@@ -1,0 +1,27 @@
+{
+  "name": "agrivoltaic-visualizer",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "build": "corepack pnpm -r build && node scripts/build-public-pages.mjs",
+    "build:pages": "node scripts/build-public-pages.mjs",
+    "study:package": "node scripts/export-run-anywhere-from-study-bundle.mjs",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "lint": "tsc -p tsconfig.json --pretty false",
+    "dev:backend": "node --import tsx packages/simulation-backend/src/index.ts",
+    "start:backend": "node packages/simulation-backend/dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "three": "^0.161.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.10",
+    "@types/three": "^0.183.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

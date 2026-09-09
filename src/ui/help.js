@@ -1,0 +1,100 @@
+export const inputHelp = {
+  'module.length': 'The long outside edge of one PV module, including its frame.',
+  'module.width': 'The short outside edge of one PV module, including its frame.',
+  'module.thickness': 'The distance from the front to the back of the module frame.',
+  'module.power':
+    'The manufacturer’s rated electrical power for one module under standard test conditions. This is used for array capacity, not ground-light calculations.',
+  'module.gap':
+    'The clear space between neighboring modules on the same table. Light can pass through these gaps.',
+  'racking.type':
+    'How the modules are supported and move. Fixed racks stay tilted; single-axis trackers rotate around the row axis; dual-axis trackers also turn horizontally; vertical modules stand upright; pergolas are horizontal. Selecting a system expands the starting clearances when needed; you can fine-tune them in later steps.',
+  'racking.height':
+    'Height above ground at the centre of the module assembly or tracker axis. This is not the height of the lowest edge.',
+  'racking.tilt':
+    'Angle above horizontal for a fixed rack, or the starting display angle for a tracker. Tracking calculations use the sun-following angle.',
+  'racking.limit':
+    'The largest tilt a tracker can reach in either direction from horizontal. It limits tilt, not horizontal turning.',
+  'racking.backtracking':
+    'Rotate single-axis trackers away from the ideal sun-facing angle near sunrise and sunset to reduce shading from neighboring rows. Assumes level ground.',
+  'racking.postSize':
+    'Width of each square support post. Posts are included in the shadow calculation.',
+  'table.orientation':
+    'Portrait puts the module’s long edge across the row; landscape puts its long edge along the row.',
+  'table.high':
+    'How many modules are placed across the tilted surface of one table. This changes its sloping width and low-edge clearance.',
+  'table.wide': 'How many modules are placed side by side along one table’s row direction.',
+  'row.tables':
+    'How many repeated PV tables are placed end to end in each row. A table is one assembly of modules. The application currently supports 1–20 tables per row; this is a software limit, not a physical restriction.',
+  'row.tableGap':
+    'The clear gap between the ends of neighboring tables along the same row, measured in their starting orientation.',
+  'rowPair.pitch':
+    'Distance from one row’s centre line to the next, measured across the rows. This includes both the PV assembly and the space between rows.',
+  'rowPair.cropSetback':
+    'Space kept free of crops next to each PV edge. It is subtracted on both sides of the interrow crop strip.',
+  'rowPair.maintenance':
+    'Width reserved for walking, machinery or maintenance between neighboring rows.',
+  'array.rows': 'Total number of parallel PV rows in the array.',
+  'array.azimuth':
+    'Direction the front of the modules faces, measured clockwise from north: 0° north, 90° east, 180° south, 270° west. Rows run perpendicular to this direction.',
+  'array.buffer':
+    'Extra ground sampled outside the array on every side. Useful for edge effects and open-field reference locations.',
+  'array.groupSize': 'Number of rows in each group before an additional access aisle is inserted.',
+  'array.aisle': 'Extra space added between row groups, in addition to the regular row pitch.',
+  'site.latitude':
+    'North–south position of the field in decimal degrees. Northern latitudes are positive; southern latitudes are negative.',
+  'site.longitude':
+    'East–west position of the field in decimal degrees. East is positive; west is negative.',
+  'site.utcOffset':
+    'Local standard time minus UTC, in hours. For Arizona, use −7. Do not include daylight-saving time; this aligns weather with the sun’s position.',
+  'site.elevation':
+    'Site height above sea level. Retained with the study and used when requesting weather; it does not alter the geometric shadow model.',
+  'analysis.date':
+    'The calendar day to model in local standard time. Automatic weather downloads use this day and your location.',
+  'weather.mode':
+    'Automatic downloads site weather from Open-Meteo. Uploaded uses your own weather file. Illustrative uses a synthetic clear-sky day and is only for exploring the designer.',
+  'analysis.resolution':
+    'Distance between numerical ground-light samples. Smaller spacing gives finer maps but takes more time and memory. These points are not physical instruments.',
+  'analysis.receiverHeight':
+    'Height of the horizontal surface where light is calculated, such as crop-canopy height. Physical instruments can be placed at other heights.',
+  'analysis.patches':
+    'How many sky directions represent diffuse light. More directions resolve narrow gaps and shadows better but take longer to calculate.',
+  'analysis.interval':
+    'Time between direct-shadow evaluations. Shorter steps follow moving shadows more closely while preserving the weather interval’s total energy.',
+  'analysis.backend':
+    'Automatic prefers the computer’s graphics processor and falls back to the CPU. CPU reference is useful for checking results or troubleshooting.',
+  'analysis.parFraction':
+    'Estimated fraction of broadband solar energy in photosynthetically active radiation. Used only when measured PPFD is unavailable.',
+  'analysis.photonFactor':
+    'Converts PAR energy to a count of photons for DLI. The default is 4.57 micromoles of photons per joule of PAR energy.',
+  'metadata.title':
+    'A name for this experiment. It appears on exported figures, reports and the saved study.',
+  'metadata.investigator':
+    'Researcher, laboratory or group responsible for the experiment. Included in the methods report.',
+};
+export const labelHelp = {
+  'Instrument type':
+    'The physical device to install. This label and its installation details are separate from the numerical light receivers.',
+  East: 'Position east or west of the array centre in metres. Positive is east; negative is west.',
+  North:
+    'Position north or south of the array centre in metres. Positive is north; negative is south.',
+  'Height / depth':
+    'Vertical position relative to the ground. Positive is above ground; negative is burial depth, for example −0.15 m.',
+  Treatment:
+    'The experimental treatment assigned to this instrument or plot, such as shaded, interrow or open-field control.',
+  Replicate: 'A label identifying the repeated experimental unit, such as 1, 2 or 3.',
+  Model:
+    'Manufacturer and model of the physical instrument, for reproducible installation records.',
+  Logger: 'Name or identifier of the data logger connected to this instrument.',
+  Channel: 'The logger channel or port used by this instrument.',
+  Notes: 'Installation details or other information needed to reproduce the experiment.',
+  'Orientation azimuth':
+    'Direction the instrument faces, clockwise from north. This is installation metadata; map values still describe horizontal receivers.',
+  'Sensor tilt':
+    'Tilt of the instrument’s sensing surface above horizontal. This is installation metadata and does not change the ground-light map.',
+  Crop: 'Crop species, variety or plot description used in the experiment.',
+  'Centre east': 'East–west coordinate of the plot centre relative to the array centre, in metres.',
+  'Centre north':
+    'North–south coordinate of the plot centre relative to the array centre, in metres.',
+  'East–west width': 'Width of the rectangular plot along the east–west direction.',
+  'North–south length': 'Length of the rectangular plot along the north–south direction.',
+};

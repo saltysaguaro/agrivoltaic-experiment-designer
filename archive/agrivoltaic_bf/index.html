@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agrivoltaic Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./platform.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/node_modules/three/build/three.module.js",
+          "three/addons/": "/node_modules/three/examples/jsm/",
+          "zod": "/node_modules/zod/index.js",
+          "@agrivoltaic/shared": "/packages/shared/dist/index.js",
+          "@agrivoltaic/three-exporter/browser": "/packages/three-exporter/dist/browser.js"
+        }
+      }
+    </script>
+  </head>
+  <body class="platform-body landing-body">
+    <div class="platform-page">
+      <header class="site-header">
+        <div>
+          <p class="eyebrow">Local-First Agrivoltaics</p>
+          <h1>Design, model, and explore annual irradiance across photovoltaic crop systems.</h1>
+        </div>
+        <p class="header-subtitle">Start by opening a local project folder or loading a saved project snapshot.</p>
+      </header>
+
+      <main class="landing-shell landing-shell--setup">
+        <section class="project-entry card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">Project Setup</p>
+              <h2>Choose a project folder or load a saved project</h2>
+            </div>
+          </div>
+          <p class="status-copy">
+            This step is required. The selected parent folder will hold a project-name subfolder with the saved site, design settings, irradiance run outputs, and logs for this local study.
+          </p>
+          <label class="field-label" for="landingProjectName">Project name</label>
+          <input id="landingProjectName" class="platform-input" type="text" placeholder="Agrivoltaic Study" />
+          <label class="field-label" for="projectFolderInput">Project parent folder</label>
+          <input id="projectFolderInput" class="platform-input" type="text" placeholder="/Users/you/Documents/agrivoltaic-projects" />
+          <div class="site-actions">
+            <button id="browseProjectFolderButton" class="secondary-button" type="button">Browse Folder</button>
+            <button id="useProjectFolderButton" class="primary-button" type="button">Set Project Folder</button>
+            <button id="loadProjectButton" class="secondary-button" type="button">Load Project</button>
+          </div>
+          <div class="site-actions">
+            <button id="importHpcResultsButton" class="secondary-button" type="button" disabled>Import HPC Results</button>
+            <button id="viewExistingResultsButton" class="secondary-button" type="button" disabled>Visualize Existing Results</button>
+          </div>
+          <input id="projectFileInput" type="file" accept=".json,application/json" hidden />
+          <p id="projectStatus" class="status-copy">Open or create a project folder, or load a saved project JSON file.</p>
+          <p id="projectSummary" class="site-summary">No project selected yet.</p>
+        </section>
+
+        <section class="site-entry card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">Site Setup</p>
+              <h2>Choose the project location</h2>
+            </div>
+          </div>
+          <label class="field-label" for="siteAddressInput">Address or place name</label>
+          <input id="siteAddressInput" class="platform-input" type="text" placeholder="Start typing an address or farm site for Mapbox lookup" />
+          <div id="siteSuggestions" class="suggestion-list"></div>
+          <p id="siteLookupStatus" class="status-copy">Type at least three characters to search for a site with Mapbox.</p>
+
+          <label class="field-label">Preset locations</label>
+          <div class="site-preset-grid">
+            <button class="secondary-button" type="button" data-site-preset="golden-co">Golden, Colorado</button>
+            <button class="secondary-button" type="button" data-site-preset="tucson-az">Tucson, Arizona</button>
+            <button class="secondary-button" type="button" data-site-preset="san-francisco-ca">San Francisco, California</button>
+            <button class="secondary-button" type="button" data-site-preset="new-york-ny">New York, New York</button>
+            <button class="secondary-button" type="button" data-site-preset="austin-tx">Austin, Texas</button>
+            <button class="secondary-button" type="button" data-site-preset="chicago-il">Chicago, Illinois</button>
+          </div>
+
+          <div class="manual-grid">
+            <input id="manualLatitude" class="platform-input" type="number" step="0.0001" placeholder="Latitude" />
+            <input id="manualLongitude" class="platform-input" type="number" step="0.0001" placeholder="Longitude" />
+          </div>
+          <div class="site-actions">
+            <button id="manualSiteButton" class="secondary-button" type="button">Use manual coordinates</button>
+            <button id="goToDesignButton" class="primary-button" type="button" disabled>Go to System Design</button>
+          </div>
+          <p id="siteSummary" class="site-summary">Choose a site with Mapbox autocomplete, use a preset, or enter coordinates manually.</p>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./src/platform/landingPage.js"></script>
+  </body>
+</html>
