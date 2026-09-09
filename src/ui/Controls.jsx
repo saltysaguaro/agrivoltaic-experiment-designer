@@ -1,5 +1,7 @@
 import React, { useId } from 'react';
 import Info from './Info.jsx';
+import LocationSearch from './LocationSearch.jsx';
+import { receiverGridSpec } from '../domain/geometry.js';
 import { inputHelp, labelHelp } from './help.js';
 import { Upload, Plus, Trash2, MapPin, Sparkles, Download, Play, Square } from 'lucide-react';
 import { dimensions, sensorTypes, rackingMinimums } from '../domain/study.js';
@@ -74,6 +76,7 @@ export default function Controls({
   run,
   cancel,
   uploadWeather,
+  selectLocation,
   weatherStatus,
   refreshWeather,
   template,
@@ -85,6 +88,7 @@ export default function Controls({
   removeSensor,
   removePlot,
 }) {
+  const receiver = receiverGridSpec(s);
   const d = dimensions(s),
     minimum = rackingMinimums(s);
   const field = (section, key, label, unit, options, extra = {}) => (
@@ -256,6 +260,13 @@ export default function Controls({
       )}
       {step === 5 && (
         <>
+          <LocationSearch address={s.site.address} onSelect={selectLocation} />
+          {s.site.utcOffsetApproximate && (
+            <div className="info-box">
+              UTC offset is estimated from longitude. Confirm the location’s standard time; do not
+              include daylight saving time.
+            </div>
+          )}
           <div className="field-pair">
             {field('site', 'latitude', 'Latitude', '°', null, { min: -89, max: 89, step: 0.001 })}
             {field('site', 'longitude', 'Longitude', '°', null, {
@@ -387,8 +398,8 @@ export default function Controls({
       {step === 7 && (
         <>
           <p className="control-note">
-            Place physical field instruments using the light map, then edit their installation
-            details.
+            Place instruments in receiver cells, then edit their installation details. Dots share a
+            cell without changing the recorded centre coordinates.
           </p>
           <button
             className={'secondary wide ' + (placing ? 'selected' : '')}
@@ -418,16 +429,32 @@ export default function Controls({
                 onChange={(value) => set('experimentSensors', i, { ...v, type: value })}
               />
               <div className="field-pair">
-                {['x', 'y', 'z'].map((k) => (
+                {['column', 'row'].map((k) => (
                   <Field
                     key={k}
-                    label={{ x: 'East', y: 'North', z: 'Height / depth' }[k]}
-                    unit="m"
-                    value={v[k]}
-                    onChange={(value) => set('experimentSensors', i, { ...v, [k]: value })}
+                    label={`Receiver ${k}`}
+                    value={(v.grid?.[k] ?? 0) + 1}
+                    min={1}
+                    max={k === 'column' ? receiver.nx : receiver.ny}
+                    step={1}
+                    help="Select a receiver-grid cell, counted from the negative along-row / across-row edge. The instrument snaps to its centre."
+                    onChange={(value) =>
+                      set('experimentSensors', i, { ...v, grid: { ...v.grid, [k]: value - 1 } })
+                    }
                   />
                 ))}
               </div>
+              <small>
+                East {v.x.toFixed(3)} m · North {v.y.toFixed(3)} m · cell centre
+              </small>
+              <Field
+                label="Height / depth"
+                unit="m"
+                value={v.z}
+                min={-5}
+                max={20}
+                onChange={(value) => set('experimentSensors', i, { ...v, z: value })}
+              />
               {['treatment', 'replicate', 'model', 'logger', 'channel', 'notes'].map((k) => (
                 <Field
                   key={k}
@@ -461,9 +488,16 @@ export default function Controls({
       )}
       {step === 8 && (
         <>
+          <button
+            className={'secondary wide ' + (placing ? 'selected' : '')}
+            onClick={() => setPlacing(!placing)}
+          >
+            <MapPin size={16} />
+            {placing ? 'Click a receiver cell for the crop plot' : 'Place a crop plot in the view'}
+          </button>
           <p className="control-note">
-            Define rectangular crop plots in east/north coordinates. Summary statistics use
-            receivers inside each plot.
+            Crop plots occupy whole receiver cells and rotate with the array. Choose a starting cell
+            and the number of cells along and across the rows.
           </p>
           <button className="secondary wide" onClick={addPlot}>
             <Plus size={16} /> Add crop plot
@@ -485,23 +519,35 @@ export default function Controls({
                   />
                 ))}
                 <div className="field-pair">
-                  {['x', 'y', 'width', 'length'].map((k) => (
+                  {['column', 'row', 'columns', 'rows'].map((k) => (
                     <Field
                       key={k}
                       label={
                         {
-                          x: 'Centre east',
-                          y: 'Centre north',
-                          width: 'East–west width',
-                          length: 'North–south length',
+                          column: 'Starting column',
+                          row: 'Starting row',
+                          columns: 'Columns wide',
+                          rows: 'Rows long',
                         }[k]
                       }
-                      unit="m"
-                      value={v[k]}
-                      onChange={(value) => set('crops', i, { ...v, [k]: value })}
+                      value={(v.grid?.[k] ?? (k.endsWith('s') ? 1 : 0)) + (k.endsWith('s') ? 0 : 1)}
+                      min={1}
+                      max={k.startsWith('column') ? receiver.nx : receiver.ny}
+                      step={1}
+                      help="Crop boundaries follow whole receiver cells. Columns run along the PV rows; receiver rows run across them. Plots stay inside the grid."
+                      onChange={(value) =>
+                        set('crops', i, {
+                          ...v,
+                          grid: { ...v.grid, [k]: value - (k.endsWith('s') ? 0 : 1) },
+                        })
+                      }
                     />
                   ))}
                 </div>
+                <small>
+                  {v.width.toFixed(3)} m along × {v.length.toFixed(3)} m across · centre E{' '}
+                  {v.x.toFixed(3)}, N {v.y.toFixed(3)} m
+                </small>
                 <div className="info-box">
                   {stats
                     ? `DLI ${stats.mean.toFixed(1)} ± ${stats.sd.toFixed(1)} · median ${stats.median.toFixed(1)} · range ${stats.min.toFixed(1)}–${stats.max.toFixed(1)} · sunlight ${stats.sunlight.toFixed(1)}% · ${stats.count} receivers`

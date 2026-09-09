@@ -5,9 +5,10 @@
 - `src/domain/study.js`: schema, migrations, defaults, derived dimensions, validation and analysis identity.
 - `src/domain/geometry.js`: hierarchy-aware finite module/support geometry, rack pose, coordinate transforms, and receiver grid. Internal Three.js Z is up; X east; Y north. Facing azimuth is clockwise from north. At 180°, rows run east–west and modules slope upward toward north. Origin is the centre of row-centre extents. Height means assembly centre/axis height, not low-edge clearance.
 - `src/irradiance/weather-service.js`: public Open-Meteo adapter, fixed ERA5 historical selection, labeled recent/forecast output, interval-ending UTC normalization, fractional-offset day clipping, provenance and response hash.
+- `src/site/mapbox.js` and `src/ui/LocationSearch.jsx`: browser geocoding using the archived public key, debounced and abortable requests, keyboard selection, atomic coordinate updates and an explicitly approximate longitude-based UTC offset. No archived runtime imports.
 - `src/ui/camera.js`: projected-bounds camera fit, camera snapshot/restore and rotated receiver-grid hit lookup. Camera state persists across redraws, light layers and layout edits.
 - `src/irradiance`: worker-based daily integration, NOAA approximate solar position, normalized Perez 1993 skies over Reinhart patches, CPU MeshBVH, isolated WebGPU BVH adapter, visibility bitsets and bounded IndexedDB cache.
-- `src/experiment`: physical field sensors and rectangular east/north crop plots; receiver-derived statistics.
+- `src/experiment`: physical field sensors and receiver-aligned rectangular crop plots; receiver-derived statistics. `grid-layout.js` normalizes cell indices, derives world coordinates/crop boundaries, packs display-only sensor markers, and generates exact receiver outlines. Stored grid indices are zero-based; UI/report tables use one-based row/column values. Legacy layouts are snapped on load; array/grid changes preserve indices where possible and clamp them to the new bounds.
 - `src/report`: canonical vector figures generated from domain geometry, reproducibility tables, CSV, JSON, 3000 × 1800 PNG, and printable HTML.
 
 ## Daily integration
@@ -30,4 +31,4 @@ WebGPU uses an independent packed binary hierarchy with stackless WGSL traversal
 
 Study JSON bundles the weather values, source metadata and optional numerical result. Imported results are recalculated before use. Analysis and weather hashes use SHA-256. JSON schema version migration currently accepts version 1 and rejects unknown versions. UI progress is navigation state, not a claim of scientific completion.
 
-`npm run build` creates relative-URL static assets. The GitHub workflow verifies the immutable archive, runs numerical tests, and deploys only `dist`. No cloud database, API key or server is required. Google fonts are optional; system fonts are fallbacks. GitHub Pages repository settings must use GitHub Actions as the source.
+`npm run build` creates relative-URL static assets. The GitHub workflow verifies the immutable archive, runs numerical tests, and deploys only `dist`. No cloud database, secret key or server is required. Address search uses a public Mapbox token restricted to the app URLs. Google fonts are optional; system fonts are fallbacks. GitHub Pages repository settings must use GitHub Actions as the source.

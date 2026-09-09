@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildGeometry, disposeGroup, localToWorld, axes } from '../domain/geometry.js';
+import { buildGeometry, disposeGroup, axes } from '../domain/geometry.js';
 import { heatColor, figureSvg } from '../report/figures.js';
-import { fitOrthographic, cameraSnapshot, restoreCamera, receiverAtPoint } from './camera.js';
+import { fitOrthographic, cameraSnapshot, restoreCamera } from './camera.js';
 import { groundGrid } from './ground-grid.js';
+import { receiverGridSpec } from '../domain/geometry.js';
+import { receiverLines, sensorMarkers, cellAt, cellCenter } from '../experiment/grid-layout.js';
 export default function Scene({
   study,
   scope,
@@ -30,7 +32,7 @@ export default function Scene({
   useEffect(() => {
     if (!host.current) return;
     setHover(null);
-    let renderer, observer, controls, frame;
+    let renderer, observer, controls;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#f1f4ee');
     scene.up.set(0, 0, 1);
@@ -91,8 +93,10 @@ export default function Scene({
     if (scope !== 'module' && showGrid) {
       const ground = groundGrid(study, group.userData);
       const grid = new THREE.LineSegments(
-        new THREE.BufferGeometry().setFromPoints(ground.lines.flat()),
-        new THREE.LineBasicMaterial({ color: 0x97ac97, transparent: true, opacity: 0.45 }),
+        new THREE.BufferGeometry().setFromPoints(
+          (scopeKey === 'array' ? receiverLines(study) : ground.lines).flat(),
+        ),
+        new THREE.LineBasicMaterial({ color: 0x97ac97, transparent: true, opacity: 0.32 }),
       );
       // Small display offset avoids z-fighting with the light-map overlay.
       grid.position.z = 0.02;
@@ -131,22 +135,56 @@ export default function Scene({
           o.material.depthWrite = false;
         });
     }
-    if (['sensors', 'crops', 'report', 'array'].includes(scope)) {
-      for (const sensor of study.experimentSensors) {
+    if (scopeKey === 'array') {
+      for (const glyph of sensorMarkers(study)) {
+        const profile = view === 'profile',
+          sensor = glyph.sensors[0];
         const marker = new THREE.Mesh(
-          new THREE.SphereGeometry(extent * 0.008, 12, 8),
-          new THREE.MeshBasicMaterial({ color: 0xd66d43 }),
+          profile
+            ? new THREE.SphereGeometry(glyph.radius, 16, 10)
+            : new THREE.CircleGeometry(glyph.radius, 24),
+          new THREE.MeshBasicMaterial({
+            color: glyph.count > 1 ? 0x8f4934 : 0xd66d43,
+            side: THREE.DoubleSide,
+            depthTest: false,
+          }),
         );
-        marker.position.set(sensor.x, sensor.y, Math.max(0.15, sensor.z));
+        marker.position.set(glyph.position.x, glyph.position.y, profile ? sensor.z : 0.065);
+        marker.renderOrder = 20;
         scene.add(marker);
-        const line = new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(sensor.x, sensor.y, 0),
-            marker.position.clone(),
-          ]),
-          new THREE.LineBasicMaterial({ color: 0xd66d43 }),
-        );
-        scene.add(line);
+        if (!profile) {
+          const rim = new THREE.Mesh(
+            new THREE.RingGeometry(glyph.radius * 0.85, glyph.radius, 24),
+            new THREE.MeshBasicMaterial({
+              color: 0xffffff,
+              side: THREE.DoubleSide,
+              depthTest: false,
+            }),
+          );
+          rim.position.copy(marker.position);
+          rim.position.z += 0.001;
+          rim.renderOrder = 21;
+          scene.add(rim);
+        }
+        if (glyph.count > 1) {
+          const canvas = document.createElement('canvas');
+          canvas.width = 128;
+          canvas.height = 128;
+          const context = canvas.getContext('2d');
+          context.fillStyle = 'white';
+          context.font = 'bold 48px Arial';
+          context.textAlign = 'center';
+          context.textBaseline = 'middle';
+          context.fillText(glyph.label, 64, 64);
+          const label = new THREE.Sprite(
+            new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), depthTest: false }),
+          );
+          label.position.copy(marker.position);
+          label.position.z += 0.002;
+          label.scale.setScalar(glyph.radius * 1.8);
+          label.renderOrder = 22;
+          scene.add(label);
+        }
       }
       for (const p of study.crops) {
         const mesh = new THREE.Mesh(
@@ -154,11 +192,12 @@ export default function Scene({
           new THREE.MeshBasicMaterial({
             color: 0x86b358,
             transparent: true,
-            opacity: 0.5,
+            opacity: metric === 'none' ? 0.35 : 0.15,
             side: THREE.DoubleSide,
           }),
         );
         mesh.position.set(p.x, p.y, 0.04);
+        if (p.grid) mesh.rotation.z = Math.atan2(axes(study).u.y, axes(study).u.x);
         scene.add(mesh);
         const edges = new THREE.LineSegments(
           new THREE.EdgesGeometry(mesh.geometry),
@@ -242,7 +281,7 @@ export default function Scene({
           callback.current?.(point);
       };
     const pointermove = (e) => {
-      if (!result || metric === 'none' || e.buttons || view === 'profile') {
+      if (scopeKey !== 'array' || e.buttons || view === 'profile') {
         setHover(null);
         return;
       }
@@ -260,19 +299,35 @@ export default function Scene({
         setHover(null);
         return;
       }
-      const found = receiverAtPoint(result, point);
+      const receiver = receiverGridSpec(study),
+        cell = cellAt(study, point, receiver, false);
+      const found = cell
+        ? {
+            index: cell.row * receiver.nx + cell.column,
+            gridCell: cell,
+            cell: result?.cells[cell.row * receiver.nx + cell.column] || {
+              ...cellCenter(study, cell, receiver),
+              z: study.analysis.receiverHeight,
+            },
+            sensors: study.experimentSensors.filter(
+              (s) => s.grid?.column === cell.column && s.grid?.row === cell.row,
+            ),
+          }
+        : null;
       setHover(
         found
           ? {
               ...found,
               left: Math.max(8, Math.min(e.clientX - rect.left + 14, rect.width - 235)),
-              top: Math.max(8, Math.min(e.clientY - rect.top + 14, rect.height - 150)),
+              top: Math.max(8, Math.min(e.clientY - rect.top + 14, rect.height - 290)),
             }
           : null,
       );
     };
     renderer.domElement.addEventListener('pointermove', pointermove);
-    renderer.domElement.addEventListener('pointerleave', () => setHover(null));
+    renderer.domElement.addEventListener('pointerleave', (e) => {
+      if (!e.relatedTarget?.closest?.('.receiver-tooltip')) setHover(null);
+    });
     renderer.domElement.addEventListener('pointerdown', pointerdown);
     renderer.domElement.addEventListener('pointerup', click);
     return () => {
@@ -283,7 +338,10 @@ export default function Scene({
         o.geometry?.dispose();
         if (o.material) {
           const list = Array.isArray(o.material) ? o.material : [o.material];
-          list.forEach((m) => m.dispose());
+          list.forEach((m) => {
+            m.map?.dispose();
+            m.dispose();
+          });
         }
       });
       renderer?.dispose();
@@ -296,21 +354,42 @@ export default function Scene({
         <div
           role="tooltip"
           className="receiver-tooltip"
+          onWheel={(e) => e.stopPropagation()}
+          onPointerLeave={(e) => {
+            if (!host.current?.contains(e.relatedTarget)) setHover(null);
+          }}
           style={{ left: hover.left, top: hover.top }}
         >
-          <strong>Receiver {hover.index + 1}</strong>
+          <strong>
+            Receiver {hover.index + 1} · column {hover.gridCell.column + 1}, row{' '}
+            {hover.gridCell.row + 1}
+          </strong>
           <span>
             East {hover.cell.x.toFixed(2)} m · North {hover.cell.y.toFixed(2)} m
           </span>
           <span>Height {hover.cell.z.toFixed(2)} m</span>
-          <div>
-            <b>{hover.cell.sunlight.toFixed(1)}%</b> relative sunlight
-          </div>
-          <div>
-            <b>{hover.cell.dli.toFixed(2)}</b> {result.estimated ? 'estimated DLI' : 'DLI'}{' '}
-            <small>mol m⁻² d⁻¹</small>
-          </div>
-          <span>{(hover.cell.wh / 1000).toFixed(3)} kWh m⁻² day⁻¹</span>
+          {hover.cell.sunlight !== undefined && (
+            <>
+              <div>
+                <b>{hover.cell.sunlight.toFixed(1)}%</b> relative sunlight
+              </div>
+              <div>
+                <b>{hover.cell.dli.toFixed(2)}</b> {result?.estimated ? 'estimated DLI' : 'DLI'}{' '}
+                <small>mol m⁻² d⁻¹</small>
+              </div>
+              <span>{(hover.cell.wh / 1000).toFixed(3)} kWh m⁻² day⁻¹</span>
+            </>
+          )}
+          {hover.sensors.length > 0 && (
+            <div className="receiver-instruments">
+              <b>{hover.sensors.length} field instruments</b>
+              {hover.sensors.map((s) => (
+                <span key={s.id}>
+                  {s.id} · {s.type} · height/depth {s.z} m
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
       {failed && (

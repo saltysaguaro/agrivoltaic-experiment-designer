@@ -59,6 +59,24 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       });
     }
   }
+  const oldFetch = globalThis.fetch;
+  let mapboxRequests = 0;
+  globalThis.fetch = async (url) => {
+    assert.ok(String(url).startsWith('https://api.mapbox.com/geocoding/v5/'));
+    mapboxRequests++;
+    return {
+      ok: true,
+      json: async () => ({
+        features: [
+          {
+            id: 'place.tucson',
+            place_name: 'Tucson, Arizona, United States',
+            center: [-110.9747, 32.2226],
+          },
+        ],
+      }),
+    };
+  };
   const oldWorker = globalThis.Worker;
   globalThis.Worker = TestWorker;
   const file = path.resolve('node_modules/.aed-interface-test.mjs');
@@ -112,6 +130,32 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).row.tableGap, 1.43);
     assert.equal(document.querySelector('[role="alert"]'), null);
     assert.match(document.querySelector('.control-content').textContent, /1–20 tables/);
+    await click(step('Full array'));
+    assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
+    await click(step('Site & weather'));
+    const search = document.querySelector('input[role="combobox"]');
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+        search,
+        'Tucson',
+      );
+      search.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    });
+    assert.equal(mapboxRequests, 1);
+    assert.equal(document.querySelectorAll('[role="option"]').length, 1);
+    await act(async () =>
+      search.dispatchEvent(
+        new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+      ),
+    );
+    const selectedSite = JSON.parse(localStorage.getItem('aed-study-v1')).site;
+    assert.equal(selectedSite.latitude, 32.2226);
+    assert.equal(selectedSite.longitude, -110.9747);
+    assert.equal(selectedSite.address, 'Tucson, Arizona, United States');
+    assert.equal(selectedSite.utcOffsetApproximate, true);
     await click(step('Irradiance'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
     await click(byText('Calculate daily light'));
@@ -133,6 +177,19 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     await click(byText('Add at array centre'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
+    await click(byText('Add at array centre'));
+    let saved = JSON.parse(localStorage.getItem('aed-study-v1'));
+    assert.equal(saved.experimentSensors.length, 2);
+    assert.deepEqual(saved.experimentSensors[0].grid, saved.experimentSensors[1].grid);
+    assert.equal(saved.experimentSensors[0].x, saved.experimentSensors[1].x);
+    await click(step('Crop plots'));
+    await click(byText('Add crop plot'));
+    saved = JSON.parse(localStorage.getItem('aed-study-v1'));
+    assert.equal(saved.crops[0].grid.columns, 1);
+    assert.equal(saved.crops[0].grid.rows, 1);
+    assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
+    assert.equal(calculations, 1);
+    await click(step('Field sensors'));
     await click(byText('Orthographic'));
     await click(byText('Relative sunlight'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
@@ -141,6 +198,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await fs.rm(file, { force: true });
     console.error = originalError;
     globalThis.Worker = oldWorker;
+    globalThis.fetch = oldFetch;
     dom.window.close();
     for (const [key, descriptor] of Object.entries(previous)) {
       if (descriptor) Object.defineProperty(globalThis, key, descriptor);

@@ -14,9 +14,17 @@ export function nearestCell(result, x, y) {
 }
 export function plotStats(result, plot) {
   if (!result) return null;
-  const cells = result.cells.filter(
-    (c) => Math.abs(c.x - plot.x) <= plot.width / 2 && Math.abs(c.y - plot.y) <= plot.length / 2,
-  );
+  const cells = result.cells.filter((c, i) => {
+    if (plot.grid && result.grid) {
+      const column = i % result.grid.nx,
+        row = Math.floor(i / result.grid.nx),
+        g = plot.grid;
+      return (
+        column >= g.column && column < g.column + g.columns && row >= g.row && row < g.row + g.rows
+      );
+    }
+    return Math.abs(c.x - plot.x) <= plot.width / 2 && Math.abs(c.y - plot.y) <= plot.length / 2;
+  });
   if (!cells.length) return null;
   const a = cells.map((c) => c.dli).sort((a, b) => a - b),
     mean = a.reduce((n, v) => n + v, 0) / a.length;

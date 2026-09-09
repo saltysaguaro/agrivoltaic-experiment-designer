@@ -57,6 +57,17 @@ export function methodsRows(s, r) {
       'Site',
       `${s.site.latitude}°, ${s.site.longitude}°; ${s.site.elevation} m; UTC ${s.site.utcOffset}`,
     ],
+    ['Address / place', s.site.address || 'Coordinates entered manually'],
+    [
+      'UTC offset source',
+      s.site.utcOffsetApproximate
+        ? 'Longitude estimate; confirm local standard time'
+        : 'User/default local standard time',
+    ],
+    [
+      'Field layout',
+      'Sensors at receiver-cell centres; crop boundaries follow receiver cells and rotate with the array. Packed marker offsets are display-only; sensor heights/depths remain installation metadata. Grid rows/columns are 1-based in tables.',
+    ],
     ['Analysis date', s.analysis.date],
     [
       'Open-field daily irradiation',
@@ -139,10 +150,18 @@ export function reportHtml(s, r) {
       : []),
   ];
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${e(s.metadata.title)} · Methods</title><style>body{max-width:1000px;margin:40px auto;font:14px/1.5 Arial;color:#203b37}h1{font-size:28px}h2{margin-top:30px}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:12px}td,th{padding:8px;border-bottom:1px solid #cbd5ce;text-align:left;overflow-wrap:anywhere}th{background:#eef2ed}svg{width:100%;height:auto}figure{margin:20px 0;break-inside:avoid}button{padding:12px 20px;background:#183d38;color:white;border:0;cursor:pointer}.note{background:#fff4d7;padding:14px}@page{size:A4 landscape;margin:14mm}@media print{body{margin:0;max-width:none}button{display:none}figure{break-before:page}thead{display:table-header-group}tr{break-inside:avoid}}</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p>Agrivoltaic experimental design · Methods package</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p><h2>System and modeling parameters</h2>${table(['Parameter', 'Value'], methodsRows(s, r))}<h2>Physical field instruments</h2>${table(
-    ['ID / type', 'E / N / Z (m)', 'Treatment / replicate', 'Model / logger', 'Notes'],
+    [
+      'ID / type',
+      'E / N / Z (m)',
+      'Receiver column / row',
+      'Treatment / replicate',
+      'Model / logger',
+      'Notes',
+    ],
     s.experimentSensors.map((v) => [
       v.id + ' · ' + v.type,
-      `${v.x} / ${v.y} / ${v.z}`,
+      `${v.x.toFixed(3)} / ${v.y.toFixed(3)} / ${v.z}`,
+      v.grid ? `${v.grid.column + 1} / ${v.grid.row + 1}` : '—',
       v.treatment + ' / ' + v.replicate,
       v.model + ' / ' + v.logger + ' / ' + (v.channel || ''),
       v.notes + `; orientation ${v.azimuth ?? 0}° azimuth / ${v.tilt ?? 0}° tilt`,
@@ -152,6 +171,7 @@ export function reportHtml(s, r) {
       'ID / crop',
       'Treatment / replicate',
       'Area (m²)',
+      'Starting column / row; columns × rows',
       'Mean / median / SD DLI (mol/m²/day)',
       'Range DLI / relative sunlight',
     ],
@@ -160,7 +180,10 @@ export function reportHtml(s, r) {
       return [
         c.id + ' · ' + c.crop,
         c.treatment + ' / ' + c.replicate,
-        c.width * c.length,
+        (c.width * c.length).toFixed(3),
+        c.grid
+          ? `${c.grid.column + 1} / ${c.grid.row + 1}; ${c.grid.columns} × ${c.grid.rows}`
+          : '—',
         p
           ? `${p.mean.toFixed(2)} / ${p.median.toFixed(2)} / ${p.sd.toFixed(2)}`
           : 'No receiver samples',
@@ -210,7 +233,10 @@ export function exportCsv(s, r) {
       v.channel,
       v.azimuth,
       v.tilt,
-      v.notes + '; nearest horizontal receiver estimate; ' + rowRelative(s, v),
+      v.notes +
+        '; horizontal receiver estimate; ' +
+        rowRelative(s, v) +
+        (v.grid ? `; receiver_column=${v.grid.column + 1}; receiver_row=${v.grid.row + 1}` : ''),
     ]);
   }
   for (const p of s.crops) {
@@ -231,7 +257,7 @@ export function exportCsv(s, r) {
       '',
       '',
       '',
-      `width=${p.width}; length=${p.length}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}`,
+      `width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}`,
     ]);
   }
   return csv(rows);

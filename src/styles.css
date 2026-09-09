@@ -1393,7 +1393,7 @@ progress {
   border: 1px solid #c3d4b5;
   background: #fffffff5;
   box-shadow: 0 5px 20px #25453222;
-  pointer-events: none;
+  pointer-events: auto;
   color: #304d38;
   font-size: 12px;
   line-height: 1.6;
@@ -1457,4 +1457,45 @@ progress {
     padding: 9px;
     font-size: 11px;
   }
+}
+
+.location-search .input-wrap > svg {
+  flex-shrink: 0;
+  margin-left: 10px;
+  color: #738471;
+}
+.location-search .input-wrap input {
+  padding-left: 8px;
+}
+.location-results {
+  border: 1px solid #c9d4c3;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 5px;
+  background: white;
+}
+.location-results button {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #e9eee5;
+  border-radius: 0;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.location-results button[aria-selected='true'] {
+  background: #edf4e6;
+  color: #244d39;
+}
+.receiver-instruments {
+  max-height: 125px;
+  overflow-y: auto;
+  border-top: 1px solid #dde5d6;
+  margin-top: 6px;
+  padding-top: 5px;
+}
+.receiver-instruments span {
+  display: block;
 }

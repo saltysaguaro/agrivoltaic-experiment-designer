@@ -34,6 +34,7 @@ import {
 } from './domain/study.js';
 import { parseWeather, weatherTemplate } from './irradiance/weather.js';
 import { downloadWeather, weatherRequestKey } from './irradiance/weather-service.js';
+import { normalizeLayout, cellAt } from './experiment/grid-layout.js';
 import { percentileSensors } from './experiment/layout.js';
 import { download, reportHtml, exportCsv, methodsRows, csv, pngFigure } from './report/export.js';
 import { figureSvg } from './report/figures.js';
@@ -57,7 +58,7 @@ const defaults = [
   'oblique',
   'oblique',
   'profile',
-  'plan',
+  'oblique',
   'plan',
   'oblique',
   'oblique',
@@ -87,7 +88,7 @@ function load() {
   }
 }
 function App() {
-  const [s, setStudy] = useState(load),
+  const [s, setRawStudy] = useState(() => normalizeLayout(load())),
     [step, setStep] = useState(() => navigation().step),
     [view, setView] = useState(() => navigation().view),
     [grid, setGrid] = useState(true),
@@ -100,7 +101,47 @@ function App() {
     [resetKey, setResetKey] = useState(0),
     [weatherStatus, setWeatherStatus] = useState({ state: 'idle', message: '' }),
     [saveStatus, setSaveStatus] = useState('Saved on this device');
+  function setStudy(update) {
+    setRawStudy((current) => {
+      const candidate = normalizeLayout(typeof update === 'function' ? update(current) : update);
+      const parsed = studySchema.safeParse(candidate);
+      if (!parsed.success) {
+        setNotice(parsed.error.issues.map(validationMessage).join(' '));
+        return current;
+      }
+      return parsed.data;
+    });
+  }
+  function selectLocation(location) {
+    weatherFlight.current?.controller.abort();
+    setStudy((current) => ({
+      ...current,
+      site: {
+        ...current.site,
+        address: location.label,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        utcOffset: location.utcOffset,
+        utcOffsetApproximate: true,
+      },
+      weather:
+        current.weather.mode === 'automatic'
+          ? {
+              ...current.weather,
+              rows: [],
+              hash: '',
+              requestKey: '',
+              provenance: undefined,
+              name: 'Open-Meteo · ready to download for your site',
+            }
+          : current.weather,
+    }));
+    setNotice(
+      'Location selected. UTC offset is estimated from longitude; confirm local standard time below.',
+    );
+  }
   const mainRef = useRef(null);
+  const enteredArray = useRef(navigation().step === 4);
   const enteredAnalysis = useRef(navigation().step >= 6);
   const weatherFlight = useRef(null),
     runToken = useRef(0);
@@ -202,6 +243,8 @@ function App() {
   function set(section, key, value) {
     setStudy((current) => {
       const next = updateStudyInput(current, section, key, value);
+      if (section === 'site' && key === 'utcOffset') next.site.utcOffsetApproximate = false;
+      if (section === 'site' && ['latitude', 'longitude'].includes(key)) next.site.address = '';
       if (section === 'weather' && key === 'mode') {
         weatherFlight.current?.controller.abort();
         setWeatherStatus({ state: 'idle', message: '' });
@@ -251,7 +294,10 @@ function App() {
   function go(n) {
     mainRef.current?.scrollTo({ top: 0 });
     setStep(n);
-    if (n === 6 && !enteredAnalysis.current) {
+    if (n === 4 && !enteredArray.current) {
+      setView('oblique');
+      enteredArray.current = true;
+    } else if (n === 6 && !enteredAnalysis.current) {
       setView('oblique');
       enteredAnalysis.current = true;
     } else if (step < 4 || n < 4) setView(defaults[n]);
@@ -360,6 +406,10 @@ function App() {
     return `${prefix}-${String(i).padStart(2, '0')}`;
   }
   function addSensor(point = { x: 0, y: 0 }) {
+    if (!cellAt(s, point, undefined, false)) {
+      setNotice('Choose a receiver cell inside the array grid.');
+      return;
+    }
     setStudy((current) => ({
       ...current,
       experimentSensors: [
@@ -367,8 +417,9 @@ function App() {
         {
           id: newId('S', current.experimentSensors),
           type: 'PAR',
-          x: +point.x.toFixed(2),
-          y: +point.y.toFixed(2),
+          x: point.x,
+          y: point.y,
+          grid: cellAt(current, point),
           z: current.analysis.receiverHeight,
           treatment: 'Interior',
           replicate: '1',
@@ -383,7 +434,11 @@ function App() {
     }));
     setPlacing(false);
   }
-  function addPlot() {
+  function addPlot(point = { x: 0, y: 0 }) {
+    if (!cellAt(s, point, undefined, false)) {
+      setNotice('Choose a receiver cell inside the array grid.');
+      return;
+    }
     setStudy((current) => ({
       ...current,
       crops: [
@@ -393,13 +448,15 @@ function App() {
           crop: 'Lettuce',
           treatment: 'Interrow',
           replicate: '1',
-          x: 0,
-          y: 0,
-          width: 2,
-          length: 4,
+          x: point.x,
+          y: point.y,
+          grid: { ...cellAt(current, point), columns: 1, rows: 1 },
+          width: 1,
+          length: 1,
         },
       ],
     }));
+    setPlacing(false);
   }
   async function saveStudy() {
     download(
@@ -493,6 +550,7 @@ function App() {
                     step={step}
                     s={s}
                     set={set}
+                    selectLocation={selectLocation}
                     result={validResult}
                     busy={busy}
                     progress={progress}
@@ -516,7 +574,7 @@ function App() {
                         ],
                       })
                     }
-                    addPlot={addPlot}
+                    addPlot={() => addPlot()}
                     removeSensor={(i) =>
                       setStudy({
                         ...s,
@@ -643,7 +701,7 @@ function App() {
                 result={validResult}
                 metric={metric}
                 showGrid={grid}
-                onPlace={addSensor}
+                onPlace={step === 8 ? addPlot : addSensor}
                 placing={placing}
                 resetKey={resetKey}
               />

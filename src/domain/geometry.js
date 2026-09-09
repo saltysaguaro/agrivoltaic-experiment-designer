@@ -144,28 +144,24 @@ export function disposeGroup(group) {
   });
   mats.forEach((m) => m.dispose());
 }
-export function receiverGrid(s) {
+export function receiverGridSpec(s) {
   const d = dimensions(s),
     nx = Math.ceil(d.footprintX / s.analysis.resolution),
     ny = Math.ceil(d.footprintY / s.analysis.resolution),
     dx = d.footprintX / nx,
     dy = d.footprintY / ny;
+  return { nx, ny, dx, dy, width: d.footprintX, height: d.footprintY, azimuth: s.array.azimuth };
+}
+export function receiverGrid(s) {
+  const grid = receiverGridSpec(s),
+    { nx, ny, dx, dy } = grid;
   const points = [];
   for (let j = 0; j < ny; j++)
     for (let i = 0; i < nx; i++) {
-      const x = -d.footprintX / 2 + (i + 0.5) * dx,
-        y = -d.footprintY / 2 + (j + 0.5) * dy,
+      const x = -grid.width / 2 + (i + 0.5) * dx,
+        y = -grid.height / 2 + (j + 0.5) * dy,
         p = localToWorld(s, x, y, s.analysis.receiverHeight);
       points.push({ x: p.x, y: p.y, z: p.z, lx: x, ly: y });
     }
-  return {
-    points,
-    nx,
-    ny,
-    dx,
-    dy,
-    width: d.footprintX,
-    height: d.footprintY,
-    azimuth: s.array.azimuth,
-  };
+  return { ...grid, points };
 }

@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { dimensions } from '../domain/study.js';
 import { buildGeometry, disposeGroup, localToWorld, worldToLocal } from '../domain/geometry.js';
+import { receiverGridSpec } from '../domain/geometry.js';
+import { receiverLines, sensorMarkers, plotCorners } from '../experiment/grid-layout.js';
 import { groundGrid } from '../ui/ground-grid.js';
 export const escapeXml = (v) =>
   String(v).replace(
@@ -39,6 +41,11 @@ export function figureSvg(
   const group = buildGeometry(s, scope),
     meshes = group.children.filter((o) => o.isMesh);
   const ground = scope !== 'module' && showGrid ? groundGrid(s, group.userData) : null;
+  const arrayScope = ['array', 'environment', 'irradiance', 'sensors', 'crops', 'report'].includes(
+    scope,
+  );
+  const receivers = receiverGridSpec(s);
+  const glyphs = arrayScope ? sensorMarkers(s) : [];
   const project = (p) =>
     view === 'profile'
       ? [worldToLocal(s, p.x, p.y).y, -p.z]
@@ -79,15 +86,10 @@ export function figureSvg(
   if (ground) all.push(...ground.corners.map(project));
   if (result && metric !== 'none')
     all.push(...result.cells.map((c) => project(new THREE.Vector3(c.x, c.y, 0))));
-  if (scope === 'array') {
+  if (arrayScope) {
     for (const sensor of s.experimentSensors)
       all.push(project(new THREE.Vector3(sensor.x, sensor.y, sensor.z)));
-    for (const c of s.crops)
-      for (const x of [-1, 1])
-        for (const y of [-1, 1])
-          all.push(
-            project(new THREE.Vector3(c.x + (x * c.width) / 2, c.y + (y * c.length) / 2, 0)),
-          );
+    for (const c of s.crops) all.push(...plotCorners(s, c).map(project));
   }
   let xmin = Math.min(...all.map((p) => p[0])),
     xmax = Math.max(...all.map((p) => p[0])),
@@ -136,8 +138,13 @@ export function figureSvg(
         q = xy(project(b));
       return `M ${p[0].toFixed(2)} ${p[1].toFixed(2)} L ${q[0].toFixed(2)} ${q[1].toFixed(2)}`;
     };
-    const lines = view === 'profile' ? [[ground.corners[0], ground.corners[3]]] : ground.lines;
-    content += `<g data-ground-grid="true"><path d="${lines.map(([a, b]) => segment(a, b)).join(' ')}" fill="none" stroke="#8c9f85" stroke-width="${view === 'profile' ? 1.5 : 0.55}" opacity=".65"/></g>`;
+    const lines =
+      view === 'profile'
+        ? [[ground.corners[0], ground.corners[3]]]
+        : arrayScope
+          ? receiverLines(s, receivers)
+          : ground.lines;
+    content += `<g data-ground-grid="true" ${arrayScope ? 'data-receiver-grid="true"' : ''}><path d="${lines.map(([a, b]) => segment(a, b)).join(' ')}" fill="none" stroke="#8c9f85" stroke-width="${view === 'profile' ? 1.5 : 0.55}" opacity=".65"/></g>`;
   }
   shapes.sort((a, b) => (a.kind === 'module') - (b.kind === 'module'));
   for (const shape of shapes)
@@ -147,25 +154,38 @@ export function figureSvg(
       '#294d55',
       metric === 'none' ? 1 : 0.65,
     );
-  if (scope === 'array') {
+  if (arrayScope) {
     for (const c of s.crops) {
-      const p = [
-        [-1, -1],
-        [1, -1],
-        [1, 1],
-        [-1, 1],
-      ].map(([a, b]) =>
-        project(new THREE.Vector3(c.x + (a * c.width) / 2, c.y + (b * c.length) / 2, 0)),
-      );
+      const p = plotCorners(s, c).map(project);
       content += poly(p, '#94bc69', '#557a35', 0.45);
       const [x, y] = xy(project(new THREE.Vector3(c.x, c.y, 0)));
       content += `<text x="${x}" y="${y}" text-anchor="middle" font-size="13">${escapeXml(c.id)}</text>`;
     }
-    for (const sensor of s.experimentSensors) {
-      const [x, y] = xy(
-        project(new THREE.Vector3(sensor.x, sensor.y, view === 'plan' ? 0 : sensor.z)),
+    for (const glyph of glyphs) {
+      const sensor = glyph.sensors[0],
+        z = view === 'profile' ? sensor.z : 0.065;
+      const point = new THREE.Vector3(glyph.position.x, glyph.position.y, z);
+      const [x, y] = xy(project(point));
+      const title = glyph.sensors
+        .map((v) => `${v.id} · ${v.type || ''} · height/depth ${v.z} m`)
+        .join('; ');
+      const circle = Array.from({ length: 24 }, (_, i) =>
+        project(
+          new THREE.Vector3(
+            point.x + glyph.radius * Math.cos((i * Math.PI) / 12),
+            point.y + glyph.radius * Math.sin((i * Math.PI) / 12),
+            z,
+          ),
+        ),
       );
-      content += `<circle cx="${x}" cy="${y}" r="5" fill="#dc7147" stroke="white" stroke-width="1.5"/><text x="${x + 9}" y="${y - 7}" font-size="12">${escapeXml(sensor.id)}</text>`;
+      const dot =
+        view === 'profile'
+          ? `<circle cx="${x}" cy="${y}" r="${glyph.radius * scale}" fill="#dc7147" stroke="white" stroke-width=".65"/>`
+          : poly(circle, glyph.count > 1 ? '#8f4934' : '#dc7147', 'white');
+      content += `<g data-sensor-cell="${glyph.cell.column},${glyph.cell.row}"><title>${escapeXml(title)}</title>${dot}`;
+      if (glyph.count > 1)
+        content += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" fill="white" font-size="${Math.min(11, glyph.radius * scale)}">${escapeXml(glyph.label)}</text>`;
+      content += '</g>';
     }
   }
   const dim = dimensions(s);
@@ -195,7 +215,7 @@ export function figureSvg(
       `Extent ${(xmax - xmin).toFixed(2)} m east–west`,
       12,
     );
-    if (scope === 'array') {
+    if (arrayScope) {
       group.userData.rowOffsets.forEach((offset, i) => {
         const p = xy(project(localToWorld(s, -group.userData.length / 2 - 0.5, offset, 0)));
         content += `<text x="${p[0] - 4}" y="${p[1]}" text-anchor="end" font-size="11">R${i + 1}</text>`;
@@ -222,5 +242,5 @@ export function figureSvg(
             ? 'Orthographic system view'
             : 'Array plan';
   disposeGroup(group);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600" role="img" aria-label="${title}"><rect width="1000" height="600" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + result.date : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600" role="img" aria-label="${title}"><rect width="1000" height="600" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + result.date : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : arrayScope ? ` · Receiver cells ${receivers.dx.toFixed(3)} × ${receivers.dy.toFixed(3)} m` : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}</g></svg>`;
 }

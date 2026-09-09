@@ -20,17 +20,29 @@ Open the URL printed by Vite. Everything runs locally in the browser, including 
 3. **PV table and row** — orientation, modules across/along, tables per row and gaps.
 4. **Row pair** — centre-to-centre pitch, edge clearance, crop setbacks and maintenance space.
 5. **Full array** — rows, groups, aisles, facing azimuth and perimeter receiver buffer.
-6. **Site and weather** — coordinates, local standard UTC offset, date, automatic Open-Meteo weather, CSV/EPW/TMY3 upload, or clearly labeled synthetic example day.
+6. **Site and weather** — Mapbox address/place search or manual coordinates, local standard UTC offset, date, automatic Open-Meteo weather, CSV/EPW/TMY3 upload, or clearly labeled synthetic example day.
 7. **Irradiance** — finite direct and diffuse occlusion, daily relative sunlight as a percentage of incoming GHI, and measured or estimated DLI.
 8. **Field sensors** — click-to-place instruments, editable coordinates/depth, treatment/replicate, installation metadata, and DLI-percentile placement.
-9. **Crop plots** — rectangular east/north plots and receiver-based mean/median/SD/range DLI and mean relative sunlight.
+9. **Crop plots** — whole-cell crop plots aligned with the receiver grid and receiver-based mean/median/SD/range DLI and mean relative sunlight.
 10. **Methods and export** — SVG/3000-pixel PNG figures, data and methods CSV, study JSON, and a printable HTML methods package with plan, profile, orthographic, relative sunlight and DLI figures.
 
-Views use an orthographic Three.js camera. In the oblique view, drag to pan, right-drag to orbit, and scroll to zoom. Camera pose and zoom persist through map-layer changes and field-layout edits. Hover over receiver cells for coordinates, relative sunlight, DLI and daily irradiation. Plan/profile keep orientation fixed. Dimensions use metres; coordinates are east/north/up from array centre. Instrument orientation does not change the horizontal receiver grid used for map estimates.
+Full array defaults to Orthographic. Views use an orthographic Three.js camera. In the oblique view, drag to pan, right-drag to orbit, and scroll to zoom. Camera pose and zoom persist through map-layer changes and field-layout edits. Hover over receiver cells for coordinates, relative sunlight, DLI and daily irradiation. Plan/profile keep orientation fixed. Dimensions use metres; coordinates are east/north/up from array centre. Instrument orientation does not change the horizontal receiver grid used for map estimates.
 
 Relative sunlight is `100 × receiver daily irradiation / open-field daily GHI`. A value of 100% means full open-field sunlight, and 0% means none. Sunlight and DLI use blue for low values and yellow for high values. CSV exports contain `relative_sunlight_percent`; numerical JSON results retain legacy shade fields alongside sunlight for compatibility. Report figures include a ground grid at z = 0, with labeled spacing, and a ground line in profile.
 
 Selecting racking or changing module/table geometry updates the axis height, row pitch and table gap to meet conservative clearance defaults (5 cm horizontal clearance and 25 cm below the module edge above the receiver plane). Larger existing clearances are retained. Direct height/spacing edits remain user-controlled and are checked before calculation. **Apply minimum clearances** repairs a previously saved layout. The application supports 1–20 tables per row; the field now displays this software limit. Axis height, row pitch and table-gap ranges accommodate the clearances needed by supported module/table dimensions.
+
+## Receiver-locked field layout
+
+Sensors snap to receiver-cell centres in plan and orthographic views. Enter a receiver column/row to move a sensor, and edit installation height/depth separately. Up to nine dots are packed within each cell; denser groups use a readable count badge. Hover over the cell to see the instrument list. Packed dots are display offsets only; reported installation coordinates remain at the cell centre. Profile views retain installation height/depth.
+
+Crop plots start as one receiver cell and expand by whole columns and rows. Their edges follow the array orientation; plot statistics use exactly those cells. Grid indices are retained as the array, azimuth or resolution changes, and clamped to remain in bounds. Existing saved/imported field layouts are snapped when loaded. Coordinates and plot dimensions are derived from those grid selections. Light outlines mark the actual receiver boundaries in interactive and report views. This display geometry never enters the irradiance solver.
+
+## Location search
+
+The address input uses the archived tool's Mapbox Geocoding v5 endpoint and the same public browser key. Type at least three characters and choose a suggestion with the mouse or arrow keys/Enter. The selected result updates longitude and latitude together and refreshes automatic weather. A longitude-based UTC offset estimate is visibly marked for confirmation; it is not a timezone-boundary lookup. Manual coordinate entry remains available.
+
+Mapbox search needs the public token's URL restrictions to permit the page being served, including local development if used. The configured GitHub Pages URL was checked successfully with a live geocoding request. The adapter is new code and imports nothing from the archived application. [Mapbox geocoding documentation](https://docs.mapbox.com/help/getting-started/geocoding/).
 
 ## Automatic site weather
 

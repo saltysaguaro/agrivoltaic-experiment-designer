@@ -49,6 +49,8 @@ export const studySchema = z.object({
     aisle: num(0, 20),
   }),
   site: z.object({
+    address: text.default(''),
+    utcOffsetApproximate: z.boolean().default(false),
     latitude: num(-89, 89),
     longitude: num(-180, 180),
     utcOffset: num(-12, 14),
@@ -106,8 +108,9 @@ export const studySchema = z.object({
       z.object({
         id: text,
         type: z.enum(sensorTypes),
-        x: num(-1000, 1000),
-        y: num(-1000, 1000),
+        grid: z.object({ column: count(0, 20000), row: count(0, 20000) }).optional(),
+        x: num(-10000, 10000),
+        y: num(-10000, 10000),
         z: num(-5, 20),
         treatment: text,
         replicate: text,
@@ -125,10 +128,18 @@ export const studySchema = z.object({
       z.object({
         id: text,
         crop: text,
+        grid: z
+          .object({
+            column: count(0, 20000),
+            row: count(0, 20000),
+            columns: count(1, 20000),
+            rows: count(1, 20000),
+          })
+          .optional(),
         treatment: text,
         replicate: text,
-        x: num(-1000, 1000),
-        y: num(-1000, 1000),
+        x: num(-10000, 10000),
+        y: num(-10000, 10000),
         width: num(0.1, 100),
         length: num(0.1, 100),
       }),
