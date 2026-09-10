@@ -1,6 +1,6 @@
 # Field layout workspace
 
-Version 0.2.0 turns the completed irradiance drawing into a field-layout workspace. Geometry, environment and calculation inputs retain the existing guided workflow. A successful calculation collapses the input panel into a narrow, labeled-on-hover icon rail; the expand button restores detailed controls. Sensors and crop beds can also be designed before a calculation, with an explicit missing-light-results message.
+Version 0.2.1 uses one **Field layout** stage for sensors and crop beds: Irradiance → Field layout → Methods & export. The complete workflow has nine stages. Saved navigation from the former sensor/crop stages converges to Field layout; saved publication navigation remains at Methods & export. Geometry, environment and calculation inputs retain the existing guided workflow. A successful calculation collapses the input panel into a narrow, labeled-on-hover icon rail; the expand button restores detailed controls. Sensors and crop beds can also be designed before a calculation, with an explicit missing-light-results message.
 
 ## Interaction strategy
 
@@ -11,6 +11,7 @@ Version 0.2.0 turns the completed irradiance drawing into a field-layout workspa
 - Focus an item and use arrow keys to move one cell; Shift + arrows resize a bed from its northeast corner. Enter opens its card. Escape cancels an in-progress gesture. Find item provides direct access to overlapping or densely grouped instruments. Pointer capture also supports touch gestures; keyboard and coordinate fields provide alternatives.
 - Undo retains the last 40 committed layout states during the current page session, covering additions, moves, resizes, metadata changes and deletions, including expanded-sidebar field edits. Pointer cancellation does not create a history entry. Undo restores field layouts only and normalizes them to the current receiver grid; it does not revert geometry or weather. Import clears history. History and calculated results are not persisted across reloads.
 - Desktop cards anchor near the selected item. On narrow screens they become a bottom sheet with a scrollable field area and visible action buttons. Map tools remain outside the drawing so they do not obscure its light values. Engineering callouts are suppressed during field editing; selection outlines and handles provide the relevant guidance.
+- Field IDs use white-backed 12 px tags: orange for sensors and green for beds. Sensor IDs sit near their dots, and bed IDs prefer the bed edges. A shared screen-space placement routine keeps tags inside the drawing and separated from each other, sensor dots and the north indicator. Selection gets priority. Long IDs are shortened in tags while titles, cards and tables retain the complete ID. Crowded views omit excess tags rather than shrink or overlap them; Find item and zoom provide access to every item. Labels are clickable during editing and read-only on Methods & export.
 
 The heatmap is reused while layouts change, and dragging previews remain local to the display until release. Sensor/crop edits never enter scientific occluders or invalidate a calculation. Plot statistics are computed from the cells actually occupied by the saved bed. Ground reservations remain optional legend layers and overlaps are reported without forcibly relocating research plots. Completed irradiance initially retains the clean modules/light-map display; entering the sensor/crop stages or selecting an item reveals the relevant field layers.
 
@@ -33,6 +34,8 @@ The reproducible maintenance command is `node scripts/build-crop-catalog.mjs`. I
 ## Publication record
 
 The compact methods report adds a four-column bed-identity table: bed/common crop, botanical name/cultivar, family, and taxonomy record. A separate compact layout/light table carries coordinates, dimensions, treatment, replicate, sampled light and reserved-area overlaps. Notes and botanical authorship are retained. JSON and CSV include each bed's complete crop identity and catalog version; methods metadata includes the taxonomy citation and license. Botanical taxonomy does not supply crop-specific light-response or yield assumptions.
+
+Methods & export and every report figure omit engineering dimensions, angle witnesses, row callouts and numbered sensor leaders. Field ID tags use the same placement routine as the map. Compact report figures refer to the complete field tables rather than repeating a long instrument key below each image; standalone figures retain a full field key. Scale bars, north indicators, ground references, ground-zone legends and all methods parameters remain available. Geometry-input stages retain their instructional engineering callouts.
 
 ## Verification scope
 

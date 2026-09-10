@@ -196,6 +196,7 @@ export default function Controls({
   refreshWeather,
   template,
   placing,
+  fieldTool,
   setPlacing,
   addSensor,
   addPercentiles,
@@ -582,16 +583,19 @@ export default function Controls({
         )}
         {step === 7 && (
           <>
+            <h3>Field sensors</h3>
             <p className="control-note">
               Place instruments in receiver cells, then edit their installation details. Dots share
               a cell without changing the recorded centre coordinates.
             </p>
             <button
-              className={'secondary wide ' + (placing ? 'selected' : '')}
-              onClick={() => setPlacing(!placing)}
+              className={'secondary wide ' + (placing && fieldTool === 'sensor' ? 'selected' : '')}
+              onClick={() => setPlacing(!(placing && fieldTool === 'sensor'), 'sensor')}
             >
               <MapPin size={16} />
-              {placing ? 'Click the ground to place a sensor' : 'Place a sensor in the view'}
+              {placing && fieldTool === 'sensor'
+                ? 'Click the ground to place a sensor'
+                : 'Place a sensor in the view'}
             </button>
             <button className="secondary wide" onClick={addSensor}>
               <Plus size={16} /> Add at array centre
@@ -679,14 +683,15 @@ export default function Controls({
             ))}
           </>
         )}
-        {step === 8 && (
+        {step === 7 && (
           <>
+            <h3>Crop beds</h3>
             <button
-              className={'secondary wide ' + (placing ? 'selected' : '')}
-              onClick={() => setPlacing(!placing)}
+              className={'secondary wide ' + (placing && fieldTool === 'crop' ? 'selected' : '')}
+              onClick={() => setPlacing(!(placing && fieldTool === 'crop'), 'crop')}
             >
               <MapPin size={16} />
-              {placing
+              {placing && fieldTool === 'crop'
                 ? 'Click a receiver cell for the crop plot'
                 : 'Place a crop plot in the view'}
             </button>
@@ -778,7 +783,7 @@ export default function Controls({
             })}
           </>
         )}
-        {step === 9 && (
+        {step === 8 && (
           <>
             {field('metadata', 'title', 'Study title', null, null, { type: 'text' })}
             {field('metadata', 'investigator', 'Investigator / group', null, null, {

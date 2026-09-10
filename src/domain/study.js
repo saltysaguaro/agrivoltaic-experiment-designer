@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { normalizeCropIdentity } from './crop-catalog.js';
 import { validateWeatherRows } from '../irradiance/weather-validation.js';
-export const VERSION = '0.2.0';
+export const VERSION = '0.2.1';
 const num = (min, max) => z.number().finite().min(min).max(max),
   count = (min, max) => num(min, max).int();
 const text = z.string().max(500);

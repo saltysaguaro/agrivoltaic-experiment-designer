@@ -51,43 +51,13 @@ import { cropIdentity, cropById, unresolvedCrops } from './domain/crop-catalog.j
 import { layoutSnapshot, replaceFieldItem } from './experiment/field-editing.js';
 import DisplayLegend from './ui/DisplayLegend.jsx';
 import { designLayers, irradianceLayers } from './ui/display-layers.js';
+import { steps, defaults, normalizeNavigation } from './ui/workflow.js';
 import './styles.css';
-const steps = [
-  ['Module', 'Define the building block', 'module'],
-  ['Racking', 'Choose a support system', 'racking'],
-  ['PV table & row', 'Build your repeated assembly', 'row'],
-  ['Row spacing', 'Make room for the experiment', 'pair'],
-  ['Full array', 'Set the field boundaries', 'array'],
-  ['Site & weather', 'Define the light environment', 'environment'],
-  ['Irradiance', 'Understand the daily light field', 'irradiance'],
-  ['Field sensors', 'Instrument the experiment', 'sensors'],
-  ['Crop plots', 'Design your growing treatments', 'crops'],
-  ['Methods & export', 'From field design to publication', 'report'],
-];
-const defaults = [
-  'oblique',
-  'oblique',
-  'oblique',
-  'profile',
-  'oblique',
-  'plan',
-  'oblique',
-  'oblique',
-  'oblique',
-  'oblique',
-];
 function navigation() {
   try {
-    const v = JSON.parse(sessionStorage.getItem('aed-navigation'));
-    return v &&
-      Number.isInteger(v.step) &&
-      v.step >= 0 &&
-      v.step < 10 &&
-      ['oblique', 'plan', 'profile'].includes(v.view)
-      ? v
-      : { step: 0, view: 'oblique' };
+    return normalizeNavigation(JSON.parse(sessionStorage.getItem('aed-navigation')));
   } catch {
-    return { step: 0, view: 'oblique' };
+    return normalizeNavigation(null);
   }
 }
 function load() {
@@ -253,7 +223,7 @@ function App() {
     validResult = result?.key === analysisKey(s) ? result : null,
     issues = designIssues(s),
     scope = steps[step][2];
-  const fieldWorkspace = (step >= 7 && step <= 8) || (step === 6 && Boolean(validResult));
+  const fieldWorkspace = step === 7 || (step === 6 && Boolean(validResult));
   const compactSidebar = fieldWorkspace && !sidebarExpanded;
   const unidentifiedCrops = unresolvedCrops(s);
   const layerMode = fieldWorkspace ? 'analysis' : 'design';
@@ -268,7 +238,7 @@ function App() {
     }
   }, [validResult]);
   useEffect(() => {
-    if (step === 7 || step === 8)
+    if (step === 7)
       setLayerPrefs((current) => ({
         ...current,
         analysis: { ...current.analysis, sensors: true, plots: true },
@@ -289,7 +259,7 @@ function App() {
   }, [s, recovery]);
   useEffect(() => {
     try {
-      sessionStorage.setItem('aed-navigation', JSON.stringify({ step, view }));
+      sessionStorage.setItem('aed-navigation', JSON.stringify({ version: 2, step, view }));
     } catch {}
   }, [step, view]);
   const requestKey = weatherRequestKey(s);
@@ -661,7 +631,11 @@ function App() {
   }
   async function exportFigure(format) {
     try {
-      const svg = figureSvg(s, validResult, view, metric, scope, grid, { layers, panelOpacity });
+      const svg = figureSvg(s, validResult, view, metric, scope, grid, {
+        layers,
+        panelOpacity,
+        callouts: !fieldWorkspace && scope !== 'report',
+      });
       download(
         format === 'png' ? await pngFigure(svg) : svg,
         `agrivoltaic-${view}-${metric}.${format}`,
@@ -745,9 +719,11 @@ function App() {
             <span className="eyebrow">YOUR EXPERIMENT</span>
             <div className="study-name">{s.metadata.title}</div>
             <div className="progress-track">
-              <span style={{ width: `${(step + 1) * 10}%` }} />
+              <span style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
             </div>
-            <span className="muted step-count">Step {String(step + 1).padStart(2, '0')} of 10</span>
+            <span className="muted step-count">
+              Step {String(step + 1).padStart(2, '0')} of {steps.length}
+            </span>
           </div>
           <nav aria-label="Design steps">
             {steps.map(([name, subtitle], i) => (
@@ -762,18 +738,7 @@ function App() {
                 >
                   {compactSidebar &&
                     React.createElement(
-                      [
-                        PanelTop,
-                        Box,
-                        Layers,
-                        ArrowLeft,
-                        Grid2X2,
-                        MapPin,
-                        Sun,
-                        MapPin,
-                        Sprout,
-                        FileText,
-                      ][i],
+                      [PanelTop, Box, Layers, ArrowLeft, Grid2X2, MapPin, Sun, Sprout, FileText][i],
                       { size: 20, className: 'rail-icon' },
                     )}
                   <span className={'step-number ' + (i < step ? 'visited' : '')}>
@@ -801,7 +766,8 @@ function App() {
                     refreshWeather={() => ensureWeather(latest.current, true).catch(() => {})}
                     template={() => download(weatherTemplate, 'weather-template.csv', 'text/csv')}
                     placing={placing}
-                    setPlacing={(v) => chooseFieldTool(v ? (step === 8 ? 'crop' : 'sensor') : null)}
+                    fieldTool={fieldTool}
+                    setPlacing={(v, kind) => chooseFieldTool(v ? kind : null)}
                     addSensor={() => addSensor()}
                     addPercentiles={() => {
                       rememberFieldLayout();
@@ -848,8 +814,7 @@ function App() {
                     'Bring the individual rows together into a finite system.',
                     'Connect your field location to a reproducible weather source.',
                     'Compare daily ground light with an unobstructed horizontal reference.',
-                    'Turn your light field into an instrumented experiment.',
-                    'Connect each treatment to its local growing environment.',
+                    'Arrange sensors and crop beds together over the light field.',
                     'Export clear figures and traceable parameters for your methods section.',
                   ][step]
                 }
@@ -974,7 +939,7 @@ function App() {
                 result={validResult}
                 metric={metric}
                 showGrid={grid}
-                onPlace={fieldTool === 'crop' || (!fieldTool && step === 8) ? addPlot : addSensor}
+                onPlace={fieldTool === 'crop' ? addPlot : addSensor}
                 interactionRef={fieldInteraction}
                 editing={fieldWorkspace}
                 selection={selection}
@@ -997,6 +962,7 @@ function App() {
                   ) : null
                 }
                 placing={placing}
+                placementKind={fieldTool === 'crop' ? 'crop plot' : 'sensor'}
                 resetKey={resetKey}
               />
               <div className="scene-label">
@@ -1017,7 +983,7 @@ function App() {
                   <MapPin size={15} />{' '}
                   {view === 'profile'
                     ? 'Use the receiver inspector below, or choose another view to place an item'
-                    : fieldTool === 'crop' || step === 8
+                    : fieldTool === 'crop'
                       ? 'Click a receiver cell to place a crop bed'
                       : 'Click a receiver cell to place an instrument'}
                 </div>
@@ -1154,7 +1120,7 @@ function App() {
               </div>
             ))}
           </div>
-          {step === 9 ? (
+          {step === 8 ? (
             <section className="export-panel">
               <div>
                 <FileText size={21} />
@@ -1236,7 +1202,7 @@ function App() {
             <span>
               {recovery
                 ? 'Automatic saving is paused; the original study is retained.'
-                : step < 9
+                : step < steps.length - 1
                   ? 'Your changes are saved as you design.'
                   : 'Keep the JSON study with your research records.'}
             </span>
@@ -1246,7 +1212,7 @@ function App() {
                   <ArrowLeft size={16} /> Back
                 </button>
               )}
-              {step < 9 && (
+              {step < steps.length - 1 && (
                 <button className="primary" onClick={() => go(step + 1)}>
                   Continue to {steps[step + 1][0].toLowerCase()} <ArrowRight size={17} />
                 </button>

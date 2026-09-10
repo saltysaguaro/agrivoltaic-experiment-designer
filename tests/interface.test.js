@@ -239,7 +239,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await click(byText('Top-down'));
     await click(byText('Estimated DLI'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
-    await click(step('Field sensors'));
+    await click(step('Field layout'));
     assert.ok(document.querySelector('.compact-sidebar'));
     await click(document.querySelector('button[aria-label="Expand inputs"]'));
     await click(byText('Place a sensor in the view'));
@@ -251,8 +251,6 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(saved.experimentSensors.length, 2);
     assert.deepEqual(saved.experimentSensors[0].grid, saved.experimentSensors[1].grid);
     assert.equal(saved.experimentSensors[0].x, saved.experimentSensors[1].x);
-    await click(step('Crop plots'));
-    await click(document.querySelector('button[aria-label="Expand inputs"]'));
     await click(byText('Add crop plot'));
     saved = JSON.parse(localStorage.getItem('aed-study-v1'));
     assert.equal(saved.crops[0].cropId, 'lettuce');
@@ -262,11 +260,24 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(saved.crops[0].grid.rows, 1);
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     assert.equal(calculations, 1);
-    await click(step('Field sensors'));
+    await click(step('Field layout'));
     await click(byText('Orthographic'));
     await click(byText('Relative sunlight'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
     assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 7);
+    const workflowButtons = [...document.querySelectorAll('.step-toggle')];
+    assert.equal(workflowButtons.length, 9);
+    assert.ok(
+      !workflowButtons.some((b) =>
+        ['Field sensors', 'Crop plots'].includes(b.getAttribute('aria-label')),
+      ),
+    );
+    await click(step('Methods & export'));
+    assert.ok(document.querySelector('.export-panel'));
+    assert.equal(document.querySelector('[aria-label="Drawing callouts"]'), null);
+    assert.equal(document.querySelectorAll('.svg-fallback [data-callout]').length, 0);
+    assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 8);
+    assert.equal(calculations, 1);
   } finally {
     await fs.rm(file, { force: true });
     console.error = originalError;

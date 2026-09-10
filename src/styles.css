@@ -1862,6 +1862,41 @@ progress {
 .field-map-overlay.placing * {
   pointer-events: none;
 }
+.field-id-tag {
+  pointer-events: all;
+  cursor: grab;
+  touch-action: none;
+}
+.field-id-tag rect {
+  fill: #fffffff7;
+  stroke: var(--tag-color);
+  stroke-width: 1;
+}
+.field-id-tag text {
+  fill: var(--tag-color);
+  font:
+    600 12px Arial,
+    sans-serif;
+  stroke: none;
+  pointer-events: none;
+}
+.field-id-tag.is-selected rect {
+  stroke: #b26c00;
+  stroke-width: 2;
+  fill: #fff5d7;
+}
+.field-label-note rect {
+  fill: #fffffff0;
+}
+.field-label-note text {
+  font:
+    11px Arial,
+    sans-serif;
+  fill: #385247;
+}
+.field-map-overlay.read-only * {
+  pointer-events: none;
+}
 .map-editor-anchor {
   position: absolute;
   z-index: 20;

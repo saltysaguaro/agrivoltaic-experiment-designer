@@ -33,7 +33,7 @@ Zones rotate with the array. Four rectangles form the perimeter ring, including 
 
 The report uses **Parameter | Value | Parameter | Value** tables grouped into PV geometry, land use and site/calculation/results. Long definitions, source hashes, weather requests, assumptions and validation qualifications use a two-column appendix. Each methods value appears once in this partition; Methods CSV retains the complete two-column record.
 
-Canonical geometry drawings share the zone polygons and callout definitions, with ground drawn beneath hardware. Irradiance/DLI figures omit callouts and default to clean light maps. Standalone SVG/PNG exports follow the current layer visibility and opacity. Provenance, source definitions, instrument keys and crop-reservation overlaps remain available in report/figure metadata and CSV.
+Geometry-input drawings share zone polygons and callout definitions, with ground drawn beneath hardware. Methods & export and all report figures omit engineering callouts; parameters remain in the compact methods tables. Irradiance/DLI figures also omit callouts and default to clean light maps. Sensor and bed IDs use spaced, white-backed tags; crowded figures retain full identification in their field tables or standalone key. Standalone SVG/PNG exports follow the current stage's callout rules, layer visibility and opacity. Provenance, source definitions, instrument keys and crop-reservation overlaps remain available in report/figure metadata and CSV.
 
 ## Verification and limits
 

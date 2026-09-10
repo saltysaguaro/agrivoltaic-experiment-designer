@@ -9,6 +9,7 @@ export { escapeXml } from './xml.js';
 import { landUseZones, zoneStyles, landUseDefinition } from '../domain/land-use.js';
 import { designLayers, irradianceLayers } from '../ui/display-layers.js';
 import { hardwarePoints } from '../ui/drawing-bounds.js';
+import { fieldLabelItems, layoutFieldLabels, labelColors } from '../ui/field-labels.js';
 import { engineeringAnnotations } from '../ui/annotations.js';
 import { annotationSvg, zoneSvg, zonePatternDefs } from '../ui/annotation-svg.js';
 export function heatColor(value, max = 100) {
@@ -43,7 +44,8 @@ export function figureSvg(
 ) {
   // A stale/absent result must export a geometry figure, never a labeled light map.
   if (!result) metric = 'none';
-  const noCallouts = scope === 'irradiance' || metric !== 'none' || options.callouts === false;
+  const noCallouts =
+    ['irradiance', 'report'].includes(scope) || metric !== 'none' || options.callouts === false;
   const layers = options.layers || (metric !== 'none' ? irradianceLayers : designLayers);
   const opacity = options.panelOpacity ?? (metric !== 'none' || scope === 'irradiance' ? 0.2 : 1);
   const group = buildGeometry(s, scope),
@@ -196,12 +198,12 @@ export function figureSvg(
   });
   if (arrayScope && layers.receiver && view !== 'profile')
     content += `<polygon points="${receiverBoundary.map((p) => xy(project(p)).join(',')).join(' ')}" fill="none" stroke="#276a80" stroke-dasharray="5 4"/>`;
+  const fieldProjection = { beds: [], markers: [] };
   if (arrayScope) {
     for (const c of layers.plots ? s.crops : []) {
       const p = plotCorners(s, c).map(project);
       content += poly(p, '#94bc69', '#557a35', 0.45);
-      const [x, y] = xy(project(new THREE.Vector3(c.x, c.y, 0)));
-      content += `<text x="${x}" y="${y}" text-anchor="middle" font-size="13">${escapeXml(c.id)}</text>`;
+      fieldProjection.beds.push({ id: c.id, crop: c.crop, points: p.map(xy) });
     }
     for (const [glyphIndex, glyph] of glyphs.entries()) {
       const sensor = glyph.sensors[0],
@@ -227,13 +229,11 @@ export function figureSvg(
       content += `<g data-sensor-cell="${glyph.cell.column},${glyph.cell.row}"><title>${escapeXml(title)}</title>${dot}`;
       if (glyph.count > 1)
         content += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" fill="white" font-size="${Math.min(11, glyph.radius * scale)}">${escapeXml(glyph.label)}</text>`;
-      // Numbered callouts use distinct vertical slots, linked by leader lines.
-      // Full IDs are in the visible legend below, including in PNG and print.
-      const slots = Math.ceil(glyphs.length / 2);
-      const labelY = 86 + (glyphIndex % slots) * Math.min(13, 405 / Math.max(1, slots - 1));
-      const labelX = glyphIndex < slots ? 14 : 963;
-      if (!noCallouts && glyphs.length <= 60)
-        content += `<path d="M ${x} ${y} L ${labelX + 8} ${labelY - 3}" stroke="#a86a50" stroke-width=".4" opacity=".6"/><text x="${labelX}" y="${labelY}" font-size="10" fill="#713c28">${glyphIndex + 1}</text>`;
+      fieldProjection.markers.push({
+        ids: glyph.sensors.map((v) => v.id),
+        point: [x, y],
+        radius: Math.min(15, glyph.radius * scale),
+      });
       content += '</g>';
     }
   }
@@ -242,6 +242,15 @@ export function figureSvg(
     const module = shape.kind === 'module';
     if (!(module ? layers.modules && opacity > 0 : layers.supports)) continue;
     content += `<g data-hardware="${shape.kind}">${poly(hull(shape.points), module ? '#46727a' : '#b5beb8', '#294d55', module ? opacity : 1)}</g>`;
+  }
+  const fieldLabels = layoutFieldLabels(fieldLabelItems(fieldProjection), 1000, 520, {
+    top: 75,
+    bottom: 16,
+    obstacles: view === 'plan' ? [{ x: 914, y: 65, width: 43, height: 65 }] : [],
+  });
+  for (const label of fieldLabels.labels) {
+    const color = labelColors[label.kind];
+    content += `<g data-field-label="${escapeXml(label.kind + ':' + label.id)}"><title>${escapeXml(label.title)}</title><rect x="${label.x}" y="${label.y}" width="${label.width}" height="${label.height}" rx="4" fill="white" fill-opacity=".97" stroke="${color}"/><text x="${label.x + 8}" y="${label.y + 16}" font-size="12" font-weight="600" fill="${color}">${escapeXml(label.text)}</text></g>`;
   }
   content += annotationSvg(annotations, (p) => xy(project(p)), 1000, 520, {
     obstacles: hardware.map((p) => xy(project(p))),
@@ -271,16 +280,37 @@ export function figureSvg(
             ? 'Orthographic system view'
             : 'Array plan';
   const provenance = provenanceRecord(s, result);
-  const wrap = (text, width = 135) =>
-    String(text).match(new RegExp('.{1,' + width + '}', 'gu')) || [''];
+  const wrap = (text, width = 135) => {
+    const lines = [];
+    let line = '';
+    for (let word of String(text).trim().split(/\s+/)) {
+      if (line && line.length + word.length + 1 > width) {
+        lines.push(line);
+        line = '';
+      }
+      while (word.length > width) {
+        lines.push(word.slice(0, width));
+        word = word.slice(width);
+      }
+      line = line ? `${line} ${word}` : word;
+    }
+    if (line) lines.push(line);
+    return lines;
+  };
   const sensorFooter = [
-    ...(glyphs.length > 60
-      ? ['Dense layout: use receiver column/row and coordinates to identify instruments.']
+    ...(fieldLabels.hidden.length > 0
+      ? ['Some ID tags omitted to avoid overlap; use the field key and receiver coordinates below.']
       : []),
     ...glyphs.map(
-      (glyph, i) =>
-        `${i + 1}: ${glyph.sensors.map((v) => `${v.id} (${v.type}, z=${v.z} m)`).join('; ')}; cell ${glyph.cell.column + 1}/${glyph.cell.row + 1}`,
+      (glyph) =>
+        `${glyph.sensors.map((v) => `${v.id} (${v.type}, z=${v.z} m)`).join('; ')}; cell ${glyph.cell.column + 1}/${glyph.cell.row + 1}`,
     ),
+    ...(layers.plots
+      ? s.crops.map(
+          (c) =>
+            `Bed ${c.id}: ${c.crop}; ${c.grid ? `cell ${c.grid.column + 1}/${c.grid.row + 1}; ${c.grid.columns} × ${c.grid.rows} cells` : `E ${c.x} / N ${c.y} m`}`,
+        )
+      : []),
   ].flatMap((text) => wrap(text));
   const fullFooter = [
     `${provenance.software} · ${provenance.date} · ${provenance.backend}`,
@@ -307,7 +337,16 @@ export function figureSvg(
           ...wrap(
             `${provenance.software} · ${provenance.backend}; complete provenance and assumptions in the report appendix.`,
           ),
-          ...sensorFooter,
+          ...(sensorFooter.length
+            ? [
+                'ID tags: orange = sensors; green = crop beds. Full identities and receiver coordinates are in the report tables.',
+              ]
+            : []),
+          ...(fieldLabels.hidden.length
+            ? [
+                'Some ID tags omitted to avoid overlap. All field items remain in the report tables.',
+              ]
+            : []),
           ...(metric !== 'none' ? wrap(provenance.dli) : []),
           ...(zones.length
             ? wrap(

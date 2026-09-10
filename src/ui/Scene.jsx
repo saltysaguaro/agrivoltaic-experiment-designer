@@ -36,6 +36,7 @@ export default function Scene({
   showGrid,
   onPlace,
   placing,
+  placementKind = 'sensor',
   resetKey,
   editing = false,
   selection = null,
@@ -64,6 +65,7 @@ export default function Scene({
     study,
     result,
     scopeKey,
+    scope,
     view,
     placing,
     onPlace,
@@ -150,7 +152,7 @@ export default function Scene({
       };
       rt.project = project;
       const current = latest.current;
-      if (current.editing) {
+      if (current.editing || current.scope === 'report') {
         const displayed = rt.preview
           ? replaceFieldItem(current.study, rt.preview.selection, rt.preview.item)
           : current.study;
@@ -169,32 +171,40 @@ export default function Scene({
         setProjection({
           width: w,
           height: h,
+          profile: current.view === 'profile',
           viewportBottom: window.innerHeight - host.current.getBoundingClientRect().top - 42,
           anchor,
-          beds:
-            current.view !== 'profile' && current.layers.plots
-              ? displayed.crops.map((b) => ({
-                  ...b,
-                  points: plotCorners(displayed, b).map(project),
-                }))
-              : [],
-          markers:
-            current.view !== 'profile' && current.layers.sensors
-              ? sensorMarkers(displayed).map((m) => {
-                  const q = project(m.position),
-                    edge = project(m.position.clone().addScaledVector(axes(displayed).u, m.radius));
-                  return {
-                    ids: m.sensors.map((v) => v.id),
-                    point: q,
-                    radius: Math.min(15, Math.hypot(edge[0] - q[0], edge[1] - q[1])),
-                  };
-                })
-              : [],
+          beds: current.layers.plots
+            ? displayed.crops.map((b) => ({
+                ...b,
+                points: plotCorners(displayed, b).map(project),
+              }))
+            : [],
+          markers: current.layers.sensors
+            ? sensorMarkers(displayed, { profile: current.view === 'profile' }).map((m) => {
+                const position = m.position.clone();
+                if (current.view === 'profile') position.z = m.sensors[0].z;
+                const q = project(position),
+                  edge = project(
+                    position
+                      .clone()
+                      .addScaledVector(
+                        current.view === 'profile' ? axes(displayed).v : axes(displayed).u,
+                        m.radius,
+                      ),
+                  );
+                return {
+                  ids: m.sensors.map((v) => v.id),
+                  point: q,
+                  radius: Math.min(15, Math.hypot(edge[0] - q[0], edge[1] - q[1])),
+                };
+              })
+            : [],
         });
       } else setProjection(null);
       annotationLayer.current.setAttribute('viewBox', `0 0 ${w} ${h}`);
       annotationLayer.current.innerHTML = annotationSvg(
-        current.editing ? [] : rt.annotations || [],
+        current.editing || current.scope === 'report' ? [] : rt.annotations || [],
         project,
         w,
         h - 25,
@@ -371,7 +381,8 @@ export default function Scene({
       rt.structureKey = structureKey;
     }
     const group = rt.group;
-    rt.annotations = editing ? [] : engineeringAnnotations(study, scope, group, focus);
+    rt.annotations =
+      editing || scope === 'report' ? [] : engineeringAnnotations(study, scope, group, focus);
     const land = landUseZones(study, group.userData);
     rt.zones =
       scopeKey === 'array' || scopeKey === 'pair'
@@ -592,16 +603,20 @@ export default function Scene({
     const rt = runtime.current;
     const group = rt?.group || buildGeometry(study, scopeKey);
     const next = engineeringAnnotations(study, scope, group, focus);
-    setAnnotations(editing ? [] : next);
+    setAnnotations(editing || scope === 'report' ? [] : next);
     if (rt) {
-      rt.annotations = editing ? [] : next;
+      rt.annotations = editing || scope === 'report' ? [] : next;
       rt.draw();
     } else disposeGroup(group);
   }, [annotationKey, structureKey, overlayKey, scope, focus, editing, selection]);
   function startItemDrag(e, target, corner) {
-    if (e.button !== 0 || view === 'profile' || placing) return;
+    if (e.button !== 0 || placing) return;
     e.preventDefault();
     e.stopPropagation();
+    if (view === 'profile') {
+      onSelect?.(target, true);
+      return;
+    }
     const rt = runtime.current,
       item = layoutItems(study, target.kind).find((v) => v.id === target.id),
       point = rt?.pointAt(e);
@@ -729,9 +744,10 @@ export default function Scene({
         onDrop={dropTool}
       >
         <svg className="engineering-overlay" aria-hidden="true" ref={annotationLayer} />
-        {editing && !failed && (
+        {(editing || scope === 'report') && !failed && (
           <FieldMapOverlay
             projection={projection}
+            interactive={editing}
             selection={selection}
             placing={placing}
             onStart={startItemDrag}
@@ -804,6 +820,7 @@ export default function Scene({
             dangerouslySetInnerHTML={{
               __html: figureSvg(study, result, view, metric, scope, showGrid, {
                 focus,
+                callouts: !editing && scope !== 'report',
                 layers,
                 panelOpacity,
               }),
@@ -842,7 +859,7 @@ export default function Scene({
           setOpen={setInspectorOpen}
           placing={placing}
           onPlace={onPlace}
-          kind={scope === 'crops' ? 'crop plot' : 'sensor'}
+          kind={placementKind}
         />
       )}
     </>
