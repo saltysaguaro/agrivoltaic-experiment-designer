@@ -1,5 +1,7 @@
 import React, { useId, useState, useEffect, useRef, createContext, useContext } from 'react';
 import Info from './Info.jsx';
+import CropPicker from './CropPicker.jsx';
+import { cropIdentity } from '../domain/crop-catalog.js';
 import LocationSearch from './LocationSearch.jsx';
 import { receiverGridSpec } from '../domain/geometry.js';
 import { inputHelp, labelHelp } from './help.js';
@@ -709,12 +711,17 @@ export default function Controls({
                   <summary>
                     {v.id} · {v.crop}
                   </summary>
-                  {['crop', 'treatment', 'replicate'].map((k) => (
+                  <CropPicker
+                    value={v.cropId}
+                    legacy={v.crop}
+                    onChange={(id) => set('crops', i, { ...v, ...cropIdentity(id) })}
+                  />
+                  {['cultivar', 'treatment', 'replicate', 'notes'].map((k) => (
                     <Field
                       key={k}
                       annotation={`crops.${i}.${k}`}
                       label={k[0].toUpperCase() + k.slice(1)}
-                      value={v[k]}
+                      value={v[k] || ''}
                       type="text"
                       onChange={(value) => set('crops', i, { ...v, [k]: value })}
                     />

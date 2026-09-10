@@ -240,6 +240,8 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await click(byText('Estimated DLI'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     await click(step('Field sensors'));
+    assert.ok(document.querySelector('.compact-sidebar'));
+    await click(document.querySelector('button[aria-label="Expand inputs"]'));
     await click(byText('Place a sensor in the view'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     await click(byText('Add at array centre'));
@@ -250,8 +252,12 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.deepEqual(saved.experimentSensors[0].grid, saved.experimentSensors[1].grid);
     assert.equal(saved.experimentSensors[0].x, saved.experimentSensors[1].x);
     await click(step('Crop plots'));
+    await click(document.querySelector('button[aria-label="Expand inputs"]'));
     await click(byText('Add crop plot'));
     saved = JSON.parse(localStorage.getItem('aed-study-v1'));
+    assert.equal(saved.crops[0].cropId, 'lettuce');
+    assert.equal(saved.crops[0].botanicalName, 'Lactuca sativa');
+    assert.ok(document.querySelector('[role="dialog"]'));
     assert.equal(saved.crops[0].grid.columns, 1);
     assert.equal(saved.crops[0].grid.rows, 1);
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);

@@ -21,6 +21,9 @@ import {
   Maximize,
   AlertTriangle,
   Loader2,
+  PanelLeftOpen,
+  PanelLeftClose,
+  Sprout,
 } from 'lucide-react';
 import {
   defaultStudy,
@@ -42,6 +45,10 @@ import { download, reportHtml, exportCsv, methodsRows, csv, pngFigure } from './
 import { figureSvg } from './report/figures.js';
 import Controls from './ui/Controls.jsx';
 import Scene from './ui/Scene.jsx';
+import FieldTools from './ui/FieldTools.jsx';
+import FieldEditor from './ui/FieldEditor.jsx';
+import { cropIdentity, cropById, unresolvedCrops } from './domain/crop-catalog.js';
+import { layoutSnapshot, replaceFieldItem } from './experiment/field-editing.js';
 import DisplayLegend from './ui/DisplayLegend.jsx';
 import { designLayers, irradianceLayers } from './ui/display-layers.js';
 import './styles.css';
@@ -118,6 +125,12 @@ function App() {
     [notice, setNotice] = useState(initial.error || ''),
     [placing, setPlacing] = useState(false),
     [resetKey, setResetKey] = useState(0),
+    [sidebarExpanded, setSidebarExpanded] = useState(false),
+    [fieldTool, setFieldTool] = useState(null),
+    [newCropId, setNewCropId] = useState('lettuce'),
+    [selection, setSelection] = useState(null),
+    [editorOpen, setEditorOpen] = useState(false),
+    [undoCount, setUndoCount] = useState(0),
     [weatherStatus, setWeatherStatus] = useState({ state: 'idle', message: '' }),
     [saveStatus, setSaveStatus] = useState('Saved on this device');
   function setStudy(update) {
@@ -130,6 +143,70 @@ function App() {
       }
       return parsed.data;
     });
+  }
+  function rememberFieldLayout() {
+    fieldHistory.current = [...fieldHistory.current.slice(-39), layoutSnapshot(latest.current)];
+    setUndoCount(fieldHistory.current.length);
+  }
+  function undoFieldEdit() {
+    const previous = fieldHistory.current.pop();
+    if (!previous) return;
+    setStudy((current) => ({ ...current, ...previous }));
+    setUndoCount(fieldHistory.current.length);
+    setSelection(null);
+    setEditorOpen(false);
+    setNotice('Field edit undone.');
+  }
+  function selectFieldItem(target, open = true) {
+    setSelection(target);
+    setEditorOpen(Boolean(target && open));
+    setInspection(null);
+    if (target) {
+      const layer = target.kind === 'sensor' ? 'sensors' : 'plots';
+      setLayerPrefs((current) => ({
+        ...current,
+        [layerMode]: { ...current[layerMode], [layer]: true },
+      }));
+    }
+  }
+  function editFieldItem(target, item) {
+    const key = target.kind === 'sensor' ? 'experimentSensors' : 'crops';
+    const current = latest.current[key].find((v) => v.id === target.id);
+    if (!current) return;
+    if (JSON.stringify(current) === JSON.stringify(item)) {
+      setEditorOpen(false);
+      return;
+    }
+    const validated = studySchema.safeParse(replaceFieldItem(latest.current, target, item));
+    if (!validated.success) {
+      setNotice(validated.error.issues.map(validationMessage).join(' '));
+      return;
+    }
+    rememberFieldLayout();
+    setStudy((study) => replaceFieldItem(study, target, item));
+    setSelection({ ...target, id: item.id });
+    setEditorOpen(false);
+  }
+  function removeFieldItem(target) {
+    const key = target.kind === 'sensor' ? 'experimentSensors' : 'crops';
+    rememberFieldLayout();
+    setStudy((current) => ({ ...current, [key]: current[key].filter((v) => v.id !== target.id) }));
+    setSelection(null);
+    setEditorOpen(false);
+  }
+  function chooseFieldTool(tool) {
+    if (tool && view === 'profile') setView('plan');
+    setFieldTool(tool);
+    setPlacing(Boolean(tool));
+    setEditorOpen(false);
+    setSelection(null);
+    if (tool) {
+      const layer = tool === 'sensor' ? 'sensors' : 'plots';
+      setLayerPrefs((current) => ({
+        ...current,
+        [layerMode]: { ...current[layerMode], [layer]: true },
+      }));
+    }
   }
   function selectLocation(location) {
     weatherFlight.current?.controller.abort();
@@ -162,6 +239,8 @@ function App() {
     );
   }
   const mainRef = useRef(null);
+  const fieldHistory = useRef([]);
+  const fieldInteraction = useRef(null);
   const enteredArray = useRef(navigation().step === 4);
   const enteredAnalysis = useRef(navigation().step >= 6);
   const weatherFlight = useRef(null),
@@ -174,14 +253,27 @@ function App() {
     validResult = result?.key === analysisKey(s) ? result : null,
     issues = designIssues(s),
     scope = steps[step][2];
-  const layerMode = validResult && step === 6 ? 'analysis' : 'design';
+  const fieldWorkspace = (step >= 7 && step <= 8) || (step === 6 && Boolean(validResult));
+  const compactSidebar = fieldWorkspace && !sidebarExpanded;
+  const unidentifiedCrops = unresolvedCrops(s);
+  const layerMode = fieldWorkspace ? 'analysis' : 'design';
   const opacityMode = step === 6 || (validResult && step >= 6) ? 'analysis' : 'design';
   const layers = layerPrefs[layerMode],
     panelOpacity = opacityPrefs[opacityMode];
   useEffect(() => {
-    if (validResult)
+    if (validResult) {
+      setSidebarExpanded(false);
+      setEditorOpen(false);
       setLayerPrefs((current) => ({ ...current, analysis: { ...irradianceLayers } }));
+    }
   }, [validResult]);
+  useEffect(() => {
+    if (step === 7 || step === 8)
+      setLayerPrefs((current) => ({
+        ...current,
+        analysis: { ...current.analysis, sensors: true, plots: true },
+      }));
+  }, [step]);
 
   useEffect(() => {
     if (recovery) {
@@ -275,6 +367,7 @@ function App() {
     return flight.promise;
   }
   function set(section, key, value) {
+    if (section === 'experimentSensors' || section === 'crops') rememberFieldLayout();
     setStudy((current) => {
       const next = updateStudyInput(current, section, key, value);
       if (section === 'site' && key === 'utcOffset') next.site.utcOffsetApproximate = false;
@@ -357,6 +450,10 @@ function App() {
     mainRef.current?.scrollTo({ top: 0 });
     setStep(n);
     setInspection(null);
+    setFieldTool(null);
+    setSelection(null);
+    setEditorOpen(false);
+    setSidebarExpanded(false);
     if (n === 4 && !enteredArray.current) {
       setView('oblique');
       enteredArray.current = true;
@@ -462,6 +559,10 @@ function App() {
       setRecovery(null);
       setStudy(next);
       setResult(null);
+      fieldHistory.current = [];
+      setUndoCount(0);
+      setSelection(null);
+      setEditorOpen(false);
       setNotice('Study imported. Recalculate light to verify results.');
     } catch (e) {
       setNotice('Could not import study: ' + e.message);
@@ -473,16 +574,22 @@ function App() {
     return `${prefix}-${String(i).padStart(2, '0')}`;
   }
   function addSensor(point = { x: 0, y: 0 }) {
+    if (latest.current.experimentSensors.length >= 500) {
+      setNotice('The study supports up to 500 sensors.');
+      return;
+    }
+    const id = newId('S', latest.current.experimentSensors);
     if (!cellAt(s, point, undefined, false)) {
       setNotice('Choose a receiver cell inside the array grid.');
       return;
     }
+    rememberFieldLayout();
     setStudy((current) => ({
       ...current,
       experimentSensors: [
         ...current.experimentSensors,
         {
-          id: newId('S', current.experimentSensors),
+          id,
           type: 'PAR',
           x: point.x,
           y: point.y,
@@ -500,19 +607,33 @@ function App() {
       ],
     }));
     setPlacing(false);
+    setFieldTool(null);
+    selectFieldItem({ kind: 'sensor', id });
   }
-  function addPlot(point = { x: 0, y: 0 }) {
+  function addPlot(point = { x: 0, y: 0 }, cropId = newCropId) {
+    if (latest.current.crops.length >= 200) {
+      setNotice('The study supports up to 200 crop beds.');
+      return;
+    }
+    if (!cropById(cropId)) {
+      setNotice('Select a crop from the catalog before placing a bed.');
+      return;
+    }
+    const id = newId('P', latest.current.crops);
     if (!cellAt(s, point, undefined, false)) {
       setNotice('Choose a receiver cell inside the array grid.');
       return;
     }
+    rememberFieldLayout();
     setStudy((current) => ({
       ...current,
       crops: [
         ...current.crops,
         {
-          id: newId('P', current.crops),
-          crop: 'Lettuce',
+          id,
+          ...cropIdentity(cropId),
+          cultivar: '',
+          notes: '',
           treatment: 'Interrow',
           replicate: '1',
           x: point.x,
@@ -524,6 +645,8 @@ function App() {
       ],
     }));
     setPlacing(false);
+    setFieldTool(null);
+    selectFieldItem({ kind: 'crop', id });
   }
   async function saveStudy() {
     download(
@@ -600,8 +723,21 @@ function App() {
           />
         </div>
       </header>
-      <div className="workspace">
+      <div
+        className={`workspace ${fieldWorkspace ? 'field-workspace' : ''} ${compactSidebar ? 'compact-sidebar' : ''}`}
+      >
         <aside className="sidebar" id="study-controls">
+          {fieldWorkspace && (
+            <button
+              className="sidebar-expand"
+              onClick={() => setSidebarExpanded((v) => !v)}
+              aria-label={compactSidebar ? 'Expand inputs' : 'Collapse inputs'}
+              title={compactSidebar ? 'Expand inputs' : 'Collapse inputs'}
+            >
+              {compactSidebar ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+              <span>{compactSidebar ? '' : 'Collapse inputs'}</span>
+            </button>
+          )}
           <a className="mobile-jump" href="#design-drawing">
             Jump to drawing ↓
           </a>
@@ -616,14 +752,37 @@ function App() {
           <nav aria-label="Design steps">
             {steps.map(([name, subtitle], i) => (
               <section key={name} className={'step-section ' + (i === step ? 'active' : '')}>
-                <button className="step-toggle" aria-expanded={i === step} onClick={() => go(i)}>
+                <button
+                  className="step-toggle"
+                  aria-label={name}
+                  title={name}
+                  aria-expanded={i === step && !compactSidebar}
+                  aria-current={i === step ? 'step' : undefined}
+                  onClick={() => go(i)}
+                >
+                  {compactSidebar &&
+                    React.createElement(
+                      [
+                        PanelTop,
+                        Box,
+                        Layers,
+                        ArrowLeft,
+                        Grid2X2,
+                        MapPin,
+                        Sun,
+                        MapPin,
+                        Sprout,
+                        FileText,
+                      ][i],
+                      { size: 20, className: 'rail-icon' },
+                    )}
                   <span className={'step-number ' + (i < step ? 'visited' : '')}>
                     {i < step ? <Check size={13} /> : String(i + 1).padStart(2, '0')}
                   </span>
                   <span>{name}</span>
                   {i === step ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
                 </button>
-                {i === step && (
+                {i === step && !compactSidebar && (
                   <Controls
                     onInspect={(value) => setInspection({ ...value, step })}
                     step={step}
@@ -642,27 +801,23 @@ function App() {
                     refreshWeather={() => ensureWeather(latest.current, true).catch(() => {})}
                     template={() => download(weatherTemplate, 'weather-template.csv', 'text/csv')}
                     placing={placing}
-                    setPlacing={(v) => {
-                      setPlacing(v);
-                    }}
+                    setPlacing={(v) => chooseFieldTool(v ? (step === 8 ? 'crop' : 'sensor') : null)}
                     addSensor={() => addSensor()}
-                    addPercentiles={() =>
+                    addPercentiles={() => {
+                      rememberFieldLayout();
                       setStudy({
                         ...s,
                         experimentSensors: [
                           ...s.experimentSensors,
                           ...percentileSensors(s, validResult),
                         ],
-                      })
-                    }
+                      });
+                    }}
                     addPlot={() => addPlot()}
                     removeSensor={(i) =>
-                      setStudy({
-                        ...s,
-                        experimentSensors: s.experimentSensors.filter((_, j) => i !== j),
-                      })
+                      removeFieldItem({ kind: 'sensor', id: s.experimentSensors[i].id })
                     }
-                    removePlot={(i) => setStudy({ ...s, crops: s.crops.filter((_, j) => i !== j) })}
+                    removePlot={(i) => removeFieldItem({ kind: 'crop', id: s.crops[i].id })}
                   />
                 )}
               </section>
@@ -712,6 +867,15 @@ function App() {
               </button>
             </div>
           )}
+          {unidentifiedCrops.length > 0 && step >= 7 && (
+            <div className="warning" role="alert">
+              <Sprout size={17} />
+              <span>
+                {unidentifiedCrops.length} imported crop bed(s) need a catalog selection to identify
+                their botanical names. Open each bed and choose its crop.
+              </span>
+            </div>
+          )}
           {issues.length > 0 && (
             <div className="warning" role="alert">
               <AlertTriangle size={17} />
@@ -730,6 +894,27 @@ function App() {
           <a className="mobile-jump" href="#study-controls">
             Back to inputs ↑
           </a>
+          {fieldWorkspace && (
+            <FieldTools
+              onDropPalette={(tool, event) => {
+                const point = fieldInteraction.current?.pointAtClient(event);
+                if (point) {
+                  if (tool.kind === 'sensor') addSensor(point);
+                  else addPlot(point, tool.cropId);
+                }
+              }}
+              tool={fieldTool}
+              setTool={chooseFieldTool}
+              cropId={newCropId}
+              setCropId={setNewCropId}
+              onUndo={undoFieldEdit}
+              canUndo={undoCount > 0}
+              study={s}
+              selection={selection}
+              onSelect={selectFieldItem}
+              view={view}
+            />
+          )}
           <section className="visual-card" id="design-drawing" tabIndex={-1}>
             <div className="visual-toolbar">
               <div className="view-tabs" role="group" aria-label="Projection">
@@ -744,7 +929,7 @@ function App() {
                     aria-pressed={view === v}
                     onClick={() => {
                       setView(v);
-                      if (v !== 'plan') setPlacing(false);
+                      if (v === 'profile') chooseFieldTool(null);
                     }}
                   >
                     <Icon size={15} />
@@ -789,7 +974,28 @@ function App() {
                 result={validResult}
                 metric={metric}
                 showGrid={grid}
-                onPlace={step === 8 ? addPlot : addSensor}
+                onPlace={fieldTool === 'crop' || (!fieldTool && step === 8) ? addPlot : addSensor}
+                interactionRef={fieldInteraction}
+                editing={fieldWorkspace}
+                selection={selection}
+                onSelect={selectFieldItem}
+                onEditItem={editFieldItem}
+                onDropTool={(tool, point) =>
+                  tool.kind === 'crop' ? addPlot(point, tool.cropId) : addSensor(point)
+                }
+                editor={
+                  fieldWorkspace && editorOpen && selection ? (
+                    <FieldEditor
+                      key={`${selection.kind}:${selection.id}`}
+                      study={s}
+                      selection={selection}
+                      result={validResult}
+                      onSave={(item) => editFieldItem(selection, item)}
+                      onClose={() => setEditorOpen(false)}
+                      onDelete={() => removeFieldItem(selection)}
+                    />
+                  ) : null
+                }
                 placing={placing}
                 resetKey={resetKey}
               />
@@ -811,8 +1017,8 @@ function App() {
                   <MapPin size={15} />{' '}
                   {view === 'profile'
                     ? 'Use the receiver inspector below, or choose another view to place an item'
-                    : step === 8
-                      ? 'Click a receiver cell to place a crop plot'
+                    : fieldTool === 'crop' || step === 8
+                      ? 'Click a receiver cell to place a crop bed'
                       : 'Click a receiver cell to place an instrument'}
                 </div>
               )}

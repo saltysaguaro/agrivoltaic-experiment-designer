@@ -14,6 +14,15 @@ import { hardwarePoints, fitDrawing } from './drawing-bounds.js';
 import { groundGrid } from './ground-grid.js';
 import { receiverLines, sensorMarkers, cellAt, cellCenter } from '../experiment/grid-layout.js';
 import ReceiverInspector from './ReceiverInspector.jsx';
+import FieldMapOverlay from './FieldMapOverlay.jsx';
+import { plotCorners } from '../experiment/grid-layout.js';
+import {
+  gridPoint,
+  moveGrid,
+  resizeGrid,
+  replaceFieldItem,
+  layoutItems,
+} from '../experiment/field-editing.js';
 
 export default function Scene({
   study,
@@ -28,12 +37,20 @@ export default function Scene({
   onPlace,
   placing,
   resetKey,
+  editing = false,
+  selection = null,
+  onSelect,
+  onEditItem,
+  onDropTool,
+  editor,
+  interactionRef,
 }) {
   const host = useRef(null),
     runtime = useRef(null),
     latest = useRef(null),
     annotationLayer = useRef(null);
   const [annotations, setAnnotations] = useState([]);
+  const [projection, setProjection] = useState(null);
   const [failed, setFailed] = useState(false),
     [hover, setHover] = useState(null);
   const [selectedCell, setSelectedCell] = useState({ column: 0, row: 0 });
@@ -43,7 +60,20 @@ export default function Scene({
   )
     ? 'array'
     : scope;
-  latest.current = { study, result, scopeKey, view, placing, onPlace, selectedCell };
+  latest.current = {
+    study,
+    result,
+    scopeKey,
+    view,
+    placing,
+    onPlace,
+    selectedCell,
+    editing,
+    selection,
+    layers,
+    onSelect,
+    onEditItem,
+  };
   const structureKey = JSON.stringify([
     study.module.length,
     study.module.width,
@@ -110,7 +140,7 @@ export default function Scene({
     runtime.current = rt;
     rt.draw = () => {
       renderer.render(scene, camera);
-      if (!annotationLayer.current || !rt.annotations) return;
+      if (!annotationLayer.current) return;
       const w = host.current.clientWidth,
         h = host.current.clientHeight;
       camera.updateMatrixWorld(true);
@@ -118,10 +148,60 @@ export default function Scene({
         const p = point.clone().project(camera);
         return [((p.x + 1) * w) / 2, ((1 - p.y) * h) / 2];
       };
+      rt.project = project;
+      const current = latest.current;
+      if (current.editing) {
+        const displayed = rt.preview
+          ? replaceFieldItem(current.study, rt.preview.selection, rt.preview.item)
+          : current.study;
+        const chosen =
+          current.selection &&
+          layoutItems(displayed, current.selection.kind).find((o) => o.id === current.selection.id);
+        const anchor = chosen
+          ? project(
+              new THREE.Vector3(
+                chosen.x,
+                chosen.y,
+                current.view === 'profile' && current.selection.kind === 'sensor' ? chosen.z : 0,
+              ),
+            )
+          : null;
+        setProjection({
+          width: w,
+          height: h,
+          viewportBottom: window.innerHeight - host.current.getBoundingClientRect().top - 42,
+          anchor,
+          beds:
+            current.view !== 'profile' && current.layers.plots
+              ? displayed.crops.map((b) => ({
+                  ...b,
+                  points: plotCorners(displayed, b).map(project),
+                }))
+              : [],
+          markers:
+            current.view !== 'profile' && current.layers.sensors
+              ? sensorMarkers(displayed).map((m) => {
+                  const q = project(m.position),
+                    edge = project(m.position.clone().addScaledVector(axes(displayed).u, m.radius));
+                  return {
+                    ids: m.sensors.map((v) => v.id),
+                    point: q,
+                    radius: Math.min(15, Math.hypot(edge[0] - q[0], edge[1] - q[1])),
+                  };
+                })
+              : [],
+        });
+      } else setProjection(null);
       annotationLayer.current.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      annotationLayer.current.innerHTML = annotationSvg(rt.annotations, project, w, h - 25, {
-        obstacles: rt.hardwarePoints?.map(project) || [],
-      });
+      annotationLayer.current.innerHTML = annotationSvg(
+        current.editing ? [] : rt.annotations || [],
+        project,
+        w,
+        h - 25,
+        {
+          obstacles: rt.hardwarePoints?.map(project) || [],
+        },
+      );
     };
     controls.addEventListener('change', () => {
       setHover(null);
@@ -160,25 +240,46 @@ export default function Scene({
         new THREE.Vector3(),
       );
     };
+    rt.pointAt = pointAt;
+    if (interactionRef)
+      interactionRef.current = {
+        pointAtClient(event) {
+          const rect = canvas.getBoundingClientRect();
+          if (
+            latest.current.view === 'profile' ||
+            event.clientX < rect.left ||
+            event.clientX > rect.right ||
+            event.clientY < rect.top ||
+            event.clientY > rect.bottom
+          )
+            return null;
+          return pointAt(event);
+        },
+      };
     let down;
     canvas.addEventListener('pointerdown', (e) => {
       down = [e.clientX, e.clientY];
     });
     canvas.addEventListener('pointerup', (e) => {
       const v = latest.current;
-      if (
-        !v.placing ||
-        v.view === 'profile' ||
-        !down ||
-        Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5
-      )
+      if (e.button !== 0 || !down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5)
         return;
+      if (!v.placing) {
+        if (v.editing) v.onSelect?.(null, false);
+        return;
+      }
+      if (v.view === 'profile') return;
       const p = pointAt(e);
       if (p) v.onPlace?.(p);
     });
     canvas.addEventListener('pointermove', (e) => {
       const v = latest.current;
-      if (v.scopeKey !== 'array' || e.buttons || v.view === 'profile') {
+      if (
+        v.scopeKey !== 'array' ||
+        e.buttons ||
+        v.view === 'profile' ||
+        (v.editing && v.selection)
+      ) {
         setHover(null);
         return;
       }
@@ -241,6 +342,7 @@ export default function Scene({
       setInspectorOpen(true);
     });
     return () => {
+      if (interactionRef) interactionRef.current = null;
       observer.disconnect();
       controls.dispose();
       if (rt.group) disposeGroup(rt.group);
@@ -269,7 +371,7 @@ export default function Scene({
       rt.structureKey = structureKey;
     }
     const group = rt.group;
-    rt.annotations = engineeringAnnotations(study, scope, group, focus);
+    rt.annotations = editing ? [] : engineeringAnnotations(study, scope, group, focus);
     const land = landUseZones(study, group.userData);
     rt.zones =
       scopeKey === 'array' || scopeKey === 'pair'
@@ -278,6 +380,7 @@ export default function Scene({
     rt.view = view;
     rt.metric = metric;
     if (rt.overlay) {
+      if (rt.heatmap) rt.overlay.remove(rt.heatmap);
       scene.remove(rt.overlay);
       disposeOverlay(rt.overlay);
     }
@@ -332,26 +435,40 @@ export default function Scene({
       metric !== 'none' &&
       ['array', 'irradiance', 'sensors', 'crops', 'report'].includes(scope)
     ) {
-      const geometry = new THREE.PlaneGeometry(result.grid.dx, result.grid.dy),
-        material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
-        mesh = new THREE.InstancedMesh(geometry, material, result.cells.length);
-      result.cells.forEach((c, i) => {
-        const matrix = new THREE.Matrix4().makeRotationZ(
-          Math.atan2(axes(study).u.y, axes(study).u.x),
-        );
-        matrix.setPosition(c.x, c.y, 0.01);
-        mesh.setMatrixAt(i, matrix);
-        mesh.setColorAt(
-          i,
-          new THREE.Color(
-            heatColor(
-              metric === 'sunlight' ? c.sunlight : c.dli,
-              metric === 'sunlight' ? 100 : result.openDli,
+      if (rt.heatmap && (rt.heatmapResult !== result || rt.heatmapMetric !== metric)) {
+        rt.heatmap.geometry.dispose();
+        rt.heatmap.material.dispose();
+        rt.heatmap = null;
+      }
+      if (!rt.heatmap) {
+        const geometry = new THREE.PlaneGeometry(result.grid.dx, result.grid.dy),
+          material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }),
+          mesh = new THREE.InstancedMesh(geometry, material, result.cells.length);
+        result.cells.forEach((c, i) => {
+          const matrix = new THREE.Matrix4().makeRotationZ(
+            Math.atan2(axes(study).u.y, axes(study).u.x),
+          );
+          matrix.setPosition(c.x, c.y, 0.01);
+          mesh.setMatrixAt(i, matrix);
+          mesh.setColorAt(
+            i,
+            new THREE.Color(
+              heatColor(
+                metric === 'sunlight' ? c.sunlight : c.dli,
+                metric === 'sunlight' ? 100 : result.openDli,
+              ),
             ),
-          ),
-        );
-      });
-      overlay.add(mesh);
+          );
+        });
+        rt.heatmap = mesh;
+        rt.heatmapResult = result;
+        rt.heatmapMetric = metric;
+      }
+      overlay.add(rt.heatmap);
+    } else if (rt.heatmap) {
+      rt.heatmap.geometry.dispose();
+      rt.heatmap.material.dispose();
+      rt.heatmap = null;
     }
     if (scopeKey === 'array') {
       for (const glyph of sensorMarkers(study, { profile: view === 'profile' })) {
@@ -475,16 +592,170 @@ export default function Scene({
     const rt = runtime.current;
     const group = rt?.group || buildGeometry(study, scopeKey);
     const next = engineeringAnnotations(study, scope, group, focus);
-    setAnnotations(next);
+    setAnnotations(editing ? [] : next);
     if (rt) {
-      rt.annotations = next;
+      rt.annotations = editing ? [] : next;
       rt.draw();
     } else disposeGroup(group);
-  }, [annotationKey, structureKey, overlayKey, scope, focus]);
+  }, [annotationKey, structureKey, overlayKey, scope, focus, editing, selection]);
+  function startItemDrag(e, target, corner) {
+    if (e.button !== 0 || view === 'profile' || placing) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const rt = runtime.current,
+      item = layoutItems(study, target.kind).find((v) => v.id === target.id),
+      point = rt?.pointAt(e);
+    if (!item || !point) return;
+    rt.controls.enabled = false;
+    rt.drag = {
+      pointerId: e.pointerId,
+      target,
+      item,
+      base: study,
+      start: gridPoint(study, point),
+      x: e.clientX,
+      y: e.clientY,
+      corner,
+      moved: false,
+    };
+    onSelect?.(target, false);
+    e.currentTarget.focus();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setHover(null);
+  }
+  function moveItemDrag(e) {
+    const rt = runtime.current,
+      drag = rt?.drag;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const point = rt.pointAt(e);
+    if (!point) return;
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 4 && !drag.moved) return;
+    drag.moved = true;
+    const p = gridPoint(drag.base, point);
+    const grid = drag.corner
+      ? resizeGrid(drag.base, drag.item.grid, drag.corner, point)
+      : moveGrid(drag.base, drag.item.grid, {
+          column: p.column - drag.start.column,
+          row: p.row - drag.start.row,
+        });
+    rt.preview = { selection: drag.target, item: { ...drag.item, grid } };
+    rt.draw();
+  }
+  function endItemDrag(e, commit) {
+    const rt = runtime.current,
+      drag = rt?.drag;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    e.stopPropagation();
+    const preview = rt.preview;
+    rt.drag = null;
+    rt.preview = null;
+    rt.controls.enabled = true;
+    if (commit && drag.moved && preview) onEditItem?.(drag.target, preview.item);
+    else if (commit && !drag.moved) onSelect?.(drag.target, true);
+    rt.draw();
+  }
+  function keyItem(e, target) {
+    if (e.key === 'Escape') {
+      const rt = runtime.current;
+      if (rt) {
+        rt.drag = null;
+        rt.preview = null;
+        rt.controls.enabled = true;
+        rt.draw();
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      onSelect?.(null, false);
+      return;
+    }
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect?.(target, true);
+      return;
+    }
+    const dirs = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowDown: [0, -1], ArrowUp: [0, 1] };
+    if (!dirs[e.key]) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const item = layoutItems(study, target.kind).find((v) => v.id === target.id);
+    if (!item) return;
+    const [x, y] = dirs[e.key];
+    let grid;
+    if (e.shiftKey && target.kind === 'crop') {
+      const g = receiverGridSpec(study);
+      grid = {
+        ...item.grid,
+        columns: Math.max(
+          1,
+          Math.min(g.nx - item.grid.column, Math.floor(100 / g.dx), item.grid.columns + x),
+        ),
+        rows: Math.max(
+          1,
+          Math.min(g.ny - item.grid.row, Math.floor(100 / g.dy), item.grid.rows + y),
+        ),
+      };
+    } else grid = moveGrid(study, item.grid, { column: x, row: y });
+    onSelect?.(target, false);
+    onEditItem?.(target, { ...item, grid });
+  }
+  function dropTool(e) {
+    const raw = e.dataTransfer.getData('application/x-aed-field-tool');
+    if (!editing || !raw) return;
+    e.preventDefault();
+    if (view === 'profile') return;
+    try {
+      const tool = JSON.parse(raw),
+        point = runtime.current?.pointAt(e);
+      if (point && ['sensor', 'crop'].includes(tool.kind)) onDropTool?.(tool, point);
+    } catch {}
+  }
   return (
     <>
-      <div className={'scene ' + (placing ? 'placing' : '')} ref={host}>
+      <div
+        className={'scene ' + (placing ? 'placing' : '')}
+        ref={host}
+        onDragOver={(e) => {
+          if (
+            editing &&
+            view !== 'profile' &&
+            e.dataTransfer.types.includes('application/x-aed-field-tool')
+          ) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+          }
+        }}
+        onDrop={dropTool}
+      >
         <svg className="engineering-overlay" aria-hidden="true" ref={annotationLayer} />
+        {editing && !failed && (
+          <FieldMapOverlay
+            projection={projection}
+            selection={selection}
+            placing={placing}
+            onStart={startItemDrag}
+            onMove={moveItemDrag}
+            onEnd={endItemDrag}
+            onKey={keyItem}
+          />
+        )}
+        {editing && editor && (
+          <div
+            className="map-editor-anchor"
+            style={{
+              '--editor-max-height': `${Math.max(180, Math.min(projection?.height || 420, projection?.viewportBottom || 420) - (projection?.anchor ? Math.max(8, Math.min(projection.anchor[1] - 40, projection.height - 360)) : 12) - 10)}px`,
+              left: projection?.anchor
+                ? Math.max(8, Math.min(projection.anchor[0] + 24, projection.width - 365))
+                : 12,
+              top: projection?.anchor
+                ? Math.max(8, Math.min(projection.anchor[1] - 40, projection.height - 360))
+                : 12,
+            }}
+          >
+            {editor}
+          </div>
+        )}
         {hover && (
           <div
             role="tooltip"

@@ -5,6 +5,12 @@ import {
   plotZoneOverlap,
 } from '../domain/land-use.js';
 import { getPose } from '../domain/geometry.js';
+import {
+  normalizeCropIdentity,
+  cropCatalogVersion,
+  cropCatalogSource,
+  cropCatalogCitation,
+} from '../domain/crop-catalog.js';
 import { provenanceRecord } from './provenance.js';
 import { dimensions, cropSpacing, VERSION } from '../domain/study.js';
 import { figureSvg, escapeXml as e } from './figures.js';
@@ -18,6 +24,13 @@ export function download(content, name, type = 'text/plain') {
   a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function botanicalLabel(crop) {
+  if (!crop.botanicalName) return 'Catalog selection required';
+  const authorship = crop.scientificName.startsWith(crop.botanicalName)
+    ? crop.scientificName.slice(crop.botanicalName.length).trim()
+    : crop.scientificName;
+  return `<i>${e(crop.botanicalName)}</i>${authorship ? ` ${e(authorship)}` : ''}`;
 }
 export function csv(rows) {
   return rows
@@ -98,6 +111,10 @@ export function methodsRows(s, r) {
         : 'None',
     ],
     ['Land-use definitions', landUseDefinition],
+    [
+      'Crop catalog',
+      `${cropCatalogVersion}; ${cropCatalogSource}; crop groups use species-level botanical identities; cultivars are recorded separately. ${cropCatalogCitation}`,
+    ],
     ['Groups / additional aisle', `${s.array.groupSize} rows per group / ${s.array.aisle} m`],
     [
       'PV-edge crop setback · S',
@@ -281,6 +298,7 @@ function pairedTable(rows) {
 }
 export function reportHtml(s, r) {
   const publication = publicationTables(s, r);
+  const crops = s.crops.map(normalizeCropIdentity);
   const figs = [
     ['plan', 'none'],
     ['profile', 'none'],
@@ -316,7 +334,7 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
       v.model + ' / ' + v.logger + ' / ' + (v.channel || ''),
       v.notes + `; orientation ${v.azimuth ?? 0}° azimuth / ${v.tilt ?? 0}° tilt`,
     ]),
-  )}<h2>Crop plots</h2>${table(
+  )}<h2>Crop bed identities</h2>${crops.length ? `<table class="crop-identities"><thead><tr><th>Bed / crop</th><th>Botanical name / cultivar</th><th>Family</th><th>Taxonomy record</th></tr></thead><tbody>${crops.map((c) => `<tr><td>${e(c.id)} · ${e(c.crop)}</td><td>${botanicalLabel(c)}${c.cultivar ? `<br>Cultivar: ${e(c.cultivar)}` : ''}${c.notes ? `<br>Notes: ${e(c.notes)}` : ''}</td><td>${e(c.cropFamily || 'Unresolved')}</td><td>${c.taxonUrl ? `<a href="${e(c.taxonUrl)}">GBIF ${c.taxonKey}</a><br>Catalog ${e(c.cropCatalogVersion)}<br>${e(c.cropId)}` : 'No botanical identity assigned'}</td></tr>`).join('')}</tbody></table>` : '<p class="empty">None specified.</p>'}<h2>Crop bed layout and light</h2>${table(
     [
       'ID / crop',
       'Treatment / replicate',
@@ -361,6 +379,14 @@ export function exportCsv(s, r) {
       'azimuth_deg',
       'tilt_deg',
       'notes',
+      'crop_catalog_id',
+      'botanical_name',
+      'scientific_name_with_authorship',
+      'botanical_family',
+      'cultivar',
+      'taxonomy_key',
+      'taxonomy_url',
+      'crop_catalog_version',
     ],
   ];
   for (const c of r?.cells || [])
@@ -389,7 +415,8 @@ export function exportCsv(s, r) {
         (v.grid ? `; receiver_column=${v.grid.column + 1}; receiver_row=${v.grid.row + 1}` : ''),
     ]);
   }
-  for (const p of s.crops) {
+  for (const raw of s.crops) {
+    const p = normalizeCropIdentity(raw);
     const stats = plotStats(r, p);
     rows.push([
       'plot',
@@ -407,7 +434,15 @@ export function exportCsv(s, r) {
       '',
       '',
       '',
-      `width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; reserved_overlap_m2=${plotZoneOverlap(s, p).toFixed(4)}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}`,
+      `width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; reserved_overlap_m2=${plotZoneOverlap(s, p).toFixed(4)}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}; notes=${p.notes || ''}`,
+      p.cropId,
+      p.botanicalName,
+      p.scientificName,
+      p.cropFamily,
+      p.cultivar,
+      p.taxonKey || '',
+      p.taxonUrl,
+      p.cropCatalogVersion,
     ]);
   }
   for (const [key, value] of Object.entries(provenanceRecord(s, r)))

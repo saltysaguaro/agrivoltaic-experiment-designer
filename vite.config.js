@@ -26,6 +26,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.endsWith('/src/data/crop-catalog.json')) return 'crop-catalog';
           if (id.endsWith('/three/build/three.core.js')) return 'three-core';
           if (id.endsWith('/three/build/three.module.js')) return 'three-renderer';
           if (id.includes('/three-mesh-bvh/')) return 'mesh-bvh';

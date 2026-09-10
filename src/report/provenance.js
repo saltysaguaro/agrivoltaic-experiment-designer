@@ -1,7 +1,9 @@
+import { cropCatalogVersion, cropCatalogSource } from '../domain/crop-catalog.js';
 import { landUseSettings, landUseDefinition } from '../domain/land-use.js';
 import { VERSION, cropSpacing } from '../domain/study.js';
 export function provenanceRecord(s, r) {
   return {
+    crop_catalog: `${cropCatalogVersion}; ${cropCatalogSource}; species-level identities with taxon URLs per crop bed`,
     software: `Agrivoltaic Experiment Designer ${r?.version || VERSION}`,
     schemaVersion: s.schemaVersion,
     landUse: `U ${landUseSettings(s).underPanelWidth} m; S ${Number(cropSpacing(s).cropSetback.toFixed(4))} m (signed); C ${Number(cropSpacing(s).croppingWidth.toFixed(4))} m; U + C = pitch; B ${landUseSettings(s).perimeterBuffer} m; receiver buffer R ${s.array.buffer} m. Planning overlays only; do not occlude or change light results.`,

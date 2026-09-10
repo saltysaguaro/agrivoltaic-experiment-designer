@@ -1,6 +1,7 @@
 import { z } from 'zod';
+import { normalizeCropIdentity } from './crop-catalog.js';
 import { validateWeatherRows } from '../irradiance/weather-validation.js';
-export const VERSION = '0.1.3';
+export const VERSION = '0.2.0';
 const num = (min, max) => z.number().finite().min(min).max(max),
   count = (min, max) => num(min, max).int();
 const text = z.string().max(500);
@@ -149,6 +150,15 @@ export const studySchema = z
         z.object({
           id: text,
           crop: text,
+          cropId: text.default(''),
+          botanicalName: text.default(''),
+          scientificName: text.default(''),
+          cropFamily: text.default(''),
+          taxonKey: count(0, Number.MAX_SAFE_INTEGER).default(0),
+          taxonUrl: text.default(''),
+          cropCatalogVersion: text.default(''),
+          cultivar: text.default(''),
+          notes: text.default(''),
           grid: z
             .object({
               column: count(0, 20000),
@@ -167,7 +177,7 @@ export const studySchema = z
       )
       .max(200),
   })
-  .transform(synchronizeCropSpacing);
+  .transform((s) => synchronizeCropSpacing({ ...s, crops: s.crops.map(normalizeCropIdentity) }));
 export const defaultStudy = () =>
   studySchema.parse({
     schemaVersion: 1,

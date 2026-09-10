@@ -1,0 +1,2984 @@
+[
+  {
+    "common": "Abaca (Manila hemp)",
+    "botanical": "Musa textilis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "abaca-manila-hemp"
+  },
+  {
+    "common": "Acorn squash",
+    "botanical": "Cucurbita pepo",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "acorn-squash"
+  },
+  {
+    "common": "Adzuki bean",
+    "botanical": "Vigna angularis",
+    "aliases": ["azuki"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "adzuki-bean"
+  },
+  {
+    "common": "Aji pepper",
+    "botanical": "Capsicum baccatum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "aji-pepper"
+  },
+  {
+    "common": "Alfalfa",
+    "botanical": "Medicago sativa",
+    "aliases": ["Alfalfa for fodder"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "alfalfa"
+  },
+  {
+    "common": "Alfalfa for seed",
+    "botanical": "Medicago sativa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "alfalfa-for-seed"
+  },
+  {
+    "common": "Almond",
+    "botanical": "Prunus dulcis (Mill.) D.A.Webb",
+    "aliases": ["Prunus dulcis"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "almond"
+  },
+  {
+    "common": "Aloe vera",
+    "botanical": "Aloe vera",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "aloe-vera"
+  },
+  {
+    "common": "Alpine strawberry",
+    "botanical": "Fragaria vesca",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "alpine-strawberry"
+  },
+  {
+    "common": "American cranberry",
+    "botanical": "Vaccinium macrocarpon",
+    "aliases": ["cranberry"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "american-cranberry"
+  },
+  {
+    "common": "American persimmon",
+    "botanical": "Diospyros virginiana",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "american-persimmon"
+  },
+  {
+    "common": "Anise seeds",
+    "botanical": "Pimpinella anisum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "anise-seeds"
+  },
+  {
+    "common": "Annual ryegrass",
+    "botanical": "Lolium multiflorum",
+    "aliases": ["Italian ryegrass"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "annual-ryegrass"
+  },
+  {
+    "common": "Apple",
+    "botanical": "Malus domestica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "apple"
+  },
+  {
+    "common": "Apricot",
+    "botanical": "Prunus armeniaca",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "apricot"
+  },
+  {
+    "common": "Areca (betel nut)",
+    "botanical": "Areca catechu",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "areca-betel-nut"
+  },
+  {
+    "common": "Arracha",
+    "botanical": "Arracacia xanthorrhiza",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "arracha"
+  },
+  {
+    "common": "Arrowroot",
+    "botanical": "Maranta arundinacea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "arrowroot"
+  },
+  {
+    "common": "Artichoke",
+    "botanical": "Cynara scolymus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "artichoke"
+  },
+  {
+    "common": "Arugula",
+    "botanical": "Eruca vesicaria",
+    "aliases": ["rocket", "rucola"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "arugula"
+  },
+  {
+    "common": "Asian pear",
+    "botanical": "Pyrus pyrifolia",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "asian-pear"
+  },
+  {
+    "common": "Asparagus",
+    "botanical": "Asparagus officinalis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "asparagus"
+  },
+  {
+    "common": "Avocado",
+    "botanical": "Persea americana",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "avocado"
+  },
+  {
+    "common": "Bahiagrass",
+    "botanical": "Paspalum notatum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "bahiagrass"
+  },
+  {
+    "common": "Bambara groundnut",
+    "botanical": "Vigna subterranea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "bambara-groundnut"
+  },
+  {
+    "common": "Banana",
+    "botanical": "Musa × paradisiaca",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "banana"
+  },
+  {
+    "common": "Banana (M. acuminata)",
+    "botanical": "Musa acuminata",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "banana-m-acuminata"
+  },
+  {
+    "common": "Banana / plantain hybrid",
+    "botanical": "Musa × paradisiaca",
+    "aliases": ["plantain"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "banana-plantain-hybrid"
+  },
+  {
+    "common": "Barley",
+    "botanical": "Hordeum vulgare",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "barley"
+  },
+  {
+    "common": "Basil",
+    "botanical": "Ocimum basilicum",
+    "aliases": ["sweet basil"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "basil"
+  },
+  {
+    "common": "Beet, fodder (mangel)",
+    "botanical": "Beta vulgaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "beet-fodder-mangel"
+  },
+  {
+    "common": "Beet, sugar",
+    "botanical": "Beta vulgaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "beet-sugar"
+  },
+  {
+    "common": "Beet, sugar for fodder",
+    "botanical": "Beta vulgaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "beet-sugar-for-fodder"
+  },
+  {
+    "common": "Beet, sugar for seeds",
+    "botanical": "Beta vulgaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "beet-sugar-for-seeds"
+  },
+  {
+    "common": "Beetroot",
+    "botanical": "Beta vulgaris",
+    "aliases": ["Beet, red"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "beetroot"
+  },
+  {
+    "common": "Bergamot",
+    "botanical": "Citrus bergamia",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "bergamot"
+  },
+  {
+    "common": "Bermuda grass",
+    "botanical": "Cynodon dactylon",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "bermuda-grass"
+  },
+  {
+    "common": "Betel nut",
+    "botanical": "Areca catechu",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "betel-nut"
+  },
+  {
+    "common": "Bird's-foot trefoil",
+    "botanical": "Lotus corniculatus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "bird-s-foot-trefoil"
+  },
+  {
+    "common": "Bitter melon",
+    "botanical": "Momordica charantia",
+    "aliases": ["bitter gourd"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "bitter-melon"
+  },
+  {
+    "common": "Black cumin",
+    "botanical": "Nigella sativa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "black-cumin"
+  },
+  {
+    "common": "Black gram",
+    "botanical": "Vigna mungo",
+    "aliases": ["urad"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "black-gram"
+  },
+  {
+    "common": "Black mulberry",
+    "botanical": "Morus nigra",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "black-mulberry"
+  },
+  {
+    "common": "Black mustard",
+    "botanical": "Brassica nigra",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "black-mustard"
+  },
+  {
+    "common": "Black pepper",
+    "botanical": "Piper nigrum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "black-pepper"
+  },
+  {
+    "common": "Black raspberry",
+    "botanical": "Rubus occidentalis",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "black-raspberry"
+  },
+  {
+    "common": "Black walnut",
+    "botanical": "Juglans nigra",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "black-walnut"
+  },
+  {
+    "common": "Black wattle",
+    "botanical": "Acacia mearnsii",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "black-wattle"
+  },
+  {
+    "common": "Blackcurrant",
+    "botanical": "Ribes nigrum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "blackcurrant"
+  },
+  {
+    "common": "Bok choy",
+    "botanical": "Brassica rapa",
+    "aliases": ["pak choi", "pak choy"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "bok-choy"
+  },
+  {
+    "common": "Bottle gourd",
+    "botanical": "Lagenaria siceraria",
+    "aliases": ["calabash"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "bottle-gourd"
+  },
+  {
+    "common": "Brazil nut",
+    "botanical": "Bertholletia excelsa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "brazil-nut"
+  },
+  {
+    "common": "Breadfruit",
+    "botanical": "Artocarpus altilis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "breadfruit"
+  },
+  {
+    "common": "Broad bean, dry",
+    "botanical": "Vicia faba",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "broad-bean-dry"
+  },
+  {
+    "common": "Broad bean, harvested green",
+    "botanical": "Vicia faba",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "broad-bean-harvested-green"
+  },
+  {
+    "common": "Broccoli",
+    "botanical": "Brassica oleracea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "broccoli"
+  },
+  {
+    "common": "Broom millet",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "broom-millet"
+  },
+  {
+    "common": "Broom sorghum",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "broom-sorghum"
+  },
+  {
+    "common": "Brown mustard",
+    "botanical": "Brassica juncea",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "brown-mustard"
+  },
+  {
+    "common": "Brussels sprouts",
+    "botanical": "Brassica oleracea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "brussels-sprouts"
+  },
+  {
+    "common": "Buckwheat",
+    "botanical": "Fagopyrum esculentum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "buckwheat"
+  },
+  {
+    "common": "Butternut squash",
+    "botanical": "Cucurbita moschata",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "butternut-squash"
+  },
+  {
+    "common": "Cabbage",
+    "botanical": "Brassica oleracea",
+    "aliases": ["Cabbage (red, white, Savoy)"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cabbage"
+  },
+  {
+    "common": "Cabbage, Chinese",
+    "botanical": "Brassica chinensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cabbage-chinese"
+  },
+  {
+    "common": "Cacao (cocoa)",
+    "botanical": "Theobroma cacao",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cacao-cocoa"
+  },
+  {
+    "common": "Calendula",
+    "botanical": "Calendula officinalis",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "calendula"
+  },
+  {
+    "common": "Camelina",
+    "botanical": "Camelina sativa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "camelina"
+  },
+  {
+    "common": "Cantaloupe",
+    "botanical": "Cucumis melo",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cantaloupe"
+  },
+  {
+    "common": "Cape gooseberry",
+    "botanical": "Physalis peruviana",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "cape-gooseberry"
+  },
+  {
+    "common": "Caraway seeds",
+    "botanical": "Carum carvi",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "caraway-seeds"
+  },
+  {
+    "common": "Cardamom",
+    "botanical": "Elettaria cardamomum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cardamom"
+  },
+  {
+    "common": "Cardoon",
+    "botanical": "Cynara cardunculus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cardoon"
+  },
+  {
+    "common": "Carob",
+    "botanical": "Ceratonia siliqua",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "carob"
+  },
+  {
+    "common": "Carrot",
+    "botanical": "Daucus carota",
+    "aliases": ["Carrot, edible"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "carrot"
+  },
+  {
+    "common": "Carrot, for fodder",
+    "botanical": "Daucus carota",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "carrot-for-fodder"
+  },
+  {
+    "common": "Cashew nuts",
+    "botanical": "Anacardium occidentale",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cashew-nuts"
+  },
+  {
+    "common": "Cassava (manioc)",
+    "botanical": "Manihot esculenta",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cassava-manioc"
+  },
+  {
+    "common": "Castor bean",
+    "botanical": "Ricinus communis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "castor-bean"
+  },
+  {
+    "common": "Cauliflower",
+    "botanical": "Brassica oleracea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cauliflower"
+  },
+  {
+    "common": "Celeriac",
+    "botanical": "Apium graveolens",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "celeriac"
+  },
+  {
+    "common": "Celery",
+    "botanical": "Apium graveolens",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "celery"
+  },
+  {
+    "common": "Chayote",
+    "botanical": "Sechium edule",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "chayote"
+  },
+  {
+    "common": "Cherimoya",
+    "botanical": "Annona cherimola",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "cherimoya"
+  },
+  {
+    "common": "Chervil",
+    "botanical": "Anthriscus cerefolium",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "chervil"
+  },
+  {
+    "common": "Chestnut",
+    "botanical": "Castanea sativa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "chestnut"
+  },
+  {
+    "common": "Chia",
+    "botanical": "Salvia hispanica",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "chia"
+  },
+  {
+    "common": "Chickpea (gram pea)",
+    "botanical": "Cicer arietinum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "chickpea-gram-pea"
+  },
+  {
+    "common": "Chicory",
+    "botanical": "Cichorium intybus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "chicory"
+  },
+  {
+    "common": "Chicory for greens",
+    "botanical": "Cichorium intybus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "chicory-for-greens"
+  },
+  {
+    "common": "Chinese broccoli",
+    "botanical": "Brassica oleracea",
+    "aliases": ["gai lan", "kai lan"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "chinese-broccoli"
+  },
+  {
+    "common": "Chives",
+    "botanical": "Allium schoenoprasum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "chives"
+  },
+  {
+    "common": "Chufa",
+    "botanical": "Cyperus esculentus",
+    "aliases": ["tigernut"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "chufa"
+  },
+  {
+    "common": "Cilantro",
+    "botanical": "Coriandrum sativum",
+    "aliases": ["coriander"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "cilantro"
+  },
+  {
+    "common": "Cinnamon",
+    "botanical": "Cinnamomum verum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cinnamon"
+  },
+  {
+    "common": "Citron",
+    "botanical": "Citrus medica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "citron"
+  },
+  {
+    "common": "Clementine",
+    "botanical": "Citrus reticulata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "clementine"
+  },
+  {
+    "common": "Clove",
+    "botanical": "Syzygium aromaticum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "clove"
+  },
+  {
+    "common": "Cocoa (cacao)",
+    "botanical": "Theobroma cacao",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cocoa-cacao"
+  },
+  {
+    "common": "Coconut",
+    "botanical": "Cocos nucifera",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "coconut"
+  },
+  {
+    "common": "Cocoyam",
+    "botanical": "Colocasia esculenta",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cocoyam"
+  },
+  {
+    "common": "Coffee (arabica)",
+    "botanical": "Coffea arabica",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "coffee-arabica"
+  },
+  {
+    "common": "Coffee (robusta)",
+    "botanical": "Coffea canephora",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "coffee-robusta"
+  },
+  {
+    "common": "Cola nut (all varieties)",
+    "botanical": "Cola acuminata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cola-nut-all-varieties"
+  },
+  {
+    "common": "Collard greens",
+    "botanical": "Brassica oleracea",
+    "aliases": ["collards"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "collard-greens"
+  },
+  {
+    "common": "Colza (rapeseed)",
+    "botanical": "Brassica napus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "colza-rapeseed"
+  },
+  {
+    "common": "Common bean",
+    "botanical": "Phaseolus vulgaris",
+    "aliases": ["Beans, dry, edible, for grains"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "common-bean"
+  },
+  {
+    "common": "Corn (maize), for silage",
+    "botanical": "Zea mays",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "corn-maize-for-silage"
+  },
+  {
+    "common": "Corn (sweet), for vegetable",
+    "botanical": "Zea mays",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "corn-sweet-for-vegetable"
+  },
+  {
+    "common": "Corn for salad",
+    "botanical": "Valerianella locusta",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "corn-for-salad"
+  },
+  {
+    "common": "Cotton (Pima)",
+    "botanical": "Gossypium barbadense",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "cotton-pima"
+  },
+  {
+    "common": "Cotton (upland)",
+    "botanical": "Gossypium hirsutum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "cotton-upland"
+  },
+  {
+    "common": "Cowpea, for grain",
+    "botanical": "Vigna unguiculata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cowpea-for-grain"
+  },
+  {
+    "common": "Cowpea, harvested green",
+    "botanical": "Vigna unguiculata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cowpea-harvested-green"
+  },
+  {
+    "common": "Cress",
+    "botanical": "Lepidium sativum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cress"
+  },
+  {
+    "common": "Crimson clover",
+    "botanical": "Trifolium incarnatum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "crimson-clover"
+  },
+  {
+    "common": "Cucumber",
+    "botanical": "Cucumis sativus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "cucumber"
+  },
+  {
+    "common": "Cumin",
+    "botanical": "Cuminum cyminum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "cumin"
+  },
+  {
+    "common": "Custard apple",
+    "botanical": "Annona reticulata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "custard-apple"
+  },
+  {
+    "common": "Daikon",
+    "botanical": "Raphanus sativus",
+    "aliases": ["Japanese radish"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "daikon"
+  },
+  {
+    "common": "Dasheen",
+    "botanical": "Colocasia esculenta",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "dasheen"
+  },
+  {
+    "common": "Date plum",
+    "botanical": "Diospyros lotus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "date-plum"
+  },
+  {
+    "common": "Dates",
+    "botanical": "Phoenix dactylifera",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "dates"
+  },
+  {
+    "common": "Dill",
+    "botanical": "Anethum graveolens",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "dill"
+  },
+  {
+    "common": "Dragon fruit (red flesh)",
+    "botanical": "Selenicereus monacanthus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "dragon-fruit-red-flesh"
+  },
+  {
+    "common": "Dragon fruit (white flesh)",
+    "botanical": "Selenicereus undatus",
+    "aliases": ["pitaya"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "dragon-fruit-white-flesh"
+  },
+  {
+    "common": "Drumstick tree",
+    "botanical": "Moringa oleifera",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "drumstick-tree"
+  },
+  {
+    "common": "Durian",
+    "botanical": "Durio zibethinus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "durian"
+  },
+  {
+    "common": "Durra (sorghum)",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "durra-sorghum"
+  },
+  {
+    "common": "Durum wheat",
+    "botanical": "Triticum durum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "durum-wheat"
+  },
+  {
+    "common": "Earth pea",
+    "botanical": "Vigna subterranea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "earth-pea"
+  },
+  {
+    "common": "Edamame",
+    "botanical": "Glycine max",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "edamame"
+  },
+  {
+    "common": "Eggplant",
+    "botanical": "Solanum melongena",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "eggplant"
+  },
+  {
+    "common": "Elephant grass",
+    "botanical": "Cenchrus purpureus",
+    "aliases": ["Napier grass"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "elephant-grass"
+  },
+  {
+    "common": "Endive",
+    "botanical": "Cichorium endivia",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "endive"
+  },
+  {
+    "common": "English lavender",
+    "botanical": "Lavandula angustifolia",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "english-lavender"
+  },
+  {
+    "common": "English walnut",
+    "botanical": "Juglans regia",
+    "aliases": ["walnut"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "english-walnut"
+  },
+  {
+    "common": "Feijoa",
+    "botanical": "Acca sellowiana",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "feijoa"
+  },
+  {
+    "common": "Fennel",
+    "botanical": "Foeniculum vulgare",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "fennel"
+  },
+  {
+    "common": "Fenugreek",
+    "botanical": "Trigonella foenum-graecum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "fenugreek"
+  },
+  {
+    "common": "Fig",
+    "botanical": "Ficus carica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "fig"
+  },
+  {
+    "common": "Filbert (Hazelnut)",
+    "botanical": "Corylus avellana",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "filbert-hazelnut"
+  },
+  {
+    "common": "Fique",
+    "botanical": "Furcraea macrophylla",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "fique"
+  },
+  {
+    "common": "Flax for fibre",
+    "botanical": "Linum usitatissimum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "flax-for-fibre"
+  },
+  {
+    "common": "Flax for oil seed (linseed)",
+    "botanical": "Linum usitatissimum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "flax-for-oil-seed-linseed"
+  },
+  {
+    "common": "Fonio",
+    "botanical": "Digitaria exilis",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "fonio"
+  },
+  {
+    "common": "Formio (New Zealand flax)",
+    "botanical": "Phormium tenax",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "formio-new-zealand-flax"
+  },
+  {
+    "common": "Galangal",
+    "botanical": "Alpinia galanga",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "galangal"
+  },
+  {
+    "common": "Garden pea",
+    "botanical": "Pisum sativum",
+    "aliases": ["Pea, harvested green"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "garden-pea"
+  },
+  {
+    "common": "Garden strawberry",
+    "botanical": "Fragaria × ananassa",
+    "aliases": ["strawberry"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "garden-strawberry"
+  },
+  {
+    "common": "Garlic",
+    "botanical": "Allium sativum",
+    "aliases": ["Garlic, dry"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "garlic"
+  },
+  {
+    "common": "Garlic chives",
+    "botanical": "Allium tuberosum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "garlic-chives"
+  },
+  {
+    "common": "Garlic, green",
+    "botanical": "Allium sativum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "garlic-green"
+  },
+  {
+    "common": "German chamomile",
+    "botanical": "Matricaria chamomilla",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "german-chamomile"
+  },
+  {
+    "common": "Ginger",
+    "botanical": "Zingiber officinale",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "ginger"
+  },
+  {
+    "common": "Gooseberry",
+    "botanical": "Ribes uva-crispa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "gooseberry"
+  },
+  {
+    "common": "Grain amaranth",
+    "botanical": "Amaranthus hypochondriacus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "grain-amaranth"
+  },
+  {
+    "common": "Gram pea (chickpea)",
+    "botanical": "Cicer arietinum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "gram-pea-chickpea"
+  },
+  {
+    "common": "Grape",
+    "botanical": "Vitis vinifera",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "grape"
+  },
+  {
+    "common": "Grapefruit",
+    "botanical": "Citrus paradisi",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "grapefruit"
+  },
+  {
+    "common": "Grapes for raisins",
+    "botanical": "Vitis vinifera",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "grapes-for-raisins"
+  },
+  {
+    "common": "Grapes for table use",
+    "botanical": "Vitis vinifera",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "grapes-for-table-use"
+  },
+  {
+    "common": "Grapes for wine",
+    "botanical": "Vitis vinifera",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "grapes-for-wine"
+  },
+  {
+    "common": "Grass esparto",
+    "botanical": "Lygeum spartum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "grass-esparto"
+  },
+  {
+    "common": "Grass pea",
+    "botanical": "Lathyrus sativus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "grass-pea"
+  },
+  {
+    "common": "Grass, orchard",
+    "botanical": "Dactylis glomerata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "grass-orchard"
+  },
+  {
+    "common": "Grass, Sudan",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "grass-sudan"
+  },
+  {
+    "common": "Green bean",
+    "botanical": "Phaseolus vulgaris",
+    "aliases": ["snap bean", "string bean"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "green-bean"
+  },
+  {
+    "common": "Ground cherry",
+    "botanical": "Physalis pruinosa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "ground-cherry"
+  },
+  {
+    "common": "Guar",
+    "botanical": "Cyamopsis tetragonoloba",
+    "aliases": ["cluster bean"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "guar"
+  },
+  {
+    "common": "Guava",
+    "botanical": "Psidium guajava",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "guava"
+  },
+  {
+    "common": "Guinea corn (sorghum)",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "guinea-corn-sorghum"
+  },
+  {
+    "common": "Guinea grass",
+    "botanical": "Megathyrsus maximus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "guinea-grass"
+  },
+  {
+    "common": "Habanero pepper",
+    "botanical": "Capsicum chinense",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "habanero-pepper"
+  },
+  {
+    "common": "Hairy vetch",
+    "botanical": "Vicia villosa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "hairy-vetch"
+  },
+  {
+    "common": "Hardy kiwi",
+    "botanical": "Actinidia arguta",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "hardy-kiwi"
+  },
+  {
+    "common": "Hazelnut (filbert)",
+    "botanical": "Corylus avellana",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "hazelnut-filbert"
+  },
+  {
+    "common": "Hemp fibre",
+    "botanical": "Cannabis sativa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "hemp-fibre"
+  },
+  {
+    "common": "Hemp, Manila (abaca)",
+    "botanical": "Musa textilis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "hemp-manila-abaca"
+  },
+  {
+    "common": "Hemp, sun",
+    "botanical": "Crotalaria juncea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "hemp-sun"
+  },
+  {
+    "common": "Hempseed",
+    "botanical": "Cannabis sativa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "hempseed"
+  },
+  {
+    "common": "Henequen",
+    "botanical": "Agave fourcroydes",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "henequen"
+  },
+  {
+    "common": "Henna",
+    "botanical": "Lawsonia inermis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "henna"
+  },
+  {
+    "common": "Highbush blueberry",
+    "botanical": "Vaccinium corymbosum",
+    "aliases": ["blueberry"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "highbush-blueberry"
+  },
+  {
+    "common": "Holy basil",
+    "botanical": "Ocimum tenuiflorum",
+    "aliases": ["tulsi"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "holy-basil"
+  },
+  {
+    "common": "Hop",
+    "botanical": "Humulus lupulus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "hop"
+  },
+  {
+    "common": "Horse bean",
+    "botanical": "Vicia faba",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "horse-bean"
+  },
+  {
+    "common": "Horseradish",
+    "botanical": "Armoracia rusticana",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "horseradish"
+  },
+  {
+    "common": "Hyacinth bean",
+    "botanical": "Lablab purpureus",
+    "aliases": ["lablab"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "hyacinth-bean"
+  },
+  {
+    "common": "Hybrid maize",
+    "botanical": "Zea mays",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "hybrid-maize"
+  },
+  {
+    "common": "Indigo",
+    "botanical": "Indigofera tinctoria",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "indigo"
+  },
+  {
+    "common": "Jackfruit",
+    "botanical": "Artocarpus heterophyllus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "jackfruit"
+  },
+  {
+    "common": "Japanese persimmon",
+    "botanical": "Diospyros kaki",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "japanese-persimmon"
+  },
+  {
+    "common": "Japanese plum",
+    "botanical": "Prunus salicina",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "japanese-plum"
+  },
+  {
+    "common": "Jerusalem artichoke",
+    "botanical": "Helianthus tuberosus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "jerusalem-artichoke"
+  },
+  {
+    "common": "Jicama",
+    "botanical": "Pachyrhizus erosus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "jicama"
+  },
+  {
+    "common": "Job's tears",
+    "botanical": "Coix lacryma-jobi",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "job-s-tears"
+  },
+  {
+    "common": "Jowar (sorghum)",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "jowar-sorghum"
+  },
+  {
+    "common": "Jujube",
+    "botanical": "Ziziphus jujuba",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "jujube"
+  },
+  {
+    "common": "Kale",
+    "botanical": "Brassica oleracea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "kale"
+  },
+  {
+    "common": "Kapok",
+    "botanical": "Ceiba pentandra",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "kapok"
+  },
+  {
+    "common": "Kenaf",
+    "botanical": "Hibiscus cannabinus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "kenaf"
+  },
+  {
+    "common": "Kiwifruit",
+    "botanical": "Actinidia chinensis",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "kiwifruit"
+  },
+  {
+    "common": "Kohlrabi",
+    "botanical": "Brassica oleracea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "kohlrabi"
+  },
+  {
+    "common": "Komatsuna",
+    "botanical": "Brassica rapa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "komatsuna"
+  },
+  {
+    "common": "Lemon",
+    "botanical": "Citrus limon",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "lemon"
+  },
+  {
+    "common": "Lemon balm",
+    "botanical": "Melissa officinalis",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "lemon-balm"
+  },
+  {
+    "common": "Lemon grass",
+    "botanical": "Cymbopogon citratus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "lemon-grass"
+  },
+  {
+    "common": "Lentil",
+    "botanical": "Lens culinaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "lentil"
+  },
+  {
+    "common": "Lettuce",
+    "botanical": "Lactuca sativa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "lettuce"
+  },
+  {
+    "common": "Lima bean",
+    "botanical": "Phaseolus lunatus",
+    "aliases": ["butter bean"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "lima-bean"
+  },
+  {
+    "common": "Lime, sour",
+    "botanical": "Citrus × aurantiifolia",
+    "aliases": ["Citrus aurantifolia"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "lime-sour"
+  },
+  {
+    "common": "Lime, sweet",
+    "botanical": "Citrus × limon",
+    "aliases": ["Citrus limetta", "Citrus limetta"],
+    "basis": "FAO WCA crop list (2005), species-level normalization; sweet lime synonym per GBIF/GRIN https://www.gbif.org/dataset/66dd0960-2d7d-46ee-a491-87b9adcfe7b1/taxon/480120",
+    "id": "lime-sweet"
+  },
+  {
+    "common": "Linseed (flax for oil seed)",
+    "botanical": "Linum usitatissimum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "linseed-flax-for-oil-seed"
+  },
+  {
+    "common": "Liquorice",
+    "botanical": "Glycyrrhiza glabra",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "liquorice"
+  },
+  {
+    "common": "Litchi",
+    "botanical": "Litchi chinensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "litchi"
+  },
+  {
+    "common": "Longan",
+    "botanical": "Dimocarpus longan",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "longan"
+  },
+  {
+    "common": "Loquat",
+    "botanical": "Eriobotrya japonica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "loquat"
+  },
+  {
+    "common": "Lowbush blueberry",
+    "botanical": "Vaccinium angustifolium",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "lowbush-blueberry"
+  },
+  {
+    "common": "Maca",
+    "botanical": "Lepidium meyenii",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "maca"
+  },
+  {
+    "common": "Macadamia",
+    "botanical": "Macadamia integrifolia",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "macadamia"
+  },
+  {
+    "common": "Mace",
+    "botanical": "Myristica fragrans",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "mace"
+  },
+  {
+    "common": "Maguey",
+    "botanical": "Agave atrovirens",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "maguey"
+  },
+  {
+    "common": "Maize",
+    "botanical": "Zea mays",
+    "aliases": ["Corn (maize), for cereals"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "maize"
+  },
+  {
+    "common": "Maize (corn)",
+    "botanical": "Zea mays",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "maize-corn"
+  },
+  {
+    "common": "Maize (corn) for silage",
+    "botanical": "Zea mays",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "maize-corn-for-silage"
+  },
+  {
+    "common": "Maize (hybrid)",
+    "botanical": "Zea mays",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "maize-hybrid"
+  },
+  {
+    "common": "Maize, ordinary",
+    "botanical": "Zea mays",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "maize-ordinary"
+  },
+  {
+    "common": "Malabar spinach",
+    "botanical": "Basella alba",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "malabar-spinach"
+  },
+  {
+    "common": "Mandarin",
+    "botanical": "Citrus reticulata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "mandarin"
+  },
+  {
+    "common": "Mangel (fodder beet)",
+    "botanical": "Beta vulgaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "mangel-fodder-beet"
+  },
+  {
+    "common": "Mango",
+    "botanical": "Mangifera indica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "mango"
+  },
+  {
+    "common": "Mangosteen",
+    "botanical": "Garcinia mangostana",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "mangosteen"
+  },
+  {
+    "common": "Manioc (cassava)",
+    "botanical": "Manihot esculenta",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "manioc-cassava"
+  },
+  {
+    "common": "Marjoram",
+    "botanical": "Origanum majorana",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "marjoram"
+  },
+  {
+    "common": "Meadow fescue",
+    "botanical": "Lolium pratense",
+    "aliases": ["Festuca pratensis"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "meadow-fescue"
+  },
+  {
+    "common": "Medlar",
+    "botanical": "Mespilus germanica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "medlar"
+  },
+  {
+    "common": "Melon (except watermelon)",
+    "botanical": "Cucumis melo",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "melon-except-watermelon"
+  },
+  {
+    "common": "Millet broom",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "millet-broom"
+  },
+  {
+    "common": "Millet, bajra",
+    "botanical": "Pennisetum americanum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "millet-bajra"
+  },
+  {
+    "common": "Millet, bulrush",
+    "botanical": "Pennisetum americanum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "millet-bulrush"
+  },
+  {
+    "common": "Millet, finger",
+    "botanical": "Eleusine coracana",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "millet-finger"
+  },
+  {
+    "common": "Millet, foxtail",
+    "botanical": "Setaria italica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "millet-foxtail"
+  },
+  {
+    "common": "Millet, Japanese",
+    "botanical": "Echinochloa esculenta",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "millet-japanese"
+  },
+  {
+    "common": "Millet, pearl (bajra, bulrush)",
+    "botanical": "Pennisetum americanum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "millet-pearl-bajra-bulrush"
+  },
+  {
+    "common": "Millet, proso",
+    "botanical": "Panicum miliaceum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "millet-proso"
+  },
+  {
+    "common": "Mizuna",
+    "botanical": "Brassica rapa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "mizuna"
+  },
+  {
+    "common": "Moth bean",
+    "botanical": "Vigna aconitifolia",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "moth-bean"
+  },
+  {
+    "common": "Mulberry for silkworms",
+    "botanical": "Morus alba",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "mulberry-for-silkworms"
+  },
+  {
+    "common": "Mung bean",
+    "botanical": "Vigna radiata",
+    "aliases": ["green gram"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "mung-bean"
+  },
+  {
+    "common": "Mustard greens",
+    "botanical": "Brassica juncea",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "mustard-greens"
+  },
+  {
+    "common": "Napa cabbage",
+    "botanical": "Brassica rapa",
+    "aliases": ["Chinese cabbage"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "napa-cabbage"
+  },
+  {
+    "common": "Narrowleaf lupin",
+    "botanical": "Lupinus angustifolius",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "narrowleaf-lupin"
+  },
+  {
+    "common": "Nectarine",
+    "botanical": "Prunus persica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "nectarine"
+  },
+  {
+    "common": "New Zealand flax (formio)",
+    "botanical": "Phormium tenax",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "new-zealand-flax-formio"
+  },
+  {
+    "common": "New Zealand spinach",
+    "botanical": "Tetragonia tetragonioides",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "new-zealand-spinach"
+  },
+  {
+    "common": "Niger seed",
+    "botanical": "Guizotia abyssinica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "niger-seed"
+  },
+  {
+    "common": "Nutmeg",
+    "botanical": "Myristica fragrans",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "nutmeg"
+  },
+  {
+    "common": "Oat",
+    "botanical": "Avena sativa",
+    "aliases": ["oats"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "oat"
+  },
+  {
+    "common": "Oca",
+    "botanical": "Oxalis tuberosa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "oca"
+  },
+  {
+    "common": "Oil palm",
+    "botanical": "Elaeis guineensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "oil-palm"
+  },
+  {
+    "common": "Okra",
+    "botanical": "Abelmoschus esculentus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "okra"
+  },
+  {
+    "common": "Olive",
+    "botanical": "Olea europaea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "olive"
+  },
+  {
+    "common": "Onion",
+    "botanical": "Allium cepa",
+    "aliases": ["Onion, dry"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "onion"
+  },
+  {
+    "common": "Onion seed",
+    "botanical": "Allium cepa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "onion-seed"
+  },
+  {
+    "common": "Onion, green",
+    "botanical": "Allium cepa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "onion-green"
+  },
+  {
+    "common": "Opium",
+    "botanical": "Papaver somniferum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "opium"
+  },
+  {
+    "common": "Orange",
+    "botanical": "Citrus sinensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "orange"
+  },
+  {
+    "common": "Orange, bitter",
+    "botanical": "Citrus aurantium",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "orange-bitter"
+  },
+  {
+    "common": "Oregano",
+    "botanical": "Origanum vulgare",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "oregano"
+  },
+  {
+    "common": "Palm palmyra",
+    "botanical": "Borassus flabellifer",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "palm-palmyra"
+  },
+  {
+    "common": "Palm, kernel oil",
+    "botanical": "Elaeis guineensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "palm-kernel-oil"
+  },
+  {
+    "common": "Palm, oil",
+    "botanical": "Elaeis guineensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "palm-oil"
+  },
+  {
+    "common": "Palm, sago",
+    "botanical": "Metroxylon sagu",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "palm-sago"
+  },
+  {
+    "common": "Papaya (pawpaw)",
+    "botanical": "Carica papaya",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "papaya-pawpaw"
+  },
+  {
+    "common": "Parsley",
+    "botanical": "Petroselinum crispum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "parsley"
+  },
+  {
+    "common": "Parsnip",
+    "botanical": "Pastinaca sativa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "parsnip"
+  },
+  {
+    "common": "Passion fruit",
+    "botanical": "Passiflora edulis",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "passion-fruit"
+  },
+  {
+    "common": "Pea, edible dry, for grain",
+    "botanical": "Pisum sativum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pea-edible-dry-for-grain"
+  },
+  {
+    "common": "Peach",
+    "botanical": "Prunus persica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "peach"
+  },
+  {
+    "common": "Peanut",
+    "botanical": "Arachis hypogaea",
+    "aliases": ["Groundnut (peanut)"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "peanut"
+  },
+  {
+    "common": "Peanut (groundnut)",
+    "botanical": "Arachis hypogaea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "peanut-groundnut"
+  },
+  {
+    "common": "Pear",
+    "botanical": "Pyrus communis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pear"
+  },
+  {
+    "common": "Pearl millet",
+    "botanical": "Pennisetum americanum",
+    "aliases": ["Bajra (Pearl millet)"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pearl-millet"
+  },
+  {
+    "common": "Pecan nut",
+    "botanical": "Carya illinoensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pecan-nut"
+  },
+  {
+    "common": "Pepper, black",
+    "botanical": "Piper nigrum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pepper-black"
+  },
+  {
+    "common": "Peppermint",
+    "botanical": "Mentha × piperita",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "peppermint"
+  },
+  {
+    "common": "Perennial ryegrass",
+    "botanical": "Lolium perenne",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "perennial-ryegrass"
+  },
+  {
+    "common": "Perilla",
+    "botanical": "Perilla frutescens",
+    "aliases": ["shiso"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "perilla"
+  },
+  {
+    "common": "Phacelia",
+    "botanical": "Phacelia tanacetifolia",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "phacelia"
+  },
+  {
+    "common": "Pigeon pea",
+    "botanical": "Cajanus cajan",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pigeon-pea"
+  },
+  {
+    "common": "Pineapple",
+    "botanical": "Ananas comosus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pineapple"
+  },
+  {
+    "common": "Pistachio nut",
+    "botanical": "Pistacia vera",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pistachio-nut"
+  },
+  {
+    "common": "Plantain",
+    "botanical": "Musa × paradisiaca",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "plantain"
+  },
+  {
+    "common": "Plum",
+    "botanical": "Prunus domestica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "plum"
+  },
+  {
+    "common": "Pomegranate",
+    "botanical": "Punica granatum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pomegranate"
+  },
+  {
+    "common": "Pomelo",
+    "botanical": "Citrus grandis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pomelo"
+  },
+  {
+    "common": "Poppy seed",
+    "botanical": "Papaver somniferum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "poppy-seed"
+  },
+  {
+    "common": "Potato",
+    "botanical": "Solanum tuberosum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "potato"
+  },
+  {
+    "common": "Prune",
+    "botanical": "Prunus domestica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "prune"
+  },
+  {
+    "common": "Pumpkin (C. maxima)",
+    "botanical": "Cucurbita maxima",
+    "aliases": ["winter squash"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "pumpkin-c-maxima"
+  },
+  {
+    "common": "Pumpkin (C. moschata)",
+    "botanical": "Cucurbita moschata",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "pumpkin-c-moschata"
+  },
+  {
+    "common": "Pumpkin (C. pepo)",
+    "botanical": "Cucurbita pepo",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "pumpkin-c-pepo"
+  },
+  {
+    "common": "Purple coneflower",
+    "botanical": "Echinacea purpurea",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "purple-coneflower"
+  },
+  {
+    "common": "Purslane",
+    "botanical": "Portulaca oleracea",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "purslane"
+  },
+  {
+    "common": "Pyrethum",
+    "botanical": "Chrysanthemum cinerariaefolium",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "pyrethum"
+  },
+  {
+    "common": "Quince",
+    "botanical": "Cydonia oblonga",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "quince"
+  },
+  {
+    "common": "Quinoa",
+    "botanical": "Chenopodium quinoa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "quinoa"
+  },
+  {
+    "common": "Rabbiteye blueberry",
+    "botanical": "Vaccinium virgatum Aiton",
+    "aliases": ["Vaccinium virgatum"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "rabbiteye-blueberry"
+  },
+  {
+    "common": "Radish",
+    "botanical": "Raphanus sativus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "radish"
+  },
+  {
+    "common": "Rambutan",
+    "botanical": "Nephelium lappaceum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "rambutan"
+  },
+  {
+    "common": "Ramie",
+    "botanical": "Boehmeria nivea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "ramie"
+  },
+  {
+    "common": "Rapeseed",
+    "botanical": "Brassica napus",
+    "aliases": ["Rapeseed (colza)"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "rapeseed"
+  },
+  {
+    "common": "Red beet",
+    "botanical": "Beta vulgaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "red-beet"
+  },
+  {
+    "common": "Red clover",
+    "botanical": "Trifolium pratense",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "red-clover"
+  },
+  {
+    "common": "Red raspberry",
+    "botanical": "Rubus idaeus",
+    "aliases": ["raspberry"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "red-raspberry"
+  },
+  {
+    "common": "Redcurrant",
+    "botanical": "Ribes rubrum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "redcurrant"
+  },
+  {
+    "common": "Rhea",
+    "botanical": "Boehmeria nivea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "rhea"
+  },
+  {
+    "common": "Rice (African)",
+    "botanical": "Oryza glaberrima",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "rice-african"
+  },
+  {
+    "common": "Rice (Asian)",
+    "botanical": "Oryza sativa",
+    "aliases": ["rice"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "rice-asian"
+  },
+  {
+    "common": "Rice bean",
+    "botanical": "Vigna umbellata",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "rice-bean"
+  },
+  {
+    "common": "Ridge gourd",
+    "botanical": "Luffa acutangula",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "ridge-gourd"
+  },
+  {
+    "common": "Rocoto pepper",
+    "botanical": "Capsicum pubescens",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "rocoto-pepper"
+  },
+  {
+    "common": "Roman chamomile",
+    "botanical": "Chamaemelum nobile",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "roman-chamomile"
+  },
+  {
+    "common": "Roselle",
+    "botanical": "Hibiscus sabdariffa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "roselle"
+  },
+  {
+    "common": "Rosemary",
+    "botanical": "Salvia rosmarinus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "rosemary"
+  },
+  {
+    "common": "Rubber",
+    "botanical": "Hevea brasiliensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "rubber"
+  },
+  {
+    "common": "Runner bean",
+    "botanical": "Phaseolus coccineus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "runner-bean"
+  },
+  {
+    "common": "Rutabaga (swede)",
+    "botanical": "Brassica napus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "rutabaga-swede"
+  },
+  {
+    "common": "Rye",
+    "botanical": "Secale cereale",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "rye"
+  },
+  {
+    "common": "Safflower",
+    "botanical": "Carthamus tinctorius",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "safflower"
+  },
+  {
+    "common": "Saffron",
+    "botanical": "Crocus sativus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "saffron"
+  },
+  {
+    "common": "Sage",
+    "botanical": "Salvia officinalis",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "sage"
+  },
+  {
+    "common": "Sainfoin",
+    "botanical": "Onobrychis viciifolia",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sainfoin"
+  },
+  {
+    "common": "Salsify",
+    "botanical": "Tragopogon porrifolius",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "salsify"
+  },
+  {
+    "common": "Sapodilla",
+    "botanical": "Achras sapota",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sapodilla"
+  },
+  {
+    "common": "Satsuma (mandarin/tangerine)",
+    "botanical": "Citrus reticulata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "satsuma-mandarin-tangerine"
+  },
+  {
+    "common": "Scorzonera - black salsify",
+    "botanical": "Scorzonera hispanica",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "scorzonera-black-salsify"
+  },
+  {
+    "common": "Sesame",
+    "botanical": "Sesamum indicum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sesame"
+  },
+  {
+    "common": "Shallot",
+    "botanical": "Allium cepa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "shallot"
+  },
+  {
+    "common": "Shea butter (nut)",
+    "botanical": "Vitellaria paradoxa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "shea-butter-nut"
+  },
+  {
+    "common": "Sisal",
+    "botanical": "Agave sisalana",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sisal"
+  },
+  {
+    "common": "Sorghum",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sorghum"
+  },
+  {
+    "common": "Sorghum, broom",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sorghum-broom"
+  },
+  {
+    "common": "Sorghum, durra",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sorghum-durra"
+  },
+  {
+    "common": "Sorghum, Guinea corn",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sorghum-guinea-corn"
+  },
+  {
+    "common": "Sorghum, jowar",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sorghum-jowar"
+  },
+  {
+    "common": "Sorghum, sweet",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sorghum-sweet"
+  },
+  {
+    "common": "Sorrel",
+    "botanical": "Rumex acetosa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "sorrel"
+  },
+  {
+    "common": "Sour cherry",
+    "botanical": "Prunus cerasus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "sour-cherry"
+  },
+  {
+    "common": "Soursop",
+    "botanical": "Annona muricata",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "soursop"
+  },
+  {
+    "common": "Soybean",
+    "botanical": "Glycine max",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "soybean"
+  },
+  {
+    "common": "Soybean hay",
+    "botanical": "Glycine max",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "soybean-hay"
+  },
+  {
+    "common": "Spearmint",
+    "botanical": "Mentha spicata",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "spearmint"
+  },
+  {
+    "common": "Spelt wheat",
+    "botanical": "Triticum spelta",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "spelt-wheat"
+  },
+  {
+    "common": "Spinach",
+    "botanical": "Spinacia oleracea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "spinach"
+  },
+  {
+    "common": "Sponge gourd",
+    "botanical": "Luffa aegyptiaca",
+    "aliases": ["loofah"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "sponge-gourd"
+  },
+  {
+    "common": "Stevia",
+    "botanical": "Stevia rebaudiana",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "stevia"
+  },
+  {
+    "common": "Subterranean clover",
+    "botanical": "Trifolium subterraneum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "subterranean-clover"
+  },
+  {
+    "common": "Sugar apple",
+    "botanical": "Annona squamosa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "sugar-apple"
+  },
+  {
+    "common": "Sugar beet",
+    "botanical": "Beta vulgaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sugar-beet"
+  },
+  {
+    "common": "Sugar beet for fodder",
+    "botanical": "Beta vulgaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sugar-beet-for-fodder"
+  },
+  {
+    "common": "Sugar beet for seed",
+    "botanical": "Beta vulgaris",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sugar-beet-for-seed"
+  },
+  {
+    "common": "Sugarcane for fodder",
+    "botanical": "Saccharum officinarum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sugarcane-for-fodder"
+  },
+  {
+    "common": "Sugarcane for sugar or alcohol",
+    "botanical": "Saccharum officinarum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sugarcane-for-sugar-or-alcohol"
+  },
+  {
+    "common": "Sugarcane for thatching",
+    "botanical": "Saccharum officinarum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sugarcane-for-thatching"
+  },
+  {
+    "common": "Summer savory",
+    "botanical": "Satureja hortensis",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "summer-savory"
+  },
+  {
+    "common": "Sunflower",
+    "botanical": "Helianthus annuus",
+    "aliases": ["Sunflower for oil seed"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sunflower"
+  },
+  {
+    "common": "Sunflower for fodder",
+    "botanical": "Helianthus annuus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sunflower-for-fodder"
+  },
+  {
+    "common": "Sunhemp",
+    "botanical": "Crotalaria juncea",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sunhemp"
+  },
+  {
+    "common": "Swede",
+    "botanical": "Brassica napus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "swede"
+  },
+  {
+    "common": "Swede for fodder",
+    "botanical": "Brassica napus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "swede-for-fodder"
+  },
+  {
+    "common": "Sweet cherry",
+    "botanical": "Prunus avium",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "sweet-cherry"
+  },
+  {
+    "common": "Sweet corn",
+    "botanical": "Zea mays",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sweet-corn"
+  },
+  {
+    "common": "Sweet lime",
+    "botanical": "Citrus × limon",
+    "aliases": ["Citrus limetta", "Citrus limetta"],
+    "basis": "FAO WCA crop list (2005), species-level normalization; sweet lime synonym per GBIF/GRIN https://www.gbif.org/dataset/66dd0960-2d7d-46ee-a491-87b9adcfe7b1/taxon/480120",
+    "id": "sweet-lime"
+  },
+  {
+    "common": "Sweet pepper",
+    "botanical": "Capsicum annuum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sweet-pepper"
+  },
+  {
+    "common": "Sweet potato",
+    "botanical": "Ipomoea batatas",
+    "aliases": ["Potato, sweet"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sweet-potato"
+  },
+  {
+    "common": "Sweet sorghum",
+    "botanical": "Sorghum bicolor",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "sweet-sorghum"
+  },
+  {
+    "common": "Swiss chard",
+    "botanical": "Beta vulgaris",
+    "aliases": ["chard", "silverbeet"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "swiss-chard"
+  },
+  {
+    "common": "Switchgrass",
+    "botanical": "Panicum virgatum",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "switchgrass"
+  },
+  {
+    "common": "Tabasco pepper",
+    "botanical": "Capsicum frutescens",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "tabasco-pepper"
+  },
+  {
+    "common": "Tall fescue",
+    "botanical": "Lolium arundinaceum",
+    "aliases": ["Festuca arundinacea"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "tall-fescue"
+  },
+  {
+    "common": "Tangerine",
+    "botanical": "Citrus reticulata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "tangerine"
+  },
+  {
+    "common": "Tannia",
+    "botanical": "Xanthosoma sagittifolium",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "tannia"
+  },
+  {
+    "common": "Tapioca (cassava)",
+    "botanical": "Manihot esculenta",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "tapioca-cassava"
+  },
+  {
+    "common": "Taro",
+    "botanical": "Colocasia esculenta",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "taro"
+  },
+  {
+    "common": "Tarragon",
+    "botanical": "Artemisia dracunculus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "tarragon"
+  },
+  {
+    "common": "Tatsoi",
+    "botanical": "Brassica rapa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "tatsoi"
+  },
+  {
+    "common": "Tea",
+    "botanical": "Camellia sinensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "tea"
+  },
+  {
+    "common": "Tef",
+    "botanical": "Eragrostis tef",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "tef"
+  },
+  {
+    "common": "Teff",
+    "botanical": "Eragrostis tef",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "teff"
+  },
+  {
+    "common": "Thyme",
+    "botanical": "Thymus vulgaris",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "thyme"
+  },
+  {
+    "common": "Timothy",
+    "botanical": "Phleum pratense",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "timothy"
+  },
+  {
+    "common": "Tobacco",
+    "botanical": "Nicotiana tabacum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "tobacco"
+  },
+  {
+    "common": "Tomatillo",
+    "botanical": "Physalis philadelphica",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "tomatillo"
+  },
+  {
+    "common": "Tomato",
+    "botanical": "Solanum lycopersicum",
+    "aliases": ["Lycopersicon esculentum"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "tomato"
+  },
+  {
+    "common": "Triticale for fodder",
+    "botanical": "× Triticosecale rimpaui",
+    "aliases": ["Hybrid of"],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "triticale-for-fodder"
+  },
+  {
+    "common": "Tropical kudzu",
+    "botanical": "Pueraria phaseoloides",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "tropical-kudzu"
+  },
+  {
+    "common": "Turmeric",
+    "botanical": "Curcuma longa",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "turmeric"
+  },
+  {
+    "common": "Turnip, edible",
+    "botanical": "Brassica rapa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "turnip-edible"
+  },
+  {
+    "common": "Turnip, for fodder",
+    "botanical": "Brassica rapa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "turnip-for-fodder"
+  },
+  {
+    "common": "Ulluco",
+    "botanical": "Ullucus tuberosus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "ulluco"
+  },
+  {
+    "common": "Urena (Congo jute)",
+    "botanical": "Urena lobata",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "urena-congo-jute"
+  },
+  {
+    "common": "Vanilla",
+    "botanical": "Vanilla planifolia",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "vanilla"
+  },
+  {
+    "common": "Vegetable amaranth",
+    "botanical": "Amaranthus tricolor",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "vegetable-amaranth"
+  },
+  {
+    "common": "Vetch for grain",
+    "botanical": "Vicia sativa",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "vetch-for-grain"
+  },
+  {
+    "common": "Watercress",
+    "botanical": "Nasturtium officinale",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "watercress"
+  },
+  {
+    "common": "Watermelon",
+    "botanical": "Citrullus lanatus",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "watermelon"
+  },
+  {
+    "common": "Wax gourd",
+    "botanical": "Benincasa hispida",
+    "aliases": ["winter melon"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "wax-gourd"
+  },
+  {
+    "common": "Welsh onion",
+    "botanical": "Allium fistulosum",
+    "aliases": ["bunching onion", "scallion"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "welsh-onion"
+  },
+  {
+    "common": "Wheat",
+    "botanical": "Triticum aestivum",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "wheat"
+  },
+  {
+    "common": "White clover",
+    "botanical": "Trifolium repens",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "white-clover"
+  },
+  {
+    "common": "White lupin",
+    "botanical": "Lupinus albus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "white-lupin"
+  },
+  {
+    "common": "White mulberry",
+    "botanical": "Morus alba",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "white-mulberry"
+  },
+  {
+    "common": "White mustard",
+    "botanical": "Sinapis alba",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "white-mustard"
+  },
+  {
+    "common": "Wild rocket",
+    "botanical": "Diplotaxis tenuifolia",
+    "aliases": ["perennial rocket"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "wild-rocket"
+  },
+  {
+    "common": "Winged bean",
+    "botanical": "Psophocarpus tetragonolobus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "winged-bean"
+  },
+  {
+    "common": "Winter savory",
+    "botanical": "Satureja montana",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "winter-savory"
+  },
+  {
+    "common": "Yacon",
+    "botanical": "Smallanthus sonchifolius",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "yacon"
+  },
+  {
+    "common": "Yam (Chinese)",
+    "botanical": "Dioscorea polystachya",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "yam-chinese"
+  },
+  {
+    "common": "Yam (greater)",
+    "botanical": "Dioscorea alata",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "yam-greater"
+  },
+  {
+    "common": "Yam (lesser)",
+    "botanical": "Dioscorea esculenta",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "yam-lesser"
+  },
+  {
+    "common": "Yam (white Guinea)",
+    "botanical": "Dioscorea rotundata",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "yam-white-guinea"
+  },
+  {
+    "common": "Yardlong bean",
+    "botanical": "Vigna unguiculata",
+    "aliases": ["asparagus bean"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "yardlong-bean"
+  },
+  {
+    "common": "Yellow lupin",
+    "botanical": "Lupinus luteus",
+    "aliases": [],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "yellow-lupin"
+  },
+  {
+    "common": "Yerba mate",
+    "botanical": "Ilex paraguariensis",
+    "aliases": [],
+    "basis": "FAO WCA crop list (2005), species-level normalization",
+    "id": "yerba-mate"
+  },
+  {
+    "common": "Zucchini",
+    "botanical": "Cucurbita pepo",
+    "aliases": ["courgette", "summer squash"],
+    "basis": "Supplemental crop selection; GBIF botanical identity",
+    "id": "zucchini"
+  }
+]
