@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Drawing and publication layout checks</title>
+    <style>
+      body {
+        margin: 20px;
+        font: 14px Arial;
+        background: #f1f4ee;
+      }
+      nav {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+      iframe {
+        width: 100%;
+        height: 1000px;
+        border: 1px solid #cad7c8;
+        background: white;
+      }
+      .figures {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .figures svg {
+        width: 100%;
+        height: auto;
+      }
+      button {
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Drawing and publication layout checks</h1>
+    <p>Isolated fixtures; the saved study is not changed.</p>
+    <nav>
+      <button id="default">Default fixed array</button
+      ><button id="rotated">Rotated tracker with plots</button
+      ><button id="zero">Zero reservations</button>
+    </nav>
+    <div class="figures"></div>
+    <iframe title="Publication report"></iframe>
+    <script type="module" src="./layout.js"></script>
+  </body>
+</html>

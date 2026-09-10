@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { validateWeatherRows } from '../irradiance/weather-validation.js';
-export const VERSION = '0.1.1';
+export const VERSION = '0.1.2';
 const num = (min, max) => z.number().finite().min(min).max(max),
   count = (min, max) => num(min, max).int();
 const text = z.string().max(500);
@@ -49,6 +49,12 @@ export const studySchema = z.object({
     groupSize: count(1, 24),
     aisle: num(0, 20),
   }),
+  landUse: z
+    .object({
+      underPanelWidth: num(0, 30).default(1),
+      perimeterBuffer: num(0, 20).default(3),
+    })
+    .default({ underPanelWidth: 1, perimeterBuffer: 3 }),
   site: z.object({
     address: text.default(''),
     utcOffsetApproximate: z.boolean().default(false),
@@ -207,7 +213,7 @@ export function analysisKey(s) {
     s.racking,
     s.table,
     s.row,
-    s.rowPair,
+    { pitch: s.rowPair.pitch },
     s.array,
     s.site,
     s.analysis,
@@ -226,7 +232,9 @@ export function dimensions(s) {
   const length = s.row.tables * tableLength + (s.row.tables - 1) * s.row.tableGap;
   const tilt =
     s.racking.type === 'vertical' ? 90 : s.racking.type === 'pergola' ? 0 : s.racking.tilt;
-  const projected = width * Math.cos((tilt * Math.PI) / 180);
+  const projected =
+    width * Math.cos((tilt * Math.PI) / 180) +
+    s.module.thickness * Math.abs(Math.sin((tilt * Math.PI) / 180));
   const span =
     (s.array.rows - 1) * s.rowPair.pitch +
     Math.floor((s.array.rows - 1) / s.array.groupSize) * s.array.aisle;
@@ -244,7 +252,9 @@ export function dimensions(s) {
     clear: s.rowPair.pitch - projected,
     usable: Math.max(
       0,
-      s.rowPair.pitch - projected - 2 * s.rowPair.cropSetback - s.rowPair.maintenance,
+      s.rowPair.pitch -
+        Math.max(projected + 2 * s.rowPair.cropSetback, s.landUse?.underPanelWidth ?? 1) -
+        s.rowPair.maintenance,
     ),
     minHeight:
       s.racking.height -

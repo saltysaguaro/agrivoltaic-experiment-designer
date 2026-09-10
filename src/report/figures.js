@@ -1,15 +1,14 @@
 import * as THREE from 'three';
-import { dimensions } from '../domain/study.js';
 import { buildGeometry, disposeGroup, localToWorld, worldToLocal } from '../domain/geometry.js';
 import { receiverGridSpec } from '../domain/geometry.js';
 import { receiverLines, sensorMarkers, plotCorners } from '../experiment/grid-layout.js';
 import { groundGrid } from '../ui/ground-grid.js';
 import { provenanceRecord } from './provenance.js';
-export const escapeXml = (v) =>
-  String(v).replace(
-    /[&<>"']/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[c],
-  );
+import { escapeXml } from './xml.js';
+export { escapeXml } from './xml.js';
+import { landUseZones, zoneStyles, landUseDefinition } from '../domain/land-use.js';
+import { engineeringAnnotations } from '../ui/annotations.js';
+import { annotationSvg, zoneSvg, zonePatternDefs } from '../ui/annotation-svg.js';
 export function heatColor(value, max = 100) {
   const t = Math.max(0, Math.min(1, value / max));
   const stops = [
@@ -38,6 +37,7 @@ export function figureSvg(
   metric = 'none',
   scope = 'array',
   showGrid = true,
+  options = {},
 ) {
   // A stale/absent result must export a geometry figure, never a labeled light map.
   if (!result) metric = 'none';
@@ -48,6 +48,21 @@ export function figureSvg(
     scope,
   );
   const receivers = receiverGridSpec(s);
+  const zones =
+    arrayScope || scope === 'pair'
+      ? landUseZones(s, group.userData).zones.filter((z) => arrayScope || z.kind !== 'perimeter')
+      : [];
+  const annotationScope =
+    arrayScope && view === 'plan' ? 'report' : arrayScope && view === 'profile' ? 'pair' : scope;
+  const annotations = engineeringAnnotations(s, annotationScope, group, options.focus);
+  if (arrayScope && view === 'profile' && !options.focus)
+    annotations.unshift(...engineeringAnnotations(s, 'racking', group).slice(0, 1));
+  const receiverBoundary = [
+    [-1, -1],
+    [1, -1],
+    [1, 1],
+    [-1, 1],
+  ].map(([x, y]) => localToWorld(s, (x * receivers.width) / 2, (y * receivers.height) / 2));
   const glyphs = arrayScope ? sensorMarkers(s, { profile: view === 'profile' }) : [];
   const project = (p) =>
     view === 'profile'
@@ -91,6 +106,8 @@ export function figureSvg(
   }
   let all = shapes.flatMap((s) => s.points);
   if (ground) all.push(...ground.corners.map(project));
+  for (const zone of zones) all.push(...zone.corners.map(project));
+  if (arrayScope) all.push(...receiverBoundary.map(project));
   if (result && metric !== 'none')
     all.push(...result.cells.map((c) => project(new THREE.Vector3(c.x, c.y, 0))));
   if (arrayScope) {
@@ -167,6 +184,12 @@ export function figureSvg(
       '#294d55',
       metric === 'none' ? 1 : 0.65,
     );
+  content += zoneSvg(zones, (p) => xy(project(p)), {
+    profile: view === 'profile',
+    muted: metric !== 'none',
+  });
+  if (arrayScope && view !== 'profile')
+    content += `<polygon points="${receiverBoundary.map((p) => xy(project(p)).join(',')).join(' ')}" fill="none" stroke="#276a80" stroke-dasharray="5 4"/>`;
   if (arrayScope) {
     for (const c of s.crops) {
       const p = plotCorners(s, c).map(project);
@@ -208,40 +231,12 @@ export function figureSvg(
       content += '</g>';
     }
   }
-  const dim = dimensions(s);
-  const line = (a, b, label, offset = 16) => {
-    const p = xy(a),
-      q = xy(b);
-    return `<path d="M ${p[0]} ${p[1] + offset} L ${q[0]} ${q[1] + offset}" stroke="#667b60" fill="none"/><circle cx="${p[0]}" cy="${p[1] + offset}" r="2" fill="#667b60"/><circle cx="${q[0]}" cy="${q[1] + offset}" r="2" fill="#667b60"/><text x="${(p[0] + q[0]) / 2}" y="${(p[1] + q[1]) / 2 + offset + 17}" font-size="12" text-anchor="middle">${escapeXml(label)}</text>`;
-  };
-  if (scope === 'module') {
-    content += line(
-      [xmin, ymax],
-      [xmax, ymax],
-      `${s.module.length} × ${s.module.width} m; thickness ${s.module.thickness} m`,
-    );
-  } else if (view === 'profile') {
-    const y0 = rowOffsets[0] ?? 0,
-      y1 = rowOffsets[1];
-    if (y1 !== undefined) content += line([y0, 0], [y1, 0], `${(y1 - y0).toFixed(2)} m pitch`, 24);
-    const x = xy([xmin, -s.racking.height])[0] - 18,
-      top = xy([xmin, -s.racking.height])[1],
-      bottom = xy([xmin, 0])[1];
-    content += `<path d="M ${x} ${top} V ${bottom}" stroke="#667b60"/><text x="${x - 6}" y="${(top + bottom) / 2}" text-anchor="end" font-size="12">${s.racking.height} m</text><text x="500" y="515" text-anchor="middle" font-size="12">Tilt ${s.racking.type === 'vertical' ? 90 : s.racking.type === 'pergola' ? 0 : s.racking.tilt}° · assembly ${dim.width.toFixed(2)} m · setback ${s.rowPair.cropSetback} m · maintenance ${s.rowPair.maintenance} m</text>`;
-  } else if (view === 'plan') {
-    content += line(
-      [xmin, ymax],
-      [xmax, ymax],
-      `Extent ${(xmax - xmin).toFixed(2)} m east–west`,
-      12,
-    );
-    if (arrayScope) {
-      rowOffsets.forEach((offset, i) => {
-        const p = xy(project(localToWorld(s, -groupLength / 2 - 0.5, offset, 0)));
-        content += `<text x="${p[0] - 4}" y="${p[1]}" text-anchor="end" font-size="11">R${i + 1}</text>`;
-      });
-    }
-  }
+  content += annotationSvg(annotations, (p) => xy(project(p)), 1000, 520);
+  if (arrayScope && view === 'plan')
+    rowOffsets.forEach((offset, i) => {
+      const p = xy(project(localToWorld(s, -groupLength / 2 - 0.5, offset, 0)));
+      content += `<text x="${p[0] - 4}" y="${p[1]}" text-anchor="end" font-size="11">R${i + 1}</text>`;
+    });
   const bar = Math.max(0.1, 10 ** Math.floor(Math.log10((xmax - xmin) / 5 || 1)));
   let legend = '';
   if (metric !== 'none' && result) {
@@ -264,7 +259,16 @@ export function figureSvg(
   const provenance = provenanceRecord(s, result);
   const wrap = (text, width = 135) =>
     String(text).match(new RegExp('.{1,' + width + '}', 'gu')) || [''];
-  const footer = [
+  const sensorFooter = [
+    ...(glyphs.length > 60
+      ? ['Dense layout: use receiver column/row and coordinates to identify instruments.']
+      : []),
+    ...glyphs.map(
+      (glyph, i) =>
+        `${i + 1}: ${glyph.sensors.map((v) => `${v.id} (${v.type}, z=${v.z} m)`).join('; ')}; cell ${glyph.cell.column + 1}/${glyph.cell.row + 1}`,
+    ),
+  ].flatMap((text) => wrap(text));
+  const fullFooter = [
     `${provenance.software} · ${provenance.date} · ${provenance.backend}`,
     `Analysis SHA-256: ${provenance.analysisHash}`,
     `Site: ${provenance.site}; receivers: ${provenance.receivers}`,
@@ -276,20 +280,47 @@ export function figureSvg(
     provenance.model,
     provenance.assumptions,
     provenance.validation,
+    provenance.landUse,
+    landUseDefinition,
     ...provenance.warnings,
-    ...(glyphs.length > 60
-      ? [
-          'Dense layout: use the receiver column/row and coordinates in this legend to identify instruments.',
-        ]
-      : []),
-    ...glyphs.map(
-      (glyph, i) =>
-        `${i + 1}: ${glyph.sensors.map((v) => `${v.id} (${v.type}, z=${v.z} m)`).join('; ')}; cell ${glyph.cell.column + 1}/${glyph.cell.row + 1}`,
-    ),
+    ...sensorFooter,
   ].flatMap((text) => wrap(text));
-  const height = 625 + footer.length * 13;
+  const drawingKey = annotations.map((a) => `${a.symbol}: ${a.label} ${a.value}`).join('; ');
+  const footer = [
+    ...wrap(drawingKey),
+    ...(options.compact
+      ? [
+          ...wrap(
+            `${provenance.software} · ${provenance.backend}; complete provenance and assumptions in the report appendix.`,
+          ),
+          ...sensorFooter,
+          ...(metric !== 'none' ? wrap(provenance.dli) : []),
+          ...(zones.length
+            ? wrap(
+                'Ground reservations: U centred beneath rows; S at displayed PV edges; M between row axes; B outside the design envelope. Not shadows or tracker swept clearances.',
+              )
+            : []),
+        ]
+      : fullFooter),
+  ];
+  const footerStart = zones.length ? 664 : 615;
+  const height = footerStart + 10 + footer.length * 13;
+  const zoneLegend = zones.length
+    ? Object.entries(zoneStyles)
+        .filter(([kind]) => arrayScope || kind !== 'perimeter')
+        .map(([kind, style], i) => {
+          const x = 40 + (i % 2) * 475,
+            y = 601 + Math.floor(i / 2) * 18;
+          return `<rect x="${x}" y="${y - 10}" width="22" height="12" fill="url(#zone-${kind})" stroke="${style.color}"/><text x="${x + 30}" y="${y}" font-size="11">${escapeXml(style.symbol + ' · ' + style.label)}</text>`;
+        })
+        .join('') +
+      `<text x="40" y="642" font-size="11">${view === 'profile' ? 'Ground reservations: centre cross-section along the across-row axis.' : 'Dashed blue: numerical receiver boundary (R). Reservations shown through PV surfaces.'} Ground z = 0 m.</text>`
+    : '';
   const footerSvg = footer
-    .map((line, i) => `<text x="40" y="${615 + i * 13}" font-size="10">${escapeXml(line)}</text>`)
+    .map(
+      (line, i) =>
+        `<text x="40" y="${footerStart + i * 13}" font-size="10">${escapeXml(line)}</text>`,
+    )
     .join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="${height}" viewBox="0 0 1000 ${height}" role="img" aria-label="${title}"><metadata>${escapeXml(JSON.stringify(provenance))}</metadata><rect width="1000" height="${height}" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + result.date : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : arrayScope ? ` · Receiver cells ${receivers.dx.toFixed(3)} × ${receivers.dy.toFixed(3)} m` : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}${footerSvg}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="${height}" viewBox="0 0 1000 ${height}" role="img" aria-label="${title}"><metadata>${escapeXml(JSON.stringify(provenance))}</metadata>${zonePatternDefs()}<rect width="1000" height="${height}" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + result.date : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : arrayScope ? ` · Receiver cells ${receivers.dx.toFixed(3)} × ${receivers.dy.toFixed(3)} m` : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}${zoneLegend}${footerSvg}</g></svg>`;
 }

@@ -1,4 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { engineeringAnnotations } from './annotations.js';
+import { annotationSvg, zoneSvg, zonePatternDefs } from './annotation-svg.js';
+import { landUseZones, zoneStyles } from '../domain/land-use.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { buildGeometry, disposeGroup, axes, receiverGridSpec } from '../domain/geometry.js';
@@ -10,6 +14,7 @@ import ReceiverInspector from './ReceiverInspector.jsx';
 
 export default function Scene({
   study,
+  focus,
   scope,
   view,
   result,
@@ -21,7 +26,9 @@ export default function Scene({
 }) {
   const host = useRef(null),
     runtime = useRef(null),
-    latest = useRef(null);
+    latest = useRef(null),
+    annotationLayer = useRef(null);
+  const [annotations, setAnnotations] = useState([]);
   const [failed, setFailed] = useState(false),
     [hover, setHover] = useState(null);
   const [selectedCell, setSelectedCell] = useState({ column: 0, row: 0 });
@@ -45,12 +52,25 @@ export default function Scene({
     scopeKey,
   ]);
   const overlayKey = JSON.stringify([
+    study.landUse,
+    study.rowPair.cropSetback,
+    study.rowPair.maintenance,
     study.analysis.resolution,
     study.analysis.receiverHeight,
     study.experimentSensors.map((s) => [s.id, s.x, s.y, s.z, s.grid]),
     study.crops.map((p) => [p.id, p.x, p.y, p.width, p.length, p.grid]),
   ]);
 
+  const annotationKey = JSON.stringify([
+    study.experimentSensors,
+    study.crops,
+    study.module.power,
+    study.site,
+    study.analysis,
+    study.metadata,
+    study.weather.name,
+    study.weather.mode,
+  ]);
   // One renderer, camera and controls for the lifetime of the mounted view.
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -83,7 +103,29 @@ export default function Scene({
     scene.add(sun);
     const rt = { scene, renderer, camera, controls, group: null, overlay: null, framing: null };
     runtime.current = rt;
-    rt.draw = () => renderer.render(scene, camera);
+    rt.draw = () => {
+      renderer.render(scene, camera);
+      if (!annotationLayer.current || !rt.annotations) return;
+      const w = host.current.clientWidth,
+        h = host.current.clientHeight;
+      camera.updateMatrixWorld(true);
+      const project = (point) => {
+        const p = point.clone().project(camera);
+        return [((p.x + 1) * w) / 2, ((1 - p.y) * h) / 2];
+      };
+      annotationLayer.current.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      annotationLayer.current.innerHTML =
+        zonePatternDefs('live-zone') +
+        zoneSvg(rt.zones || [], project, {
+          prefix: 'live-zone',
+          profile: rt.view === 'profile',
+          muted: rt.metric !== 'none',
+        }) +
+        (rt.receiverBoundary
+          ? `<polygon points="${rt.receiverBoundary.map((p) => project(p).join(',')).join(' ')}" fill="none" stroke="#276a80" stroke-width="1" stroke-dasharray="5 4"/>`
+          : '') +
+        annotationSvg(rt.annotations, project, w, h - 25);
+    };
     controls.addEventListener('change', () => {
       setHover(null);
       rt.draw();
@@ -229,6 +271,30 @@ export default function Scene({
       rt.structureKey = structureKey;
     }
     const group = rt.group;
+    rt.annotations = engineeringAnnotations(study, scope, group, focus);
+    const land = landUseZones(study, group.userData);
+    rt.zones =
+      scopeKey === 'array' || scopeKey === 'pair'
+        ? land.zones.filter((z) => scopeKey === 'array' || z.kind !== 'perimeter')
+        : [];
+    rt.view = view;
+    rt.metric = metric;
+    const receiver = receiverGridSpec(study);
+    rt.receiverBoundary = null;
+    if (scopeKey === 'array') {
+      const { u, v } = axes(study);
+      rt.receiverBoundary = [
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1],
+      ].map(([x, y]) =>
+        u
+          .clone()
+          .multiplyScalar((x * receiver.width) / 2)
+          .addScaledVector(v, (y * receiver.height) / 2),
+      );
+    }
     if (rt.overlay) {
       scene.remove(rt.overlay);
       disposeOverlay(rt.overlay);
@@ -364,6 +430,7 @@ export default function Scene({
     const framingKey = `${view}:${scopeKey}:${resetKey}`;
     if (rt.framingKey !== framingKey) {
       const bounds = displayBounds(study, group, scopeKey);
+      for (const a of rt.annotations) for (const p of a.points) bounds.expandByPoint(p);
       const center = bounds.getCenter(new THREE.Vector3()),
         size = bounds.getSize(new THREE.Vector3());
       const extent = Math.max(size.x, size.y, size.z, 1) * 1.4;
@@ -391,9 +458,21 @@ export default function Scene({
     }
     rt.resize();
   }, [structureKey, overlayKey, view, scopeKey, scope, metric, result, showGrid, resetKey]);
+  // Updating a callout or non-spatial field does not rebuild thousands of map cells.
+  useEffect(() => {
+    const rt = runtime.current;
+    const group = rt?.group || buildGeometry(study, scopeKey);
+    const next = engineeringAnnotations(study, scope, group, focus);
+    setAnnotations(next);
+    if (rt) {
+      rt.annotations = next;
+      rt.draw();
+    } else disposeGroup(group);
+  }, [annotationKey, structureKey, overlayKey, scope, focus]);
   return (
     <>
       <div className={'scene ' + (placing ? 'placing' : '')} ref={host}>
+        <svg className="engineering-overlay" aria-hidden="true" ref={annotationLayer} />
         {hover && (
           <div
             role="tooltip"
@@ -440,11 +519,55 @@ export default function Scene({
           <div
             className="svg-fallback"
             dangerouslySetInnerHTML={{
-              __html: figureSvg(study, result, view, metric, scope, showGrid),
+              __html: figureSvg(study, result, view, metric, scope, showGrid, { focus }),
             }}
           />
         )}
       </div>
+      {document.getElementById('drawing-annotations') &&
+        createPortal(
+          <aside className="drawing-annotations" aria-label="Drawing callouts">
+            <div className="annotation-cards" aria-live="polite">
+              {annotations.map((a) => (
+                <div key={a.id} className={a.active ? 'active' : ''}>
+                  <strong>
+                    <b>{a.symbol}</b> {a.label}: <span>{a.value}</span>
+                  </strong>
+                  {a.active && <p>{a.detail || 'Study setting retained in the methods report.'}</p>}
+                </div>
+              ))}
+            </div>
+            <small>
+              Focus an input to highlight it. Dimensions use committed values; a short leader marks
+              dimensions viewed edge-on. Pan and zoom are preserved.
+            </small>
+            {(scopeKey === 'array' || scopeKey === 'pair') && (
+              <>
+                <div className="zone-legend" aria-label="Land-use zone legend">
+                  {Object.entries(zoneStyles)
+                    .filter(([kind]) => scopeKey === 'array' || kind !== 'perimeter')
+                    .map(([kind, style]) => (
+                      <span key={kind}>
+                        <i className={'zone-swatch ' + kind} />
+                        {style.symbol} · {style.label}
+                      </span>
+                    ))}
+                  {scopeKey === 'array' && (
+                    <span>
+                      <i className="receiver-swatch" />R · Numerical receiver boundary
+                    </span>
+                  )}
+                </div>
+                <small>
+                  Hatching marks reservations at ground level (z = 0), not shade. U runs through
+                  table gaps; S follows the displayed PV edges. B starts at the design envelope, not
+                  the tracker swept envelope. Use plan view to compare zones.
+                </small>
+              </>
+            )}
+          </aside>,
+          document.getElementById('drawing-annotations'),
+        )}
       {scopeKey === 'array' && (
         <ReceiverInspector
           study={study}

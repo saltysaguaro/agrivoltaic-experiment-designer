@@ -30,9 +30,13 @@ export const inputHelp = {
   'rowPair.pitch':
     'Distance from one row’s centre line to the next, measured across the rows. This includes both the PV assembly and the space between rows.',
   'rowPair.cropSetback':
-    'Space kept free of crops next to each PV edge. It is subtracted on both sides of the interrow crop strip.',
+    'Space kept free of crops outside each PV edge at the displayed tilt. For trackers this follows the preview pose, not the full swept envelope. It is subtracted on both sides of the interrow crop strip.',
   'rowPair.maintenance':
-    'Width reserved for walking, machinery or maintenance between neighboring rows.',
+    'Width reserved for walking, machinery or maintenance, centred halfway between adjacent row axes, including group gaps.',
+  'landUse.underPanelWidth':
+    'Total width of a continuous strip kept free of crops beneath each PV row, centred on its axis and extending through table gaps. Default 1 m; set 0 to allow cultivation beneath the row. This is a land-use reservation, not a shadow footprint.',
+  'landUse.perimeterBuffer':
+    'No-crop border outside the array design envelope: row length by row-axis span plus untilted assembly width. Default 3 m; set 0 for no border. Independent of the numerical receiver buffer. It is not a certification of tracker swept clearance.',
   'array.rows': 'Total number of parallel PV rows in the array.',
   'array.azimuth':
     'Direction the front of the modules faces, measured clockwise from north: 0° north, 90° east, 180° south, 270° west. Rows run perpendicular to this direction.',

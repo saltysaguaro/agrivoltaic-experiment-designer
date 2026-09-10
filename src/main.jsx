@@ -103,6 +103,7 @@ function App() {
     [step, setStep] = useState(() => navigation().step),
     [view, setView] = useState(() => navigation().view),
     [grid, setGrid] = useState(true),
+    [inspection, setInspection] = useState(null),
     [metric, setMetric] = useState('none'),
     [result, setResult] = useState(null),
     [busy, setBusy] = useState(false),
@@ -339,6 +340,7 @@ function App() {
   function go(n) {
     mainRef.current?.scrollTo({ top: 0 });
     setStep(n);
+    setInspection(null);
     if (n === 4 && !enteredArray.current) {
       setView('oblique');
       enteredArray.current = true;
@@ -611,6 +613,7 @@ function App() {
                 </button>
                 {i === step && (
                   <Controls
+                    onInspect={(value) => setInspection({ ...value, step })}
                     step={step}
                     s={s}
                     set={set}
@@ -765,6 +768,7 @@ function App() {
             </div>
             <div className="scene-wrap">
               <Scene
+                focus={inspection?.step === step ? inspection : null}
                 study={s}
                 scope={scope}
                 view={view}
@@ -788,18 +792,6 @@ function App() {
                 <Compass size={25} />
                 <span>{view === 'plan' ? 'NORTH ↑' : 'Z ↑'}</span>
               </div>
-              {step === 0 && (
-                <div className="dimension-label">
-                  {s.module.length.toFixed(3)} × {s.module.width.toFixed(3)} m{' '}
-                  <span>· {s.module.thickness * 1000} mm frame</span>
-                </div>
-              )}
-              {step === 3 && (
-                <div className="dimension-label">
-                  ← {s.rowPair.pitch.toFixed(2)} m row pitch →{' '}
-                  <span>· {d.usable.toFixed(2)} m usable strip</span>
-                </div>
-              )}
               {placing && (
                 <div className="placing-banner">
                   <MapPin size={15} />{' '}
@@ -822,6 +814,7 @@ function App() {
                 </div>
               )}
             </div>
+            <div id="drawing-annotations" />
             <div className="visual-footer">
               <span>
                 <span className="legend-square" /> PV module

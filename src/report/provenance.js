@@ -1,8 +1,11 @@
+import { landUseSettings, landUseDefinition } from '../domain/land-use.js';
 import { VERSION } from '../domain/study.js';
 export function provenanceRecord(s, r) {
   return {
     software: `Agrivoltaic Experiment Designer ${r?.version || VERSION}`,
     schemaVersion: s.schemaVersion,
+    landUse: `U ${landUseSettings(s).underPanelWidth} m; S ${s.rowPair.cropSetback} m; M ${s.rowPair.maintenance} m; B ${landUseSettings(s).perimeterBuffer} m; receiver buffer R ${s.array.buffer} m. Planning overlays only; do not occlude or change light results.`,
+    landUseDefinition,
     study: s.metadata.title,
     date: s.analysis.date,
     site: `${s.site.latitude}°, ${s.site.longitude}°; UTC ${s.site.utcOffset}; elevation ${s.site.elevation} m`,

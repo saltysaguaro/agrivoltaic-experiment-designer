@@ -1,8 +1,14 @@
+import { landUseZones } from '../domain/land-use.js';
 import { Vector3, Box3 } from 'three';
 import { receiverGridSpec, localToWorld } from '../domain/geometry.js';
 import { plotCorners } from '../experiment/grid-layout.js';
 export function displayBounds(study, group, scope) {
   const bounds = new Box3().setFromObject(group);
+  if (scope === 'array' || scope === 'pair') {
+    const land = landUseZones(study, group.userData);
+    for (const zone of land.zones.filter((z) => scope === 'array' || z.kind !== 'perimeter'))
+      for (const p of zone.corners) bounds.expandByPoint(p);
+  }
   if (scope === 'array') {
     const g = receiverGridSpec(study);
     for (const x of [-1, 1])

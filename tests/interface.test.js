@@ -133,6 +133,9 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await click(step('Full array'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
     await click(step('Site & weather'));
+    const latitude = document.querySelector('[data-annotation="site.latitude"] input');
+    await act(async () => latitude.focus());
+    assert.match(document.querySelector('.annotation-cards').textContent, /Latitude/);
     const search = document.querySelector('input[role="combobox"]');
     await act(async () => {
       Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
@@ -169,6 +172,30 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     );
     assert.match(document.querySelector('.notice').textContent, /Daily light calculated/);
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
+    await click(step('Row spacing'));
+    const reservation = document.querySelector('[data-annotation="landUse.underPanelWidth"] input');
+    await act(async () => reservation.focus());
+    assert.match(
+      document.querySelector('.annotation-cards').textContent,
+      /Non-cultivated width beneath each row/,
+    );
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+        reservation,
+        '2',
+      );
+      reservation.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    });
+    await act(async () => reservation.blur());
+    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).landUse.underPanelWidth, 2);
+    assert.match(document.querySelector('.annotation-cards').textContent, /2 m/);
+    await click(step('Irradiance'));
+    assert.equal(calculations, 1, 'Changing reserved ground does not repeat the solve');
+    assert.equal(
+      byText('Relative sunlight').disabled,
+      false,
+      'Existing light results remain valid',
+    );
     await click(byText('Top-down'));
     await click(byText('Estimated DLI'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);

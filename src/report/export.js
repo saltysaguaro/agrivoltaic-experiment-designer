@@ -1,3 +1,9 @@
+import {
+  landUseSettings,
+  landUseSummary,
+  landUseDefinition,
+  plotZoneOverlap,
+} from '../domain/land-use.js';
 import { getPose } from '../domain/geometry.js';
 import { provenanceRecord } from './provenance.js';
 import { dimensions, VERSION } from '../domain/study.js';
@@ -30,7 +36,9 @@ export function csv(rows) {
     .join('\r\n');
 }
 export function methodsRows(s, r) {
-  const d = dimensions(s);
+  const d = dimensions(s),
+    land = landUseSettings(s),
+    areas = landUseSummary(s);
   return [
     ['Software', `Agrivoltaic Experiment Designer ${VERSION}; study schema ${s.schemaVersion}`],
     ['Study', s.metadata.title],
@@ -42,7 +50,8 @@ export function methodsRows(s, r) {
     ],
     ['Module gap', `${s.module.gap} m`],
     ['Racking', s.racking.type],
-    ['Axis / centre height', `${s.racking.height} m`],
+    ['Axis / centre height · H', `${s.racking.height} m`],
+    ['Support post width · p', `${s.racking.postSize} m`],
     [
       'Effective fixed tilt',
       ['single-axis', 'dual-axis'].includes(s.racking.type)
@@ -71,9 +80,23 @@ export function methodsRows(s, r) {
       'Array',
       `${s.array.rows} rows; ${d.modules} modules; ${((d.modules * s.module.power) / 1000).toFixed(2)} kWp`,
     ],
-    ['Row pitch / buffer', `${s.rowPair.pitch} m / ${s.array.buffer} m`],
+    ['Row pitch · P', `${s.rowPair.pitch} m`],
+    ['Numerical receiver buffer · R', `${s.array.buffer} m`],
+    ['Under-row no-crop width · U', `${land.underPanelWidth} m (centred continuous strip)`],
+    ['Perimeter no-crop buffer · B', `${land.perimeterBuffer} m (outside design envelope)`],
+    ['Design envelope', `${d.length.toFixed(3)} × ${(d.span + d.width).toFixed(3)} m`],
+    ['Reserved land union area', `${areas.reservedArea.toFixed(2)} m²; overlaps counted once`],
+    ['Envelope plus perimeter area', `${areas.outerArea.toFixed(2)} m²`],
+    [
+      'Plot / reservation conflicts',
+      areas.conflicts.length
+        ? areas.conflicts.map((p) => `${p.id}: ${p.area.toFixed(2)} m²`).join('; ')
+        : 'None',
+    ],
+    ['Land-use definitions', landUseDefinition],
     ['Groups / additional aisle', `${s.array.groupSize} rows per group / ${s.array.aisle} m`],
-    ['Crop setback / maintenance zone', `${s.rowPair.cropSetback} m / ${s.rowPair.maintenance} m`],
+    ['PV-edge crop setback · S', `${s.rowPair.cropSetback} m (displayed pose)`],
+    ['Interrow maintenance lane · M', `${s.rowPair.maintenance} m (between row axes)`],
     ['Surface-facing azimuth', `${s.array.azimuth}° clockwise from north`],
     [
       'Site',
@@ -113,6 +136,7 @@ export function methodsRows(s, r) {
         ? `${r.cells.length}; actual cell ${r.grid.dx.toFixed(4)} × ${r.grid.dy.toFixed(4)} m`
         : 'Not calculated',
     ],
+    ['Weather mode', s.weather.mode],
     ['Weather', s.weather.name],
     [
       'Weather dataset / retrieval',
@@ -134,6 +158,7 @@ export function methodsRows(s, r) {
       'Weather input hash encoding',
       'JSON arrays in interval order: minute, duration, GHI, DNI, DHI, PPFD or null, diffuse PPFD or null',
     ],
+    ['Requested compute engine', s.analysis.backend],
     ['Solver', r?.backend || 'Not calculated'],
     ['Sky', 'Perez 1993 relative sky distribution normalized to DHI'],
     ['Sky subdivision', `Reinhart ${s.analysis.patches} patches`],
@@ -169,8 +194,83 @@ export function methodsRows(s, r) {
   ];
 }
 const table = (heads, rows) =>
-  `<table><thead><tr>${heads.map((h) => `<th>${e(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((v) => `<td>${e(v ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  rows.length === 0
+    ? '<p class="empty">None specified.</p>'
+    : `<table><thead><tr>${heads.map((h) => `<th>${e(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((v) => `<td>${e(v ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+export function publicationTables(s, r) {
+  const rows = methodsRows(s, r);
+  const groups = [
+    [
+      'PV system and geometry',
+      [
+        'Module',
+        'Module gap',
+        'Racking',
+        'Axis / centre height · H',
+        'Support post width · p',
+        'Effective fixed tilt',
+        'Tracker rotation limit',
+        'Tracker preview tilt',
+        'Backtracking',
+        'Table',
+        'Tables per row / gap',
+        'Array',
+        'Row pitch · P',
+        'Groups / additional aisle',
+        'Surface-facing azimuth',
+      ],
+    ],
+    [
+      'Land-use plan',
+      [
+        'Under-row no-crop width · U',
+        'PV-edge crop setback · S',
+        'Interrow maintenance lane · M',
+        'Perimeter no-crop buffer · B',
+        'Design envelope',
+        'Reserved land union area',
+        'Envelope plus perimeter area',
+        'Numerical receiver buffer · R',
+      ],
+    ],
+    [
+      'Site, calculation and daily outputs',
+      [
+        'Site',
+        'Analysis date',
+        'Weather mode',
+        'Requested compute engine',
+        'Solver',
+        'Sky subdivision',
+        'Receiver grid',
+        'Numerical receivers',
+        'Open-field daily irradiation',
+        'Open-field DLI',
+        'Receiver-area mean relative sunlight / DLI',
+      ],
+    ],
+  ];
+  const included = new Set(groups.flatMap(([, keys]) => keys));
+  return {
+    sections: groups.map(([title, keys]) => ({
+      title,
+      rows: keys.map((key) => rows.find(([name]) => name === key)),
+    })),
+    notes: rows.filter(([key]) => !included.has(key)),
+  };
+}
+function pairedTable(rows) {
+  const half = Math.ceil(rows.length / 2);
+  return `<table class="parameters"><colgroup><col class="parameter"><col class="value"><col class="parameter"><col class="value"></colgroup><thead><tr><th scope="col">Parameter</th><th scope="col">Value</th><th scope="col">Parameter</th><th scope="col">Value</th></tr></thead><tbody>${rows
+    .slice(0, half)
+    .map(
+      (row, i) =>
+        `<tr>${[row, rows[i + half]].map((pair) => (pair ? `<th scope="row">${e(pair[0])}</th><td>${e(pair[1])}</td>` : '<td></td><td></td>')).join('')}</tr>`,
+    )
+    .join('')}</tbody></table>`;
+}
 export function reportHtml(s, r) {
+  const publication = publicationTables(s, r);
   const figs = [
     ['plan', 'none'],
     ['profile', 'none'],
@@ -182,7 +282,14 @@ export function reportHtml(s, r) {
         ]
       : []),
   ];
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${e(s.metadata.title)} · Methods</title><style>body{max-width:1000px;margin:40px auto;font:14px/1.5 Arial;color:#203b37}h1{font-size:28px}h2{margin-top:30px}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:12px}td,th{padding:8px;border-bottom:1px solid #cbd5ce;text-align:left;overflow-wrap:anywhere}th{background:#eef2ed}svg{width:100%;height:auto}figure{margin:20px 0;break-inside:avoid}button{padding:12px 20px;background:#183d38;color:white;border:0;cursor:pointer}.note{background:#fff4d7;padding:14px}@page{size:A4 landscape;margin:14mm}@media print{body{margin:0;max-width:none}button{display:none}figure{break-before:page}figure svg{max-height:158mm;max-width:100%;width:auto;display:block;margin:auto}thead{display:table-header-group}tr{break-inside:avoid}}</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p>Agrivoltaic experimental design · Methods package</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p><h2>System and modeling parameters</h2>${table(['Parameter', 'Value'], methodsRows(s, r))}<h2>Physical field instruments</h2>${table(
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${e(s.metadata.title)} · Methods</title><style>
+*{box-sizing:border-box}body{max-width:1080px;margin:28px auto;padding:0 18px;font:12px/1.35 Arial,sans-serif;color:#203b37}
+h1{font-size:24px;margin:12px 0 4px;overflow-wrap:anywhere}h2{font-size:14px;margin:14px 0 5px;break-after:avoid}p{margin:5px 0 9px}.report-meta{color:#50625a;overflow-wrap:anywhere}
+table{width:100%;border-collapse:collapse;margin:5px 0 12px;font-size:11px;table-layout:fixed}td,th{padding:5px 7px;border-bottom:1px solid #cbd5ce;text-align:left;vertical-align:top;overflow-wrap:anywhere}thead th{background:#eaf0e9;border-top:1.5px solid #37564b}tbody th{font-weight:500;color:#395649}.parameters .parameter{width:20%}.parameters .value{width:30%}.parameters tr>:nth-child(3){border-left:1px solid #b9c8bc}
+svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{font-size:11px;color:#455d51;overflow-wrap:anywhere}.appendix{border-top:2px solid #37564b;margin-top:22px}.methods-notes{columns:2;column-gap:26px}.methods-notes p{break-inside:avoid;overflow-wrap:anywhere;font-size:11px;line-height:1.4}.methods-notes strong{display:block;margin-bottom:2px}button{padding:10px 18px;background:#183d38;color:white;border:0;cursor:pointer}.note{border-left:3px solid #af873e;padding:7px 10px;background:#fff8e7;font-size:11px}.empty{color:#60736a;font-style:italic}.table-scroll{overflow-x:auto}
+@page{size:A4 landscape;margin:12mm}@media(max-width:650px){.methods-notes{columns:1}.parameters{min-width:610px}body{padding:0 12px}}
+@media print{body{margin:0;padding:0;max-width:none;font-size:9pt}h1{font-size:17pt;margin-top:0}h2{font-size:10pt;margin:3mm 0 1mm}table{font-size:8pt;margin:1mm 0 3mm}td,th{padding:1.1mm 1.5mm}button{display:none}.note{font-size:8pt;padding:2mm 3mm}.report-meta{font-size:8pt}.table-scroll{overflow:visible}.parameters{min-width:0}.appendix{break-before:page;border-top:0}.methods-notes p{font-size:8pt}figure{break-before:page;margin:0}figure svg{max-height:165mm;max-width:100%;width:auto;display:block;margin:auto}figcaption{font-size:8pt}thead{display:table-header-group}tr{break-inside:avoid}a{color:inherit;text-decoration:none}}
+</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(s.analysis.date)} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / S / M / B match the hatched zones in the drawings. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Physical field instruments</h2>${table(
     [
       'ID / type',
       'E / N / Z (m)',
@@ -206,7 +313,7 @@ export function reportHtml(s, r) {
       'Area (m²)',
       'Starting column / row; columns × rows',
       `Mean / median / SD ${r?.estimated ? 'estimated DLI' : 'DLI'} (mol/m²/day)`,
-      'Range DLI / relative sunlight',
+      'Range DLI / sunlight; reservation overlap',
     ],
     s.crops.map((c) => {
       const p = plotStats(r, c);
@@ -220,10 +327,10 @@ export function reportHtml(s, r) {
         p
           ? `${p.mean.toFixed(2)} / ${p.median.toFixed(2)} / ${p.sd.toFixed(2)}`
           : 'No receiver samples',
-        p ? `${p.min.toFixed(2)}–${p.max.toFixed(2)} / ${p.sunlight.toFixed(1)}%` : '—',
+        `${p ? `${p.min.toFixed(2)}–${p.max.toFixed(2)} / ${p.sunlight.toFixed(1)}%` : '—'}; ${plotZoneOverlap(s, c).toFixed(2)} m² reserved`,
       ];
     }),
-  )}${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric)}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p></body></html>`;
+  )}<section class="appendix"><h2>Methods, assumptions and provenance</h2><div class="methods-notes">${publication.notes.map(([key, value]) => `<p><strong>${e(key)}</strong>${e(value)}</p>`).join('')}</div></section>${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric, 'array', true, { compact: true })}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p></body></html>`;
 }
 export function exportCsv(s, r) {
   const rows = [
@@ -290,7 +397,7 @@ export function exportCsv(s, r) {
       '',
       '',
       '',
-      `width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}`,
+      `width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; reserved_overlap_m2=${plotZoneOverlap(s, p).toFixed(4)}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}`,
     ]);
   }
   for (const [key, value] of Object.entries(provenanceRecord(s, r)))
