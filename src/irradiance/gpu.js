@@ -86,17 +86,24 @@ export class WebGpuIrradianceEngine {
     engine.name = 'WebGPU BVH';
     const module = engine.device.createShaderModule({ code: shader });
     const info = await module.getCompilationInfo();
-    if (info.messages.some((m) => m.type === 'error'))
+    if (info.messages.some((m) => m.type === 'error')) {
+      engine.dispose();
       throw Error(
         info.messages
           .filter((m) => m.type === 'error')
           .map((m) => m.message)
           .join('; '),
       );
-    engine.pipeline = await engine.device.createComputePipelineAsync({
-      layout: 'auto',
-      compute: { module, entryPoint: 'main' },
-    });
+    }
+    try {
+      engine.pipeline = await engine.device.createComputePipelineAsync({
+        layout: 'auto',
+        compute: { module, entryPoint: 'main' },
+      });
+    } catch (error) {
+      engine.dispose();
+      throw error;
+    }
     return engine;
   }
   buffer(data, usage = 128) {

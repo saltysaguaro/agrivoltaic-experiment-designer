@@ -1,3 +1,4 @@
+import { verifyWeatherRecord } from './irradiance/weather-record.js';
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 import {
   defaultStudy,
+  VERSION,
   migrateStudy,
   studySchema,
   dimensions,
@@ -80,15 +82,24 @@ function navigation() {
   }
 }
 function load() {
+  let original = null;
   try {
-    const v = localStorage.getItem('aed-study-v1') || localStorage.getItem('fieldwork-study-v1');
-    return v ? migrateStudy(JSON.parse(v)) : defaultStudy();
-  } catch {
-    return defaultStudy();
+    original = localStorage.getItem('aed-study-v1') || localStorage.getItem('fieldwork-study-v1');
+    return { study: original ? migrateStudy(JSON.parse(original)) : defaultStudy() };
+  } catch (error) {
+    return {
+      study: defaultStudy(),
+      original,
+      error: original
+        ? 'The saved study needs repair. Its original data is retained; use Recover saved JSON, then open a corrected study. Automatic saving is paused.'
+        : 'Device storage could not be read. Export JSON to keep your work.',
+    };
   }
 }
 function App() {
-  const [s, setRawStudy] = useState(() => normalizeLayout(load())),
+  const [initial] = useState(load);
+  const [recovery, setRecovery] = useState(initial.original || null);
+  const [s, setRawStudy] = useState(() => normalizeLayout(initial.study)),
     [step, setStep] = useState(() => navigation().step),
     [view, setView] = useState(() => navigation().view),
     [grid, setGrid] = useState(true),
@@ -96,7 +107,7 @@ function App() {
     [result, setResult] = useState(null),
     [busy, setBusy] = useState(false),
     [progress, setProgress] = useState(null),
-    [notice, setNotice] = useState(''),
+    [notice, setNotice] = useState(initial.error || ''),
     [placing, setPlacing] = useState(false),
     [resetKey, setResetKey] = useState(0),
     [weatherStatus, setWeatherStatus] = useState({ state: 'idle', message: '' }),
@@ -130,6 +141,8 @@ function App() {
               ...current.weather,
               rows: [],
               hash: '',
+              sourceText: undefined,
+              normalizedHash: '',
               requestKey: '',
               provenance: undefined,
               name: 'Open-Meteo · ready to download for your site',
@@ -154,13 +167,17 @@ function App() {
     issues = designIssues(s),
     scope = steps[step][2];
   useEffect(() => {
+    if (recovery) {
+      setSaveStatus('Original study retained · repair required');
+      return;
+    }
     try {
       localStorage.setItem('aed-study-v1', JSON.stringify(s));
       setSaveStatus('Saved on this device');
     } catch {
       setSaveStatus('Device storage unavailable · export JSON to save');
     }
-  }, [s]);
+  }, [s, recovery]);
   useEffect(() => {
     try {
       sessionStorage.setItem('aed-navigation', JSON.stringify({ step, view }));
@@ -258,6 +275,8 @@ function App() {
                 ? 'Illustrative clear-sky day · synthetic'
                 : 'Upload a weather file',
           hash: '',
+          sourceText: undefined,
+          normalizedHash: '',
           format: value === 'sample' ? 'sample' : value === 'automatic' ? 'Open-Meteo' : 'CSV',
           rows: [],
         };
@@ -276,6 +295,8 @@ function App() {
           ...next.weather,
           rows: [],
           hash: '',
+          sourceText: undefined,
+          normalizedHash: '',
           requestKey: '',
           provenance: undefined,
           name: 'Open-Meteo · ready to download for your site',
@@ -285,11 +306,35 @@ function App() {
           ...next.weather,
           rows: [],
           hash: '',
+          sourceText: undefined,
+          normalizedHash: '',
           name: 'Upload weather for the new date',
         };
       }
       return parsed.success ? next : current;
     });
+  }
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!busy) {
+      setElapsed(0);
+      return;
+    }
+    const start = performance.now();
+    const timer = setInterval(
+      () => setElapsed(Math.floor((performance.now() - start) / 1000)),
+      1000,
+    );
+    return () => clearInterval(timer);
+  }, [busy]);
+  function preview() {
+    setStudy((current) => ({
+      ...current,
+      analysis: { ...current.analysis, patches: 145, resolution: 3, interval: 15 },
+    }));
+    setNotice(
+      'Preview settings applied: 145 patches, 3 m cells, 15-minute direct steps. Recheck cell-based layouts, then calculate.',
+    );
   }
   function go(n) {
     mainRef.current?.scrollTo({ top: 0 });
@@ -377,7 +422,9 @@ function App() {
       const next = studySchema.parse({
         ...s,
         weather: { ...parsed.weather, mode: 'upload' },
-        site: parsed.site ? { ...s.site, ...parsed.site } : s.site,
+        site: parsed.site
+          ? { ...s.site, ...parsed.site, address: '', utcOffsetApproximate: false }
+          : s.site,
       });
       weatherFlight.current?.controller.abort();
       setWeatherStatus({ state: 'idle', message: '' });
@@ -393,6 +440,8 @@ function App() {
     try {
       const data = JSON.parse(await file.text()),
         next = migrateStudy(data.study || data);
+      await verifyWeatherRecord(next.weather);
+      setRecovery(null);
       setStudy(next);
       setResult(null);
       setNotice('Study imported. Recalculate light to verify results.');
@@ -482,9 +531,13 @@ function App() {
     }
   }
   function report() {
-    const html = reportHtml(s, validResult);
-    download(html, 'agrivoltaic-methods.html', 'text/html');
-    setNotice('Methods report downloaded. Open it to print or save as PDF.');
+    try {
+      const html = reportHtml(s, validResult);
+      download(html, 'agrivoltaic-methods.html', 'text/html');
+      setNotice('Methods report downloaded. Open it to print or save as PDF.');
+    } catch (error) {
+      setNotice('Methods report export failed: ' + error.message);
+    }
   }
   const mean = validResult?.meanDli;
   return (
@@ -498,6 +551,14 @@ function App() {
           <span>Agrivoltaic Experiment Designer</span>
         </a>
         <div className="header-actions">
+          {recovery && (
+            <button
+              className="secondary compact"
+              onClick={() => download(recovery, 'agrivoltaic-recovery.json', 'application/json')}
+            >
+              Recover saved JSON
+            </button>
+          )}
           <span className="local-status">
             <i />
             {saveStatus}
@@ -526,7 +587,10 @@ function App() {
         </div>
       </header>
       <div className="workspace">
-        <aside className="sidebar">
+        <aside className="sidebar" id="study-controls">
+          <a className="mobile-jump" href="#design-drawing">
+            Jump to drawing ↓
+          </a>
           <div className="sidebar-heading">
             <span className="eyebrow">YOUR EXPERIMENT</span>
             <div className="study-name">{s.metadata.title}</div>
@@ -554,6 +618,8 @@ function App() {
                     result={validResult}
                     busy={busy}
                     progress={progress}
+                    elapsed={elapsed}
+                    preview={preview}
                     run={run}
                     cancel={cancel}
                     uploadWeather={uploadWeather}
@@ -646,7 +712,10 @@ function App() {
               <button onClick={() => go(6)}>Go to analysis</button>
             </div>
           )}
-          <section className="visual-card">
+          <a className="mobile-jump" href="#study-controls">
+            Back to inputs ↑
+          </a>
+          <section className="visual-card" id="design-drawing" tabIndex={-1}>
             <div className="visual-toolbar">
               <div className="view-tabs" role="group" aria-label="Projection">
                 {[
@@ -657,6 +726,7 @@ function App() {
                   <button
                     key={v}
                     className={view === v ? 'selected' : ''}
+                    aria-pressed={view === v}
                     onClick={() => {
                       setView(v);
                       if (v !== 'plan') setPlacing(false);
@@ -734,8 +804,10 @@ function App() {
                 <div className="placing-banner">
                   <MapPin size={15} />{' '}
                   {view === 'profile'
-                    ? 'Choose Orthographic or Top-down to place a sensor'
-                    : 'Click the ground to place a field instrument'}
+                    ? 'Use the receiver inspector below, or choose another view to place an item'
+                    : step === 8
+                      ? 'Click a receiver cell to place a crop plot'
+                      : 'Click a receiver cell to place an instrument'}
                 </div>
               )}
               <div className="scene-hint">
@@ -771,6 +843,7 @@ function App() {
               </span>
             </div>
           </section>
+          <div id="receiver-inspector" />
           {step >= 6 && (
             <div className="light-control">
               <div className="metric-tabs">
@@ -782,6 +855,7 @@ function App() {
                   <button
                     key={v}
                     className={metric === v ? 'selected' : ''}
+                    aria-pressed={metric === v}
                     disabled={v !== 'none' && !validResult}
                     onClick={() => {
                       setMetric(v);
@@ -953,9 +1027,11 @@ function App() {
           )}
           <footer className="step-footer">
             <span>
-              {step < 9
-                ? 'Your changes are saved as you design.'
-                : 'Keep the JSON study with your research records.'}
+              {recovery
+                ? 'Automatic saving is paused; the original study is retained.'
+                : step < 9
+                  ? 'Your changes are saved as you design.'
+                  : 'Keep the JSON study with your research records.'}
             </span>
             <div>
               {step > 0 && (
@@ -974,7 +1050,7 @@ function App() {
       </div>
       <footer className="app-footer">
         <span>AGRIVOLTAIC EXPERIMENT DESIGNER</span>
-        <span>Local computation · Version 0.1.0</span>
+        <span>Local computation · Version {VERSION}</span>
       </footer>
     </div>
   );

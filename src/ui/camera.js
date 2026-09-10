@@ -1,4 +1,19 @@
-import { Vector3 } from 'three';
+import { Vector3, Box3 } from 'three';
+import { receiverGridSpec, localToWorld } from '../domain/geometry.js';
+import { plotCorners } from '../experiment/grid-layout.js';
+export function displayBounds(study, group, scope) {
+  const bounds = new Box3().setFromObject(group);
+  if (scope === 'array') {
+    const g = receiverGridSpec(study);
+    for (const x of [-1, 1])
+      for (const y of [-1, 1])
+        bounds.expandByPoint(localToWorld(study, (x * g.width) / 2, (y * g.height) / 2, 0));
+    for (const s of study.experimentSensors) bounds.expandByPoint(new Vector3(s.x, s.y, s.z));
+    for (const plot of study.crops)
+      for (const p of plotCorners(study, plot)) bounds.expandByPoint(p);
+  }
+  return bounds;
+}
 // Project the actual bounding-box corners into the camera basis instead of using
 // the largest world axis as the orthographic height (which wasted screen space).
 export function fitOrthographic(camera, bounds, aspect, padding = 1.13) {

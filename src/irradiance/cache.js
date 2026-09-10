@@ -4,10 +4,20 @@ async function database() {
   if (typeof indexedDB === 'undefined') return null;
   if (!db)
     db = new Promise((resolve) => {
+      let settled = false;
+      const finish = (value) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeout);
+          resolve(value);
+        } else value?.close();
+      };
+      const timeout = setTimeout(() => finish(null), 1500);
       const r = indexedDB.open('fieldwork-visibility-v1', 1);
       r.onupgradeneeded = () => r.result.createObjectStore('visibility');
-      r.onsuccess = () => resolve(r.result);
-      r.onerror = () => resolve(null);
+      r.onsuccess = () => finish(r.result);
+      r.onerror = () => finish(null);
+      r.onblocked = () => finish(null);
     });
   return db;
 }
@@ -18,8 +28,15 @@ export async function getCached(key) {
     if (!d) return null;
     return await new Promise((resolve) => {
       const r = d.transaction('visibility').objectStore('visibility').get(key);
-      r.onsuccess = () => resolve(r.result || null);
-      r.onerror = () => resolve(null);
+      const timeout = setTimeout(() => resolve(null), 1500);
+      r.onsuccess = () => {
+        clearTimeout(timeout);
+        resolve(r.result || null);
+      };
+      r.onerror = () => {
+        clearTimeout(timeout);
+        resolve(null);
+      };
     });
   } catch {
     return null;

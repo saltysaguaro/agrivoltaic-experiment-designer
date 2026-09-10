@@ -1,5 +1,6 @@
 import { z } from 'zod';
-export const VERSION = '0.1.0';
+import { validateWeatherRows } from '../irradiance/weather-validation.js';
+export const VERSION = '0.1.1';
 const num = (min, max) => z.number().finite().min(min).max(max),
   count = (min, max) => num(min, max).int();
 const text = z.string().max(500);
@@ -88,12 +89,14 @@ export const studySchema = z.object({
       .optional(),
     name: text,
     hash: text,
+    sourceText: z.string().max(25000000).optional(),
+    normalizedHash: z.string().default(''),
     format: text,
     rows: z
       .array(
         z.object({
           minute: num(0, 1440),
-          duration: num(1, 180),
+          duration: num(Number.EPSILON, 180),
           ghi: num(0, 1500),
           dni: num(0, 1600),
           dhi: num(0, 1500),
@@ -101,7 +104,14 @@ export const studySchema = z.object({
           diffusePpfd: num(0, 4000).optional(),
         }),
       )
-      .max(1440),
+      .max(1440)
+      .superRefine((rows, context) => {
+        try {
+          validateWeatherRows(rows, { allowEmpty: true });
+        } catch (error) {
+          context.addIssue({ code: z.ZodIssueCode.custom, message: error.message });
+        }
+      }),
   }),
   experimentSensors: z
     .array(
@@ -201,7 +211,7 @@ export function analysisKey(s) {
     s.array,
     s.site,
     s.analysis,
-    s.weather,
+    { ...s.weather, sourceText: undefined },
   ]);
 }
 export async function sha256(text) {
@@ -350,7 +360,11 @@ export function designIssues(s) {
     issues.push('Adjacent row envelopes overlap. Increase row pitch.');
   if (s.analysis.receiverHeight >= d.minHeight)
     issues.push('Receiver height must be below the lowest module edge.');
-  if ((d.footprintX * d.footprintY) / s.analysis.resolution ** 2 > 20000)
+  if (
+    Math.ceil(d.footprintX / s.analysis.resolution) *
+      Math.ceil(d.footprintY / s.analysis.resolution) >
+    20000
+  )
     issues.push('This grid exceeds 20,000 receivers. Increase grid spacing or reduce the array.');
   return issues;
 }

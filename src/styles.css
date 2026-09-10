@@ -1499,3 +1499,45 @@ progress {
 .receiver-instruments span {
   display: block;
 }
+
+.field-error {
+  color: #8d3026;
+}
+.input-wrap:has([aria-invalid='true']) {
+  border-color: #8d3026;
+}
+.receiver-inspector {
+  padding: 16px;
+  background: #f3f7ed;
+  border: 1px solid #c9d4c3;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+.receiver-inspector summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.receiver-inspector p {
+  margin: 8px 0;
+}
+.scene canvas:focus-visible {
+  outline: 3px solid #426cbd;
+  outline-offset: -3px;
+}
+.mobile-jump {
+  display: none;
+}
+@media (max-width: 900px) {
+  .mobile-jump {
+    display: block;
+    padding: 12px;
+    text-align: center;
+    color: #254d3f;
+    font-weight: 600;
+    background: #eaf1e3;
+  }
+  #design-drawing,
+  #study-controls {
+    scroll-margin-top: 80px;
+  }
+}

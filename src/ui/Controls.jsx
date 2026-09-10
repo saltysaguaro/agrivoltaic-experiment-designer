@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React, { useId, useState, useEffect } from 'react';
 import Info from './Info.jsx';
 import LocationSearch from './LocationSearch.jsx';
 import { receiverGridSpec } from '../domain/geometry.js';
@@ -18,8 +18,33 @@ export function Field({
   options,
   hint,
   help,
+  integer = false,
 }) {
   const id = useId();
+  const [draft, setDraft] = useState(String(value));
+  const [error, setError] = useState('');
+  useEffect(() => {
+    setDraft(String(value));
+    setError('');
+  }, [value]);
+  function commit() {
+    const number = Number(draft);
+    const message =
+      draft.trim() === '' || !Number.isFinite(number)
+        ? 'Enter a number.'
+        : min !== undefined && number < min
+          ? `Enter ${min} or more.`
+          : max !== undefined && number > max
+            ? `Enter ${max} or less.`
+            : integer && !Number.isInteger(number)
+              ? 'Enter a whole number.'
+              : '';
+    setError(message);
+    if (!message) {
+      setDraft(String(number));
+      onChange(number);
+    }
+  }
   return (
     <div className="field">
       <div className="field-label">
@@ -47,15 +72,54 @@ export function Field({
         <div className="input-wrap">
           <input
             id={id}
-            type={type}
-            value={value}
+            type={type === 'number' ? 'text' : type}
+            inputMode={type === 'number' ? 'decimal' : undefined}
+            role={type === 'number' ? 'spinbutton' : undefined}
+            aria-valuenow={
+              type === 'number' && draft.trim() && Number.isFinite(Number(draft))
+                ? Number(draft)
+                : undefined
+            }
+            aria-valuemin={min}
+            aria-valuemax={max}
+            value={type === 'number' ? draft : value}
             min={min}
             max={max}
             step={step}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${id}-error` : undefined}
+            onBlur={type === 'number' ? commit : undefined}
+            onKeyDown={(e) => {
+              if (type !== 'number') return;
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                commit();
+              }
+              if (e.key === 'Escape') {
+                setDraft(String(value));
+                setError('');
+              }
+              if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
+                e.preventDefault();
+                const n = Number(draft.trim() && Number.isFinite(Number(draft)) ? draft : value);
+                setDraft(
+                  String(
+                    Math.max(
+                      min ?? -Infinity,
+                      Math.min(
+                        max ?? Infinity,
+                        Number((n + (e.key === 'ArrowUp' ? step : -step)).toFixed(10)),
+                      ),
+                    ),
+                  ),
+                );
+                setError('');
+              }
+            }}
             onChange={(e) => {
               if (type === 'number') {
-                if (e.target.value !== '' && Number.isFinite(+e.target.value))
-                  onChange(+e.target.value);
+                setDraft(e.target.value);
+                setError('');
               } else onChange(e.target.value);
             }}
           />
@@ -63,6 +127,11 @@ export function Field({
         </div>
       )}
       {hint && <small>{hint}</small>}
+      {error && (
+        <small id={`${id}-error`} role="alert" className="field-error">
+          {error}
+        </small>
+      )}
     </div>
   );
 }
@@ -73,6 +142,8 @@ export default function Controls({
   result,
   busy,
   progress,
+  elapsed,
+  preview,
   run,
   cancel,
   uploadWeather,
@@ -100,6 +171,7 @@ export default function Controls({
       onChange={(v) => set(section, key, v)}
       unit={unit}
       options={options}
+      integer={['high', 'wide', 'tables', 'rows', 'groupSize'].includes(key)}
       {...extra}
     />
   );
@@ -386,9 +458,19 @@ export default function Controls({
           {busy && (
             <>
               <progress value={progress?.progress || 0} max="1" />
-              <small>{progress?.message || 'Preparing geometry…'}</small>
+              <small role="status">
+                {progress?.message || 'Preparing geometry…'} · {elapsed || 0} s elapsed
+              </small>
+              <small>Progress counts sky and sun directions; cached poses finish faster.</small>
             </>
           )}
+          <button className="secondary wide" disabled={busy} onClick={preview}>
+            Apply coarse preview settings
+          </button>
+          <small>
+            Changes to 145 patches, 3 m cells and 15-minute steps. Check sensor/plot cells after
+            changing resolution.
+          </small>
           <div className="info-box">
             Numerical receivers sample the horizontal light field. Place physical instruments in the
             next step.
@@ -437,6 +519,7 @@ export default function Controls({
                     min={1}
                     max={k === 'column' ? receiver.nx : receiver.ny}
                     step={1}
+                    integer
                     help="Select a receiver-grid cell, counted from the negative along-row / across-row edge. The instrument snaps to its centre."
                     onChange={(value) =>
                       set('experimentSensors', i, { ...v, grid: { ...v.grid, [k]: value - 1 } })
@@ -470,6 +553,8 @@ export default function Controls({
                     key={k}
                     label={k === 'azimuth' ? 'Orientation azimuth' : 'Sensor tilt'}
                     unit="°"
+                    min={0}
+                    max={k === 'azimuth' ? 360 : 180}
                     value={v[k] ?? 0}
                     onChange={(value) => set('experimentSensors', i, { ...v, [k]: value })}
                   />
@@ -534,6 +619,7 @@ export default function Controls({
                       min={1}
                       max={k.startsWith('column') ? receiver.nx : receiver.ny}
                       step={1}
+                      integer
                       help="Crop boundaries follow whole receiver cells. Columns run along the PV rows; receiver rows run across them. Plots stay inside the grid."
                       onChange={(value) =>
                         set('crops', i, {
@@ -550,7 +636,7 @@ export default function Controls({
                 </small>
                 <div className="info-box">
                   {stats
-                    ? `DLI ${stats.mean.toFixed(1)} ± ${stats.sd.toFixed(1)} · median ${stats.median.toFixed(1)} · range ${stats.min.toFixed(1)}–${stats.max.toFixed(1)} · sunlight ${stats.sunlight.toFixed(1)}% · ${stats.count} receivers`
+                    ? `${result.estimated ? 'Estimated DLI' : 'DLI'} ${stats.mean.toFixed(1)} ± ${stats.sd.toFixed(1)} · median ${stats.median.toFixed(1)} · range ${stats.min.toFixed(1)}–${stats.max.toFixed(1)} · sunlight ${stats.sunlight.toFixed(1)}% · ${stats.count} receivers`
                     : 'No receiver samples in this plot.'}
                 </div>
                 <button className="text-button danger" onClick={() => removePlot(i)}>

@@ -70,7 +70,7 @@ The CSV template contains placeholder nighttime zeros throughout and **must be p
 - Shared broadband/PAR visibility. Default estimated PAR: 0.50 broadband fraction, 4.57 µmol/J, Spitters daily diffuse partition. Measured total/diffuse PPFD are supported.
 - Study schema, software version, actual backend, weather SHA-256 and analysis identity are retained.
 
-**Development model.** CPU finite occlusion matched Radiance on 45,990 rays across nine cases. This comparison uses identical geometry, rays and shared source weights. It does not independently validate the Perez source distribution, solar position, integrated daily energy, GPU execution, reflections or field agreement. Opaque modules and square posts only; flat ground; no vegetation occlusion or reflected radiation. Hardware WebGPU parity and real-browser interaction testing have not yet been performed; simulated-DOM integration tests cover first-click calculation, help and view selection. See [architecture](docs/ARCHITECTURE.md), [status](docs/STATUS.md), [comparison results](docs/radiance-validation.json), and the [original modeling brief](docs/modeling-brief.md).
+**Development model.** CPU finite occlusion matched Radiance on 45,990 rays across nine cases. This comparison uses identical geometry, rays and shared source weights. It does not independently validate the Perez source distribution, solar position, integrated daily energy, GPU execution, reflections or field agreement. Opaque modules and square posts only; flat ground; no vegetation occlusion or reflected radiation. Browser WebGPU/CPU parity passed on five small rack designs, including persistent-cache reuse and device-loss fallback. Forty-four convergence sweeps cover two locations and two seasons. These bounded checks do not replace independent physical or field validation. Real-browser checks cover numeric entry, keyboard receiver inspection, stable rendering and mobile navigation. See [architecture](docs/ARCHITECTURE.md), [status](docs/STATUS.md), [comparison results](docs/radiance-validation.json), and the [original modeling brief](docs/modeling-brief.md).
 
 ## Verify
 
@@ -79,13 +79,18 @@ npm test
 npm run build
 npm run archive:verify
 npm run validate:radiance  # requires rtrace and oconv on PATH
+npm run validate:convergence  # writes measured sky/time/grid/pose sensitivity
 ```
 
 The Radiance harness returns a nonzero status when the tools are unavailable or comparisons fail. It writes its measured results to `docs/radiance-validation.json`.
 
+For real WebGPU regression checks, run `npm run dev`, open `http://127.0.0.1:5173/validation/`, and select **Run GPU / CPU checks**. The local harness uses independent workers and isolated cache keys; it never modifies the saved Study. Its development page is not included in the production bundle. Current results are in [webgpu-validation.json](docs/webgpu-validation.json) and [convergence-validation.json](docs/convergence-validation.json).
+
+Weather JSON retains the original source text and its SHA-256, plus a separate hash of normalized solver intervals. Existing records without the original source remain supported and are labeled as legacy. Data CSV appends `record=metadata` rows (`id` is the metadata key and `type` is its value). SVG/PNG figures visibly include provenance; SVG additionally embeds structured metadata. See [repair notes](docs/REVIEW-FIXES.md).
+
 ## GitHub Pages
 
-The workflow in `.github/workflows/pages.yml` tests and builds the application on pushes to `main`, then deploys `dist` to GitHub Pages. In repository **Settings → Pages**, choose **GitHub Actions** as the source. Relative asset URLs support `https://saltysaguaro.github.io/agrivoltaic-experiment-designer/` without a server or secret keys. Only the new application's static output is deployed; the archive stays in source control.
+The workflow in `.github/workflows/pages.yml` tests and builds pull requests and pushes to `main`, then deploys only from `main` using `dist` to GitHub Pages. In repository **Settings → Pages**, choose **GitHub Actions** as the source. Relative asset URLs support `https://saltysaguaro.github.io/agrivoltaic-experiment-designer/` without a server or secret keys. Only the new application's static output is deployed; the archive stays in source control.
 
 This checkout has not been pushed or published by the implementation task.
 

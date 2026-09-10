@@ -23,6 +23,14 @@ export default defineConfig({
   worker: { format: 'es' },
   build: {
     target: 'es2022',
-    rollupOptions: { output: { manualChunks: { three: ['three', 'three-mesh-bvh'] } } },
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.endsWith('/three/build/three.core.js')) return 'three-core';
+          if (id.endsWith('/three/build/three.module.js')) return 'three-renderer';
+          if (id.includes('/three-mesh-bvh/')) return 'mesh-bvh';
+        },
+      },
+    },
   },
 });

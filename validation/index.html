@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Scientific regression checks</title>
+  <style>
+    body {
+      max-width: 960px;
+      margin: 32px auto;
+      padding: 20px;
+      font: 16px/1.5 system-ui;
+    }
+    button {
+      padding: 12px;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+    }
+  </style>
+  <h1>Scientific regression checks</h1>
+  <p>
+    Local validation only. Compares all receiver cells on five small rack designs, tests cache reuse
+    and device-loss fallback. No study storage is modified. This does not establish independent sky
+    or field accuracy.
+  </p>
+  <button id="run">Run GPU / CPU checks</button>
+  <p id="status" role="status">Ready</p>
+  <pre id="results"></pre>
+  <h2>Publication figure sample</h2>
+  <div id="figure"></div>
+  <script type="module" src="./browser.js"></script>
+</html>

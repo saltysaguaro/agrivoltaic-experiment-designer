@@ -1,4 +1,5 @@
-import { sha256 } from '../domain/study.js';
+import { validateWeatherRows } from './weather-validation.js';
+import { weatherRecord } from './weather-record.js';
 function csvLine(line) {
   return (line.match(/("(?:[^"]|"")*"|[^,]*)(,|$)/g) || [])
     .filter((v, i, a) => i < a.length - 1 || v)
@@ -69,38 +70,13 @@ export async function parseWeather(text, name, date) {
   }
   rows.sort((a, b) => a.minute - b.minute);
   if (!rows.length) throw Error('No weather records for the selected date.');
-  let end = 0;
-  for (const r of rows) {
-    if (
-      ![r.minute, r.duration, r.ghi, r.dni, r.dhi].every(Number.isFinite) ||
-      r.minute < 0 ||
-      r.minute + r.duration > 1440 ||
-      r.duration <= 0 ||
-      r.minute < end
-    )
-      throw Error('Weather contains missing values, overlapping intervals, or invalid times.');
-    if (r.ghi < 0 || r.ghi > 1500 || r.dni < 0 || r.dni > 1600 || r.dhi < 0 || r.dhi > r.ghi)
-      throw Error('Weather irradiance must be valid W/m² and 0 ≤ DHI ≤ GHI.');
-    if (r.ppfd !== undefined && (!Number.isFinite(r.ppfd) || r.ppfd < 0 || r.ppfd > 4000))
-      throw Error('PPFD must be 0–4000 µmol m⁻² s⁻¹.');
-    if (
-      r.diffusePpfd !== undefined &&
-      (r.ppfd === undefined ||
-        !Number.isFinite(r.diffusePpfd) ||
-        r.diffusePpfd < 0 ||
-        r.diffusePpfd > r.ppfd)
-    )
-      throw Error('Diffuse PPFD requires total PPFD and must be between zero and total PPFD.');
-    end = r.minute + r.duration;
-  }
-  if (rows.some((r) => r.ppfd !== undefined) && rows.some((r) => r.ppfd === undefined))
-    throw Error('Provide PPFD for every interval or omit the PPFD column.');
-  if (rows[0].minute !== 0 || end !== 1440 || rows.reduce((n, r) => n + r.duration, 0) !== 1440)
-    throw Error(
-      'A daily analysis requires complete, contiguous 24-hour weather coverage, including nighttime zeros.',
-    );
+  validateWeatherRows(rows);
   return {
-    weather: { name, hash: await sha256(text), format: epw ? 'EPW' : tmy ? 'TMY3' : 'CSV', rows },
+    weather: {
+      name,
+      ...(await weatherRecord(rows, text)),
+      format: epw ? 'EPW' : tmy ? 'TMY3' : 'CSV',
+    },
     site,
   };
 }

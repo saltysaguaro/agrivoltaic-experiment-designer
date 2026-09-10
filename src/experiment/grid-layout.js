@@ -85,12 +85,12 @@ export function receiverLines(study, grid = receiverGridSpec(study)) {
 }
 // Positions below are glyph offsets, not changes to installation coordinates.
 // Up to nine individual dots; denser cells use one larger, readable count badge.
-export function sensorMarkers(study) {
+export function sensorMarkers(study, { profile = false } = {}) {
   const g = receiverGridSpec(study),
     groups = new Map();
   for (const sensor of study.experimentSensors) {
     const cell = sensor.grid || cellAt(study, sensor, g),
-      key = `${cell.column}:${cell.row}`;
+      key = `${cell.column}:${cell.row}${profile ? ':' + sensor.z : ''}`;
     if (!groups.has(key)) groups.set(key, { cell, sensors: [] });
     groups.get(key).sensors.push(sensor);
   }

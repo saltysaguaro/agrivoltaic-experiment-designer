@@ -1,3 +1,5 @@
+import { getPose } from '../domain/geometry.js';
+import { provenanceRecord } from './provenance.js';
 import { dimensions, VERSION } from '../domain/study.js';
 import { figureSvg, escapeXml as e } from './figures.js';
 import { plotStats, rowRelative, nearestCell } from '../experiment/layout.js';
@@ -41,8 +43,28 @@ export function methodsRows(s, r) {
     ['Module gap', `${s.module.gap} m`],
     ['Racking', s.racking.type],
     ['Axis / centre height', `${s.racking.height} m`],
-    ['Fixed tilt / tracker limit', `${s.racking.tilt}° / ±${s.racking.limit}°`],
-    ['Backtracking', String(s.racking.backtracking)],
+    [
+      'Effective fixed tilt',
+      ['single-axis', 'dual-axis'].includes(s.racking.type)
+        ? 'Not applicable (tracking)'
+        : `${getPose(s).tilt}°`,
+    ],
+    [
+      'Tracker rotation limit',
+      ['single-axis', 'dual-axis'].includes(s.racking.type)
+        ? `±${s.racking.limit}°`
+        : 'Not applicable',
+    ],
+    [
+      'Tracker preview tilt',
+      ['single-axis', 'dual-axis'].includes(s.racking.type)
+        ? `${getPose(s).tilt}° (display only)`
+        : 'Not applicable',
+    ],
+    [
+      'Backtracking',
+      s.racking.type === 'single-axis' ? String(s.racking.backtracking) : 'Not applicable',
+    ],
     ['Table', `${s.table.high} across × ${s.table.wide} along; ${s.table.orientation}`],
     ['Tables per row / gap', `${s.row.tables} / ${s.row.tableGap} m`],
     [
@@ -100,7 +122,18 @@ export function methodsRows(s, r) {
     ],
     ['Weather attribution', s.weather.provenance?.attribution || 'User-supplied or synthetic'],
     ['Weather request', s.weather.provenance?.url || 'Local'],
-    ['Weather SHA-256', r?.weatherHash || s.weather.hash || 'Not calculated'],
+    ['Weather source SHA-256', s.weather.hash || 'Unavailable (synthetic or legacy)'],
+    ['Weather inputs SHA-256', r?.weatherInputHash || s.weather.normalizedHash || 'Not calculated'],
+    [
+      'Weather source snapshot',
+      s.weather.sourceText !== undefined
+        ? 'Retained in study JSON'
+        : 'Unavailable (synthetic or legacy)',
+    ],
+    [
+      'Weather input hash encoding',
+      'JSON arrays in interval order: minute, duration, GHI, DNI, DHI, PPFD or null, diffuse PPFD or null',
+    ],
     ['Solver', r?.backend || 'Not calculated'],
     ['Sky', 'Perez 1993 relative sky distribution normalized to DHI'],
     ['Sky subdivision', `Reinhart ${s.analysis.patches} patches`],
@@ -149,7 +182,7 @@ export function reportHtml(s, r) {
         ]
       : []),
   ];
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${e(s.metadata.title)} · Methods</title><style>body{max-width:1000px;margin:40px auto;font:14px/1.5 Arial;color:#203b37}h1{font-size:28px}h2{margin-top:30px}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:12px}td,th{padding:8px;border-bottom:1px solid #cbd5ce;text-align:left;overflow-wrap:anywhere}th{background:#eef2ed}svg{width:100%;height:auto}figure{margin:20px 0;break-inside:avoid}button{padding:12px 20px;background:#183d38;color:white;border:0;cursor:pointer}.note{background:#fff4d7;padding:14px}@page{size:A4 landscape;margin:14mm}@media print{body{margin:0;max-width:none}button{display:none}figure{break-before:page}thead{display:table-header-group}tr{break-inside:avoid}}</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p>Agrivoltaic experimental design · Methods package</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p><h2>System and modeling parameters</h2>${table(['Parameter', 'Value'], methodsRows(s, r))}<h2>Physical field instruments</h2>${table(
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${e(s.metadata.title)} · Methods</title><style>body{max-width:1000px;margin:40px auto;font:14px/1.5 Arial;color:#203b37}h1{font-size:28px}h2{margin-top:30px}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:12px}td,th{padding:8px;border-bottom:1px solid #cbd5ce;text-align:left;overflow-wrap:anywhere}th{background:#eef2ed}svg{width:100%;height:auto}figure{margin:20px 0;break-inside:avoid}button{padding:12px 20px;background:#183d38;color:white;border:0;cursor:pointer}.note{background:#fff4d7;padding:14px}@page{size:A4 landscape;margin:14mm}@media print{body{margin:0;max-width:none}button{display:none}figure{break-before:page}figure svg{max-height:158mm;max-width:100%;width:auto;display:block;margin:auto}thead{display:table-header-group}tr{break-inside:avoid}}</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p>Agrivoltaic experimental design · Methods package</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p><h2>System and modeling parameters</h2>${table(['Parameter', 'Value'], methodsRows(s, r))}<h2>Physical field instruments</h2>${table(
     [
       'ID / type',
       'E / N / Z (m)',
@@ -172,7 +205,7 @@ export function reportHtml(s, r) {
       'Treatment / replicate',
       'Area (m²)',
       'Starting column / row; columns × rows',
-      'Mean / median / SD DLI (mol/m²/day)',
+      `Mean / median / SD ${r?.estimated ? 'estimated DLI' : 'DLI'} (mol/m²/day)`,
       'Range DLI / relative sunlight',
     ],
     s.crops.map((c) => {
@@ -260,6 +293,8 @@ export function exportCsv(s, r) {
       `width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}`,
     ]);
   }
+  for (const [key, value] of Object.entries(provenanceRecord(s, r)))
+    rows.push(['metadata', key, Array.isArray(value) ? value.join('; ') : value]);
   return csv(rows);
 }
 export async function pngFigure(svg) {
@@ -269,10 +304,23 @@ export async function pngFigure(svg) {
     img.src = url;
     await img.decode();
     const canvas = document.createElement('canvas');
-    canvas.width = 3000;
-    canvas.height = 1800;
-    canvas.getContext('2d').drawImage(img, 0, 0, 3000, 1800);
-    return await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    const scale = Math.min(
+      3,
+      16000 / img.naturalHeight,
+      Math.sqrt(16000000 / (img.naturalWidth * img.naturalHeight)),
+    );
+    canvas.width = Math.round(img.naturalWidth * scale);
+    canvas.height = Math.round(img.naturalHeight * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    return await new Promise((resolve, reject) =>
+      canvas.toBlob(
+        (blob) =>
+          blob
+            ? resolve(blob)
+            : reject(Error('PNG exceeds this browser’s canvas capacity. Export SVG instead.')),
+        'image/png',
+      ),
+    );
   } finally {
     URL.revokeObjectURL(url);
   }

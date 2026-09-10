@@ -1,6 +1,6 @@
 {
   "name": "agrivoltaic-experiment-designer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,8 +11,9 @@
     "archive:verify": "node scripts/archive.mjs",
     "archive:lock": "node scripts/archive.mjs --lock",
     "validate:radiance": "node scripts/radiance-validation.mjs",
-    "format": "prettier --write src tests scripts vite.config.js",
-    "format:check": "prettier --check src tests scripts vite.config.js"
+    "format": "prettier --write src tests scripts validation vite.config.js",
+    "format:check": "prettier --check src tests scripts validation vite.config.js",
+    "validate:convergence": "node scripts/convergence-validation.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",

@@ -1,4 +1,5 @@
-import { sha256 } from '../domain/study.js';
+import { weatherRecord } from './weather-record.js';
+import { validateWeatherRows } from './weather-validation.js';
 const HOUR = 3600000,
   DAY = 24 * HOUR;
 export const WEATHER_ATTRIBUTION =
@@ -93,6 +94,7 @@ export function normalizeWeatherResponse(data, request) {
     throw Error(
       'Weather is not available for the complete selected day. Choose another date or upload weather.',
     );
+  validateWeatherRows(rows);
   return rows;
 }
 export async function downloadWeather(
@@ -121,7 +123,7 @@ export async function downloadWeather(
   return {
     mode: 'automatic',
     name: `Open-Meteo · ${request.model} · ${s.analysis.date}`,
-    hash: await sha256(raw),
+    ...(await weatherRecord(rows, raw)),
     format: 'Open-Meteo',
     rows,
     requestKey: request.key,

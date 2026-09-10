@@ -1,3 +1,5 @@
+import { validateWeatherRows, canonicalWeatherRows } from './weather-validation.js';
+import { verifyWeatherRecord } from './weather-record.js';
 import {
   buildGeometry,
   simulationGeometry,
@@ -28,15 +30,7 @@ export function integrateSources(s) {
     zenith = 0,
     dayMinutes = 0,
     maxClosure = 0;
-  let end = 0;
-  for (const w of weather) {
-    if (w.minute !== end || w.duration <= 0 || w.minute + w.duration > 1440)
-      throw Error('Weather must contain contiguous, ordered intervals covering 24 hours.');
-    end = w.minute + w.duration;
-  }
-  if (end !== 1440) throw Error('A complete 24-hour weather day is required.');
-  if (weather.some((w) => w.ppfd !== undefined) && weather.some((w) => w.ppfd === undefined))
-    throw Error('PPFD must be supplied for every interval or omitted.');
+  validateWeatherRows(weather);
   for (const w of weather) {
     if (w.dhi > w.ghi) throw Error('DHI exceeds GHI.');
     const sub = [];
@@ -71,6 +65,7 @@ export function integrateSources(s) {
         ppfd: w.ppfd,
         diffusePpfd: w.diffusePpfd,
         weather: w,
+        weatherCos: cosIntegral,
       });
     }
   }
@@ -93,9 +88,7 @@ export function integrateSources(s) {
       const total = (v.ppfd * v.duration * 60) / 1e6;
       v.parDiffuse = total * fd;
       const w = v.weather;
-      const wCos = sum(
-        steps.filter((q) => q.weather === w).map((q) => Math.max(0, q.sun.z) * q.duration),
-      );
+      const wCos = v.weatherCos;
       v.parDirect = wCos
         ? (((v.ppfd * (1 - fd) * w.duration * 60) / 1e6) * Math.max(0, v.sun.z) * v.duration) / wCos
         : 0;
@@ -119,9 +112,18 @@ export function integrateSources(s) {
     warnings.push('Low mean solar elevation: the default broadband-to-PAR fraction is uncertain.');
   return { steps, patches, open, openDli, measured, warnings };
 }
-export async function calculateDay(s, onProgress = () => {}) {
+export async function calculateDay(
+  s,
+  onProgress = () => {},
+  {
+    createGpu = () => WebGpuIrradianceEngine.create(),
+    diffusePoseStep = 2,
+    cache = { get: getCached, put: putCached },
+  } = {},
+) {
   const issues = designIssues(s);
   if (issues.length) throw Error(issues.join(' '));
+  await verifyWeatherRecord(s.weather);
   const start = performance.now(),
     source = integrateSources(s),
     grid = receiverGrid(s),
@@ -131,40 +133,54 @@ export async function calculateDay(s, onProgress = () => {}) {
   let engine, backend;
   try {
     if (s.analysis.backend === 'cpu') throw Error('CPU selected');
-    engine = await WebGpuIrradianceEngine.create();
+    engine = await createGpu();
   } catch (e) {
     if (s.analysis.backend === 'gpu')
       warnings.push(`WebGPU unavailable (${e.message}); used CPU reference.`);
     engine = new CpuBvhIrradianceEngine();
   }
   backend = engine.name;
+  async function fallback(error) {
+    if (engine.name === 'CPU MeshBVH') throw error;
+    engine.dispose();
+    warnings.push(`GPU execution failed; CPU fallback used: ${error.message}`);
+    engine = new CpuBvhIrradianceEngine();
+    backend = 'WebGPU + CPU fallback';
+    await engine.initializeGeometry(currentGeometry);
+  }
+  const timings = { geometryMs: 0, visibilityMs: 0 };
   let currentGeometry = null,
     currentPose = null;
   async function initialize(pose) {
     if (currentPose === pose.key) return;
+    const started = performance.now();
     currentPose = pose.key;
     if (currentGeometry) currentGeometry.dispose();
     const group = buildGeometry(s, 'array', pose);
     currentGeometry = simulationGeometry(group);
     disposeGroup(group);
-    await engine.initializeGeometry(currentGeometry);
+    try {
+      await engine.initializeGeometry(currentGeometry);
+    } catch (error) {
+      await fallback(error);
+    }
+    timings.geometryMs += performance.now() - started;
   }
   async function visibility(directions) {
+    const started = performance.now();
     try {
       return await engine.visibility(grid.points, directions);
     } catch (e) {
-      if (engine.name === 'CPU MeshBVH') throw e;
-      engine.dispose();
-      warnings.push(`GPU execution failed; CPU fallback used: ${e.message}`);
-      engine = new CpuBvhIrradianceEngine();
-      backend = 'WebGPU + CPU fallback';
-      await engine.initializeGeometry(currentGeometry);
-      return engine.visibility(grid.points, directions);
+      await fallback(e);
+      return await engine.visibility(grid.points, directions);
+    } finally {
+      timings.visibilityMs += performance.now() - started;
     }
   }
   const geometryHash = await sha256(
     JSON.stringify([
       VERSION,
+      diffusePoseStep,
       s.module,
       s.racking,
       s.table,
@@ -181,7 +197,7 @@ export async function calculateDay(s, onProgress = () => {}) {
     const groups = new Map();
     for (const step of source.steps) {
       if (!step.direct && !step.diffuse && !step.parDiffuse && !step.parDirect) continue;
-      const pose = getPose(s, step.sun, true);
+      const pose = getPose(s, step.sun, diffusePoseStep);
       if (!groups.has(pose.key))
         groups.set(pose.key, {
           pose,
@@ -201,16 +217,20 @@ export async function calculateDay(s, onProgress = () => {}) {
       });
     }
     let done = 0,
-      total = groups.size + source.steps.filter((v) => v.direct || v.parDirect).length;
+      total =
+        groups.size * source.patches.length +
+        source.steps.filter((v) => v.direct || v.parDirect).length;
     for (const group of groups.values()) {
       const key = `${geometryHash}:${engine.name}:${group.pose.key}`,
-        existing = await getCached(key);
+        existing = await cache.get(key).catch(() => null);
       let bits = existing;
       if (bits) cached++;
       else {
         await initialize(group.pose);
         bits = await visibility(source.patches.map((p) => p.direction));
-        await putCached(key, bits);
+        // The backend may change after a failed GPU dispatch. Do not label CPU
+        // visibility as GPU data in a later run.
+        await cache.put(`${geometryHash}:${engine.name}:${group.pose.key}`, bits).catch(() => {});
       }
       const words = Math.ceil(source.patches.length / 32);
       for (let i = 0; i < grid.points.length; i++)
@@ -219,7 +239,11 @@ export async function calculateDay(s, onProgress = () => {}) {
             energy[i] += group.sky[j];
             dli[i] += group.par[j];
           }
-      onProgress({ progress: ++done / total, message: 'Integrating diffuse sky' });
+      done += source.patches.length;
+      onProgress({
+        progress: done / total,
+        message: `${engine.name}: integrating diffuse sky (${cached} cached poses)`,
+      });
     }
     for (const step of source.steps) {
       if (!step.direct && !step.parDirect) continue;
@@ -242,7 +266,14 @@ export async function calculateDay(s, onProgress = () => {}) {
     return {
       key: analysisKey(s),
       studyHash: await sha256(analysisKey(s)),
-      weatherHash: s.weather.hash || (await sha256(JSON.stringify(sampleWeather(s)))),
+      weatherHash:
+        s.weather.hash ||
+        (await sha256(
+          canonicalWeatherRows(s.weather.rows.length ? s.weather.rows : sampleWeather(s)),
+        )),
+      weatherInputHash: await sha256(
+        canonicalWeatherRows(s.weather.rows.length ? s.weather.rows : sampleWeather(s)),
+      ),
       date: s.analysis.date,
       cells,
       grid: { ...grid, points: undefined },
@@ -254,6 +285,7 @@ export async function calculateDay(s, onProgress = () => {}) {
       createdAt: new Date().toISOString(),
       seconds: (performance.now() - start) / 1000,
       cached,
+      timings,
       warnings,
       meanSunlight: sum(cells.map((c) => c.sunlight)) / cells.length,
       meanShade: sum(cells.map((c) => c.shade)) / cells.length,

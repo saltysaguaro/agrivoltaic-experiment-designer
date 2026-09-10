@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildGeometry, disposeGroup, axes } from '../domain/geometry.js';
+import { buildGeometry, disposeGroup, axes, receiverGridSpec } from '../domain/geometry.js';
 import { heatColor, figureSvg } from '../report/figures.js';
-import { fitOrthographic, cameraSnapshot, restoreCamera } from './camera.js';
+import { fitOrthographic, displayBounds } from './camera.js';
 import { groundGrid } from './ground-grid.js';
-import { receiverGridSpec } from '../domain/geometry.js';
 import { receiverLines, sensorMarkers, cellAt, cellCenter } from '../experiment/grid-layout.js';
+import ReceiverInspector from './ReceiverInspector.jsx';
+
 export default function Scene({
   study,
   scope,
@@ -18,78 +19,232 @@ export default function Scene({
   placing,
   resetKey,
 }) {
-  const savedCamera = useRef(null);
-  const [hover, setHover] = useState(null);
+  const host = useRef(null),
+    runtime = useRef(null),
+    latest = useRef(null);
+  const [failed, setFailed] = useState(false),
+    [hover, setHover] = useState(null);
+  const [selectedCell, setSelectedCell] = useState({ column: 0, row: 0 });
+  const [inspectorOpen, setInspectorOpen] = useState(false);
   const scopeKey = ['array', 'environment', 'irradiance', 'sensors', 'crops', 'report'].includes(
     scope,
   )
     ? 'array'
     : scope;
-  const host = useRef(),
-    [failed, setFailed] = useState(false),
-    callback = useRef(onPlace);
-  callback.current = onPlace;
+  latest.current = { study, result, scopeKey, view, placing, onPlace, selectedCell };
+  const structureKey = JSON.stringify([
+    study.module.length,
+    study.module.width,
+    study.module.thickness,
+    study.module.gap,
+    study.racking,
+    study.table,
+    study.row,
+    study.rowPair.pitch,
+    study.array,
+    scopeKey,
+  ]);
+  const overlayKey = JSON.stringify([
+    study.analysis.resolution,
+    study.analysis.receiverHeight,
+    study.experimentSensors.map((s) => [s.id, s.x, s.y, s.z, s.grid]),
+    study.crops.map((p) => [p.id, p.x, p.y, p.width, p.length, p.grid]),
+  ]);
+
+  // One renderer, camera and controls for the lifetime of the mounted view.
   useEffect(() => {
-    if (!host.current) return;
-    setHover(null);
-    let renderer, observer, controls;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#f1f4ee');
-    scene.up.set(0, 0, 1);
-    const group = buildGeometry(study, scope);
-    scene.add(group);
-    const bounds = new THREE.Box3().setFromObject(group),
-      center = bounds.getCenter(new THREE.Vector3()),
-      size = bounds.getSize(new THREE.Vector3());
-    const extent = Math.max(size.x, size.y, size.z, 1) * 1.4;
+    let renderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer = new THREE.WebGLRenderer({ antialias: true });
     } catch {
       setFailed(true);
-      disposeGroup(group);
       return;
     }
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(host.current.clientWidth, host.current.clientHeight);
-    host.current.appendChild(renderer.domElement);
+    const canvas = renderer.domElement;
+    canvas.tabIndex = 0;
+    canvas.setAttribute('role', 'group');
+    canvas.setAttribute(
+      'aria-label',
+      'Field drawing. Arrow keys inspect receiver cells. Enter places an item when placement is enabled.',
+    );
+    host.current.appendChild(canvas);
+    const camera = new THREE.OrthographicCamera();
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = false;
+    controls.screenSpacePanning = true;
+    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
     scene.add(new THREE.HemisphereLight(0xffffff, 0x8b9f84, 2.6));
     const sun = new THREE.DirectionalLight(0xffffff, 2.4);
     sun.position.set(-20, -20, 40);
     scene.add(sun);
-    group.traverse((o) => {
-      if (!o.isMesh) return;
-      const edge = new THREE.LineSegments(
-        new THREE.EdgesGeometry(o.geometry),
-        new THREE.LineBasicMaterial({
-          color: o.userData.kind === 'module' ? 0x9cbcb6 : 0x516461,
-          transparent: true,
-          opacity: 0.7,
-        }),
+    const rt = { scene, renderer, camera, controls, group: null, overlay: null, framing: null };
+    runtime.current = rt;
+    rt.draw = () => renderer.render(scene, camera);
+    controls.addEventListener('change', () => {
+      setHover(null);
+      rt.draw();
+    });
+    rt.resize = () => {
+      const w = Math.max(1, host.current.clientWidth),
+        h = Math.max(1, host.current.clientHeight);
+      renderer.setSize(w, h);
+      if (rt.framing) {
+        const half = (rt.framing.top - rt.framing.bottom) / 2;
+        Object.assign(camera, {
+          left: (-half * w) / h,
+          right: (half * w) / h,
+          top: half,
+          bottom: -half,
+        });
+        camera.updateProjectionMatrix();
+      }
+      rt.draw();
+    };
+    const observer = new ResizeObserver(rt.resize);
+    observer.observe(host.current);
+    const pointAt = (e) => {
+      const rect = canvas.getBoundingClientRect(),
+        ray = new THREE.Raycaster();
+      ray.setFromCamera(
+        new THREE.Vector2(
+          ((e.clientX - rect.left) / rect.width) * 2 - 1,
+          (-(e.clientY - rect.top) / rect.height) * 2 + 1,
+        ),
+        camera,
       );
-      o.add(edge);
-      if (o.userData.kind === 'module') {
-        const { width, height, depth } = o.geometry.parameters;
-        const points = [];
-        for (let i = 1; i < 6; i++) {
-          points.push(
-            new THREE.Vector3(-width / 2 + (i * width) / 6, -height / 2, depth / 2 + 0.001),
-            new THREE.Vector3(-width / 2 + (i * width) / 6, height / 2, depth / 2 + 0.001),
-          );
-        }
-        for (let i = 1; i < 12; i++) {
-          points.push(
-            new THREE.Vector3(-width / 2, -height / 2 + (i * height) / 12, depth / 2 + 0.001),
-            new THREE.Vector3(width / 2, -height / 2 + (i * height) / 12, depth / 2 + 0.001),
-          );
-        }
-        o.add(
-          new THREE.LineSegments(
-            new THREE.BufferGeometry().setFromPoints(points),
-            new THREE.LineBasicMaterial({ color: 0x88aca8, transparent: true, opacity: 0.35 }),
+      return ray.ray.intersectPlane(
+        new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
+        new THREE.Vector3(),
+      );
+    };
+    let down;
+    canvas.addEventListener('pointerdown', (e) => {
+      down = [e.clientX, e.clientY];
+    });
+    canvas.addEventListener('pointerup', (e) => {
+      const v = latest.current;
+      if (
+        !v.placing ||
+        v.view === 'profile' ||
+        !down ||
+        Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5
+      )
+        return;
+      const p = pointAt(e);
+      if (p) v.onPlace?.(p);
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      const v = latest.current;
+      if (v.scopeKey !== 'array' || e.buttons || v.view === 'profile') {
+        setHover(null);
+        return;
+      }
+      const point = pointAt(e),
+        g = receiverGridSpec(v.study);
+      const cell = point && cellAt(v.study, point, g, false);
+      if (!cell) {
+        setHover(null);
+        return;
+      }
+      const index = cell.row * g.nx + cell.column,
+        rect = canvas.getBoundingClientRect();
+      setHover({
+        index,
+        gridCell: cell,
+        cell: v.result?.cells[index] || {
+          ...cellCenter(v.study, cell, g),
+          z: v.study.analysis.receiverHeight,
+        },
+        sensors: v.study.experimentSensors.filter(
+          (s) => s.grid?.column === cell.column && s.grid?.row === cell.row,
+        ),
+        left: Math.max(8, Math.min(e.clientX - rect.left + 14, rect.width - 235)),
+        top: Math.max(8, Math.min(e.clientY - rect.top + 14, rect.height - 290)),
+      });
+    });
+    canvas.addEventListener('pointerleave', (e) => {
+      if (!e.relatedTarget?.closest?.('.receiver-tooltip')) setHover(null);
+    });
+    canvas.addEventListener('keydown', (e) => {
+      const v = latest.current;
+      if (v.scopeKey !== 'array') return;
+      const g = receiverGridSpec(v.study),
+        cell = { ...v.selectedCell };
+      if (e.key === 'Enter' && v.placing) {
+        e.preventDefault();
+        v.onPlace?.(
+          cellCenter(
+            v.study,
+            { column: Math.min(cell.column, g.nx - 1), row: Math.min(cell.row, g.ny - 1) },
+            g,
           ),
         );
+        return;
       }
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+      e.preventDefault();
+      cell.column = Math.max(
+        0,
+        Math.min(
+          g.nx - 1,
+          cell.column + (e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0),
+        ),
+      );
+      cell.row = Math.max(
+        0,
+        Math.min(g.ny - 1, cell.row + (e.key === 'ArrowUp' ? 1 : e.key === 'ArrowDown' ? -1 : 0)),
+      );
+      setSelectedCell(cell);
+      setInspectorOpen(true);
     });
+    return () => {
+      observer.disconnect();
+      controls.dispose();
+      if (rt.group) disposeGroup(rt.group);
+      if (rt.overlay) disposeOverlay(rt.overlay);
+      renderer.dispose();
+      canvas.remove();
+      runtime.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const rt = runtime.current;
+    if (!rt) return;
+    setHover(null);
+    const { scene, camera, controls } = rt;
+    if (rt.structureKey !== structureKey) {
+      if (rt.group) {
+        scene.remove(rt.group);
+        disposeGroup(rt.group);
+      }
+      const group = buildGeometry(study, scopeKey);
+      decorate(group);
+      rt.group = group;
+      scene.add(group);
+      rt.structureKey = structureKey;
+    }
+    const group = rt.group;
+    if (rt.overlay) {
+      scene.remove(rt.overlay);
+      disposeOverlay(rt.overlay);
+    }
+    const overlay = new THREE.Group();
+    rt.overlay = overlay;
+    scene.add(overlay);
+    group.children
+      .filter((o) => o.userData.kind === 'module')
+      .forEach((o) => {
+        const transparent =
+          scope === 'irradiance' || (result && metric !== 'none' && scopeKey === 'array');
+        o.material.transparent = Boolean(transparent);
+        o.material.opacity = transparent ? 0.2 : 1;
+        o.material.depthWrite = !transparent;
+      });
     if (scope !== 'module' && showGrid) {
       const ground = groundGrid(study, group.userData);
       const grid = new THREE.LineSegments(
@@ -100,7 +255,7 @@ export default function Scene({
       );
       // Small display offset avoids z-fighting with the light-map overlay.
       grid.position.z = 0.02;
-      scene.add(grid);
+      overlay.add(grid);
     }
     if (
       result &&
@@ -126,7 +281,7 @@ export default function Scene({
           ),
         );
       });
-      scene.add(mesh);
+      overlay.add(mesh);
       group.children
         .filter((o) => o.isMesh && o.userData.kind === 'module')
         .forEach((o) => {
@@ -136,7 +291,7 @@ export default function Scene({
         });
     }
     if (scopeKey === 'array') {
-      for (const glyph of sensorMarkers(study)) {
+      for (const glyph of sensorMarkers(study, { profile: view === 'profile' })) {
         const profile = view === 'profile',
           sensor = glyph.sensors[0];
         const marker = new THREE.Mesh(
@@ -151,7 +306,7 @@ export default function Scene({
         );
         marker.position.set(glyph.position.x, glyph.position.y, profile ? sensor.z : 0.065);
         marker.renderOrder = 20;
-        scene.add(marker);
+        overlay.add(marker);
         if (!profile) {
           const rim = new THREE.Mesh(
             new THREE.RingGeometry(glyph.radius * 0.85, glyph.radius, 24),
@@ -164,7 +319,7 @@ export default function Scene({
           rim.position.copy(marker.position);
           rim.position.z += 0.001;
           rim.renderOrder = 21;
-          scene.add(rim);
+          overlay.add(rim);
         }
         if (glyph.count > 1) {
           const canvas = document.createElement('canvas');
@@ -183,7 +338,7 @@ export default function Scene({
           label.position.z += 0.002;
           label.scale.setScalar(glyph.radius * 1.8);
           label.renderOrder = 22;
-          scene.add(label);
+          overlay.add(label);
         }
       }
       for (const p of study.crops) {
@@ -198,7 +353,7 @@ export default function Scene({
         );
         mesh.position.set(p.x, p.y, 0.04);
         if (p.grid) mesh.rotation.z = Math.atan2(axes(study).u.y, axes(study).u.x);
-        scene.add(mesh);
+        overlay.add(mesh);
         const edges = new THREE.LineSegments(
           new THREE.EdgesGeometry(mesh.geometry),
           new THREE.LineBasicMaterial({ color: 0x4f793d }),
@@ -206,200 +361,144 @@ export default function Scene({
         mesh.add(edges);
       }
     }
-    const camera = new THREE.OrthographicCamera();
-    camera.up.set(0, 0, 1);
-    if (view === 'plan') {
-      camera.position.copy(center).add(new THREE.Vector3(0, 0, extent * 3));
-      camera.up.set(0, 1, 0);
-    } else if (view === 'profile') {
-      camera.position.copy(center).add(axes(study).u.multiplyScalar(extent * 3));
-    } else {
-      camera.position.copy(center).add(new THREE.Vector3(extent, -extent, extent * 0.85));
-    }
-    camera.near = 0.01;
-    camera.far = extent * 20;
-    camera.lookAt(center);
-    controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.copy(center);
-    controls.enableRotate = view === 'oblique';
-    controls.enableDamping = false;
-    controls.screenSpacePanning = true;
-    controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
-    controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
-    const previous = savedCamera.current;
-    const reuse =
-      previous &&
-      previous.view === view &&
-      previous.scopeKey === scopeKey &&
-      previous.resetKey === resetKey;
-    if (reuse) restoreCamera(camera, controls, previous);
-    let framing = reuse ? { ...previous.frustum } : null;
-    const draw = () => renderer.render(scene, camera);
-    controls.addEventListener('change', () => {
-      setHover(null);
-      draw();
-    });
-    const resize = () => {
-      const w = host.current.clientWidth,
-        h = host.current.clientHeight,
-        aspect = w / h;
-      renderer.setSize(w, h);
-      if (!framing)
-        framing = fitOrthographic(camera, bounds, aspect, view === 'oblique' ? 1.1 : 1.15);
-      const half = (framing.top - framing.bottom) / 2;
-      camera.left = -half * aspect;
-      camera.right = half * aspect;
-      camera.top = half;
-      camera.bottom = -half;
-      camera.updateProjectionMatrix();
-      draw();
-    };
-    observer = new ResizeObserver(resize);
-    observer.observe(host.current);
-    resize();
-    let down;
-    const pointerdown = (e) => (down = [e.clientX, e.clientY]),
-      click = (e) => {
-        if (
-          !placing ||
-          view === 'profile' ||
-          !down ||
-          Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5
-        )
-          return;
-        const rect = renderer.domElement.getBoundingClientRect(),
-          ray = new THREE.Raycaster();
-        ray.setFromCamera(
-          new THREE.Vector2(
-            ((e.clientX - rect.left) / rect.width) * 2 - 1,
-            (-(e.clientY - rect.top) / rect.height) * 2 + 1,
-          ),
-          camera,
-        );
-        const point = new THREE.Vector3();
-        if (ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), point))
-          callback.current?.(point);
-      };
-    const pointermove = (e) => {
-      if (scopeKey !== 'array' || e.buttons || view === 'profile') {
-        setHover(null);
-        return;
-      }
-      const rect = renderer.domElement.getBoundingClientRect(),
-        ray = new THREE.Raycaster();
-      ray.setFromCamera(
-        new THREE.Vector2(
-          ((e.clientX - rect.left) / rect.width) * 2 - 1,
-          (-(e.clientY - rect.top) / rect.height) * 2 + 1,
-        ),
+    const framingKey = `${view}:${scopeKey}:${resetKey}`;
+    if (rt.framingKey !== framingKey) {
+      const bounds = displayBounds(study, group, scopeKey);
+      const center = bounds.getCenter(new THREE.Vector3()),
+        size = bounds.getSize(new THREE.Vector3());
+      const extent = Math.max(size.x, size.y, size.z, 1) * 1.4;
+      camera.up.set(0, 0, 1);
+      if (view === 'plan') {
+        camera.position.copy(center).add(new THREE.Vector3(0, 0, extent * 3));
+        camera.up.set(0, 1, 0);
+      } else if (view === 'profile')
+        camera.position.copy(center).add(axes(study).u.multiplyScalar(extent * 3));
+      else camera.position.copy(center).add(new THREE.Vector3(extent, -extent, extent * 0.85));
+      camera.near = 0.01;
+      camera.far = extent * 20;
+      camera.zoom = 1;
+      camera.lookAt(center);
+      controls.target.copy(center);
+      controls.enableRotate = view === 'oblique';
+      controls.update();
+      rt.framing = fitOrthographic(
         camera,
+        bounds,
+        host.current.clientWidth / Math.max(1, host.current.clientHeight),
+        view === 'oblique' ? 1.1 : 1.15,
       );
-      const point = new THREE.Vector3();
-      if (!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), -0.01), point)) {
-        setHover(null);
-        return;
-      }
-      const receiver = receiverGridSpec(study),
-        cell = cellAt(study, point, receiver, false);
-      const found = cell
-        ? {
-            index: cell.row * receiver.nx + cell.column,
-            gridCell: cell,
-            cell: result?.cells[cell.row * receiver.nx + cell.column] || {
-              ...cellCenter(study, cell, receiver),
-              z: study.analysis.receiverHeight,
-            },
-            sensors: study.experimentSensors.filter(
-              (s) => s.grid?.column === cell.column && s.grid?.row === cell.row,
-            ),
-          }
-        : null;
-      setHover(
-        found
-          ? {
-              ...found,
-              left: Math.max(8, Math.min(e.clientX - rect.left + 14, rect.width - 235)),
-              top: Math.max(8, Math.min(e.clientY - rect.top + 14, rect.height - 290)),
-            }
-          : null,
-      );
-    };
-    renderer.domElement.addEventListener('pointermove', pointermove);
-    renderer.domElement.addEventListener('pointerleave', (e) => {
-      if (!e.relatedTarget?.closest?.('.receiver-tooltip')) setHover(null);
-    });
-    renderer.domElement.addEventListener('pointerdown', pointerdown);
-    renderer.domElement.addEventListener('pointerup', click);
-    return () => {
-      savedCamera.current = { ...cameraSnapshot(camera, controls, view, resetKey), scopeKey };
-      observer?.disconnect();
-      controls?.dispose();
-      scene.traverse((o) => {
-        o.geometry?.dispose();
-        if (o.material) {
-          const list = Array.isArray(o.material) ? o.material : [o.material];
-          list.forEach((m) => {
-            m.map?.dispose();
-            m.dispose();
-          });
-        }
-      });
-      renderer?.dispose();
-      renderer?.domElement.remove();
-    };
-  }, [study, scope, view, result, metric, showGrid, placing, resetKey]);
+      rt.framingKey = framingKey;
+    }
+    rt.resize();
+  }, [structureKey, overlayKey, view, scopeKey, scope, metric, result, showGrid, resetKey]);
   return (
-    <div className={'scene ' + (placing ? 'placing' : '')} ref={host}>
-      {hover && (
-        <div
-          role="tooltip"
-          className="receiver-tooltip"
-          onWheel={(e) => e.stopPropagation()}
-          onPointerLeave={(e) => {
-            if (!host.current?.contains(e.relatedTarget)) setHover(null);
-          }}
-          style={{ left: hover.left, top: hover.top }}
-        >
-          <strong>
-            Receiver {hover.index + 1} · column {hover.gridCell.column + 1}, row{' '}
-            {hover.gridCell.row + 1}
-          </strong>
-          <span>
-            East {hover.cell.x.toFixed(2)} m · North {hover.cell.y.toFixed(2)} m
-          </span>
-          <span>Height {hover.cell.z.toFixed(2)} m</span>
-          {hover.cell.sunlight !== undefined && (
-            <>
-              <div>
-                <b>{hover.cell.sunlight.toFixed(1)}%</b> relative sunlight
+    <>
+      <div className={'scene ' + (placing ? 'placing' : '')} ref={host}>
+        {hover && (
+          <div
+            role="tooltip"
+            className="receiver-tooltip"
+            onWheel={(e) => e.stopPropagation()}
+            onPointerLeave={(e) => {
+              if (!host.current?.contains(e.relatedTarget)) setHover(null);
+            }}
+            style={{ left: hover.left, top: hover.top }}
+          >
+            <strong>
+              Receiver {hover.index + 1} · column {hover.gridCell.column + 1}, row{' '}
+              {hover.gridCell.row + 1}
+            </strong>
+            <span>
+              East {hover.cell.x.toFixed(2)} m · North {hover.cell.y.toFixed(2)} m
+            </span>
+            <span>Height {hover.cell.z.toFixed(2)} m</span>
+            {hover.cell.sunlight !== undefined && (
+              <>
+                <div>
+                  <b>{hover.cell.sunlight.toFixed(1)}%</b> relative sunlight
+                </div>
+                <div>
+                  <b>{hover.cell.dli.toFixed(2)}</b> {result?.estimated ? 'estimated DLI' : 'DLI'}{' '}
+                  <small>mol m⁻² d⁻¹</small>
+                </div>
+                <span>{(hover.cell.wh / 1000).toFixed(3)} kWh m⁻² day⁻¹</span>
+              </>
+            )}
+            {hover.sensors.length > 0 && (
+              <div className="receiver-instruments">
+                <b>{hover.sensors.length} field instruments</b>
+                {hover.sensors.map((s) => (
+                  <span key={s.id}>
+                    {s.id} · {s.type} · height/depth {s.z} m
+                  </span>
+                ))}
               </div>
-              <div>
-                <b>{hover.cell.dli.toFixed(2)}</b> {result?.estimated ? 'estimated DLI' : 'DLI'}{' '}
-                <small>mol m⁻² d⁻¹</small>
-              </div>
-              <span>{(hover.cell.wh / 1000).toFixed(3)} kWh m⁻² day⁻¹</span>
-            </>
-          )}
-          {hover.sensors.length > 0 && (
-            <div className="receiver-instruments">
-              <b>{hover.sensors.length} field instruments</b>
-              {hover.sensors.map((s) => (
-                <span key={s.id}>
-                  {s.id} · {s.type} · height/depth {s.z} m
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-      {failed && (
-        <div
-          className="svg-fallback"
-          dangerouslySetInnerHTML={{
-            __html: figureSvg(study, result, view, metric, scope, showGrid),
-          }}
+            )}
+          </div>
+        )}
+        {failed && (
+          <div
+            className="svg-fallback"
+            dangerouslySetInnerHTML={{
+              __html: figureSvg(study, result, view, metric, scope, showGrid),
+            }}
+          />
+        )}
+      </div>
+      {scopeKey === 'array' && (
+        <ReceiverInspector
+          study={study}
+          result={result}
+          cell={selectedCell}
+          setCell={setSelectedCell}
+          open={inspectorOpen}
+          setOpen={setInspectorOpen}
+          placing={placing}
+          onPlace={onPlace}
+          kind={scope === 'crops' ? 'crop plot' : 'sensor'}
         />
       )}
-    </div>
+    </>
   );
+}
+
+function decorate(group) {
+  group.traverse((o) => {
+    if (!o.isMesh) return;
+    const edge = new THREE.LineSegments(
+      new THREE.EdgesGeometry(o.geometry),
+      new THREE.LineBasicMaterial({
+        color: o.userData.kind === 'module' ? 0x9cbcb6 : 0x516461,
+        transparent: true,
+        opacity: 0.7,
+      }),
+    );
+    o.add(edge);
+    if (o.userData.kind === 'module') {
+      const { width, height, depth } = o.geometry.parameters;
+      const points = [];
+      for (let i = 1; i < 6; i++) {
+        points.push(
+          new THREE.Vector3(-width / 2 + (i * width) / 6, -height / 2, depth / 2 + 0.001),
+          new THREE.Vector3(-width / 2 + (i * width) / 6, height / 2, depth / 2 + 0.001),
+        );
+      }
+      for (let i = 1; i < 12; i++) {
+        points.push(
+          new THREE.Vector3(-width / 2, -height / 2 + (i * height) / 12, depth / 2 + 0.001),
+          new THREE.Vector3(width / 2, -height / 2 + (i * height) / 12, depth / 2 + 0.001),
+        );
+      }
+      o.add(
+        new THREE.LineSegments(
+          new THREE.BufferGeometry().setFromPoints(points),
+          new THREE.LineBasicMaterial({ color: 0x88aca8, transparent: true, opacity: 0.35 }),
+        ),
+      );
+    }
+  });
+}
+function disposeOverlay(group) {
+  group.traverse((o) => o.material?.map?.dispose());
+  disposeGroup(group);
 }

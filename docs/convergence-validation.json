@@ -1,0 +1,2119 @@
+{
+  "createdAt": "2026-09-10T14:13:14.946Z",
+  "version": "0.1.1",
+  "scope": "CPU sensitivity on small fixed and tracking arrays at two latitudes and two seasons. Each sweep changes only one setting. Differences describe convergence; they are not field accuracy or universal acceptance tolerances.",
+  "cases": [
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "fixed",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 91.59663223457827,
+          "meanDli": 54.42697943124215,
+          "seconds": 0.036470540999999995,
+          "timings": {
+            "geometryMs": 3.9223750000000024,
+            "visibilityMs": 21.859468000000035
+          },
+          "deltaMeanSunlight": 0.017600776089423675,
+          "deltaMeanDli": 0.011474678902253288
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 91.60100959592036,
+          "meanDli": 54.429833215392605,
+          "seconds": 0.07656733399999999,
+          "timings": {
+            "geometryMs": 1.218874999999997,
+            "visibilityMs": 63.567129000000094
+          },
+          "deltaMeanSunlight": 0.021978137431517553,
+          "deltaMeanDli": 0.014328463052706297
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 91.57903145848884,
+          "meanDli": 54.4155047523399,
+          "seconds": 0.21466404199999997,
+          "timings": {
+            "geometryMs": 0.6631669999999872,
+            "visibilityMs": 183.476623
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "fixed",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 91.54003397464025,
+          "meanDli": 54.39418366975539,
+          "seconds": 0.012526583000000016,
+          "timings": {
+            "geometryMs": 0.68262500000003,
+            "visibilityMs": 4.409874999999886
+          },
+          "deltaMeanSunlight": -0.018500584844758805,
+          "deltaMeanDli": -0.010811398060482702
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 91.60100959592036,
+          "meanDli": 54.429833215392605,
+          "seconds": 0.014644625000000019,
+          "timings": {
+            "geometryMs": 0.6649590000000103,
+            "visibilityMs": 6.059999999999661
+          },
+          "deltaMeanSunlight": 0.04247503643534856,
+          "deltaMeanDli": 0.024838147576730307
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 91.55853455948501,
+          "meanDli": 54.404995067815875,
+          "seconds": 0.02788429100000002,
+          "timings": {
+            "geometryMs": 0.5171669999999722,
+            "visibilityMs": 12.406588999999826
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "fixed",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 91.1322762435381,
+          "meanDli": 54.1546793146496,
+          "seconds": 0.02190579200000002,
+          "timings": {
+            "geometryMs": 0.49645799999996143,
+            "visibilityMs": 13.656629999999893
+          },
+          "deltaMeanSunlight": -0.08501901524488176,
+          "deltaMeanDli": -0.04961819382418753
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 91.60100959592036,
+          "meanDli": 54.429833215392605,
+          "seconds": 0.015370790999999996,
+          "timings": {
+            "geometryMs": 0.5009160000000179,
+            "visibilityMs": 6.031791999999655
+          },
+          "deltaMeanSunlight": 0.383714337137377,
+          "deltaMeanDli": 0.2255357069188193
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 91.21729525878298,
+          "meanDli": 54.204297508473786,
+          "seconds": 0.2000787920000001,
+          "timings": {
+            "geometryMs": 0.5997079999999642,
+            "visibilityMs": 188.15996299999978
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 90.93305852904392,
+          "meanDli": 54.03159249327646,
+          "seconds": 0.369725583,
+          "timings": {
+            "geometryMs": 29.52045399999963,
+            "visibilityMs": 329.69279499999936
+          },
+          "deltaMeanSunlight": -0.021794463456899393,
+          "deltaMeanDli": -0.014208718339787652
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 90.94736391708135,
+          "meanDli": 54.04091877147397,
+          "seconds": 1.4780850829999999,
+          "timings": {
+            "geometryMs": 27.952581999999666,
+            "visibilityMs": 1427.9922400000014
+          },
+          "deltaMeanSunlight": -0.007489075419471192,
+          "deltaMeanDli": -0.004882440142282007
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 90.95485299250082,
+          "meanDli": 54.04580121161625,
+          "seconds": 5.004076708,
+          "timings": {
+            "geometryMs": 26.893292000004294,
+            "visibilityMs": 4905.967005000001
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 90.82014137570751,
+          "meanDli": 53.9666183111761,
+          "seconds": 1.1905834999999998,
+          "timings": {
+            "geometryMs": 19.63745700000709,
+            "visibilityMs": 1155.8914960000047
+          },
+          "deltaMeanSunlight": 0.06051590282311281,
+          "deltaMeanDli": 0.035369748657295474
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 90.94736391708135,
+          "meanDli": 54.04091877147397,
+          "seconds": 1.1743109160000003,
+          "timings": {
+            "geometryMs": 25.51766900000439,
+            "visibilityMs": 1130.929584999989
+          },
+          "deltaMeanSunlight": 0.18773844419695251,
+          "deltaMeanDli": 0.10967020895516555
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 90.7596254728844,
+          "meanDli": 53.9312485625188,
+          "seconds": 1.3600208750000002,
+          "timings": {
+            "geometryMs": 35.91966800001319,
+            "visibilityMs": 1295.9327589999994
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 90.55347571768678,
+          "meanDli": 53.81310090691516,
+          "seconds": 0.3582022919999999,
+          "timings": {
+            "geometryMs": 20.93962599999577,
+            "visibilityMs": 326.3500029999868
+          },
+          "deltaMeanSunlight": 0.05453509921981947,
+          "deltaMeanDli": 0.034258302523326734
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 90.94736391708135,
+          "meanDli": 54.04091877147397,
+          "seconds": 1.3066041669999995,
+          "timings": {
+            "geometryMs": 22.16316500000721,
+            "visibilityMs": 1266.6588339999962
+          },
+          "deltaMeanSunlight": 0.44842329861438657,
+          "deltaMeanDli": 0.2620761670821352
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 90.49894061846696,
+          "meanDli": 53.77884260439183,
+          "seconds": 4.678946333999998,
+          "timings": {
+            "geometryMs": 23.079835999986244,
+            "visibilityMs": 4611.620626000018
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 170,
+          "meanSunlight": 90.94736391708135,
+          "meanDli": 54.04091877147397,
+          "seconds": 1.30698675,
+          "timings": {
+            "geometryMs": 23.33312699999442,
+            "visibilityMs": 1263.139701000022
+          },
+          "deltaMeanSunlight": -0.0008342265740992616,
+          "deltaMeanDli": -0.0005438670444135596
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 90.94745014457486,
+          "meanDli": 54.04097498676788,
+          "seconds": 1.7414410839999983,
+          "timings": {
+            "geometryMs": 27.226080000018555,
+            "visibilityMs": 1692.3753289999877
+          },
+          "deltaMeanSunlight": -0.0007479990805876469,
+          "deltaMeanDli": -0.00048765175050391463
+        },
+        {
+          "value": 0.5,
+          "receivers": 170,
+          "meanSunlight": 90.94819814365545,
+          "meanDli": 54.04146263851838,
+          "seconds": 1.9874607079999986,
+          "timings": {
+            "geometryMs": 28.43224900001951,
+            "visibilityMs": 1934.3737929999807
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 89.17355455587044,
+          "meanDli": 53.00830205158669,
+          "seconds": 1.0468088749999989,
+          "timings": {
+            "geometryMs": 33.94846099998904,
+            "visibilityMs": 1002.2695029999813
+          },
+          "deltaMeanSunlight": 0.013128392789326426,
+          "deltaMeanDli": 0.008558945980233545
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 89.17043573869097,
+          "meanDli": 53.00626876478693,
+          "seconds": 3.877400250000002,
+          "timings": {
+            "geometryMs": 31.649589000007836,
+            "visibilityMs": 3811.1284519999826
+          },
+          "deltaMeanSunlight": 0.010009575609856824,
+          "deltaMeanDli": 0.006525659180475429
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 89.16042616308111,
+          "meanDli": 52.999743105606456,
+          "seconds": 14.833115583,
+          "timings": {
+            "geometryMs": 32.323204000025726,
+            "visibilityMs": 14671.242337999982
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 89.21219014065161,
+          "meanDli": 53.03064834302121,
+          "seconds": 2.914635333999999,
+          "timings": {
+            "geometryMs": 21.833251000040036,
+            "visibilityMs": 2867.400872999955
+          },
+          "deltaMeanSunlight": -0.006123238816826415,
+          "deltaMeanDli": -0.003665392090624664
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 89.17043573869097,
+          "meanDli": 53.00626876478693,
+          "seconds": 3.833868957999999,
+          "timings": {
+            "geometryMs": 30.287256000068737,
+            "visibilityMs": 3769.1092499999577
+          },
+          "deltaMeanSunlight": -0.0478776407774717,
+          "deltaMeanDli": -0.02804497032490616
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 89.21831337946844,
+          "meanDli": 53.03431373511184,
+          "seconds": 5.838146833999999,
+          "timings": {
+            "geometryMs": 52.434571999969194,
+            "visibilityMs": 5729.389751000024
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 89.34903437841888,
+          "meanDli": 53.10870953617921,
+          "seconds": 1.0997045829999987,
+          "timings": {
+            "geometryMs": 30.003291999921203,
+            "visibilityMs": 1053.6302080000023
+          },
+          "deltaMeanSunlight": 0.3281804836595654,
+          "deltaMeanDli": 0.19250882819655857
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 89.17043573869097,
+          "meanDli": 53.00626876478693,
+          "seconds": 3.8871329590000023,
+          "timings": {
+            "geometryMs": 31.21737999995821,
+            "visibilityMs": 3821.4230000000316
+          },
+          "deltaMeanSunlight": 0.14958184393165652,
+          "deltaMeanDli": 0.09006805680427732
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 89.02085389475931,
+          "meanDli": 52.916200707982654,
+          "seconds": 13.991302165999993,
+          "timings": {
+            "geometryMs": 31.807461999989755,
+            "visibilityMs": 13857.832578999914
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 170,
+          "meanSunlight": 89.17043573869097,
+          "meanDli": 53.00626876478693,
+          "seconds": 3.8283706669999957,
+          "timings": {
+            "geometryMs": 32.248504999952274,
+            "visibilityMs": 3760.1067489999987
+          },
+          "deltaMeanSunlight": -0.0006191798574093355,
+          "deltaMeanDli": -0.000403669134350082
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 89.17073878427018,
+          "meanDli": 53.00646633282014,
+          "seconds": 4.541755375000008,
+          "timings": {
+            "geometryMs": 34.40928800005349,
+            "visibilityMs": 4468.513167000026
+          },
+          "deltaMeanSunlight": -0.00031613427819365825,
+          "deltaMeanDli": -0.00020610110114205327
+        },
+        {
+          "value": 0.5,
+          "receivers": 170,
+          "meanSunlight": 89.17105491854838,
+          "meanDli": 53.00667243392128,
+          "seconds": 4.551743041000009,
+          "timings": {
+            "geometryMs": 34.48362799992901,
+            "visibilityMs": 4477.623629000023
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "fixed",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 89.44337034297622,
+          "meanDli": 20.95132288180032,
+          "seconds": 0.01976804199999606,
+          "timings": {
+            "geometryMs": 0.3528749999968568,
+            "visibilityMs": 16.14046399995277
+          },
+          "deltaMeanSunlight": 0.010219881104404749,
+          "deltaMeanDli": 0.0027903653902789927
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 89.45907362844767,
+          "meanDli": 20.955610397853153,
+          "seconds": 0.05637287500000093,
+          "timings": {
+            "geometryMs": 0.3525000000081491,
+            "visibilityMs": 49.91283600007591
+          },
+          "deltaMeanSunlight": 0.025923166575850587,
+          "deltaMeanDli": 0.007077881443112943
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 89.43315046187182,
+          "meanDli": 20.94853251641004,
+          "seconds": 0.2035662500000035,
+          "timings": {
+            "geometryMs": 0.2803330000024289,
+            "visibilityMs": 182.07712300001003
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "fixed",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 89.45693233722636,
+          "meanDli": 20.95468972530316,
+          "seconds": 0.007279707999987295,
+          "timings": {
+            "geometryMs": 0.2504579999949783,
+            "visibilityMs": 3.1481210000056308
+          },
+          "deltaMeanSunlight": 0.012327642885580303,
+          "deltaMeanDli": 0.0024752772187106586
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 89.45907362844767,
+          "meanDli": 20.955610397853153,
+          "seconds": 0.010342333000007784,
+          "timings": {
+            "geometryMs": 0.22162499999103602,
+            "visibilityMs": 4.46833000004699
+          },
+          "deltaMeanSunlight": 0.014468934106886877,
+          "deltaMeanDli": 0.0033959497687021667
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 89.44460469434078,
+          "meanDli": 20.95221444808445,
+          "seconds": 0.02013454100000672,
+          "timings": {
+            "geometryMs": 0.22604100000171456,
+            "visibilityMs": 9.173793000096339
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "fixed",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 89.46143184514555,
+          "meanDli": 20.95608955531523,
+          "seconds": 0.01881045799999265,
+          "timings": {
+            "geometryMs": 0.4435840000078315,
+            "visibilityMs": 13.000081000020145
+          },
+          "deltaMeanSunlight": 0.28396233360078327,
+          "deltaMeanDli": 0.06459590056798703
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 89.45907362844767,
+          "meanDli": 20.955610397853153,
+          "seconds": 0.0107927500000078,
+          "timings": {
+            "geometryMs": 0.22391700001026038,
+            "visibilityMs": 4.890335999953095
+          },
+          "deltaMeanSunlight": 0.28160411690289777,
+          "deltaMeanDli": 0.06411674310590953
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 89.17746951154477,
+          "meanDli": 20.891493654747244,
+          "seconds": 0.1889829170000012,
+          "timings": {
+            "geometryMs": 0.25775000000430737,
+            "visibilityMs": 181.63908599998103
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 88.03907959306518,
+          "meanDli": 20.63915752934085,
+          "seconds": 0.18022825000000012,
+          "timings": {
+            "geometryMs": 10.186369000002742,
+            "visibilityMs": 166.72737599990796
+          },
+          "deltaMeanSunlight": 0.03220978336125313,
+          "deltaMeanDli": 0.008794335648509843
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 88.02736030421812,
+          "meanDli": 20.635957776069397,
+          "seconds": 0.6532175419999985,
+          "timings": {
+            "geometryMs": 11.223956000045291,
+            "visibilityMs": 631.3262519999989
+          },
+          "deltaMeanSunlight": 0.020490494514191937,
+          "deltaMeanDli": 0.005594582377057122
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 88.00686980970393,
+          "meanDli": 20.63036319369234,
+          "seconds": 2.496630957999994,
+          "timings": {
+            "geometryMs": 11.351207999963663,
+            "visibilityMs": 2445.8880010000576
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 88.01517048043283,
+          "meanDli": 20.63238589946374,
+          "seconds": 0.46733683400000153,
+          "timings": {
+            "geometryMs": 7.534001000007265,
+            "visibilityMs": 452.3617879999947
+          },
+          "deltaMeanSunlight": -0.0319280429168316,
+          "deltaMeanDli": -0.007713065717172896
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 88.02736030421812,
+          "meanDli": 20.635957776069397,
+          "seconds": 0.3782144169999956,
+          "timings": {
+            "geometryMs": 8.771080999969854,
+            "visibilityMs": 358.48266699994565
+          },
+          "deltaMeanSunlight": -0.019738219131539836,
+          "deltaMeanDli": -0.0041411891115146204
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 88.04709852334966,
+          "meanDli": 20.64009896518091,
+          "seconds": 0.8902451250000013,
+          "timings": {
+            "geometryMs": 18.448997000028612,
+            "visibilityMs": 853.2859560001089
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 87.16771622389649,
+          "meanDli": 20.443332916910485,
+          "seconds": 0.1979446670000034,
+          "timings": {
+            "geometryMs": 10.465162999927998,
+            "visibilityMs": 179.94337100004486
+          },
+          "deltaMeanSunlight": -0.47609097779869103,
+          "deltaMeanDli": -0.1047679531587633
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 88.02736030421812,
+          "meanDli": 20.635957776069397,
+          "seconds": 0.6523047920000099,
+          "timings": {
+            "geometryMs": 10.630291000023135,
+            "visibilityMs": 630.759086999984
+          },
+          "deltaMeanSunlight": 0.3835531025229386,
+          "deltaMeanDli": 0.08785690600014817
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 87.64380720169518,
+          "meanDli": 20.54810087006925,
+          "seconds": 2.3591240000000107,
+          "timings": {
+            "geometryMs": 11.79275100005907,
+            "visibilityMs": 2323.3177439999854
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 170,
+          "meanSunlight": 88.02736030421812,
+          "meanDli": 20.635957776069397,
+          "seconds": 0.6617688749999943,
+          "timings": {
+            "geometryMs": 10.76624700006505,
+            "visibilityMs": 640.0870009999635
+          },
+          "deltaMeanSunlight": 0.00011382182556474163,
+          "deltaMeanDli": 0.000031077121100508975
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 88.02768997776303,
+          "meanDli": 20.63604778784548,
+          "seconds": 0.7653308329999999,
+          "timings": {
+            "geometryMs": 12.071832999936305,
+            "visibilityMs": 741.7780779999739
+          },
+          "deltaMeanSunlight": 0.0004434953704759437,
+          "deltaMeanDli": 0.00012108889718476235
+        },
+        {
+          "value": 0.5,
+          "receivers": 170,
+          "meanSunlight": 88.02724648239256,
+          "meanDli": 20.635926698948296,
+          "seconds": 1.0277277919999905,
+          "timings": {
+            "geometryMs": 13.792163000020082,
+            "visibilityMs": 1000.4324539999216
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 87.63125590013792,
+          "meanDli": 20.550468761203717,
+          "seconds": 0.9019885829999985,
+          "timings": {
+            "geometryMs": 23.08078499988187,
+            "visibilityMs": 870.7791680000082
+          },
+          "deltaMeanSunlight": 0.0183471784333733,
+          "deltaMeanDli": 0.005009386233219004
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 87.6236865890202,
+          "meanDli": 20.54840208904231,
+          "seconds": 3.353974333999999,
+          "timings": {
+            "geometryMs": 23.150375000041095,
+            "visibilityMs": 3304.7736230000737
+          },
+          "deltaMeanSunlight": 0.010777867315653111,
+          "deltaMeanDli": 0.0029427140718105704
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 87.61290872170454,
+          "meanDli": 20.5454593749705,
+          "seconds": 12.914136375000002,
+          "timings": {
+            "geometryMs": 23.943338000040967,
+            "visibilityMs": 12791.317379000058
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 87.72978427991316,
+          "meanDli": 20.57123994880303,
+          "seconds": 2.4654433750000027,
+          "timings": {
+            "geometryMs": 16.18958500000008,
+            "visibilityMs": 2430.616493999958
+          },
+          "deltaMeanSunlight": 0.10687632888665632,
+          "deltaMeanDli": 0.023355454573092516
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 87.6236865890202,
+          "meanDli": 20.54840208904231,
+          "seconds": 3.3482923340000124,
+          "timings": {
+            "geometryMs": 22.884340000033262,
+            "visibilityMs": 3299.340458999912
+          },
+          "deltaMeanSunlight": 0.0007786379936902676,
+          "deltaMeanDli": 0.0005175948123721241
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 87.6229079510265,
+          "meanDli": 20.547884494229937,
+          "seconds": 4.174559208000006,
+          "timings": {
+            "geometryMs": 36.20712999999523,
+            "visibilityMs": 4100.687841999985
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 87.32428318021597,
+          "meanDli": 20.477430018518103,
+          "seconds": 0.9205756660000043,
+          "timings": {
+            "geometryMs": 21.799833999946713,
+            "visibilityMs": 887.375410999899
+          },
+          "deltaMeanSunlight": 0.04363232858955257,
+          "deltaMeanDli": 0.009164744554176707
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 87.6236865890202,
+          "meanDli": 20.54840208904231,
+          "seconds": 3.458715124999988,
+          "timings": {
+            "geometryMs": 23.618495999937295,
+            "visibilityMs": 3408.789212999909
+          },
+          "deltaMeanSunlight": 0.3430357373937767,
+          "deltaMeanDli": 0.080136815078383
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 87.28065085162642,
+          "meanDli": 20.468265273963926,
+          "seconds": 12.292893207999994,
+          "timings": {
+            "geometryMs": 24.95311900007073,
+            "visibilityMs": 12188.573457999984
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Tucson",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 170,
+          "meanSunlight": 87.6236865890202,
+          "meanDli": 20.54840208904231,
+          "seconds": 3.3541933749999733,
+          "timings": {
+            "geometryMs": 23.577163999987533,
+            "visibilityMs": 3304.3782549999596
+          },
+          "deltaMeanSunlight": -0.00021080935847805904,
+          "deltaMeanDli": -0.00005755792384221081
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 87.62377816062289,
+          "meanDli": 20.548427091117034,
+          "seconds": 3.729987041999993,
+          "timings": {
+            "geometryMs": 25.59279200009769,
+            "visibilityMs": 3675.554379999987
+          },
+          "deltaMeanSunlight": -0.00011923775578281948,
+          "deltaMeanDli": -0.00003255584911698861
+        },
+        {
+          "value": 0.5,
+          "receivers": 170,
+          "meanSunlight": 87.62389739837867,
+          "meanDli": 20.54845964696615,
+          "seconds": 3.7354319160000014,
+          "timings": {
+            "geometryMs": 25.19737700006226,
+            "visibilityMs": 3681.612586999836
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "fixed",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 90.60755855496461,
+          "meanDli": 53.70138431053773,
+          "seconds": 0.02254308299999684,
+          "timings": {
+            "geometryMs": 0.18066699997871183,
+            "visibilityMs": 19.379583000059938
+          },
+          "deltaMeanSunlight": 0.00572714933178986,
+          "deltaMeanDli": 0.003734744008788482
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 90.62385027103649,
+          "meanDli": 53.71200833751275,
+          "seconds": 0.06290479100000812,
+          "timings": {
+            "geometryMs": 0.2825840000004973,
+            "visibilityMs": 53.11387499986449
+          },
+          "deltaMeanSunlight": 0.022018865403666155,
+          "deltaMeanDli": 0.014358770983804447
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 90.60183140563282,
+          "meanDli": 53.697649566528945,
+          "seconds": 0.22064554199998385,
+          "timings": {
+            "geometryMs": 0.24762499998905696,
+            "visibilityMs": 186.01541799976258
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "fixed",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 90.56948560664416,
+          "meanDli": 53.6804161721249,
+          "seconds": 0.011855709000024944,
+          "timings": {
+            "geometryMs": 0.25129200000083074,
+            "visibilityMs": 4.761500999942655
+          },
+          "deltaMeanSunlight": -0.034626650922604085,
+          "deltaMeanDli": -0.02012529361743276
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 90.62385027103649,
+          "meanDli": 53.71200833751275,
+          "seconds": 0.022398916999984066,
+          "timings": {
+            "geometryMs": 0.3986250000016298,
+            "visibilityMs": 10.710636000294471
+          },
+          "deltaMeanSunlight": 0.019738013469719817,
+          "deltaMeanDli": 0.011466871770416276
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 90.60411225756677,
+          "meanDli": 53.70054146574233,
+          "seconds": 0.033619166000018595,
+          "timings": {
+            "geometryMs": 0.3297080000047572,
+            "visibilityMs": 14.84175000002142
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "fixed",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 90.08708958688369,
+          "meanDli": 53.398309525310054,
+          "seconds": 0.02347333300000173,
+          "timings": {
+            "geometryMs": 0.24120799999218434,
+            "visibilityMs": 14.479833999823313
+          },
+          "deltaMeanSunlight": -0.36050595866640833,
+          "deltaMeanDli": -0.20974521855072936
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 90.62385027103649,
+          "meanDli": 53.71200833751275,
+          "seconds": 0.01702820800000336,
+          "timings": {
+            "geometryMs": 0.32474999999976717,
+            "visibilityMs": 7.31366299992078
+          },
+          "deltaMeanSunlight": 0.17625472548638754,
+          "deltaMeanDli": 0.10395359365196555
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 90.4475955455501,
+          "meanDli": 53.608054743860784,
+          "seconds": 0.20219329100000322,
+          "timings": {
+            "geometryMs": 0.2594579999858979,
+            "visibilityMs": 191.5867029997171
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 90.45033725406951,
+          "meanDli": 53.6070845571949,
+          "seconds": 0.5215140409999877,
+          "timings": {
+            "geometryMs": 30.60171000016271,
+            "visibilityMs": 483.33649799993145
+          },
+          "deltaMeanSunlight": -0.010326627357287066,
+          "deltaMeanDli": -0.006734119789612691
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 90.4723707445557,
+          "meanDli": 53.621452865373634,
+          "seconds": 1.9017314160000243,
+          "timings": {
+            "geometryMs": 29.439582999999402,
+            "visibilityMs": 1847.7238299997698
+          },
+          "deltaMeanSunlight": 0.01170686312890723,
+          "deltaMeanDli": 0.00763418838911889
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 90.4606638814268,
+          "meanDli": 53.613818676984515,
+          "seconds": 7.32181362500001,
+          "timings": {
+            "geometryMs": 31.345919999846956,
+            "visibilityMs": 7198.241120999941
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 90.39595909236405,
+          "meanDli": 53.57700052275776,
+          "seconds": 1.4936864999999817,
+          "timings": {
+            "geometryMs": 20.99966900004074,
+            "visibilityMs": 1453.4720840001537
+          },
+          "deltaMeanSunlight": -0.08427246011561351,
+          "deltaMeanDli": -0.04901183906247297
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 90.4723707445557,
+          "meanDli": 53.621452865373634,
+          "seconds": 1.7572746249999909,
+          "timings": {
+            "geometryMs": 27.00587500014808,
+            "visibilityMs": 1705.477375999937
+          },
+          "deltaMeanSunlight": -0.007860807923961488,
+          "deltaMeanDli": -0.004559496446596256
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 90.48023155247967,
+          "meanDli": 53.62601236182023,
+          "seconds": 1.8783745829999972,
+          "timings": {
+            "geometryMs": 45.96850199968321,
+            "visibilityMs": 1797.2089159995085
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 89.94615206633256,
+          "meanDli": 53.31510905923225,
+          "seconds": 0.5261751250000088,
+          "timings": {
+            "geometryMs": 27.724752999813063,
+            "visibilityMs": 484.5812469999364
+          },
+          "deltaMeanSunlight": -0.3923376456764913,
+          "deltaMeanDli": -0.22689165468135286
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 90.4723707445557,
+          "meanDli": 53.621452865373634,
+          "seconds": 1.9119474169999884,
+          "timings": {
+            "geometryMs": 29.279706000350416,
+            "visibilityMs": 1857.6095470002037
+          },
+          "deltaMeanSunlight": 0.13388103254665396,
+          "deltaMeanDli": 0.07945215146003193
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 90.33848971200905,
+          "meanDli": 53.5420007139136,
+          "seconds": 7.001126582999976,
+          "timings": {
+            "geometryMs": 30.09729399997741,
+            "visibilityMs": 6906.3383369999065
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 170,
+          "meanSunlight": 90.4723707445557,
+          "meanDli": 53.621452865373634,
+          "seconds": 1.9141324169999863,
+          "timings": {
+            "geometryMs": 28.695839000312844,
+            "visibilityMs": 1860.6820430000662
+          },
+          "deltaMeanSunlight": 0.00006752367286821936,
+          "deltaMeanDli": 0.00004403301153388384
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 90.47245942676409,
+          "meanDli": 53.62151069612458,
+          "seconds": 2.7382541250000068,
+          "timings": {
+            "geometryMs": 34.528959999996005,
+            "visibilityMs": 2672.0356310001516
+          },
+          "deltaMeanSunlight": 0.00015620588125386803,
+          "deltaMeanDli": 0.0001018637624810026
+        },
+        {
+          "value": 0.5,
+          "receivers": 170,
+          "meanSunlight": 90.47230322088284,
+          "meanDli": 53.6214088323621,
+          "seconds": 3.3774759170000035,
+          "timings": {
+            "geometryMs": 37.95395799976541,
+            "visibilityMs": 3301.7967879999196
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 88.58853688133567,
+          "meanDli": 52.52966052855291,
+          "seconds": 1.5417381250000035,
+          "timings": {
+            "geometryMs": 41.802588999969885,
+            "visibilityMs": 1486.2563770000415
+          },
+          "deltaMeanSunlight": 0.018829778592206026,
+          "deltaMeanDli": 0.012279128534757433
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 88.58085430008298,
+          "meanDli": 52.52465062351241,
+          "seconds": 5.7764269579999965,
+          "timings": {
+            "geometryMs": 41.565000999573385,
+            "visibilityMs": 5687.640335999924
+          },
+          "deltaMeanSunlight": 0.011147197339511195,
+          "deltaMeanDli": 0.007269223494255073
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 88.56970710274346,
+          "meanDli": 52.51738140001815,
+          "seconds": 22.258000583000015,
+          "timings": {
+            "geometryMs": 41.89982800022699,
+            "visibilityMs": 22034.339789000078
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 88.6810101119048,
+          "meanDli": 52.58289524441413,
+          "seconds": 3.908639166000008,
+          "timings": {
+            "geometryMs": 28.529499999975087,
+            "visibilityMs": 3847.0747910001082
+          },
+          "deltaMeanSunlight": 0.023800243846110902,
+          "deltaMeanDli": 0.013819869743812774
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 88.58085430008298,
+          "meanDli": 52.52465062351241,
+          "seconds": 5.670012374999991,
+          "timings": {
+            "geometryMs": 40.23353400014457,
+            "visibilityMs": 5582.014955000108
+          },
+          "deltaMeanSunlight": -0.07635556797571041,
+          "deltaMeanDli": -0.04442475115791211
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 88.65720986805869,
+          "meanDli": 52.56907537467032,
+          "seconds": 7.820958624999999,
+          "timings": {
+            "geometryMs": 64.23391399995307,
+            "visibilityMs": 7685.334665999835
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 88.68917612246945,
+          "meanDli": 52.585047076934046,
+          "seconds": 1.595091625000001,
+          "timings": {
+            "geometryMs": 40.74004399991827,
+            "visibilityMs": 1534.0779200003017
+          },
+          "deltaMeanSunlight": 0.1978334391263843,
+          "deltaMeanDli": 0.11577310301682786
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 88.58085430008298,
+          "meanDli": 52.52465062351241,
+          "seconds": 5.790889207999979,
+          "timings": {
+            "geometryMs": 40.5185829999682,
+            "visibilityMs": 5703.223161000002
+          },
+          "deltaMeanSunlight": 0.08951161673991237,
+          "deltaMeanDli": 0.055376649595189065
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 88.49134268334306,
+          "meanDli": 52.46927397391722,
+          "seconds": 20.686913791999977,
+          "timings": {
+            "geometryMs": 41.50829700010945,
+            "visibilityMs": 20505.62290999992
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 170,
+          "meanSunlight": 88.58085430008298,
+          "meanDli": 52.52465062351241,
+          "seconds": 5.700129749999993,
+          "timings": {
+            "geometryMs": 40.553420000185724,
+            "visibilityMs": 5612.938254000415
+          },
+          "deltaMeanSunlight": -0.00037555745186068634,
+          "deltaMeanDli": -0.00024490560002021766
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 88.5815955687563,
+          "meanDli": 52.525134013865326,
+          "seconds": 5.855074874999991,
+          "timings": {
+            "geometryMs": 42.1696219999576,
+            "visibilityMs": 5764.716465000005
+          },
+          "deltaMeanSunlight": 0.0003657112214625613,
+          "deltaMeanDli": 0.0002384847528986711
+        },
+        {
+          "value": 0.5,
+          "receivers": 170,
+          "meanSunlight": 88.58122985753484,
+          "meanDli": 52.52489552911243,
+          "seconds": 5.84464837499999,
+          "timings": {
+            "geometryMs": 41.390048999805,
+            "visibilityMs": 5756.282668000844
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "fixed",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 91.14834150653033,
+          "meanDli": 6.364032125088979,
+          "seconds": 0.017669916999991982,
+          "timings": {
+            "geometryMs": 0.307083000021521,
+            "visibilityMs": 14.431210000126157
+          },
+          "deltaMeanSunlight": 0.04333166621087514,
+          "deltaMeanDli": 0.0037376609673733796
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 91.14155849448194,
+          "meanDli": 6.363447042594093,
+          "seconds": 0.053227624999999536,
+          "timings": {
+            "geometryMs": 0.41899999999441206,
+            "visibilityMs": 48.40128900005948
+          },
+          "deltaMeanSunlight": 0.03654865416248754,
+          "deltaMeanDli": 0.0031525784724877326
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 91.10500984031945,
+          "meanDli": 6.360294464121606,
+          "seconds": 0.19603966700000455,
+          "timings": {
+            "geometryMs": 0.28595900000073016,
+            "visibilityMs": 179.80541800009087
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "fixed",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 90.96010957778559,
+          "meanDli": 6.35234089561858,
+          "seconds": 0.0053592920000082814,
+          "timings": {
+            "geometryMs": 0.2664160000276752,
+            "visibilityMs": 1.8387929997988977
+          },
+          "deltaMeanSunlight": -0.049660541486147736,
+          "deltaMeanDli": -0.0030340443749823365
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 91.14155849448194,
+          "meanDli": 6.363447042594093,
+          "seconds": 0.007596625000005588,
+          "timings": {
+            "geometryMs": 0.22129100002348423,
+            "visibilityMs": 3.1533350002137013
+          },
+          "deltaMeanSunlight": 0.13178837521020625,
+          "deltaMeanDli": 0.00807210260053104
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 91.00977011927174,
+          "meanDli": 6.355374939993562,
+          "seconds": 0.01409212500002468,
+          "timings": {
+            "geometryMs": 0.2908329999772832,
+            "visibilityMs": 5.777498000126798
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "fixed",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 91.0029501208928,
+          "meanDli": 6.355807698019472,
+          "seconds": 0.01719933299999684,
+          "timings": {
+            "geometryMs": 0.23662500001955777,
+            "visibilityMs": 13.03349800023716
+          },
+          "deltaMeanSunlight": 0.14389350740505336,
+          "deltaMeanDli": 0.010175194321933034
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 91.14155849448194,
+          "meanDli": 6.363447042594093,
+          "seconds": 0.007002082999970298,
+          "timings": {
+            "geometryMs": 0.23704200005158782,
+            "visibilityMs": 2.703915999853052
+          },
+          "deltaMeanSunlight": 0.2825018809941895,
+          "deltaMeanDli": 0.017814538896554488
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 90.85905661348775,
+          "meanDli": 6.345632503697539,
+          "seconds": 0.18007787499995903,
+          "timings": {
+            "geometryMs": 0.177291999978479,
+            "visibilityMs": 174.4175409997697
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 90.07763143178329,
+          "meanDli": 6.296658868620926,
+          "seconds": 0.22664874999999302,
+          "timings": {
+            "geometryMs": 12.254872999794316,
+            "visibilityMs": 211.09308600000804
+          },
+          "deltaMeanSunlight": 0.008821470264805953,
+          "deltaMeanDli": 0.0007609138527833181
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 90.06949608642043,
+          "meanDli": 6.295957137866565,
+          "seconds": 0.8322747499999823,
+          "timings": {
+            "geometryMs": 12.029292000399437,
+            "visibilityMs": 809.7148330002092
+          },
+          "deltaMeanSunlight": 0.0006861249019465276,
+          "deltaMeanDli": 0.00005918309842201097
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 90.06880996151848,
+          "meanDli": 6.295897954768143,
+          "seconds": 3.241815332999977,
+          "timings": {
+            "geometryMs": 13.183956999797374,
+            "visibilityMs": 3189.6380850000423
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 90.02489352641072,
+          "meanDli": 6.293225926676884,
+          "seconds": 0.8850894579999731,
+          "timings": {
+            "geometryMs": 10.487628000031691,
+            "visibilityMs": 864.0610369997448
+          },
+          "deltaMeanSunlight": 0.017338237281549596,
+          "deltaMeanDli": 0.0010622326298905804
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 90.06949608642043,
+          "meanDli": 6.295957137866565,
+          "seconds": 0.6788814580000472,
+          "timings": {
+            "geometryMs": 11.499829999927897,
+            "visibilityMs": 656.2713709997479
+          },
+          "deltaMeanSunlight": 0.0619407972912569,
+          "deltaMeanDli": 0.0037934438195712517
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 90.00755528912917,
+          "meanDli": 6.292163694046994,
+          "seconds": 0.4038942500000121,
+          "timings": {
+            "geometryMs": 17.516208000073675,
+            "visibilityMs": 370.36995500017656
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 90.30360263996074,
+          "meanDli": 6.31192451021103,
+          "seconds": 0.23832829099998343,
+          "timings": {
+            "geometryMs": 13.09278499998618,
+            "visibilityMs": 218.92233199998736
+          },
+          "deltaMeanSunlight": 0.5931872870994397,
+          "deltaMeanDli": 0.03843550726588418
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 90.06949608642043,
+          "meanDli": 6.295957137866565,
+          "seconds": 0.8532868749999907,
+          "timings": {
+            "geometryMs": 12.778621999721508,
+            "visibilityMs": 829.5615820001112
+          },
+          "deltaMeanSunlight": 0.35908073355912506,
+          "deltaMeanDli": 0.02246813492141886
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 89.7104153528613,
+          "meanDli": 6.273489002945146,
+          "seconds": 3.106925083999988,
+          "timings": {
+            "geometryMs": 13.338834999944083,
+            "visibilityMs": 3064.863582999562
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 170,
+          "meanSunlight": 90.06949608642043,
+          "meanDli": 6.295957137866565,
+          "seconds": 0.8585184579999768,
+          "timings": {
+            "geometryMs": 13.510165999818128,
+            "visibilityMs": 834.2431679997826
+          },
+          "deltaMeanSunlight": 0.001045397493442124,
+          "deltaMeanDli": 0.00009017288621748776
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 90.06690323717467,
+          "meanDli": 6.295733486383303,
+          "seconds": 1.0795855000000447,
+          "timings": {
+            "geometryMs": 14.091252999962308,
+            "visibilityMs": 1052.709250000189
+          },
+          "deltaMeanSunlight": -0.0015474517523159648,
+          "deltaMeanDli": -0.00013347859704460063
+        },
+        {
+          "value": 0.5,
+          "receivers": 170,
+          "meanSunlight": 90.06845068892699,
+          "meanDli": 6.295866964980347,
+          "seconds": 1.0354246660000062,
+          "timings": {
+            "geometryMs": 14.257583999889903,
+            "visibilityMs": 1008.3059139996767
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 170,
+          "meanSunlight": 89.69557650485758,
+          "meanDli": 6.2798052069936166,
+          "seconds": 0.7125137090000208,
+          "timings": {
+            "geometryMs": 19.15637899999274,
+            "visibilityMs": 686.7987990003312
+          },
+          "deltaMeanSunlight": 0.051085034083897085,
+          "deltaMeanDli": 0.004406443476753452
+        },
+        {
+          "value": 577,
+          "receivers": 170,
+          "meanSunlight": 89.65515718425897,
+          "meanDli": 6.276318756318159,
+          "seconds": 2.6000310000000173,
+          "timings": {
+            "geometryMs": 17.30046000034781,
+            "visibilityMs": 2562.581998999871
+          },
+          "deltaMeanSunlight": 0.010665713485281003,
+          "deltaMeanDli": 0.0009199928012959546
+        },
+        {
+          "value": 2305,
+          "receivers": 170,
+          "meanSunlight": 89.64449147077369,
+          "meanDli": 6.275398763516863,
+          "seconds": 10.00770658300002,
+          "timings": {
+            "geometryMs": 17.481956999748945,
+            "visibilityMs": 9915.298836999806
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 170,
+          "meanSunlight": 89.77840390466156,
+          "meanDli": 6.283874102221978,
+          "seconds": 1.7391642920000012,
+          "timings": {
+            "geometryMs": 11.912706999573857,
+            "visibilityMs": 1712.7720859998954
+          },
+          "deltaMeanSunlight": 0.14151086298019777,
+          "deltaMeanDli": 0.008661081124579972
+        },
+        {
+          "value": 10,
+          "receivers": 170,
+          "meanSunlight": 89.65515718425897,
+          "meanDli": 6.276318756318159,
+          "seconds": 2.5868511249999866,
+          "timings": {
+            "geometryMs": 16.859165000612848,
+            "visibilityMs": 2550.2073310000706
+          },
+          "deltaMeanSunlight": 0.01826414257760689,
+          "deltaMeanDli": 0.0011057352207606286
+        },
+        {
+          "value": 5,
+          "receivers": 170,
+          "meanSunlight": 89.63689304168136,
+          "meanDli": 6.275213021097398,
+          "seconds": 2.975182541999966,
+          "timings": {
+            "geometryMs": 25.200794000120368,
+            "visibilityMs": 2923.8401249998133
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 45,
+          "meanSunlight": 89.15151315810601,
+          "meanDli": 6.24212750406354,
+          "seconds": 0.7050925419999985,
+          "timings": {
+            "geometryMs": 16.448131000099238,
+            "visibilityMs": 679.9773339999374
+          },
+          "deltaMeanSunlight": -0.4466446048085402,
+          "deltaMeanDli": -0.027914921459744058
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 89.65515718425897,
+          "meanDli": 6.276318756318159,
+          "seconds": 2.5852137910000166,
+          "timings": {
+            "geometryMs": 17.133541000192054,
+            "visibilityMs": 2547.5323279998847
+          },
+          "deltaMeanSunlight": 0.056999421344414714,
+          "deltaMeanDli": 0.006276330794874774
+        },
+        {
+          "value": 0.5,
+          "receivers": 627,
+          "meanSunlight": 89.59815776291455,
+          "meanDli": 6.270042425523284,
+          "seconds": 9.437987250000006,
+          "timings": {
+            "geometryMs": 18.371168999641668,
+            "visibilityMs": 9359.56495999964
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Wageningen",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 170,
+          "meanSunlight": 89.65515718425897,
+          "meanDli": 6.276318756318159,
+          "seconds": 2.5692011250000215,
+          "timings": {
+            "geometryMs": 16.992328999913298,
+            "visibilityMs": 2532.622457000136
+          },
+          "deltaMeanSunlight": 0.0000017883479159763738,
+          "deltaMeanDli": 1.5425759603004963e-7
+        },
+        {
+          "value": 1,
+          "receivers": 170,
+          "meanSunlight": 89.6553263238058,
+          "meanDli": 6.276333345793649,
+          "seconds": 2.572652665999951,
+          "timings": {
+            "geometryMs": 17.487709000473842,
+            "visibilityMs": 2535.3514960000175
+          },
+          "deltaMeanSunlight": 0.00017092789474304482,
+          "deltaMeanDli": 0.00001474373308596455
+        },
+        {
+          "value": 0.5,
+          "receivers": 170,
+          "meanSunlight": 89.65515539591105,
+          "meanDli": 6.276318602060563,
+          "seconds": 2.5558710829999765,
+          "timings": {
+            "geometryMs": 18.051036000135355,
+            "visibilityMs": 2518.137330999947
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    }
+  ]
+}

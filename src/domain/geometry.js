@@ -38,8 +38,13 @@ export function getPose(s, sun = null, quantize = false) {
     yaw = (Math.atan2(sun.dot(u), -sun.dot(v)) * 180) / Math.PI;
   }
   if (quantize && ['single-axis', 'dual-axis'].includes(s.racking.type)) {
-    tilt = Math.round(tilt / 2) * 2;
-    yaw = Math.round(yaw / 2) * 2;
+    const bin = typeof quantize === 'number' ? quantize : 2;
+    tilt = Math.round(tilt / bin) * bin;
+    tilt = Math.max(
+      s.racking.type === 'dual-axis' ? 0 : -s.racking.limit,
+      Math.min(s.racking.limit, tilt),
+    );
+    yaw = Math.round(yaw / bin) * bin;
   }
   return { tilt, yaw, key: `${tilt.toFixed(4)}:${yaw.toFixed(4)}` };
 }

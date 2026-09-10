@@ -1,0 +1,88 @@
+{
+  "createdAt": "2026-09-10T14:15:57.991Z",
+  "version": "0.1.1",
+  "environment": "Codex in-app browser, local application. Actual WebGPU API; GPU vendor and hardware acceleration were not independently identified.",
+  "scope": "Five small rack designs; per-cell daily GPU/CPU parity; isolated real IndexedDB cold/warm cache in separate workers; actual device destruction; simulated allocation and storage errors. Shared sky/solar physics. Not independent physical validation.",
+  "tolerances": { "wh": 0.1, "dli": 0.001 },
+  "cases": [
+    {
+      "type": "fixed",
+      "cells": 45,
+      "cpuSeconds": 0.02510000000009313,
+      "gpuSeconds": 0.050399999999906867,
+      "warmCachedPoses": 1,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0,
+      "warmDifference": { "maxWhDifference": 0, "maxDliDifference": 0, "maxSunlightDifference": 0 }
+    },
+    {
+      "type": "device",
+      "backend": "WebGPU + CPU fallback",
+      "warning": "GPU execution failed; CPU fallback used: WebGPU device lost",
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0
+    },
+    {
+      "type": "allocation",
+      "backend": "WebGPU + CPU fallback",
+      "warning": "GPU execution failed; CPU fallback used: Simulated allocation limit",
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0
+    },
+    {
+      "type": "storage",
+      "backend": "WebGPU BVH",
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0
+    },
+    {
+      "type": "single-axis",
+      "cells": 45,
+      "cpuSeconds": 0.10689999999990686,
+      "gpuSeconds": 0.15920000000018628,
+      "warmCachedPoses": 25,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0,
+      "warmDifference": { "maxWhDifference": 0, "maxDliDifference": 0, "maxSunlightDifference": 0 }
+    },
+    {
+      "type": "dual-axis",
+      "cells": 45,
+      "cpuSeconds": 0.18089999999990686,
+      "gpuSeconds": 0.22289999999990687,
+      "warmCachedPoses": 27,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0,
+      "warmDifference": { "maxWhDifference": 0, "maxDliDifference": 0, "maxSunlightDifference": 0 }
+    },
+    {
+      "type": "vertical",
+      "cells": 45,
+      "cpuSeconds": 0.013699999999720604,
+      "gpuSeconds": 0.044,
+      "warmCachedPoses": 1,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0,
+      "warmDifference": { "maxWhDifference": 0, "maxDliDifference": 0, "maxSunlightDifference": 0 }
+    },
+    {
+      "type": "pergola",
+      "cells": 45,
+      "cpuSeconds": 0.013399999999906868,
+      "gpuSeconds": 0.04,
+      "warmCachedPoses": 1,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0,
+      "warmDifference": { "maxWhDifference": 0, "maxDliDifference": 0, "maxSunlightDifference": 0 }
+    }
+  ],
+  "passed": true
+}

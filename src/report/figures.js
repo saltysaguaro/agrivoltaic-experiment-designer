@@ -4,6 +4,7 @@ import { buildGeometry, disposeGroup, localToWorld, worldToLocal } from '../doma
 import { receiverGridSpec } from '../domain/geometry.js';
 import { receiverLines, sensorMarkers, plotCorners } from '../experiment/grid-layout.js';
 import { groundGrid } from '../ui/ground-grid.js';
+import { provenanceRecord } from './provenance.js';
 export const escapeXml = (v) =>
   String(v).replace(
     /[&<>"']/g,
@@ -38,6 +39,8 @@ export function figureSvg(
   scope = 'array',
   showGrid = true,
 ) {
+  // A stale/absent result must export a geometry figure, never a labeled light map.
+  if (!result) metric = 'none';
   const group = buildGeometry(s, scope),
     meshes = group.children.filter((o) => o.isMesh);
   const ground = scope !== 'module' && showGrid ? groundGrid(s, group.userData) : null;
@@ -45,7 +48,7 @@ export function figureSvg(
     scope,
   );
   const receivers = receiverGridSpec(s);
-  const glyphs = arrayScope ? sensorMarkers(s) : [];
+  const glyphs = arrayScope ? sensorMarkers(s, { profile: view === 'profile' }) : [];
   const project = (p) =>
     view === 'profile'
       ? [worldToLocal(s, p.x, p.y).y, -p.z]
@@ -65,6 +68,10 @@ export function figureSvg(
       );
     return { points, kind: m.userData.kind };
   });
+  // Projected data no longer needs Three.js resources, even if later export fails.
+  const rowOffsets = group.userData.rowOffsets;
+  const groupLength = group.userData.length;
+  disposeGroup(group);
   function hull(points) {
     const p = [...new Map(points.map((p) => [p.join(','), p])).values()].sort(
       (a, b) => a[0] - b[0] || a[1] - b[1],
@@ -91,10 +98,16 @@ export function figureSvg(
       all.push(project(new THREE.Vector3(sensor.x, sensor.y, sensor.z)));
     for (const c of s.crops) all.push(...plotCorners(s, c).map(project));
   }
-  let xmin = Math.min(...all.map((p) => p[0])),
-    xmax = Math.max(...all.map((p) => p[0])),
-    ymin = Math.min(...all.map((p) => p[1])),
-    ymax = Math.max(...all.map((p) => p[1]));
+  let xmin = Infinity,
+    xmax = -Infinity,
+    ymin = Infinity,
+    ymax = -Infinity;
+  for (const [x, y] of all) {
+    xmin = Math.min(xmin, x);
+    xmax = Math.max(xmax, x);
+    ymin = Math.min(ymin, y);
+    ymax = Math.max(ymax, y);
+  }
   const scale = Math.min(850 / Math.max(0.2, xmax - xmin), 410 / Math.max(0.2, ymax - ymin)),
     tx = 500 - ((xmin + xmax) / 2) * scale,
     ty = 285 - ((ymin + ymax) / 2) * scale,
@@ -161,7 +174,7 @@ export function figureSvg(
       const [x, y] = xy(project(new THREE.Vector3(c.x, c.y, 0)));
       content += `<text x="${x}" y="${y}" text-anchor="middle" font-size="13">${escapeXml(c.id)}</text>`;
     }
-    for (const glyph of glyphs) {
+    for (const [glyphIndex, glyph] of glyphs.entries()) {
       const sensor = glyph.sensors[0],
         z = view === 'profile' ? sensor.z : 0.065;
       const point = new THREE.Vector3(glyph.position.x, glyph.position.y, z);
@@ -185,6 +198,13 @@ export function figureSvg(
       content += `<g data-sensor-cell="${glyph.cell.column},${glyph.cell.row}"><title>${escapeXml(title)}</title>${dot}`;
       if (glyph.count > 1)
         content += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" fill="white" font-size="${Math.min(11, glyph.radius * scale)}">${escapeXml(glyph.label)}</text>`;
+      // Numbered callouts use distinct vertical slots, linked by leader lines.
+      // Full IDs are in the visible legend below, including in PNG and print.
+      const slots = Math.ceil(glyphs.length / 2);
+      const labelY = 86 + (glyphIndex % slots) * Math.min(13, 405 / Math.max(1, slots - 1));
+      const labelX = glyphIndex < slots ? 14 : 963;
+      if (glyphs.length <= 60)
+        content += `<path d="M ${x} ${y} L ${labelX + 8} ${labelY - 3}" stroke="#a86a50" stroke-width=".4" opacity=".6"/><text x="${labelX}" y="${labelY}" font-size="10" fill="#713c28">${glyphIndex + 1}</text>`;
       content += '</g>';
     }
   }
@@ -201,8 +221,8 @@ export function figureSvg(
       `${s.module.length} × ${s.module.width} m; thickness ${s.module.thickness} m`,
     );
   } else if (view === 'profile') {
-    const y0 = group.userData.rowOffsets[0] ?? 0,
-      y1 = group.userData.rowOffsets[1];
+    const y0 = rowOffsets[0] ?? 0,
+      y1 = rowOffsets[1];
     if (y1 !== undefined) content += line([y0, 0], [y1, 0], `${(y1 - y0).toFixed(2)} m pitch`, 24);
     const x = xy([xmin, -s.racking.height])[0] - 18,
       top = xy([xmin, -s.racking.height])[1],
@@ -216,8 +236,8 @@ export function figureSvg(
       12,
     );
     if (arrayScope) {
-      group.userData.rowOffsets.forEach((offset, i) => {
-        const p = xy(project(localToWorld(s, -group.userData.length / 2 - 0.5, offset, 0)));
+      rowOffsets.forEach((offset, i) => {
+        const p = xy(project(localToWorld(s, -groupLength / 2 - 0.5, offset, 0)));
         content += `<text x="${p[0] - 4}" y="${p[1]}" text-anchor="end" font-size="11">R${i + 1}</text>`;
       });
     }
@@ -241,6 +261,35 @@ export function figureSvg(
           : view === 'oblique'
             ? 'Orthographic system view'
             : 'Array plan';
-  disposeGroup(group);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600" role="img" aria-label="${title}"><rect width="1000" height="600" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + result.date : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : arrayScope ? ` · Receiver cells ${receivers.dx.toFixed(3)} × ${receivers.dy.toFixed(3)} m` : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}</g></svg>`;
+  const provenance = provenanceRecord(s, result);
+  const wrap = (text, width = 135) =>
+    String(text).match(new RegExp('.{1,' + width + '}', 'gu')) || [''];
+  const footer = [
+    `${provenance.software} · ${provenance.date} · ${provenance.backend}`,
+    `Analysis SHA-256: ${provenance.analysisHash}`,
+    `Site: ${provenance.site}; receivers: ${provenance.receivers}`,
+    `Weather: ${provenance.weather}`,
+    `Source SHA-256: ${provenance.weatherSourceHash}`,
+    `Weather inputs SHA-256: ${provenance.weatherInputHash}`,
+    provenance.weatherAttribution,
+    provenance.dli,
+    provenance.model,
+    provenance.assumptions,
+    provenance.validation,
+    ...provenance.warnings,
+    ...(glyphs.length > 60
+      ? [
+          'Dense layout: use the receiver column/row and coordinates in this legend to identify instruments.',
+        ]
+      : []),
+    ...glyphs.map(
+      (glyph, i) =>
+        `${i + 1}: ${glyph.sensors.map((v) => `${v.id} (${v.type}, z=${v.z} m)`).join('; ')}; cell ${glyph.cell.column + 1}/${glyph.cell.row + 1}`,
+    ),
+  ].flatMap((text) => wrap(text));
+  const height = 625 + footer.length * 13;
+  const footerSvg = footer
+    .map((line, i) => `<text x="40" y="${615 + i * 13}" font-size="10">${escapeXml(line)}</text>`)
+    .join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="${height}" viewBox="0 0 1000 ${height}" role="img" aria-label="${title}"><metadata>${escapeXml(JSON.stringify(provenance))}</metadata><rect width="1000" height="${height}" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + result.date : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : arrayScope ? ` · Receiver cells ${receivers.dx.toFixed(3)} × ${receivers.dy.toFixed(3)} m` : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}${footerSvg}</g></svg>`;
 }
