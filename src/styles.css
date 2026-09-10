@@ -88,25 +88,6 @@ p {
   letter-spacing: -1.2px;
   white-space: nowrap;
 }
-.brand-mark {
-  width: 37px;
-  height: 37px;
-  background: #224c40;
-  border-radius: 10px;
-  color: #d7e5a9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  transform: rotate(-4deg);
-}
-.brand-mark > svg:last-child {
-  position: absolute;
-  bottom: 3px;
-  right: 3px;
-  fill: #d7e5a9;
-  color: #224c40;
-}
 .brand-dot {
   color: #88a249;
 }
@@ -1089,10 +1070,6 @@ progress {
     font-size: 11px;
     padding: 9px;
   }
-  .brand-mark {
-    height: 31px;
-    width: 31px;
-  }
   .workspace-heading h1 {
     font-size: 24px;
   }
@@ -1450,9 +1427,6 @@ progress {
     gap: 8px;
     max-width: 230px;
   }
-  .brand-mark {
-    flex-shrink: 0;
-  }
   .header-actions .compact {
     padding: 9px;
     font-size: 11px;
@@ -1623,16 +1597,6 @@ progress {
   color: #a05a31;
   background: repeating-linear-gradient(135deg, transparent 0 4px, #a05a3177 4px 5px);
 }
-.zone-swatch.setback {
-  color: #a17c17;
-  background: radial-gradient(#a17c17 1px, transparent 1px) 0 0/5px 5px;
-}
-.zone-swatch.maintenance {
-  color: #64717a;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 4px, #64717a66 4px 5px),
-    repeating-linear-gradient(90deg, transparent 0 4px, #64717a66 4px 5px);
-}
 .zone-swatch.perimeter {
   color: #81598b;
   background: repeating-linear-gradient(135deg, transparent 0 4px, #81598b77 4px 5px);
@@ -1647,4 +1611,76 @@ progress {
 }
 .field:focus-within > .field-label label {
   color: #9b471f;
+}
+
+.display-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 18px;
+  border-top: 1px solid #d3decf;
+  background: #fafcf7;
+}
+.layer-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  flex: 1 1 350px;
+}
+.layer-buttons small {
+  width: 100%;
+  font-size: 11px;
+  color: #596e5c;
+}
+.layer-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  padding: 4px 5px;
+  background: none;
+  color: #395449;
+  font-size: 11px;
+}
+.layer-toggle:hover {
+  border-color: #b3c4ad;
+}
+.layer-toggle[aria-pressed='false'] {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+.layer-toggle i {
+  margin: 0;
+}
+.panel-opacity {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  width: 180px;
+  font-size: 12px;
+  flex: 0 0 180px;
+}
+.panel-opacity input {
+  grid-column: 1/-1;
+  width: 100%;
+  accent-color: #315f51;
+}
+.zone-swatch.cropping {
+  color: #558042;
+  background: radial-gradient(#558042 1px, transparent 1px) 0 0/5px 5px;
+}
+@media (max-width: 560px) {
+  .panel-opacity {
+    flex: 1 1 100%;
+  }
+  .display-legend {
+    padding: 12px;
+  }
+}
+@media (min-width: 901px) {
+  .scene-wrap {
+    height: clamp(280px, calc(100dvh - 340px), 510px);
+  }
 }

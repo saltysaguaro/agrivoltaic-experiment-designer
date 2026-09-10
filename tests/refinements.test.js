@@ -69,7 +69,11 @@ test('relative sunlight complements shade and is consistent across report, CSV, 
   assert.ok(mean[1].startsWith(r.meanSunlight.toFixed(3) + '%'));
   const html = reportHtml(s, r);
   assert.doesNotMatch(html, /relative shade|shade_percent/i);
-  assert.equal((html.match(/data-ground-grid="true"/g) || []).length, 5);
+  assert.equal(
+    (html.match(/data-ground-grid="true"/g) || []).length,
+    3,
+    'Light figures default to a clean map without ground-grid overlays',
+  );
   assert.match(figureSvg(s, r, 'plan', 'sunlight'), /100% sunlight/);
 });
 

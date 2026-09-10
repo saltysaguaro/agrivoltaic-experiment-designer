@@ -42,6 +42,8 @@ import { download, reportHtml, exportCsv, methodsRows, csv, pngFigure } from './
 import { figureSvg } from './report/figures.js';
 import Controls from './ui/Controls.jsx';
 import Scene from './ui/Scene.jsx';
+import DisplayLegend from './ui/DisplayLegend.jsx';
+import { designLayers, irradianceLayers } from './ui/display-layers.js';
 import './styles.css';
 const steps = [
   ['Module', 'Define the building block', 'module'],
@@ -103,6 +105,11 @@ function App() {
     [step, setStep] = useState(() => navigation().step),
     [view, setView] = useState(() => navigation().view),
     [grid, setGrid] = useState(true),
+    [layerPrefs, setLayerPrefs] = useState({
+      design: { ...designLayers },
+      analysis: { ...irradianceLayers },
+    }),
+    [opacityPrefs, setOpacityPrefs] = useState({ design: 1, analysis: 0.2 }),
     [inspection, setInspection] = useState(null),
     [metric, setMetric] = useState('none'),
     [result, setResult] = useState(null),
@@ -167,6 +174,15 @@ function App() {
     validResult = result?.key === analysisKey(s) ? result : null,
     issues = designIssues(s),
     scope = steps[step][2];
+  const layerMode = validResult && step === 6 ? 'analysis' : 'design';
+  const opacityMode = step === 6 || (validResult && step >= 6) ? 'analysis' : 'design';
+  const layers = layerPrefs[layerMode],
+    panelOpacity = opacityPrefs[opacityMode];
+  useEffect(() => {
+    if (validResult)
+      setLayerPrefs((current) => ({ ...current, analysis: { ...irradianceLayers } }));
+  }, [validResult]);
+
   useEffect(() => {
     if (recovery) {
       setSaveStatus('Original study retained · repair required');
@@ -522,7 +538,7 @@ function App() {
   }
   async function exportFigure(format) {
     try {
-      const svg = figureSvg(s, validResult, view, metric, step < 5 ? scope : 'array', grid);
+      const svg = figureSvg(s, validResult, view, metric, scope, grid, { layers, panelOpacity });
       download(
         format === 'png' ? await pngFigure(svg) : svg,
         `agrivoltaic-${view}-${metric}.${format}`,
@@ -546,10 +562,6 @@ function App() {
     <div className="app">
       <header className="app-header">
         <a className="brand" href="./" aria-label="Agrivoltaic Experiment Designer home">
-          <span className="brand-mark">
-            <PanelTop size={21} />
-            <Leaf size={13} />
-          </span>
           <span>Agrivoltaic Experiment Designer</span>
         </a>
         <div className="header-actions">
@@ -769,6 +781,8 @@ function App() {
             <div className="scene-wrap">
               <Scene
                 focus={inspection?.step === step ? inspection : null}
+                layers={layers}
+                panelOpacity={panelOpacity}
                 study={s}
                 scope={scope}
                 view={view}
@@ -815,26 +829,20 @@ function App() {
               )}
             </div>
             <div id="drawing-annotations" />
-            <div className="visual-footer">
-              <span>
-                <span className="legend-square" /> PV module
-              </span>
-              {step > 0 && (
-                <span>
-                  <span className="legend-square steel" /> Structural support
-                </span>
-              )}
-              {step >= 7 && (
-                <span>
-                  <span className="legend-dot" /> Field sensor
-                </span>
-              )}
-              <span className="scale-note">
-                {step === 0
-                  ? 'Module dimensions in metres'
-                  : 'Origin at array centre · east / north / up'}
-              </span>
-            </div>
+            <DisplayLegend
+              scope={scope}
+              layers={layers}
+              opacity={panelOpacity}
+              setLayer={(key, visible) =>
+                setLayerPrefs((current) => ({
+                  ...current,
+                  [layerMode]: { ...current[layerMode], [key]: visible },
+                }))
+              }
+              setOpacity={(value) =>
+                setOpacityPrefs((current) => ({ ...current, [opacityMode]: value }))
+              }
+            />
           </section>
           <div id="receiver-inspector" />
           {step >= 6 && (

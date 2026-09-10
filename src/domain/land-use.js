@@ -1,4 +1,4 @@
-import { dimensions } from './study.js';
+import { dimensions, cropSpacing } from './study.js';
 import { localToWorld, worldToLocal } from './geometry.js';
 
 // Planning overlays only. These rectangles never enter scientific occluders.
@@ -9,8 +9,7 @@ export const zoneStyles = {
     color: '#a05a31',
     hatch: 'diagonal',
   },
-  setback: { symbol: 'S', label: 'PV-edge crop setback', color: '#a17c17', hatch: 'dots' },
-  maintenance: { symbol: 'M', label: 'Maintenance lane', color: '#64717a', hatch: 'cross' },
+  cropping: { symbol: 'C', label: 'Cropping area', color: '#558042', hatch: 'dots' },
   perimeter: {
     symbol: 'B',
     label: 'Perimeter no-crop buffer',
@@ -19,9 +18,13 @@ export const zoneStyles = {
   },
 };
 export const landUseDefaults = { underPanelWidth: 1, perimeterBuffer: 3 };
-export const landUseSettings = (s) => s.landUse || landUseDefaults;
+export const landUseSettings = (s) => ({
+  ...landUseDefaults,
+  ...s.landUse,
+  underPanelWidth: cropSpacing(s).underPanelWidth,
+});
 export const landUseDefinition =
-  'U: continuous no-crop strip centred on each row axis, including table gaps. S: outside each PV edge at the displayed pose. M: centred between adjacent row axes. B: outward from the design envelope (row length × axis span plus untilted assembly width). Zones may overlap; they are planning reservations, not shadows or a tracker swept-clearance certification. Receiver-area statistics include reserved zones.';
+  'U: continuous non-cultivated width centred on each row axis. C: cropping width between non-cultivated strips; C = pitch − U, plus any extra group aisle. S: signed distance from the projected PV frame edge to the cropping edge; S = (U − projected panel width) / 2. Negative S allows crops beneath panels. B: no-crop perimeter outside the design envelope (row length × axis span plus untilted assembly width). Ground layers do not shade or mask numerical receivers; tracker dimensions use the displayed pose.';
 
 export function landUseZones(s, geometry = null) {
   const d = dimensions(s),
@@ -56,19 +59,16 @@ export function landUseZones(s, geometry = null) {
     const r = rect(...args);
     if (r.x1 - r.x0 > 1e-9 && r.y1 - r.y0 > 1e-9) zones.push(r);
   };
-  const tilt =
-    s.racking.type === 'vertical' ? 90 : s.racking.type === 'pergola' ? 0 : s.racking.tilt;
-  const angle = (tilt * Math.PI) / 180;
-  const edge = (g.width * Math.cos(angle) + s.module.thickness * Math.abs(Math.sin(angle))) / 2;
-  for (const cy of g.rowOffsets) {
+  for (const cy of g.rowOffsets)
     add('underPanel', -x, cy - settings.underPanelWidth / 2, x, cy + settings.underPanelWidth / 2);
-    add('setback', -x, cy - edge - s.rowPair.cropSetback, x, cy - edge);
-    add('setback', -x, cy + edge, x, cy + edge + s.rowPair.cropSetback);
-  }
-  for (let i = 1; i < g.rowOffsets.length; i++) {
-    const cy = (g.rowOffsets[i - 1] + g.rowOffsets[i]) / 2;
-    add('maintenance', -x, cy - s.rowPair.maintenance / 2, x, cy + s.rowPair.maintenance / 2);
-  }
+  for (let i = 1; i < g.rowOffsets.length; i++)
+    add(
+      'cropping',
+      -x,
+      g.rowOffsets[i - 1] + settings.underPanelWidth / 2,
+      x,
+      g.rowOffsets[i] - settings.underPanelWidth / 2,
+    );
   const b = settings.perimeterBuffer;
   // Four non-overlapping rectangles form the ring, including its corners.
   add('perimeter', -x - b, -y - b, x + b, -y);
@@ -106,19 +106,22 @@ export function rectangleUnionArea(rectangles) {
 export function plotZoneOverlap(s, plot, zones = landUseZones(s).zones) {
   const p = worldToLocal(s, plot.x, plot.y);
   // Layout normalization aligns imported plots with the array before rendering.
-  const clipped = zones.map((z) => ({
-    ...z,
-    x0: Math.max(z.x0, p.x - plot.width / 2),
-    x1: Math.min(z.x1, p.x + plot.width / 2),
-    y0: Math.max(z.y0, p.y - plot.length / 2),
-    y1: Math.min(z.y1, p.y + plot.length / 2),
-  }));
+  const clipped = zones
+    .filter((z) => z.kind !== 'cropping')
+    .map((z) => ({
+      ...z,
+      x0: Math.max(z.x0, p.x - plot.width / 2),
+      x1: Math.min(z.x1, p.x + plot.width / 2),
+      y0: Math.max(z.y0, p.y - plot.length / 2),
+      y1: Math.min(z.y1, p.y + plot.length / 2),
+    }));
   return rectangleUnionArea(clipped);
 }
 export function landUseSummary(s) {
   const { zones, outer } = landUseZones(s);
   return {
-    reservedArea: rectangleUnionArea(zones),
+    reservedArea: rectangleUnionArea(zones.filter((z) => z.kind !== 'cropping')),
+    croppingArea: rectangleUnionArea(zones.filter((z) => z.kind === 'cropping')),
     outerArea: (outer.x1 - outer.x0) * (outer.y1 - outer.y0),
     conflicts: s.crops
       .map((p) => ({ id: p.id, area: plotZoneOverlap(s, p, zones) }))

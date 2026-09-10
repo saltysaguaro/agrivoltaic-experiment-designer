@@ -105,6 +105,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       await import(pathToFileURL(file).href + '?test=' + Date.now());
     });
     assert.match(document.querySelector('.brand').textContent, /Agrivoltaic Experiment Designer/);
+    assert.equal(document.querySelector('.brand svg'), null);
     const help = document.querySelector('button[aria-label="About Length"]');
     await act(async () => help.focus());
     assert.match(document.querySelector('[role="tooltip"]').textContent, /long outside edge/);
@@ -160,11 +161,23 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(selectedSite.address, 'Tucson, Arizona, United States');
     assert.equal(selectedSite.utcOffsetApproximate, true);
     await click(step('Irradiance'));
+    assert.equal(
+      document.querySelector('.drawing-annotations'),
+      null,
+      'Irradiance has no callouts before calculating',
+    );
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
     await click(byText('Calculate daily light'));
     await act(async () => {
       await calculation;
     });
+    assert.equal(calculations, 1);
+    assert.equal(document.querySelector('.drawing-annotations'), null);
+    assert.equal(byText('U · Under-row no-crop strip').getAttribute('aria-pressed'), 'false');
+    assert.equal(byText('C · Cropping area').getAttribute('aria-pressed'), 'false');
+    assert.equal(document.querySelector('input[aria-label="Panel opacity"]').value, '20');
+    await click(byText('C · Cropping area'));
+    assert.equal(byText('C · Cropping area').getAttribute('aria-pressed'), 'true');
     assert.equal(calculations, 1);
     assert.match(
       document.querySelector('.step-section.active .step-toggle').textContent,
@@ -179,6 +192,33 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       document.querySelector('.annotation-cards').textContent,
       /Non-cultivated width beneath each row/,
     );
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+        reservation,
+        '2',
+      );
+      reservation.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    });
+    assert.equal(
+      JSON.parse(localStorage.getItem('aed-study-v1')).landUse.underPanelWidth,
+      2,
+      'Typing updates before blur',
+    );
+    const setback = document.querySelector('[data-annotation="rowPair.cropSetback"] input');
+    const cropWidth = document.querySelector('[data-annotation="rowPair.croppingWidth"] input');
+    const beforeArrow = Number(setback.value);
+    await act(async () =>
+      setback.dispatchEvent(
+        new dom.window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }),
+      ),
+    );
+    const linked = JSON.parse(localStorage.getItem('aed-study-v1'));
+    assert.ok(Math.abs(linked.rowPair.cropSetback - beforeArrow - 0.1) < 1e-6);
+    assert.ok(
+      Math.abs(linked.landUse.underPanelWidth + Number(cropWidth.value) - linked.rowPair.pitch) <
+        1e-6,
+    );
+    // Restore the reference width through its own live input.
     await act(async () => {
       Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
         reservation,

@@ -6,7 +6,7 @@ import path from 'node:path';
 import { JSDOM } from 'jsdom';
 import { build } from 'esbuild';
 
-test('numeric editing preserves incomplete keyboard drafts until a valid commit', async () => {
+test('numeric editing preserves incomplete drafts and publishes valid numbers and arrow steps immediately', async () => {
   const dom = new JSDOM('<div id="root"></div>');
   const before = {};
   for (const [key, value] of Object.entries({
@@ -60,17 +60,17 @@ test('numeric editing preserves incomplete keyboard drafts until a valid commit'
       await type(draft);
       assert.equal(input.value, draft);
     }
-    assert.deepEqual(commits, []);
+    assert.deepEqual(commits, [-0, -0.1, -0.15]);
     await act(async () =>
       input.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true })),
     );
-    assert.deepEqual(commits, [-0.15]);
+    assert.deepEqual(commits, [-0, -0.1, -0.15]);
     await type('');
     await act(async () =>
       input.dispatchEvent(new dom.window.FocusEvent('focusout', { bubbles: true })),
     );
     assert.equal(input.getAttribute('aria-invalid'), 'true');
-    assert.deepEqual(commits, [-0.15]);
+    assert.deepEqual(commits, [-0, -0.1, -0.15]);
     await type('21');
     await act(async () =>
       input.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true })),
@@ -80,7 +80,14 @@ test('numeric editing preserves incomplete keyboard drafts until a valid commit'
     await act(async () =>
       input.dispatchEvent(new dom.window.FocusEvent('focusout', { bubbles: true })),
     );
-    assert.deepEqual(commits, [-0.15, 0.35]);
+    assert.deepEqual(commits, [-0, -0.1, -0.15, 0.35]);
+    await act(async () =>
+      input.dispatchEvent(
+        new dom.window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }),
+      ),
+    );
+    assert.equal(commits.at(-1), 0.45);
+    assert.equal(input.value, '0.45');
     await act(async () =>
       input.dispatchEvent(
         new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),

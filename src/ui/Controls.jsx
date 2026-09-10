@@ -1,4 +1,4 @@
-import React, { useId, useState, useEffect, createContext, useContext } from 'react';
+import React, { useId, useState, useEffect, useRef, createContext, useContext } from 'react';
 import Info from './Info.jsx';
 import LocationSearch from './LocationSearch.jsx';
 import { receiverGridSpec } from '../domain/geometry.js';
@@ -7,6 +7,8 @@ import { Upload, Plus, Trash2, MapPin, Sparkles, Download, Play, Square } from '
 import { dimensions, sensorTypes, rackingMinimums } from '../domain/study.js';
 import { plotZoneOverlap, landUseSummary } from '../domain/land-use.js';
 import { plotStats } from '../experiment/layout.js';
+const inputText = (value) =>
+  typeof value === 'number' ? String(Number(value.toFixed(6))) : String(value);
 const InspectionContext = createContext(null);
 export function Field({
   annotation,
@@ -25,16 +27,23 @@ export function Field({
 }) {
   const inspect = useContext(InspectionContext);
   const id = useId();
-  const [draft, setDraft] = useState(String(value));
+  const [draft, setDraft] = useState(inputText(value));
+  const emitted = useRef(value);
+  const dirty = useRef(false);
   const [error, setError] = useState('');
   useEffect(() => {
-    setDraft(String(value));
+    if (value !== emitted.current) {
+      setDraft(inputText(value));
+      dirty.current = false;
+      emitted.current = value;
+    }
     setError('');
   }, [value]);
-  function commit() {
-    const number = Number(draft);
+  function commit(text = draft) {
+    if (!dirty.current) return;
+    const number = Number(text);
     const message =
-      draft.trim() === '' || !Number.isFinite(number)
+      text.trim() === '' || !Number.isFinite(number)
         ? 'Enter a number.'
         : min !== undefined && number < min
           ? `Enter ${min} or more.`
@@ -45,8 +54,12 @@ export function Field({
               : '';
     setError(message);
     if (!message) {
-      setDraft(String(number));
-      onChange(number);
+      setDraft(inputText(number));
+      dirty.current = false;
+      if (number !== emitted.current) {
+        emitted.current = number;
+        onChange(number);
+      }
     }
   }
   return (
@@ -98,7 +111,7 @@ export function Field({
             step={step}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? `${id}-error` : undefined}
-            onBlur={type === 'number' ? commit : undefined}
+            onBlur={type === 'number' ? () => commit() : undefined}
             onKeyDown={(e) => {
               if (type !== 'number') return;
               if (e.key === 'Enter') {
@@ -106,13 +119,15 @@ export function Field({
                 commit();
               }
               if (e.key === 'Escape') {
-                setDraft(String(value));
+                dirty.current = false;
+                setDraft(inputText(value));
                 setError('');
               }
               if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
                 e.preventDefault();
+                dirty.current = true;
                 const n = Number(draft.trim() && Number.isFinite(Number(draft)) ? draft : value);
-                setDraft(
+                commit(
                   String(
                     Math.max(
                       min ?? -Infinity,
@@ -128,8 +143,24 @@ export function Field({
             }}
             onChange={(e) => {
               if (type === 'number') {
-                setDraft(e.target.value);
+                dirty.current = true;
+                const text = e.target.value;
+                setDraft(text);
                 setError('');
+                // Publish complete, valid numbers while preserving intermediate drafts.
+                const n = Number(text);
+                if (
+                  /^-?(?:\d+(?:\.\d+)?|\.\d+)$/.test(text) &&
+                  Number.isFinite(n) &&
+                  (min === undefined || n >= min) &&
+                  (max === undefined || n <= max) &&
+                  (!integer || Number.isInteger(n))
+                ) {
+                  if (n !== emitted.current) {
+                    emitted.current = n;
+                    onChange(n);
+                  }
+                }
               } else onChange(e.target.value);
             }}
           />
@@ -327,19 +358,24 @@ export default function Controls({
               null,
               {
                 min: 0,
-                max: 30,
+                max: s.rowPair.pitch,
                 hint: 'U · Total centred strip width; 0 allows crops beneath the row.',
               },
             )}
             {field('rowPair', 'cropSetback', 'Crop setback from each edge', 'm', null, {
-              min: 0,
-              max: 5,
+              min: -d.projected / 2,
+              max: (s.rowPair.pitch - d.projected) / 2,
+              hint: 'S · Negative values allow crops beneath the panel edges.',
             })}
-            {field('rowPair', 'maintenance', 'Maintenance strip', 'm', null, { min: 0, max: 5 })}
+            {field('rowPair', 'croppingWidth', 'Cropping area width', 'm', null, {
+              min: 0,
+              max: s.rowPair.pitch,
+              hint: 'C · Linked to non-cultivated width and setback.',
+            })}
             <div className="info-box">
-              {d.usable.toFixed(2)} m available at the regular pitch and displayed pose. Group
-              aisles add space. Hatched zones reserve ground for access or non-cultivation; they are
-              not shadows.
+              Non-cultivated width + cropping width = {s.rowPair.pitch} m row pitch. The two areas
+              share an edge. Group aisles add cropping space. Setback is measured from the panel
+              edge at the displayed tilt.
             </div>
           </>
         )}
@@ -661,7 +697,7 @@ export default function Controls({
             </button>
             {landUseSummary(s).conflicts.length > 0 && (
               <div className="info-box zone-warning" role="status">
-                Some plots intersect reserved no-crop or maintenance zones. Their locations are
+                Some plots intersect non-cultivated or perimeter zones. Their locations are
                 retained; review the marked areas below.
               </div>
             )}

@@ -8,6 +8,8 @@ import {
   studySchema,
   dimensions,
   analysisKey,
+  cropSpacing,
+  updateStudyInput,
   selectRacking,
 } from '../src/domain/study.js';
 import {
@@ -47,7 +49,11 @@ test('land-use inputs migrate, validate and round-trip without changing the solv
   assert.deepEqual([...original.attributes.position.array], [...updated.attributes.position.array]);
   assert.equal(analysisKey(s), key);
   assert.deepEqual(receiverGridSpec(s), grid);
-  assert.deepEqual(migrateStudy(JSON.parse(JSON.stringify(s))), s);
+  const migrated = migrateStudy(JSON.parse(JSON.stringify(s)));
+  assert.equal(migrated.rowPair.maintenance, undefined);
+  assert.equal(migrated.rowPair.croppingWidth, 3);
+  assert.equal(migrated.landUse.underPanelWidth, 5);
+  assert.deepEqual(migrateStudy(JSON.parse(JSON.stringify(migrated))), migrated);
   assert.equal(
     studySchema.safeParse({ ...s, landUse: { underPanelWidth: -1, perimeterBuffer: 3 } }).success,
     false,
@@ -82,7 +88,7 @@ test('reserved rectangles rotate with the array, retain metric widths and includ
   const under = zones.filter((z) => z.kind === 'underPanel');
   assert.equal(under.length, s.array.rows);
   under.forEach((r) => near(r.y1 - r.y0, s.landUse.underPanelWidth));
-  const lanes = zones.filter((z) => z.kind === 'maintenance');
+  const lanes = zones.filter((z) => z.kind === 'cropping');
   assert.equal(lanes.length, s.array.rows - 1);
   near((lanes[1].y0 + lanes[1].y1) / 2, 0);
   near(outer.x1 - outer.x0, d.length + 2 * s.landUse.perimeterBuffer);
@@ -94,7 +100,8 @@ test('reserved rectangles rotate with the array, retain metric widths and includ
   s.landUse = { underPanelWidth: 0, perimeterBuffer: 0 };
   s.rowPair.cropSetback = 0;
   s.rowPair.maintenance = 0;
-  assert.equal(landUseZones(s).zones.length, 0);
+  assert.ok(landUseZones(s).zones.every((z) => z.kind === 'cropping'));
+  assert.equal(landUseSummary(s).reservedArea, 0);
 });
 
 test('plot reservations use union area and central profile sections do not project side buffers through the field', () => {
@@ -143,12 +150,12 @@ test('engineering witnesses match actual rotated module edges, land widths, sens
       'landUse.underPanelWidth',
       'landUse.perimeterBuffer',
       'rowPair.cropSetback',
-      'rowPair.maintenance',
+      'rowPair.croppingWidth',
       'array.buffer',
     ]) {
       const [a] = engineeringAnnotations(s, 'array', group, { id });
       const [section, key] = id.split('.');
-      near(a.points[0].distanceTo(a.points[1]), s[section][key]);
+      near(a.points[0].distanceTo(a.points[1]), Math.abs(s[section][key]));
     }
     let edge = -Infinity;
     for (const mesh of group.children.filter((m) => m.userData.kind === 'module')) {
@@ -158,12 +165,16 @@ test('engineering witnesses match actual rotated module edges, land widths, sens
         edge = Math.max(edge, worldToLocal(s, p.x, p.y).y);
       }
     }
-    const setback = landUseZones(s)
-      .zones.filter((z) => z.kind === 'setback')
-      .at(-1);
+    const [setback] = engineeringAnnotations(s, 'array', group, { id: 'rowPair.cropSetback' });
     assert.ok(
-      Math.abs(setback.y0 - edge) < 1e-6,
-      'Setback begins at the actual frame edge, including thickness',
+      Math.abs(
+        worldToLocal(s, setback.points[0].x, setback.points[0].y).y + dimensions(s).span - edge,
+      ) < 1e-6,
+      'Signed setback starts at the actual frame edge, including thickness',
+    );
+    near(
+      worldToLocal(s, setback.points[1].x, setback.points[1].y).y,
+      group.userData.rowOffsets[0] + s.landUse.underPanelWidth / 2,
     );
     const [tilt] = engineeringAnnotations(s, 'racking', group, { id: 'racking.tilt' });
     assert.equal(
@@ -219,4 +230,47 @@ test('publication tables retain every methods value exactly once and all figure 
     assert.ok(svg.window.document.documentElement.textContent.includes('Planning overlays only'));
     assert.ok(svg.window.document.querySelector('[data-callout]'));
   }
+});
+
+test('editing any linked width or signed setback maintains a contiguous crop partition across geometry changes', () => {
+  let s = defaultStudy();
+  const check = () => {
+    const d = cropSpacing(s);
+    near(s.rowPair.cropSetback, (s.landUse.underPanelWidth - d.projected) / 2);
+    near(s.rowPair.croppingWidth + s.landUse.underPanelWidth, s.rowPair.pitch);
+    const { zones } = landUseZones(s),
+      under = zones.filter((z) => z.kind === 'underPanel'),
+      crop = zones.filter((z) => z.kind === 'cropping');
+    crop.forEach((c, i) => {
+      near(c.y0, under[i].y1);
+      near(c.y1, under[i + 1].y0);
+    });
+  };
+  check();
+  s = updateStudyInput(s, 'rowPair', 'cropSetback', -0.5);
+  check();
+  near(s.landUse.underPanelWidth, dimensions(s).projected - 1);
+  s = updateStudyInput(s, 'landUse', 'underPanelWidth', 2);
+  check();
+  s = updateStudyInput(s, 'rowPair', 'croppingWidth', 3);
+  check();
+  near(s.landUse.underPanelWidth, 5);
+  s = updateStudyInput(s, 'module', 'length', 3);
+  check();
+  near(s.landUse.underPanelWidth, 5);
+  s = updateStudyInput(s, 'rowPair', 'pitch', 4);
+  check();
+  near(s.landUse.underPanelWidth, 4);
+  near(s.rowPair.croppingWidth, 0);
+  s = updateStudyInput(s, 'landUse', 'underPanelWidth', 0);
+  near(s.rowPair.cropSetback, -dimensions(s).projected / 2);
+  near(s.rowPair.croppingWidth, 4);
+  s = defaultStudy();
+  s.array.groupSize = 1;
+  const group = buildGeometry(s, 'pair');
+  const [gap] = engineeringAnnotations(s, 'pair', group, { id: 'rowPair.croppingWidth' });
+  assert.equal(gap.symbol, 'C + A');
+  near(gap.points[0].distanceTo(gap.points[1]), s.rowPair.croppingWidth + s.array.aisle);
+  near(parseFloat(gap.value), s.rowPair.croppingWidth + s.array.aisle);
+  disposeGroup(group);
 });

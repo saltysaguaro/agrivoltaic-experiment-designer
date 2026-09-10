@@ -30,11 +30,11 @@ export const inputHelp = {
   'rowPair.pitch':
     'Distance from one row’s centre line to the next, measured across the rows. This includes both the PV assembly and the space between rows.',
   'rowPair.cropSetback':
-    'Space kept free of crops outside each PV edge at the displayed tilt. For trackers this follows the preview pose, not the full swept envelope. It is subtracted on both sides of the interrow crop strip.',
-  'rowPair.maintenance':
-    'Width reserved for walking, machinery or maintenance, centred halfway between adjacent row axes, including group gaps.',
+    'Signed distance from the projected panel edge to the cropping edge. Negative values extend crops beneath the panel; positive values leave an uncultivated margin outside it. Changing setback updates both widths immediately. Uses the displayed tilt.',
+  'rowPair.croppingWidth':
+    'Width of the cropping area between adjacent non-cultivated strips. Cropping width plus non-cultivated width equals row pitch. Editing either width updates setback and the other width. Group aisles add cropping space.',
   'landUse.underPanelWidth':
-    'Total width of a continuous strip kept free of crops beneath each PV row, centred on its axis and extending through table gaps. Default 1 m; set 0 to allow cultivation beneath the row. This is a land-use reservation, not a shadow footprint.',
+    'Total non-cultivated width centred beneath each row, including table gaps. Its edges touch the cropping area. Editing it updates cropping width and signed setback immediately. Zero permits crops across the full row pitch.',
   'landUse.perimeterBuffer':
     'No-crop border outside the array design envelope: row length by row-axis span plus untilted assembly width. Default 3 m; set 0 for no border. Independent of the numerical receiver buffer. It is not a certification of tracker swept clearance.',
   'array.rows': 'Total number of parallel PV rows in the array.',

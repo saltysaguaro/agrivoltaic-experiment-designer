@@ -6,7 +6,7 @@ import {
 } from '../domain/land-use.js';
 import { getPose } from '../domain/geometry.js';
 import { provenanceRecord } from './provenance.js';
-import { dimensions, VERSION } from '../domain/study.js';
+import { dimensions, cropSpacing, VERSION } from '../domain/study.js';
 import { figureSvg, escapeXml as e } from './figures.js';
 import { plotStats, rowRelative, nearestCell } from '../experiment/layout.js';
 export function download(content, name, type = 'text/plain') {
@@ -38,6 +38,7 @@ export function csv(rows) {
 export function methodsRows(s, r) {
   const d = dimensions(s),
     land = landUseSettings(s),
+    spacing = cropSpacing(s),
     areas = landUseSummary(s);
   return [
     ['Software', `Agrivoltaic Experiment Designer ${VERSION}; study schema ${s.schemaVersion}`],
@@ -82,7 +83,10 @@ export function methodsRows(s, r) {
     ],
     ['Row pitch · P', `${s.rowPair.pitch} m`],
     ['Numerical receiver buffer · R', `${s.array.buffer} m`],
-    ['Under-row no-crop width · U', `${land.underPanelWidth} m (centred continuous strip)`],
+    [
+      'Under-row no-crop width · U',
+      `${Number(land.underPanelWidth.toFixed(4))} m (centred continuous strip)`,
+    ],
     ['Perimeter no-crop buffer · B', `${land.perimeterBuffer} m (outside design envelope)`],
     ['Design envelope', `${d.length.toFixed(3)} × ${(d.span + d.width).toFixed(3)} m`],
     ['Reserved land union area', `${areas.reservedArea.toFixed(2)} m²; overlaps counted once`],
@@ -95,8 +99,14 @@ export function methodsRows(s, r) {
     ],
     ['Land-use definitions', landUseDefinition],
     ['Groups / additional aisle', `${s.array.groupSize} rows per group / ${s.array.aisle} m`],
-    ['PV-edge crop setback · S', `${s.rowPair.cropSetback} m (displayed pose)`],
-    ['Interrow maintenance lane · M', `${s.rowPair.maintenance} m (between row axes)`],
+    [
+      'PV-edge crop setback · S',
+      `${Number(spacing.cropSetback.toFixed(4))} m (signed; negative beneath PV)`,
+    ],
+    [
+      'Interrow cropping width · C',
+      `${Number(spacing.croppingWidth.toFixed(4))} m; C + U = row pitch`,
+    ],
     ['Surface-facing azimuth', `${s.array.azimuth}° clockwise from north`],
     [
       'Site',
@@ -225,7 +235,7 @@ export function publicationTables(s, r) {
       [
         'Under-row no-crop width · U',
         'PV-edge crop setback · S',
-        'Interrow maintenance lane · M',
+        'Interrow cropping width · C',
         'Perimeter no-crop buffer · B',
         'Design envelope',
         'Reserved land union area',
@@ -289,7 +299,7 @@ table{width:100%;border-collapse:collapse;margin:5px 0 12px;font-size:11px;table
 svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{font-size:11px;color:#455d51;overflow-wrap:anywhere}.appendix{border-top:2px solid #37564b;margin-top:22px}.methods-notes{columns:2;column-gap:26px}.methods-notes p{break-inside:avoid;overflow-wrap:anywhere;font-size:11px;line-height:1.4}.methods-notes strong{display:block;margin-bottom:2px}button{padding:10px 18px;background:#183d38;color:white;border:0;cursor:pointer}.note{border-left:3px solid #af873e;padding:7px 10px;background:#fff8e7;font-size:11px}.empty{color:#60736a;font-style:italic}.table-scroll{overflow-x:auto}
 @page{size:A4 landscape;margin:12mm}@media(max-width:650px){.methods-notes{columns:1}.parameters{min-width:610px}body{padding:0 12px}}
 @media print{body{margin:0;padding:0;max-width:none;font-size:9pt}h1{font-size:17pt;margin-top:0}h2{font-size:10pt;margin:3mm 0 1mm}table{font-size:8pt;margin:1mm 0 3mm}td,th{padding:1.1mm 1.5mm}button{display:none}.note{font-size:8pt;padding:2mm 3mm}.report-meta{font-size:8pt}.table-scroll{overflow:visible}.parameters{min-width:0}.appendix{break-before:page;border-top:0}.methods-notes p{font-size:8pt}figure{break-before:page;margin:0}figure svg{max-height:165mm;max-width:100%;width:auto;display:block;margin:auto}figcaption{font-size:8pt}thead{display:table-header-group}tr{break-inside:avoid}a{color:inherit;text-decoration:none}}
-</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(s.analysis.date)} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / S / M / B match the hatched zones in the drawings. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Physical field instruments</h2>${table(
+</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(s.analysis.date)} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / C / B identify the ground zones. S is the signed PV-edge setback; negative values place crops beneath panels. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Physical field instruments</h2>${table(
     [
       'ID / type',
       'E / N / Z (m)',

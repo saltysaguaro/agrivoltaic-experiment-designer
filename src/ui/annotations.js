@@ -1,5 +1,5 @@
 import { Vector3 } from 'three';
-import { dimensions } from '../domain/study.js';
+import { dimensions, cropSpacing } from '../domain/study.js';
 import { localToWorld, getPose, receiverGridSpec } from '../domain/geometry.js';
 import { landUseSettings } from '../domain/land-use.js';
 import { plotCorners } from '../experiment/grid-layout.js';
@@ -20,7 +20,7 @@ const labels = {
   'row.tableGap': ['Gt', 'Table gap', 'm'],
   'rowPair.pitch': ['P', 'Row pitch', 'm'],
   'rowPair.cropSetback': ['S', 'PV-edge setback', 'm'],
-  'rowPair.maintenance': ['M', 'Maintenance lane', 'm'],
+  'rowPair.croppingWidth': ['C', 'Cropping width', 'm'],
   'landUse.underPanelWidth': ['U', 'Under-row no-crop width', 'm'],
   'landUse.perimeterBuffer': ['B', 'Perimeter no-crop buffer', 'm'],
   'array.rows': ['Nr', 'PV rows'],
@@ -35,20 +35,22 @@ const defaults = {
   module: ['module.length', 'module.width'],
   racking: ['racking.height', 'racking.tilt'],
   row: ['table.high', 'row.tables', 'row.tableGap'],
-  pair: ['rowPair.pitch', 'landUse.underPanelWidth', 'rowPair.maintenance'],
+  pair: ['rowPair.pitch', 'landUse.underPanelWidth', 'rowPair.croppingWidth'],
   array: ['array.rows', 'landUse.perimeterBuffer', 'array.buffer'],
   environment: ['site.latitude'],
-  irradiance: ['analysis.resolution', 'analysis.receiverHeight'],
+  irradiance: [],
   sensors: ['experimentSensors.0.z'],
   crops: ['crops.0.grid.columns'],
   report: [
     'landUse.underPanelWidth',
     'rowPair.cropSetback',
-    'rowPair.maintenance',
+    'rowPair.croppingWidth',
     'landUse.perimeterBuffer',
   ],
 };
 export function engineeringAnnotations(s, scope, group, focus = null) {
+  if (scope === 'irradiance') return [];
+  const spacing = cropSpacing(s);
   const d = dimensions(s),
     g = group.userData,
     settings = landUseSettings(s);
@@ -66,7 +68,10 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
   return ids.map((id) => {
     const named = labels[id];
     let value = id.split('.').reduce((o, key) => o?.[key], s);
+    if (id === 'rowPair.cropSetback') value = spacing.cropSetback;
+    if (id === 'rowPair.croppingWidth') value = spacing.croppingWidth;
     if (id.startsWith('landUse.')) value = settings[id.split('.')[1]];
+    if (typeof value === 'number') value = Number(value.toFixed(4));
     if (/\.grid\.(column|row)$/.test(id) && typeof value === 'number') value++;
     const label = focus?.label || named?.[1] || id.split('.').at(-1);
     const unit = focus?.unit || named?.[2] || '';
@@ -82,6 +87,8 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
     };
     const dimension = (from, to, note) => {
       a.kind = 'dimension';
+      a.external =
+        /^(module|table|racking|row)\./.test(id) || ['array.rows', 'array.groupSize'].includes(id);
       a.points = [from, to];
       if (note) a.detail = note;
     };
@@ -153,14 +160,22 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
     else if (id === 'rowPair.cropSetback')
       dimension(
         p(g.length * 0.15, cy + projectedEdge),
-        p(g.length * 0.15, cy + projectedEdge + s.rowPair.cropSetback),
+        p(g.length * 0.15, cy + settings.underPanelWidth / 2),
       );
-    else if (id === 'rowPair.maintenance' && cy1 !== undefined)
+    else if (id === 'rowPair.croppingWidth' && cy1 !== undefined) {
       dimension(
-        p(g.length * 0.35, (cy + cy1 - s.rowPair.maintenance) / 2),
-        p(g.length * 0.35, (cy + cy1 + s.rowPair.maintenance) / 2),
+        p(g.length * 0.35, cy + settings.underPanelWidth / 2),
+        p(g.length * 0.35, cy1 - settings.underPanelWidth / 2),
+        cy1 - cy > s.rowPair.pitch + 1e-6
+          ? 'The marked gap includes the extra group aisle; C is the regular cropping width.'
+          : a.detail,
       );
-    else if (id === 'landUse.perimeterBuffer' || id === 'array.buffer') {
+      if (cy1 - cy > s.rowPair.pitch + 1e-6) {
+        a.symbol = 'C + A';
+        a.value = `${Number((cy1 - cy - settings.underPanelWidth).toFixed(4))} m`;
+        a.detail = `Regular cropping width C = ${Number(spacing.croppingWidth.toFixed(4))} m; extra group aisle A = ${s.array.aisle} m. The witness spans their combined width.`;
+      }
+    } else if (id === 'landUse.perimeterBuffer' || id === 'array.buffer') {
       const b = id === 'array.buffer' ? s.array.buffer : settings.perimeterBuffer;
       dimension(
         p(g.length / 2, id === 'array.buffer' ? g.span / 2 : -g.span / 2),
@@ -223,7 +238,7 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
         a.symbol = crop.id;
         a.kind = 'outline';
         a.points = plotCorners(s, crop);
-        a.detail ||= `${crop.width.toFixed(3)} × ${crop.length.toFixed(3)} m; whole receiver cells. Hatched areas are reserved land-use zones.`;
+        a.detail ||= `${crop.width.toFixed(3)} × ${crop.length.toFixed(3)} m; whole receiver cells. Non-cultivated and cropping areas share their boundaries.`;
       } else {
         a.label = 'Crop plots';
         a.value = 'Place a plot';

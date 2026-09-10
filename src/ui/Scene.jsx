@@ -1,19 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { engineeringAnnotations } from './annotations.js';
-import { annotationSvg, zoneSvg, zonePatternDefs } from './annotation-svg.js';
-import { landUseZones, zoneStyles } from '../domain/land-use.js';
+import { annotationSvg } from './annotation-svg.js';
+import { landMeshes, applyDisplayLayers } from './land-meshes.js';
+import { designLayers } from './display-layers.js';
+import { landUseZones } from '../domain/land-use.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { buildGeometry, disposeGroup, axes, receiverGridSpec } from '../domain/geometry.js';
 import { heatColor, figureSvg } from '../report/figures.js';
-import { fitOrthographic, displayBounds } from './camera.js';
+import { displayBounds } from './camera.js';
+import { hardwarePoints, fitDrawing } from './drawing-bounds.js';
 import { groundGrid } from './ground-grid.js';
 import { receiverLines, sensorMarkers, cellAt, cellCenter } from '../experiment/grid-layout.js';
 import ReceiverInspector from './ReceiverInspector.jsx';
 
 export default function Scene({
   study,
+  layers = designLayers,
+  panelOpacity = 1,
   focus,
   scope,
   view,
@@ -54,7 +59,7 @@ export default function Scene({
   const overlayKey = JSON.stringify([
     study.landUse,
     study.rowPair.cropSetback,
-    study.rowPair.maintenance,
+    study.rowPair.croppingWidth,
     study.analysis.resolution,
     study.analysis.receiverHeight,
     study.experimentSensors.map((s) => [s.id, s.x, s.y, s.z, s.grid]),
@@ -114,17 +119,9 @@ export default function Scene({
         return [((p.x + 1) * w) / 2, ((1 - p.y) * h) / 2];
       };
       annotationLayer.current.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      annotationLayer.current.innerHTML =
-        zonePatternDefs('live-zone') +
-        zoneSvg(rt.zones || [], project, {
-          prefix: 'live-zone',
-          profile: rt.view === 'profile',
-          muted: rt.metric !== 'none',
-        }) +
-        (rt.receiverBoundary
-          ? `<polygon points="${rt.receiverBoundary.map((p) => project(p).join(',')).join(' ')}" fill="none" stroke="#276a80" stroke-width="1" stroke-dasharray="5 4"/>`
-          : '') +
-        annotationSvg(rt.annotations, project, w, h - 25);
+      annotationLayer.current.innerHTML = annotationSvg(rt.annotations, project, w, h - 25, {
+        obstacles: rt.hardwarePoints?.map(project) || [],
+      });
     };
     controls.addEventListener('change', () => {
       setHover(null);
@@ -267,6 +264,7 @@ export default function Scene({
       const group = buildGeometry(study, scopeKey);
       decorate(group);
       rt.group = group;
+      rt.hardwarePoints = hardwarePoints(group);
       scene.add(group);
       rt.structureKey = structureKey;
     }
@@ -279,22 +277,6 @@ export default function Scene({
         : [];
     rt.view = view;
     rt.metric = metric;
-    const receiver = receiverGridSpec(study);
-    rt.receiverBoundary = null;
-    if (scopeKey === 'array') {
-      const { u, v } = axes(study);
-      rt.receiverBoundary = [
-        [-1, -1],
-        [1, -1],
-        [1, 1],
-        [-1, 1],
-      ].map(([x, y]) =>
-        u
-          .clone()
-          .multiplyScalar((x * receiver.width) / 2)
-          .addScaledVector(v, (y * receiver.height) / 2),
-      );
-    }
     if (rt.overlay) {
       scene.remove(rt.overlay);
       disposeOverlay(rt.overlay);
@@ -302,15 +284,36 @@ export default function Scene({
     const overlay = new THREE.Group();
     rt.overlay = overlay;
     scene.add(overlay);
-    group.children
-      .filter((o) => o.userData.kind === 'module')
-      .forEach((o) => {
-        const transparent =
-          scope === 'irradiance' || (result && metric !== 'none' && scopeKey === 'array');
-        o.material.transparent = Boolean(transparent);
-        o.material.opacity = transparent ? 0.2 : 1;
-        o.material.depthWrite = !transparent;
-      });
+    overlay.add(landMeshes(study, rt.zones, view === 'profile'));
+    if (scopeKey === 'array') {
+      const receiver = receiverGridSpec(study),
+        { u, v } = axes(study);
+      const corners = [
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1],
+        [-1, -1],
+      ].map(([x, y]) =>
+        u
+          .clone()
+          .multiplyScalar((x * receiver.width) / 2)
+          .addScaledVector(v, (y * receiver.height) / 2)
+          .setZ(0.035),
+      );
+      const boundary = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(corners),
+        new THREE.LineDashedMaterial({
+          color: 0x276a80,
+          dashSize: 0.3,
+          gapSize: 0.2,
+          depthWrite: false,
+        }),
+      );
+      boundary.computeLineDistances();
+      boundary.userData.layer = 'receiver';
+      overlay.add(boundary);
+    }
     if (scope !== 'module' && showGrid) {
       const ground = groundGrid(study, group.userData);
       const grid = new THREE.LineSegments(
@@ -321,6 +324,7 @@ export default function Scene({
       );
       // Small display offset avoids z-fighting with the light-map overlay.
       grid.position.z = 0.02;
+      if (scopeKey === 'array') grid.userData.layer = 'receiver';
       overlay.add(grid);
     }
     if (
@@ -348,13 +352,6 @@ export default function Scene({
         );
       });
       overlay.add(mesh);
-      group.children
-        .filter((o) => o.isMesh && o.userData.kind === 'module')
-        .forEach((o) => {
-          o.material.transparent = true;
-          o.material.opacity = 0.2;
-          o.material.depthWrite = false;
-        });
     }
     if (scopeKey === 'array') {
       for (const glyph of sensorMarkers(study, { profile: view === 'profile' })) {
@@ -367,11 +364,12 @@ export default function Scene({
           new THREE.MeshBasicMaterial({
             color: glyph.count > 1 ? 0x8f4934 : 0xd66d43,
             side: THREE.DoubleSide,
-            depthTest: false,
+            depthTest: true,
           }),
         );
         marker.position.set(glyph.position.x, glyph.position.y, profile ? sensor.z : 0.065);
-        marker.renderOrder = 20;
+        marker.renderOrder = 3;
+        marker.userData.layer = 'sensors';
         overlay.add(marker);
         if (!profile) {
           const rim = new THREE.Mesh(
@@ -379,12 +377,13 @@ export default function Scene({
             new THREE.MeshBasicMaterial({
               color: 0xffffff,
               side: THREE.DoubleSide,
-              depthTest: false,
+              depthTest: true,
             }),
           );
           rim.position.copy(marker.position);
           rim.position.z += 0.001;
-          rim.renderOrder = 21;
+          rim.renderOrder = 3;
+          rim.userData.layer = 'sensors';
           overlay.add(rim);
         }
         if (glyph.count > 1) {
@@ -398,12 +397,13 @@ export default function Scene({
           context.textBaseline = 'middle';
           context.fillText(glyph.label, 64, 64);
           const label = new THREE.Sprite(
-            new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), depthTest: false }),
+            new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), depthTest: true }),
           );
           label.position.copy(marker.position);
           label.position.z += 0.002;
           label.scale.setScalar(glyph.radius * 1.8);
-          label.renderOrder = 22;
+          label.renderOrder = 3;
+          label.userData.layer = 'sensors';
           overlay.add(label);
         }
       }
@@ -417,6 +417,9 @@ export default function Scene({
             side: THREE.DoubleSide,
           }),
         );
+        mesh.userData.layer = 'plots';
+        mesh.renderOrder = 2;
+        mesh.material.depthWrite = false;
         mesh.position.set(p.x, p.y, 0.04);
         if (p.grid) mesh.rotation.z = Math.atan2(axes(study).u.y, axes(study).u.x);
         overlay.add(mesh);
@@ -427,6 +430,7 @@ export default function Scene({
         mesh.add(edges);
       }
     }
+    applyDisplayLayers(group, overlay, layers, panelOpacity);
     const framingKey = `${view}:${scopeKey}:${resetKey}`;
     if (rt.framingKey !== framingKey) {
       const bounds = displayBounds(study, group, scopeKey);
@@ -448,16 +452,24 @@ export default function Scene({
       controls.target.copy(center);
       controls.enableRotate = view === 'oblique';
       controls.update();
-      rt.framing = fitOrthographic(
+      rt.framing = fitDrawing(
         camera,
         bounds,
-        host.current.clientWidth / Math.max(1, host.current.clientHeight),
-        view === 'oblique' ? 1.1 : 1.15,
+        host.current.clientWidth,
+        Math.max(1, host.current.clientHeight),
+        rt.annotations.length > 0,
       );
       rt.framingKey = framingKey;
     }
     rt.resize();
   }, [structureKey, overlayKey, view, scopeKey, scope, metric, result, showGrid, resetKey]);
+  useEffect(() => {
+    const rt = runtime.current;
+    if (rt?.group) {
+      applyDisplayLayers(rt.group, rt.overlay, layers, panelOpacity);
+      rt.draw();
+    }
+  }, [layers, panelOpacity]);
   // Updating a callout or non-spatial field does not rebuild thousands of map cells.
   useEffect(() => {
     const rt = runtime.current;
@@ -519,12 +531,17 @@ export default function Scene({
           <div
             className="svg-fallback"
             dangerouslySetInnerHTML={{
-              __html: figureSvg(study, result, view, metric, scope, showGrid, { focus }),
+              __html: figureSvg(study, result, view, metric, scope, showGrid, {
+                focus,
+                layers,
+                panelOpacity,
+              }),
             }}
           />
         )}
       </div>
-      {document.getElementById('drawing-annotations') &&
+      {annotations.length > 0 &&
+        document.getElementById('drawing-annotations') &&
         createPortal(
           <aside className="drawing-annotations" aria-label="Drawing callouts">
             <div className="annotation-cards" aria-live="polite">
@@ -538,33 +555,9 @@ export default function Scene({
               ))}
             </div>
             <small>
-              Focus an input to highlight it. Dimensions use committed values; a short leader marks
-              dimensions viewed edge-on. Pan and zoom are preserved.
+              Focus an input to highlight it. Valid edits and arrow keys update immediately; a short
+              leader marks dimensions viewed edge-on. Pan and zoom are preserved.
             </small>
-            {(scopeKey === 'array' || scopeKey === 'pair') && (
-              <>
-                <div className="zone-legend" aria-label="Land-use zone legend">
-                  {Object.entries(zoneStyles)
-                    .filter(([kind]) => scopeKey === 'array' || kind !== 'perimeter')
-                    .map(([kind, style]) => (
-                      <span key={kind}>
-                        <i className={'zone-swatch ' + kind} />
-                        {style.symbol} · {style.label}
-                      </span>
-                    ))}
-                  {scopeKey === 'array' && (
-                    <span>
-                      <i className="receiver-swatch" />R · Numerical receiver boundary
-                    </span>
-                  )}
-                </div>
-                <small>
-                  Hatching marks reservations at ground level (z = 0), not shade. U runs through
-                  table gaps; S follows the displayed PV edges. B starts at the design envelope, not
-                  the tracker swept envelope. Use plan view to compare zones.
-                </small>
-              </>
-            )}
           </aside>,
           document.getElementById('drawing-annotations'),
         )}

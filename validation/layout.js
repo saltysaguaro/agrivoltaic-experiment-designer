@@ -1,4 +1,4 @@
-import { defaultStudy, selectRacking } from '../src/domain/study.js';
+import { defaultStudy, selectRacking, synchronizeCropSpacing } from '../src/domain/study.js';
 import { normalizeLayout } from '../src/experiment/grid-layout.js';
 import { figureSvg } from '../src/report/figures.js';
 import { reportHtml } from '../src/report/export.js';
@@ -45,11 +45,9 @@ function show(kind) {
   if (kind === 'zero') {
     s.landUse.underPanelWidth = 0;
     s.landUse.perimeterBuffer = 0;
-    s.rowPair.cropSetback = 0;
-    s.rowPair.maintenance = 0;
     s.array.buffer = 0;
   }
-  s = normalizeLayout(s);
+  s = normalizeLayout(synchronizeCropSpacing(s));
   document.querySelector('.figures').innerHTML = ['plan', 'profile']
     .map((view) => figureSvg(s, null, view, 'none', 'array', true, { compact: true }))
     .join('');

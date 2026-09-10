@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-09-10T15:28:39.319Z",
+  "createdAt": "2026-09-10T17:02:11.851Z",
   "radiance": "RADIANCE 5.3 official release lastmod Mon Aug 28 12:47:29 MDT 2023 by klepley on klepley-39626s",
   "scope": "CPU MeshBVH versus Radiance first-hit occlusion, identical finite triangulated geometry and sky/sun directions. Irradiance uses shared Perez weights. This does NOT independently validate Perez sky, solar position, multi-bounce reflection, daily integration, or WebGPU.",
   "results": [

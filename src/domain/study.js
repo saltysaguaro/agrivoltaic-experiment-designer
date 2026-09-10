@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { validateWeatherRows } from '../irradiance/weather-validation.js';
-export const VERSION = '0.1.2';
+export const VERSION = '0.1.3';
 const num = (min, max) => z.number().finite().min(min).max(max),
   count = (min, max) => num(min, max).int();
 const text = z.string().max(500);
@@ -17,151 +17,157 @@ export const sensorTypes = [
   'Leaf temperature',
   'Custom',
 ];
-export const studySchema = z.object({
-  schemaVersion: z.literal(1),
-  metadata: z.object({ title: text, investigator: text, units: z.literal('SI') }),
-  module: z.object({
-    length: num(0.1, 5),
-    width: num(0.1, 3),
-    thickness: num(0.005, 0.2),
-    power: num(1, 1500),
-    gap: num(0, 0.5),
-  }),
-  racking: z.object({
-    type: z.enum(['fixed', 'single-axis', 'dual-axis', 'vertical', 'pergola']),
-    tilt: num(0, 85),
-    height: num(0.2, 25),
-    limit: num(0, 85),
-    backtracking: z.boolean(),
-    postSize: num(0.02, 0.5),
-  }),
-  table: z.object({
-    high: count(1, 5),
-    wide: count(1, 20),
-    orientation: z.enum(['portrait', 'landscape']),
-  }),
-  row: z.object({ tables: count(1, 20), tableGap: num(0.05, 30) }),
-  rowPair: z.object({ pitch: num(0.5, 120), cropSetback: num(0, 5), maintenance: num(0, 5) }),
-  array: z.object({
-    rows: count(1, 24),
-    azimuth: num(0, 359.9),
-    buffer: num(0, 20),
-    groupSize: count(1, 24),
-    aisle: num(0, 20),
-  }),
-  landUse: z
-    .object({
-      underPanelWidth: num(0, 30).default(1),
-      perimeterBuffer: num(0, 20).default(3),
-    })
-    .default({ underPanelWidth: 1, perimeterBuffer: 3 }),
-  site: z.object({
-    address: text.default(''),
-    utcOffsetApproximate: z.boolean().default(false),
-    latitude: num(-89, 89),
-    longitude: num(-180, 180),
-    utcOffset: num(-12, 14),
-    elevation: num(-500, 9000),
-  }),
-  analysis: z.object({
-    date: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .refine((v) => {
-        const t = Date.parse(v + 'T12:00:00Z');
-        return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === v;
-      }, 'Use a valid calendar date'),
-    resolution: num(0.25, 5),
-    receiverHeight: num(0, 5),
-    interval: z.union([z.literal(5), z.literal(10), z.literal(15)]),
-    patches: z.union([z.literal(145), z.literal(577), z.literal(2305)]),
-    parFraction: num(0.3, 0.6),
-    photonFactor: num(3, 6),
-    backend: z.enum(['auto', 'cpu', 'gpu']),
-  }),
-  weather: z.object({
-    mode: z.enum(['automatic', 'upload', 'sample']).default('upload'),
-    requestKey: z.string().default(''),
-    provenance: z
+export const studySchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    metadata: z.object({ title: text, investigator: text, units: z.literal('SI') }),
+    module: z.object({
+      length: num(0.1, 5),
+      width: num(0.1, 3),
+      thickness: num(0.005, 0.2),
+      power: num(1, 1500),
+      gap: num(0, 0.5),
+    }),
+    racking: z.object({
+      type: z.enum(['fixed', 'single-axis', 'dual-axis', 'vertical', 'pergola']),
+      tilt: num(0, 85),
+      height: num(0.2, 25),
+      limit: num(0, 85),
+      backtracking: z.boolean(),
+      postSize: num(0.02, 0.5),
+    }),
+    table: z.object({
+      high: count(1, 5),
+      wide: count(1, 20),
+      orientation: z.enum(['portrait', 'landscape']),
+    }),
+    row: z.object({ tables: count(1, 20), tableGap: num(0.05, 30) }),
+    rowPair: z.object({
+      pitch: num(0.5, 120),
+      cropSetback: num(-30, 60),
+      croppingWidth: num(0, 120).default(0),
+    }),
+    array: z.object({
+      rows: count(1, 24),
+      azimuth: num(0, 359.9),
+      buffer: num(0, 20),
+      groupSize: count(1, 24),
+      aisle: num(0, 20),
+    }),
+    landUse: z
       .object({
-        url: z.string(),
-        model: z.string(),
-        retrievedAt: z.string(),
-        attribution: z.string(),
-        gridLatitude: z.number().optional(),
-        gridLongitude: z.number().optional(),
-        gridElevation: z.number().optional(),
+        underPanelWidth: num(0, 120).default(1),
+        perimeterBuffer: num(0, 20).default(3),
       })
-      .optional(),
-    name: text,
-    hash: text,
-    sourceText: z.string().max(25000000).optional(),
-    normalizedHash: z.string().default(''),
-    format: text,
-    rows: z
+      .default({ underPanelWidth: 1, perimeterBuffer: 3 }),
+    site: z.object({
+      address: text.default(''),
+      utcOffsetApproximate: z.boolean().default(false),
+      latitude: num(-89, 89),
+      longitude: num(-180, 180),
+      utcOffset: num(-12, 14),
+      elevation: num(-500, 9000),
+    }),
+    analysis: z.object({
+      date: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .refine((v) => {
+          const t = Date.parse(v + 'T12:00:00Z');
+          return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === v;
+        }, 'Use a valid calendar date'),
+      resolution: num(0.25, 5),
+      receiverHeight: num(0, 5),
+      interval: z.union([z.literal(5), z.literal(10), z.literal(15)]),
+      patches: z.union([z.literal(145), z.literal(577), z.literal(2305)]),
+      parFraction: num(0.3, 0.6),
+      photonFactor: num(3, 6),
+      backend: z.enum(['auto', 'cpu', 'gpu']),
+    }),
+    weather: z.object({
+      mode: z.enum(['automatic', 'upload', 'sample']).default('upload'),
+      requestKey: z.string().default(''),
+      provenance: z
+        .object({
+          url: z.string(),
+          model: z.string(),
+          retrievedAt: z.string(),
+          attribution: z.string(),
+          gridLatitude: z.number().optional(),
+          gridLongitude: z.number().optional(),
+          gridElevation: z.number().optional(),
+        })
+        .optional(),
+      name: text,
+      hash: text,
+      sourceText: z.string().max(25000000).optional(),
+      normalizedHash: z.string().default(''),
+      format: text,
+      rows: z
+        .array(
+          z.object({
+            minute: num(0, 1440),
+            duration: num(Number.EPSILON, 180),
+            ghi: num(0, 1500),
+            dni: num(0, 1600),
+            dhi: num(0, 1500),
+            ppfd: num(0, 4000).optional(),
+            diffusePpfd: num(0, 4000).optional(),
+          }),
+        )
+        .max(1440)
+        .superRefine((rows, context) => {
+          try {
+            validateWeatherRows(rows, { allowEmpty: true });
+          } catch (error) {
+            context.addIssue({ code: z.ZodIssueCode.custom, message: error.message });
+          }
+        }),
+    }),
+    experimentSensors: z
       .array(
         z.object({
-          minute: num(0, 1440),
-          duration: num(Number.EPSILON, 180),
-          ghi: num(0, 1500),
-          dni: num(0, 1600),
-          dhi: num(0, 1500),
-          ppfd: num(0, 4000).optional(),
-          diffusePpfd: num(0, 4000).optional(),
+          id: text,
+          type: z.enum(sensorTypes),
+          grid: z.object({ column: count(0, 20000), row: count(0, 20000) }).optional(),
+          x: num(-10000, 10000),
+          y: num(-10000, 10000),
+          z: num(-5, 20),
+          treatment: text,
+          replicate: text,
+          model: text,
+          logger: text,
+          channel: text.default(''),
+          azimuth: num(0, 360).default(0),
+          tilt: num(0, 180).default(0),
+          notes: text,
         }),
       )
-      .max(1440)
-      .superRefine((rows, context) => {
-        try {
-          validateWeatherRows(rows, { allowEmpty: true });
-        } catch (error) {
-          context.addIssue({ code: z.ZodIssueCode.custom, message: error.message });
-        }
-      }),
-  }),
-  experimentSensors: z
-    .array(
-      z.object({
-        id: text,
-        type: z.enum(sensorTypes),
-        grid: z.object({ column: count(0, 20000), row: count(0, 20000) }).optional(),
-        x: num(-10000, 10000),
-        y: num(-10000, 10000),
-        z: num(-5, 20),
-        treatment: text,
-        replicate: text,
-        model: text,
-        logger: text,
-        channel: text.default(''),
-        azimuth: num(0, 360).default(0),
-        tilt: num(0, 180).default(0),
-        notes: text,
-      }),
-    )
-    .max(500),
-  crops: z
-    .array(
-      z.object({
-        id: text,
-        crop: text,
-        grid: z
-          .object({
-            column: count(0, 20000),
-            row: count(0, 20000),
-            columns: count(1, 20000),
-            rows: count(1, 20000),
-          })
-          .optional(),
-        treatment: text,
-        replicate: text,
-        x: num(-10000, 10000),
-        y: num(-10000, 10000),
-        width: num(0.1, 100),
-        length: num(0.1, 100),
-      }),
-    )
-    .max(200),
-});
+      .max(500),
+    crops: z
+      .array(
+        z.object({
+          id: text,
+          crop: text,
+          grid: z
+            .object({
+              column: count(0, 20000),
+              row: count(0, 20000),
+              columns: count(1, 20000),
+              rows: count(1, 20000),
+            })
+            .optional(),
+          treatment: text,
+          replicate: text,
+          x: num(-10000, 10000),
+          y: num(-10000, 10000),
+          width: num(0.1, 100),
+          length: num(0.1, 100),
+        }),
+      )
+      .max(200),
+  })
+  .transform(synchronizeCropSpacing);
 export const defaultStudy = () =>
   studySchema.parse({
     schemaVersion: 1,
@@ -177,7 +183,7 @@ export const defaultStudy = () =>
     },
     table: { high: 2, wide: 6, orientation: 'portrait' },
     row: { tables: 2, tableGap: 0.3 },
-    rowPair: { pitch: 8, cropSetback: 0.5, maintenance: 1 },
+    rowPair: { pitch: 8, cropSetback: 0, croppingWidth: 7 },
     array: { rows: 4, azimuth: 180, buffer: 3, groupSize: 4, aisle: 3 },
     site: { latitude: 32.22, longitude: -110.97, utcOffset: -7, elevation: 728 },
     analysis: {
@@ -250,12 +256,7 @@ export function dimensions(s) {
     footprintY: span + width + 2 * s.array.buffer,
     modules: s.table.high * s.table.wide * s.row.tables * s.array.rows,
     clear: s.rowPair.pitch - projected,
-    usable: Math.max(
-      0,
-      s.rowPair.pitch -
-        Math.max(projected + 2 * s.rowPair.cropSetback, s.landUse?.underPanelWidth ?? 1) -
-        s.rowPair.maintenance,
-    ),
+    usable: Math.max(0, s.rowPair.pitch - (s.landUse?.underPanelWidth ?? 1)),
     minHeight:
       s.racking.height -
       (width / 2) *
@@ -265,6 +266,30 @@ export function dimensions(s) {
             180,
         ) -
       s.module.thickness / 2,
+  };
+}
+// One independent width defines a contiguous partition of the regular row pitch.
+// Stored dependent values are normalized on every import and application edit.
+export function cropSpacing(s) {
+  const projected = dimensions(s).projected;
+  const underPanelWidth = Math.max(0, Math.min(s.rowPair.pitch, s.landUse?.underPanelWidth ?? 1));
+  return {
+    projected,
+    underPanelWidth,
+    cropSetback: (underPanelWidth - projected) / 2,
+    croppingWidth: s.rowPair.pitch - underPanelWidth,
+  };
+}
+export function synchronizeCropSpacing(s) {
+  const spacing = cropSpacing(s);
+  return {
+    ...s,
+    landUse: { ...s.landUse, underPanelWidth: spacing.underPanelWidth },
+    rowPair: {
+      ...s.rowPair,
+      cropSetback: spacing.cropSetback,
+      croppingWidth: spacing.croppingWidth,
+    },
   };
 }
 // Switching hardware is a setup action: provide clearances that work with the
@@ -308,20 +333,24 @@ export function selectRacking(study, type) {
   s.racking.height = Math.max(s.racking.height, minimum.height);
   s.rowPair.pitch = Math.max(s.rowPair.pitch, minimum.pitch);
   s.row.tableGap = Math.max(s.row.tableGap, minimum.tableGap);
-  return s;
+  return synchronizeCropSpacing(s);
 }
 // Later workflow steps can enlarge the assembly after its rack was selected.
 // Keep dependent clearances compatible; direct spacing edits remain user-controlled.
 export function updateStudyInput(study, section, key, value) {
   let s = structuredClone(study);
   s[section][key] = value;
+  if (section === 'rowPair' && key === 'cropSetback')
+    s.landUse.underPanelWidth = dimensions(s).projected + 2 * value;
+  if (section === 'rowPair' && key === 'croppingWidth')
+    s.landUse.underPanelWidth = s.rowPair.pitch - value;
   if (
     ['module', 'table'].includes(section) ||
     (section === 'racking' && ['type', 'tilt', 'limit'].includes(key)) ||
     (section === 'analysis' && key === 'receiverHeight')
   )
     s = selectRacking(s, s.racking.type);
-  return s;
+  return synchronizeCropSpacing(s);
 }
 export function validationMessage(issue) {
   const names = {

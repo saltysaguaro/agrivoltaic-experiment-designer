@@ -7,6 +7,8 @@ import { provenanceRecord } from './provenance.js';
 import { escapeXml } from './xml.js';
 export { escapeXml } from './xml.js';
 import { landUseZones, zoneStyles, landUseDefinition } from '../domain/land-use.js';
+import { designLayers, irradianceLayers } from '../ui/display-layers.js';
+import { hardwarePoints } from '../ui/drawing-bounds.js';
 import { engineeringAnnotations } from '../ui/annotations.js';
 import { annotationSvg, zoneSvg, zonePatternDefs } from '../ui/annotation-svg.js';
 export function heatColor(value, max = 100) {
@@ -41,6 +43,9 @@ export function figureSvg(
 ) {
   // A stale/absent result must export a geometry figure, never a labeled light map.
   if (!result) metric = 'none';
+  const noCallouts = scope === 'irradiance' || metric !== 'none' || options.callouts === false;
+  const layers = options.layers || (metric !== 'none' ? irradianceLayers : designLayers);
+  const opacity = options.panelOpacity ?? (metric !== 'none' || scope === 'irradiance' ? 0.2 : 1);
   const group = buildGeometry(s, scope),
     meshes = group.children.filter((o) => o.isMesh);
   const ground = scope !== 'module' && showGrid ? groundGrid(s, group.userData) : null;
@@ -50,12 +55,17 @@ export function figureSvg(
   const receivers = receiverGridSpec(s);
   const zones =
     arrayScope || scope === 'pair'
-      ? landUseZones(s, group.userData).zones.filter((z) => arrayScope || z.kind !== 'perimeter')
+      ? landUseZones(s, group.userData).zones.filter(
+          (z) => (arrayScope || z.kind !== 'perimeter') && layers[z.kind],
+        )
       : [];
   const annotationScope =
     arrayScope && view === 'plan' ? 'report' : arrayScope && view === 'profile' ? 'pair' : scope;
-  const annotations = engineeringAnnotations(s, annotationScope, group, options.focus);
-  if (arrayScope && view === 'profile' && !options.focus)
+  const annotations = noCallouts
+    ? []
+    : engineeringAnnotations(s, annotationScope, group, options.focus);
+  const hardware = hardwarePoints(group);
+  if (!noCallouts && arrayScope && view === 'profile' && !options.focus)
     annotations.unshift(...engineeringAnnotations(s, 'racking', group).slice(0, 1));
   const receiverBoundary = [
     [-1, -1],
@@ -63,7 +73,8 @@ export function figureSvg(
     [1, 1],
     [-1, 1],
   ].map(([x, y]) => localToWorld(s, (x * receivers.width) / 2, (y * receivers.height) / 2));
-  const glyphs = arrayScope ? sensorMarkers(s, { profile: view === 'profile' }) : [];
+  const glyphs =
+    arrayScope && layers.sensors ? sensorMarkers(s, { profile: view === 'profile' }) : [];
   const project = (p) =>
     view === 'profile'
       ? [worldToLocal(s, p.x, p.y).y, -p.z]
@@ -125,7 +136,10 @@ export function figureSvg(
     ymin = Math.min(ymin, y);
     ymax = Math.max(ymax, y);
   }
-  const scale = Math.min(850 / Math.max(0.2, xmax - xmin), 410 / Math.max(0.2, ymax - ymin)),
+  const scale = Math.min(
+      (noCallouts ? 850 : 730) / Math.max(0.2, xmax - xmin),
+      (noCallouts ? 410 : 310) / Math.max(0.2, ymax - ymin),
+    ),
     tx = 500 - ((xmin + xmax) / 2) * scale,
     ty = 285 - ((ymin + ymax) / 2) * scale,
     xy = (p) => [p[0] * scale + tx, p[1] * scale + ty],
@@ -162,7 +176,7 @@ export function figureSvg(
       );
     }
   }
-  if (ground) {
+  if (ground && (!arrayScope || layers.receiver || view === 'profile')) {
     const segment = (a, b) => {
       const p = xy(project(a)),
         q = xy(project(b));
@@ -176,22 +190,14 @@ export function figureSvg(
           : ground.lines;
     content += `<g data-ground-grid="true" ${arrayScope ? 'data-receiver-grid="true"' : ''}><path d="${lines.map(([a, b]) => segment(a, b)).join(' ')}" fill="none" stroke="#8c9f85" stroke-width="${view === 'profile' ? 1.5 : 0.55}" opacity=".65"/></g>`;
   }
-  shapes.sort((a, b) => (a.kind === 'module') - (b.kind === 'module'));
-  for (const shape of shapes)
-    content += poly(
-      hull(shape.points),
-      shape.kind === 'module' ? (metric === 'none' ? '#46727a' : 'none') : '#b5beb8',
-      '#294d55',
-      metric === 'none' ? 1 : 0.65,
-    );
   content += zoneSvg(zones, (p) => xy(project(p)), {
     profile: view === 'profile',
     muted: metric !== 'none',
   });
-  if (arrayScope && view !== 'profile')
+  if (arrayScope && layers.receiver && view !== 'profile')
     content += `<polygon points="${receiverBoundary.map((p) => xy(project(p)).join(',')).join(' ')}" fill="none" stroke="#276a80" stroke-dasharray="5 4"/>`;
   if (arrayScope) {
-    for (const c of s.crops) {
+    for (const c of layers.plots ? s.crops : []) {
       const p = plotCorners(s, c).map(project);
       content += poly(p, '#94bc69', '#557a35', 0.45);
       const [x, y] = xy(project(new THREE.Vector3(c.x, c.y, 0)));
@@ -226,13 +232,21 @@ export function figureSvg(
       const slots = Math.ceil(glyphs.length / 2);
       const labelY = 86 + (glyphIndex % slots) * Math.min(13, 405 / Math.max(1, slots - 1));
       const labelX = glyphIndex < slots ? 14 : 963;
-      if (glyphs.length <= 60)
+      if (!noCallouts && glyphs.length <= 60)
         content += `<path d="M ${x} ${y} L ${labelX + 8} ${labelY - 3}" stroke="#a86a50" stroke-width=".4" opacity=".6"/><text x="${labelX}" y="${labelY}" font-size="10" fill="#713c28">${glyphIndex + 1}</text>`;
       content += '</g>';
     }
   }
-  content += annotationSvg(annotations, (p) => xy(project(p)), 1000, 520);
-  if (arrayScope && view === 'plan')
+  shapes.sort((a, b) => (a.kind === 'module') - (b.kind === 'module'));
+  for (const shape of shapes) {
+    const module = shape.kind === 'module';
+    if (!(module ? layers.modules && opacity > 0 : layers.supports)) continue;
+    content += `<g data-hardware="${shape.kind}">${poly(hull(shape.points), module ? '#46727a' : '#b5beb8', '#294d55', module ? opacity : 1)}</g>`;
+  }
+  content += annotationSvg(annotations, (p) => xy(project(p)), 1000, 520, {
+    obstacles: hardware.map((p) => xy(project(p))),
+  });
+  if (!noCallouts && arrayScope && layers.modules && view === 'plan')
     rowOffsets.forEach((offset, i) => {
       const p = xy(project(localToWorld(s, -groupLength / 2 - 0.5, offset, 0)));
       content += `<text x="${p[0] - 4}" y="${p[1]}" text-anchor="end" font-size="11">R${i + 1}</text>`;
@@ -297,7 +311,7 @@ export function figureSvg(
           ...(metric !== 'none' ? wrap(provenance.dli) : []),
           ...(zones.length
             ? wrap(
-                'Ground reservations: U centred beneath rows; S at displayed PV edges; M between row axes; B outside the design envelope. Not shadows or tracker swept clearances.',
+                'U and C meet at the cropping edge; U + C = pitch. S is signed from the PV edge (negative beneath panels). B surrounds the design envelope.',
               )
             : []),
         ]
@@ -307,14 +321,14 @@ export function figureSvg(
   const height = footerStart + 10 + footer.length * 13;
   const zoneLegend = zones.length
     ? Object.entries(zoneStyles)
-        .filter(([kind]) => arrayScope || kind !== 'perimeter')
+        .filter(([kind]) => (arrayScope || kind !== 'perimeter') && layers[kind])
         .map(([kind, style], i) => {
           const x = 40 + (i % 2) * 475,
             y = 601 + Math.floor(i / 2) * 18;
           return `<rect x="${x}" y="${y - 10}" width="22" height="12" fill="url(#zone-${kind})" stroke="${style.color}"/><text x="${x + 30}" y="${y}" font-size="11">${escapeXml(style.symbol + ' · ' + style.label)}</text>`;
         })
         .join('') +
-      `<text x="40" y="642" font-size="11">${view === 'profile' ? 'Ground reservations: centre cross-section along the across-row axis.' : 'Dashed blue: numerical receiver boundary (R). Reservations shown through PV surfaces.'} Ground z = 0 m.</text>`
+      `<text x="40" y="642" font-size="11">${view === 'profile' ? 'Ground reservations: centre cross-section along the across-row axis.' : 'Dashed blue: numerical receiver boundary (R). Ground layers lie beneath PV surfaces.'} Ground z = 0 m.</text>`
     : '';
   const footerSvg = footer
     .map(
