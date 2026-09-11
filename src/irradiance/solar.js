@@ -38,7 +38,16 @@ export function sampleWeather(s) {
       cos = Math.max(0, sun.z),
       dni = cos > 0 ? 850 * Math.exp(-0.12 / Math.max(0.05, cos)) : 0,
       dhi = cos > 0 ? 100 * Math.sqrt(cos) : 0;
-    return { minute: h * 60, duration: 60, ghi: dni * cos + dhi, dni, dhi };
+    // Synthetic snapshots must hash identically across JS math-library implementations.
+    // Micro-W/m² precision is far below the illustrative model's physical accuracy.
+    const stable = (value) => Number(value.toFixed(6));
+    return {
+      minute: h * 60,
+      duration: 60,
+      ghi: stable(dni * cos + dhi),
+      dni: stable(dni),
+      dhi: stable(dhi),
+    };
   });
 }
 export function spitters(zenith, k) {

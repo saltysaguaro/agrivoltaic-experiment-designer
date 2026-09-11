@@ -1,4 +1,26 @@
 export const inputHelp = {
+  'module.cellColumns':
+    'Number of solar-cell columns across the module width. Cell width is fitted to the fixed outer module size.',
+  'module.cellRows':
+    'Number of solar-cell rows along the module length. Cell length is fitted to the fixed outer module size.',
+  'module.cellGapX':
+    'Transparent gap between cell columns in the module plane, in metres. Changes the linked module transmission.',
+  'module.cellGapY':
+    'Transparent gap between cell rows in the module plane, in metres. Changes the linked module transmission.',
+  'module.cellMargin':
+    'Opaque perimeter on each edge of the module, including the frame. This area is excluded from transmitting gaps.',
+  'module.gapTransmission':
+    'Fraction of broadband sunlight transmitted through laminate in the internal gaps, from 0 to 1. Module-average transmission also accounts for the gap area. Use measured laminate data when available.',
+  'module.gapParTransmission':
+    'Fraction of photosynthetically active radiation transmitted through gap laminate, from 0 to 1. Used for DLI, independently of broadband transmission.',
+  'analysis.period':
+    'Calculate one day, an inclusive range of whole months, or every day in a calendar year. Period DLI is the mean daily value.',
+  'analysis.year':
+    'Year of the calendar-year calculation, or the starting year of the season. Automatic weather must be available for the complete period.',
+  'analysis.startMonth': 'First included month of the season. Calculation starts on its first day.',
+  'analysis.endMonth':
+    'Last included month of the season. If earlier than the start month, it is in the following year.',
+
   'module.length': 'The long outside edge of one PV module, including its frame.',
   'module.width': 'The short outside edge of one PV module, including its frame.',
   'module.thickness': 'The distance from the front to the back of the module frame.',

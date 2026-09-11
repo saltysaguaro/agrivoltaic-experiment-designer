@@ -1,3 +1,4 @@
+import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
 import { validateWeatherRows, canonicalWeatherRows } from './weather-validation.js';
 import { verifyWeatherRecord } from './weather-record.js';
 import {
@@ -14,7 +15,7 @@ import { CpuBvhIrradianceEngine } from './cpu.js';
 import { WebGpuIrradianceEngine } from './gpu.js';
 import { getCached, putCached } from './cache.js';
 const sum = (a) => a.reduce((n, v) => n + v, 0);
-export function integrateSources(s) {
+export function integrateSources(s, { allowZero = false } = {}) {
   if (s.weather.mode === 'automatic' && !s.weather.rows.length)
     throw Error(
       'Download site weather before calculating, or choose the illustrative weather option.',
@@ -69,7 +70,7 @@ export function integrateSources(s) {
       });
     }
   }
-  if (open <= 0) throw Error('The selected day has no incoming solar energy.');
+  if (open <= 0 && !allowZero) throw Error('The selected day has no incoming solar energy.');
   if (maxClosure > 10)
     warnings.push(
       `GHI closure: supplied DNI differs by up to ${maxClosure.toFixed(1)} W/m². Direct horizontal energy is normalized to GHI − DHI.`,
@@ -78,7 +79,7 @@ export function integrateSources(s) {
     warnings.push(
       'Synthetic illustrative weather; replace with measured or modeled site weather before publication.',
     );
-  const fraction = spitters(dayMinutes ? zenith / dayMinutes : 90, diffuse / open);
+  const fraction = spitters(dayMinutes ? zenith / dayMinutes : 90, open ? diffuse / open : 1);
   let openDli = 0;
   const totalDirect = open - diffuse;
   for (const v of steps) {
@@ -118,6 +119,7 @@ export async function calculateDay(
   {
     createGpu = () => WebGpuIrradianceEngine.create(),
     diffusePoseStep = 2,
+    allowZero = false,
     cache = { get: getCached, put: putCached },
   } = {},
 ) {
@@ -125,11 +127,19 @@ export async function calculateDay(
   if (issues.length) throw Error(issues.join(' '));
   await verifyWeatherRecord(s.weather);
   const start = performance.now(),
-    source = integrateSources(s),
+    source = integrateSources(s, { allowZero }),
     grid = receiverGrid(s),
     energy = new Float64Array(grid.points.length),
     dli = new Float64Array(grid.points.length),
     warnings = [...source.warnings];
+  const optics = moduleOptics(s.module),
+    transmitting = optics.broadband > 0 || optics.par > 0;
+  const weights = transmitting
+    ? [optics.broadband, optics.par].map((t) =>
+        Float64Array.from({ length: 65536 }, (_, n) => (n === 65535 ? 0 : t ** n)),
+      )
+    : null;
+  if (s.module.bifacial) warnings.push(opticalAssumptions(s));
   let engine, backend;
   try {
     if (s.analysis.backend === 'cpu') throw Error('CPU selected');
@@ -235,7 +245,11 @@ export async function calculateDay(
       const words = Math.ceil(source.patches.length / 32);
       for (let i = 0; i < grid.points.length; i++)
         for (let j = 0; j < source.patches.length; j++)
-          if (bits[i * words + (j >>> 5)] & (1 << (j & 31))) {
+          if (transmitting) {
+            const n = bits[i * source.patches.length + j];
+            energy[i] += group.sky[j] * weights[0][n];
+            dli[i] += group.par[j] * weights[1][n];
+          } else if (bits[i * words + (j >>> 5)] & (1 << (j & 31))) {
             energy[i] += group.sky[j];
             dli[i] += group.par[j];
           }
@@ -250,7 +264,10 @@ export async function calculateDay(
       await initialize(getPose(s, step.sun));
       const bits = await visibility([step.sun]);
       for (let i = 0; i < grid.points.length; i++)
-        if (bits[i] & 1) {
+        if (transmitting) {
+          energy[i] += step.direct * weights[0][bits[i]];
+          dli[i] += step.parDirect * weights[1][bits[i]];
+        } else if (bits[i] & 1) {
           energy[i] += step.direct;
           dli[i] += step.parDirect;
         }
@@ -259,8 +276,8 @@ export async function calculateDay(
     const cells = grid.points.map((p, i) => ({
       ...p,
       wh: energy[i],
-      sunlight: Math.max(0, Math.min(100, (100 * energy[i]) / source.open)),
-      shade: Math.max(0, Math.min(100, 100 * (1 - energy[i] / source.open))),
+      sunlight: Math.max(0, Math.min(100, source.open ? (100 * energy[i]) / source.open : 100)),
+      shade: Math.max(0, Math.min(100, source.open ? 100 * (1 - energy[i] / source.open) : 0)),
       dli: dli[i],
     }));
     return {

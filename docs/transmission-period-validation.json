@@ -1,0 +1,85 @@
+{
+  "createdAt": "2026-09-11T21:15:16.403Z",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+  "scope": "Synthetic tests: shared solar/sky model, actual CPU/GPU module-count and daily-result parity; calendar-year CPU browser solve. Not independent field validation.",
+  "cases": [
+    {
+      "type": "module counts at centre, edge, corner and opaque support",
+      "cpu": [
+        2,
+        2,
+        2,
+        65535,
+        0
+      ],
+      "gpu": [
+        2,
+        2,
+        2,
+        65535,
+        0
+      ]
+    },
+    {
+      "type": "fixed",
+      "receivers": 45,
+      "backend": "WebGPU BVH",
+      "cpuSeconds": 0.017600000001490115,
+      "gpuSeconds": 0.04069999999925494,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0
+    },
+    {
+      "type": "single-axis",
+      "receivers": 45,
+      "backend": "WebGPU BVH",
+      "cpuSeconds": 0.06469999999925494,
+      "gpuSeconds": 0.06969999999925494,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0
+    },
+    {
+      "type": "dual-axis",
+      "receivers": 45,
+      "backend": "WebGPU BVH",
+      "cpuSeconds": 0.11280000000074505,
+      "gpuSeconds": 0.09910000000149012,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0
+    },
+    {
+      "type": "vertical",
+      "receivers": 45,
+      "backend": "WebGPU BVH",
+      "cpuSeconds": 0.008899999998509885,
+      "gpuSeconds": 0.03430000000074506,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0
+    },
+    {
+      "type": "pergola",
+      "receivers": 45,
+      "backend": "WebGPU BVH",
+      "cpuSeconds": 0.009,
+      "gpuSeconds": 0.03360000000149012,
+      "maxWhDifference": 0,
+      "maxDliDifference": 0,
+      "maxSunlightDifference": 0
+    },
+    {
+      "type": "full leap calendar year",
+      "days": 366,
+      "months": 12,
+      "seconds": 2.11960000000149,
+      "backend": "CPU MeshBVH",
+      "receivers": 1,
+      "openWh": 1906094.5031640003,
+      "meanDli": 29.580969400984344
+    }
+  ],
+  "passed": true
+}

@@ -1,3 +1,4 @@
+import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import * as THREE from 'three';
 import { buildGeometry, disposeGroup, localToWorld, worldToLocal } from '../domain/geometry.js';
 import { receiverGridSpec } from '../domain/geometry.js';
@@ -269,11 +270,15 @@ export function figureSvg(
   }
   const title =
     metric === 'sunlight'
-      ? 'Daily relative sunlight'
+      ? isPeriod(s)
+        ? 'Period relative sunlight'
+        : 'Daily relative sunlight'
       : metric === 'dli'
         ? result?.estimated
-          ? 'Estimated DLI'
-          : 'Daily light integral'
+          ? dliLabel(result)
+          : isPeriod(s)
+            ? 'Mean daily light integral'
+            : 'Daily light integral'
         : view === 'profile'
           ? 'Array profile'
           : view === 'oblique'
@@ -375,5 +380,5 @@ export function figureSvg(
         `<text x="40" y="${footerStart + i * 13}" font-size="10">${escapeXml(line)}</text>`,
     )
     .join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="${height}" viewBox="0 0 1000 ${height}" role="img" aria-label="${title}"><metadata>${escapeXml(JSON.stringify(provenance))}</metadata>${zonePatternDefs()}<rect width="1000" height="${height}" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + result.date : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : arrayScope ? ` · Receiver cells ${receivers.dx.toFixed(3)} × ${receivers.dy.toFixed(3)} m` : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}${zoneLegend}${footerSvg}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="${height}" viewBox="0 0 1000 ${height}" role="img" aria-label="${title}"><metadata>${escapeXml(JSON.stringify(provenance))}</metadata>${zonePatternDefs()}<rect width="1000" height="${height}" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + periodLabel(s) : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : arrayScope ? ` · Receiver cells ${receivers.dx.toFixed(3)} × ${receivers.dy.toFixed(3)} m` : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}${zoneLegend}${footerSvg}</g></svg>`;
 }

@@ -5,7 +5,7 @@ export const steps = [
   ['Row spacing', 'Make room for the experiment', 'pair'],
   ['Full array', 'Set the field boundaries', 'array'],
   ['Site & weather', 'Define the light environment', 'environment'],
-  ['Irradiance', 'Understand the daily light field', 'irradiance'],
+  ['Irradiance', 'Understand the light field', 'irradiance'],
   ['Field layout', 'Place sensors and crop beds', 'array'],
   ['Methods & export', 'From field design to publication', 'report'],
 ];

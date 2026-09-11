@@ -1,3 +1,4 @@
+import { dliLabel } from '../domain/period.js';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { engineeringAnnotations } from './annotations.js';
@@ -796,10 +797,12 @@ export default function Scene({
                   <b>{hover.cell.sunlight.toFixed(1)}%</b> relative sunlight
                 </div>
                 <div>
-                  <b>{hover.cell.dli.toFixed(2)}</b> {result?.estimated ? 'estimated DLI' : 'DLI'}{' '}
-                  <small>mol m⁻² d⁻¹</small>
+                  <b>{hover.cell.dli.toFixed(2)}</b> {dliLabel(result)} <small>mol m⁻² d⁻¹</small>
                 </div>
-                <span>{(hover.cell.wh / 1000).toFixed(3)} kWh m⁻² day⁻¹</span>
+                <span>
+                  {(hover.cell.wh / 1000).toFixed(3)} kWh m⁻²{' '}
+                  {result?.period ? 'over period' : 'day⁻¹'}
+                </span>
               </>
             )}
             {hover.sensors.length > 0 && (

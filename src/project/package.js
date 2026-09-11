@@ -1,3 +1,5 @@
+import { isPeriod, periodLabel, analysisPeriod } from '../domain/period.js';
+import { weatherForPeriod } from '../irradiance/period-engine.js';
 import { VERSION, migrateStudy, studySchema, sha256, designIssues } from '../domain/study.js';
 import { normalizeLayout } from '../experiment/grid-layout.js';
 import { unresolvedCrops } from '../domain/crop-catalog.js';
@@ -51,7 +53,7 @@ export function projectFilename(study) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')
       .slice(0, 75) || 'agrivoltaic-project';
-  return `${stem}-${study.analysis.date}.agrivoltaic.zip`;
+  return `${stem}-${isPeriod(study) ? `${analysisPeriod(study).start}_${analysisPeriod(study).end}` : study.analysis.date}.agrivoltaic.zip`;
 }
 export async function projectDocument(study, result) {
   const normalized = studySchema.parse(normalizeLayout(migrateStudy(study)));
@@ -105,15 +107,30 @@ export async function buildProjectPackage(study, result, onProgress = () => {}) 
   add('provenance.json', json(provenanceRecord(s, r)), 'application/json');
   add('tables/data.csv', exportCsv(s, r), 'text/csv');
   add('tables/methods.csv', csv([['Parameter', 'Value'], ...methodsRows(s, r)]), 'text/csv');
-  const rows = s.weather.rows.length
-    ? s.weather.rows
-    : s.weather.mode === 'sample'
-      ? sampleWeather(s)
+  const periodDays =
+    isPeriod(s) && (s.weather.mode === 'sample' || s.weather.days?.length)
+      ? weatherForPeriod(s)
       : [];
+  const rows = isPeriod(s)
+    ? periodDays.flatMap((d) => d.rows.map((v) => ({ ...v, date: d.date })))
+    : s.weather.rows.length
+      ? s.weather.rows
+      : s.weather.mode === 'sample'
+        ? sampleWeather(s)
+        : [];
   add(
     'weather/intervals.csv',
     csv([
-      ['minute', 'duration', 'ghi', 'dni', 'dhi', 'ppfd', 'diffusePpfd'],
+      [
+        'minute',
+        'duration',
+        'ghi',
+        'dni',
+        'dhi',
+        'ppfd',
+        'diffusePpfd',
+        ...(isPeriod(s) ? ['date'] : []),
+      ],
       ...rows.map((v) => [
         v.minute,
         v.duration,
@@ -122,10 +139,59 @@ export async function buildProjectPackage(study, result, onProgress = () => {}) 
         v.dhi,
         v.ppfd ?? '',
         v.diffusePpfd ?? '',
+        ...(isPeriod(s) ? [v.date] : []),
       ]),
     ]),
     'text/csv',
   );
+  if (r?.daily)
+    add(
+      'tables/daily.csv',
+      csv([
+        [
+          'date',
+          'open_wh_m2',
+          'mean_received_wh_m2',
+          'open_dli_mol_m2_day',
+          'mean_dli_mol_m2_day',
+          'relative_sunlight_percent',
+          'backend',
+        ],
+        ...r.daily.map((d) => [
+          d.date,
+          d.openWh,
+          d.meanWh,
+          d.openDli,
+          d.meanDli,
+          d.meanSunlight ?? '',
+          d.backend,
+        ]),
+      ]),
+      'text/csv',
+    );
+  if (r?.monthly)
+    add(
+      'tables/monthly.csv',
+      csv([
+        [
+          'month',
+          'days',
+          'open_wh_m2',
+          'mean_received_wh_m2',
+          'mean_daily_dli_mol_m2_day',
+          'relative_sunlight_percent',
+        ],
+        ...r.monthly.map((m) => [
+          m.month,
+          m.days,
+          m.openWh,
+          m.meanWh,
+          m.meanDli,
+          m.meanSunlight ?? '',
+        ]),
+      ]),
+      'text/csv',
+    );
   if (s.weather.sourceText !== undefined)
     add('weather/source.txt', s.weather.sourceText, 'text/plain');
   onProgress('Preparing the standalone methods report');
@@ -147,7 +213,7 @@ export async function buildProjectPackage(study, result, onProgress = () => {}) 
   }
   add(
     'README.md',
-    `# ${s.metadata.title}\n\nAgrivoltaic system and research plan, exported ${project.createdAt}.\nInvestigator / group: ${s.metadata.investigator || 'Not specified'}\nSoftware: Agrivoltaic Experiment Designer ${VERSION}; project format 1; Study schema ${s.schemaVersion}.\n\n## Read or reopen\n\n- Open report.html in a browser to read the methods, field tables and figures, or print/save a PDF. It is self-contained and needs no network.\n- Open this entire .agrivoltaic.zip file in the designer to resume editing. Alternatively unzip it and open project.json.\n- project.json is the authoritative editable record: complete study, field layouts, botanical identities, weather source/intervals and ${r ? 'saved receiver results' : 'an explicit absence of calculated results'}.\n- figures/ contains publication-ready vector SVGs. tables/data.csv uses row types for receivers, sensors and crop beds; tables/methods.csv carries every methods parameter.\n- weather/intervals.csv preserves local-day interval starts (minutes after midnight), duration (minutes), irradiance (W/m²), and PPFD where available (µmol/m²/s). Site UTC offset is in project.json. ${s.weather.sourceText !== undefined ? 'weather/source.txt preserves the retained original source text in UTF-8; its original format is recorded in project.json.' : 'No original source text was available. Illustrative intervals, if selected, are generated by the recorded software version.'}\n- provenance.json records model assumptions, weather attribution, actual calculation backend and versions. manifest.json inventories every other file with byte length and SHA-256.\n\n## Research reference\n\nTitle: ${s.metadata.title}\nCreators: ${s.metadata.investigator || 'Not specified'}\nAnalysis date: ${s.analysis.date}\nProject content SHA-256: ${project.contentSha256}\nCalculation: ${r ? `${r.backend}, software ${r.version}, created ${r.createdAt}` : 'Not calculated'}\n\nDeposit this ZIP alongside the publication and cite the persistent identifier assigned by your repository. No DOI or reuse license is assigned by the application. Weather and botanical data retain their source attribution; specify your research-data license in the repository record.\n\n## Scope and integrity\n\nThis is a design and numerical light-model record, not a claim of measured sensor observations or crop yield. Imported results are restored only when their inputs, receiver grid and weather match; restoring is not rerunning or independently validating the simulation. Checksums detect alteration and transfer errors; they do not authenticate authorship. The package contains site coordinates, investigator information and field notes as entered in the project.\n\n${project.warnings.length ? project.warnings.map((w) => '- ' + w).join('\n') : 'Matching calculated light results are included.'}\n\nPackage format documentation: docs/PROJECT-PACKAGES.md in the application source.\n`,
+    `# ${s.metadata.title}\n\nAgrivoltaic system and research plan, exported ${project.createdAt}.\nInvestigator / group: ${s.metadata.investigator || 'Not specified'}\nSoftware: Agrivoltaic Experiment Designer ${VERSION}; project format 1; Study schema ${s.schemaVersion}.\n\n## Read or reopen\n\n- Open report.html in a browser to read the methods, field tables and figures, or print/save a PDF. It is self-contained and needs no network.\n- Open this entire .agrivoltaic.zip file in the designer to resume editing. Alternatively unzip it and open project.json.\n- project.json is the authoritative editable record: complete study, field layouts, botanical identities, weather source/intervals and ${r ? 'saved receiver results' : 'an explicit absence of calculated results'}.\n- figures/ contains publication-ready vector SVGs. tables/data.csv uses row types for receivers, sensors and crop beds; tables/methods.csv carries every methods parameter.\n- weather/intervals.csv preserves local-day interval starts (minutes after midnight), duration (minutes), irradiance (W/m²), and PPFD where available (µmol/m²/s). For periods, the date column identifies each local day. Site UTC offset is in project.json. Period receiver irradiation is summed; DLI is the mean daily value. Daily/monthly summary CSVs accompany period results. ${s.weather.sourceText !== undefined ? 'weather/source.txt preserves the retained original source text in UTF-8; its original format is recorded in project.json.' : 'No original source text was available. Illustrative intervals, if selected, are generated by the recorded software version.'}\n- provenance.json records model assumptions, weather attribution, actual calculation backend and versions. manifest.json inventories every other file with byte length and SHA-256.\n\n## Research reference\n\nTitle: ${s.metadata.title}\nCreators: ${s.metadata.investigator || 'Not specified'}\nAnalysis period: ${periodLabel(s)}\nProject content SHA-256: ${project.contentSha256}\nCalculation: ${r ? `${r.backend}, software ${r.version}, created ${r.createdAt}` : 'Not calculated'}\n\nDeposit this ZIP alongside the publication and cite the persistent identifier assigned by your repository. No DOI or reuse license is assigned by the application. Weather and botanical data retain their source attribution; specify your research-data license in the repository record.\n\n## Scope and integrity\n\nThis is a design and numerical light-model record, not a claim of measured sensor observations or crop yield. Imported results are restored only when their inputs, receiver grid and weather match; restoring is not rerunning or independently validating the simulation. Checksums detect alteration and transfer errors; they do not authenticate authorship. The package contains site coordinates, investigator information and field notes as entered in the project.\n\n${project.warnings.length ? project.warnings.map((w) => '- ' + w).join('\n') : 'Matching calculated light results are included.'}\n\nPackage format documentation: docs/PROJECT-PACKAGES.md in the application source.\n`,
     'text/markdown',
   );
   onProgress('Computing file checksums');

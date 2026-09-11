@@ -1,3 +1,4 @@
+import { periodLabel } from '../domain/period.js';
 import React, { useEffect, useRef } from 'react';
 import { dimensions } from '../domain/study.js';
 export default function ProjectImportDialog({
@@ -50,7 +51,7 @@ export default function ProjectImportDialog({
           </dd>
           <dt>Site / date</dt>
           <dd>
-            {s.site.latitude}°, {s.site.longitude}° · {s.analysis.date}
+            {s.site.latitude}°, {s.site.longitude}° · {periodLabel(s)}
           </dd>
           <dt>Weather</dt>
           <dd>

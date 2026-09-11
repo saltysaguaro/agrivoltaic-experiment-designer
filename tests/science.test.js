@@ -36,7 +36,7 @@ const near = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) < tol, `${a} ≠ ${
 test('versioned study round-trips and rejects invalid versions / dimensions', () => {
   const s = defaultStudy();
   assert.deepEqual(migrateStudy(JSON.parse(JSON.stringify(s))), s);
-  assert.throws(() => migrateStudy({ ...s, schemaVersion: 2 }));
+  assert.throws(() => migrateStudy({ ...s, schemaVersion: 99 }));
   assert.throws(() => migrateStudy({ ...s, module: { ...s.module, width: -1 } }));
 });
 test('receiver coordinates rotate with the study, preserve area, and exclude field sensors', () => {

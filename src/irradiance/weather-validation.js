@@ -1,5 +1,5 @@
 // Shared by the Study schema, file import and the numerical engine.
-export function validateWeatherRows(rows, { allowEmpty = false } = {}) {
+export function validateWeatherRows(rows, { allowEmpty = false, totalMinutes = 1440 } = {}) {
   if (!rows.length && allowEmpty) return;
   let end = 0;
   for (const r of rows) {
@@ -9,7 +9,7 @@ export function validateWeatherRows(rows, { allowEmpty = false } = {}) {
       r.duration <= 0 ||
       r.duration > 180 ||
       r.minute < 0 ||
-      r.minute + r.duration > 1440 + 1e-7
+      r.minute + r.duration > totalMinutes + 1e-7
     )
       throw Error(
         'Weather requires complete, contiguous, ordered 24-hour coverage with valid intervals.',
@@ -28,7 +28,7 @@ export function validateWeatherRows(rows, { allowEmpty = false } = {}) {
       throw Error('Diffuse PPFD requires total PPFD and must be between zero and total PPFD.');
     end = r.minute + r.duration;
   }
-  if (Math.abs(end - 1440) > 1e-7)
+  if (Math.abs(end - totalMinutes) > 1e-7)
     throw Error(
       'A complete, contiguous 24-hour weather day is required, including nighttime zeros.',
     );
@@ -50,4 +50,10 @@ export function canonicalWeatherRows(rows) {
       r.diffusePpfd ?? null,
     ]),
   );
+}
+
+export function canonicalWeatherInput(weather) {
+  return weather.days?.length
+    ? JSON.stringify(weather.days.map((d) => [d.date, JSON.parse(canonicalWeatherRows(d.rows))]))
+    : canonicalWeatherRows(weather.rows);
 }

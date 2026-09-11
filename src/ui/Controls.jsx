@@ -1,3 +1,5 @@
+import { moduleOptics } from '../domain/optics.js';
+import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import React, { useId, useState, useEffect, useRef, createContext, useContext } from 'react';
 import Info from './Info.jsx';
 import CropPicker from './CropPicker.jsx';
@@ -180,6 +182,7 @@ export function Field({
 }
 export default function Controls({
   onInspect,
+  canResume,
   step,
   s,
   set,
@@ -205,6 +208,7 @@ export default function Controls({
   removePlot,
 }) {
   const receiver = receiverGridSpec(s);
+  const optics = moduleOptics(s.module);
   const d = dimensions(s),
     minimum = rackingMinimums(s);
   const field = (section, key, label, unit, options, extra = {}) => (
@@ -250,10 +254,85 @@ export default function Controls({
               max: 0.5,
               step: 0.005,
             })}
-            <div className="info-box">
-              Opaque module surfaces. Bifaciality affects module energy yield; the ground-light
-              model uses physical occlusion.
-            </div>
+            <Field
+              annotation="module.bifacial"
+              label="Module construction"
+              value={s.module.bifacial ? 'bifacial' : 'monofacial'}
+              options={[
+                { value: 'monofacial', label: 'Monofacial · opaque' },
+                { value: 'bifacial', label: 'Bifacial · transmitting cell gaps' },
+              ]}
+              onChange={(v) => set('module', 'bifacial', v === 'bifacial')}
+              help="Bifacial enables internal cell gaps and light transmission through transparent laminate. Electrical output and rear-side electrical gain are not simulated."
+            />
+            {s.module.bifacial && (
+              <>
+                <p className="control-note">
+                  Outer dimensions stay fixed. X runs across module width; Y runs along module
+                  length, before table orientation and rotation.
+                </p>
+                <div className="field-pair">
+                  {field('module', 'cellColumns', 'Cell columns (X)', null, null, {
+                    min: 1,
+                    max: 24,
+                    step: 1,
+                    integer: true,
+                  })}
+                  {field('module', 'cellRows', 'Cell rows (Y)', null, null, {
+                    min: 1,
+                    max: 48,
+                    step: 1,
+                    integer: true,
+                  })}
+                </div>
+                <div className="field-pair">
+                  {field('module', 'cellGapX', 'Cell gap X', 'm', null, {
+                    min: 0,
+                    max: 0.2,
+                    step: 0.001,
+                  })}
+                  {field('module', 'cellGapY', 'Cell gap Y', 'm', null, {
+                    min: 0,
+                    max: 0.2,
+                    step: 0.001,
+                  })}
+                </div>
+                {field('module', 'cellMargin', 'Opaque perimeter width', 'm', null, {
+                  min: 0,
+                  max: 0.2,
+                  step: 0.001,
+                })}
+                <div className="field-pair">
+                  {field(
+                    'module',
+                    'gapTransmission',
+                    'Laminate broadband transmission',
+                    null,
+                    null,
+                    { min: 0, max: 1, step: 0.01 },
+                  )}
+                  {field('module', 'gapParTransmission', 'Laminate PAR transmission', null, null, {
+                    min: 0,
+                    max: 1,
+                    step: 0.01,
+                  })}
+                </div>
+                <div className="info-box" role="status">
+                  Fitted cells: {(optics.cellWidth * 1000).toFixed(1)} ×{' '}
+                  {(optics.cellLength * 1000).toFixed(1)} mm.
+                  <br />
+                  Internal gap area: {(100 * optics.openFraction).toFixed(2)}%.
+                  <br />
+                  Linked module transmission: {(100 * optics.broadband).toFixed(2)}% broadband ·{' '}
+                  {(100 * optics.par).toFixed(2)}% PAR.
+                </div>
+                <p className="control-note">
+                  Area-averaged transmission through each module. Does not resolve individual
+                  cell-gap sunflecks or angle-dependent glass optics. Set both laminate values to 0
+                  for an opaque backsheet.
+                </p>
+              </>
+            )}
           </>
         )}
         {step === 1 && (
@@ -446,15 +525,62 @@ export default function Controls({
                 step: 1,
               })}
             </div>
-            {field('analysis', 'date', 'Analysis date', null, null, { type: 'date' })}
+            {field('analysis', 'period', 'Analysis period', null, [
+              { value: 'day', label: 'Single day' },
+              { value: 'season', label: 'Season · month range' },
+              { value: 'year', label: 'Calendar year' },
+            ])}
+            {!isPeriod(s) ? (
+              field('analysis', 'date', 'Analysis date', null, null, { type: 'date' })
+            ) : (
+              <>
+                {field(
+                  'analysis',
+                  'year',
+                  s.analysis.period === 'season' ? 'Season starting year' : 'Calendar year',
+                  null,
+                  null,
+                  { min: 1900, max: 2100, step: 1, integer: true },
+                )}
+                {s.analysis.period === 'season' && (
+                  <div className="field-pair">
+                    {field(
+                      'analysis',
+                      'startMonth',
+                      'Start month',
+                      null,
+                      Array.from({ length: 12 }, (_, i) => ({
+                        value: i + 1,
+                        label: new Date(2020, i, 1).toLocaleString('en', { month: 'long' }),
+                      })),
+                    )}
+                    {field(
+                      'analysis',
+                      'endMonth',
+                      'End month',
+                      null,
+                      Array.from({ length: 12 }, (_, i) => ({
+                        value: i + 1,
+                        label: new Date(2020, i, 1).toLocaleString('en', { month: 'long' }),
+                      })),
+                    )}
+                  </div>
+                )}
+                <div className="info-box">
+                  {periodLabel(s)}. Every day is calculated. An earlier end month extends into the
+                  following year. For future periods, upload representative dated weather or choose
+                  illustrative weather explicitly.
+                </div>
+              </>
+            )}
             {field('weather', 'mode', 'Weather source', null, [
               { value: 'automatic', label: 'Automatic · Open-Meteo' },
               { value: 'upload', label: 'Upload my weather' },
-              { value: 'sample', label: 'Illustrative clear-sky day' },
+              { value: 'sample', label: 'Illustrative clear-sky weather' },
             ])}
             {s.weather.mode === 'automatic' && (
               <div className="weather-download">
-                <p>Weather downloads automatically for your coordinates and date.</p>
+                <p>Weather downloads automatically for your coordinates and selected period.</p>
                 <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">
                   Weather by Open-Meteo · CC BY 4.0
                 </a>
@@ -481,15 +607,15 @@ export default function Controls({
             <label className="upload-button">
               <Upload size={16} /> Upload weather{' '}
               <Info label="weather file">
-                Upload a complete day of GHI, DNI and DHI from your own source. Accepts CSV, EPW or
-                TMY3. Uploading switches off automatic downloads.
+                Upload complete coverage of GHI, DNI and DHI for the selected period from your own
+                source. Accepts CSV, EPW or TMY3. Uploading switches off automatic downloads.
               </Info>
               <input
                 onFocus={() =>
                   onInspect?.({
                     id: 'weather.name',
                     label: 'Weather upload',
-                    help: 'Import a complete day of weather; its provenance is retained with the study.',
+                    help: 'Import complete weather for the selected period; its provenance is retained with the study.',
                   })
                 }
                 type="file"
@@ -501,7 +627,8 @@ export default function Controls({
               />
             </label>
             <small className="muted">
-              EPW, TMY3, or CSV. Local standard time; complete 24-hour coverage.
+              EPW, TMY3, or CSV. Local standard time; complete 24-hour coverage for every selected
+              day.
             </small>
             <button className="text-button" onClick={template}>
               <Download size={14} /> CSV template
@@ -511,6 +638,10 @@ export default function Controls({
         )}
         {step === 6 && (
           <>
+            <p className="control-note">
+              {periodLabel(s)}
+              {isPeriod(s) ? ' · Maps show period-total irradiation and mean daily DLI.' : ''}
+            </p>
             <div className="field-pair">
               {field('analysis', 'resolution', 'Receiver spacing', 'm', null, {
                 min: 0.25,
@@ -557,7 +688,13 @@ export default function Controls({
             </details>
             <button className="primary wide" onClick={busy ? cancel : run}>
               {busy ? <Square size={16} /> : <Play size={16} />}{' '}
-              {busy ? 'Cancel calculation' : 'Calculate daily light'}
+              {busy
+                ? 'Cancel calculation'
+                : canResume
+                  ? 'Resume period calculation'
+                  : isPeriod(s)
+                    ? 'Calculate period light'
+                    : 'Calculate daily light'}
             </button>
             {busy && (
               <>
@@ -772,7 +909,7 @@ export default function Controls({
                   )}
                   <div className="info-box">
                     {stats
-                      ? `${result.estimated ? 'Estimated DLI' : 'DLI'} ${stats.mean.toFixed(1)} ± ${stats.sd.toFixed(1)} · median ${stats.median.toFixed(1)} · range ${stats.min.toFixed(1)}–${stats.max.toFixed(1)} · sunlight ${stats.sunlight.toFixed(1)}% · ${stats.count} receivers`
+                      ? `${dliLabel(result)} ${stats.mean.toFixed(1)} ± ${stats.sd.toFixed(1)} · median ${stats.median.toFixed(1)} · range ${stats.min.toFixed(1)}–${stats.max.toFixed(1)} · sunlight ${stats.sunlight.toFixed(1)}% · ${stats.count} receivers`
                       : 'No receiver samples in this plot.'}
                   </div>
                   <button className="text-button danger" onClick={() => removePlot(i)}>

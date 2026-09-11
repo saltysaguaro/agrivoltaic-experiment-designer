@@ -1,0 +1,336 @@
+{
+  "createdAt": "2026-09-11T21:37:56.057Z",
+  "version": "0.4.0",
+  "suite": "cpu-dense",
+  "budgetSeconds": 120,
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 12,
+    "deviceMemoryGiB": 32,
+    "webgpu": {
+      "vendor": "apple",
+      "architecture": "metal-3",
+      "device": "",
+      "description": "",
+      "isFallbackAdapter": false,
+      "limits": {
+        "maxBufferSize": 4294967292,
+        "maxStorageBufferBindingSize": 4294967292,
+        "maxComputeWorkgroupsPerDimension": 65535
+      }
+    },
+    "initialVisibility": "visible"
+  },
+  "scope": "Sequential actual browser worker solves, June 2024 (30 days) and full leap year 2024 (366 days), bifacial area-averaged transmission. Actual production IndexedDB/memory cache reset before each cold case; optional warm repeat. Includes checkpoint/result transfer. Excludes worker imports, network weather, result validation, full application rendering and export. Page JS heap is not total browser/worker/GPU memory. A timeout is not a hardware limit.",
+  "solves": [
+    {
+      "label": "1/2 \u00b7 250 modules / 5040 receivers \u00b7 fixed \u00b7 June \u00b7 cpu",
+      "spec": {
+        "size": "medium",
+        "mode": "season",
+        "backend": "cpu"
+      },
+      "modules": 250,
+      "receivers": 5040,
+      "areaM2": 1638.4572,
+      "nominalSpacing": 0.572443394581508,
+      "patches": 577,
+      "intervalMinutes": 10,
+      "period": {
+        "mode": "season",
+        "start": "2024-06-01",
+        "end": "2024-06-30",
+        "days": 30
+      },
+      "optics": {
+        "columns": 6,
+        "rows": 12,
+        "gapX": 0.02,
+        "gapY": 0.01,
+        "margin": 0.01,
+        "cellWidth": 0.16899999999999996,
+        "cellLength": 0.17900000000000002,
+        "openFraction": 0.13058733720132598,
+        "broadband": 0.11752860348119339,
+        "par": 0.10446986976106079
+      },
+      "study": {
+        "schemaVersion": 2,
+        "metadata": {
+          "title": "Agrivoltaic field study",
+          "investigator": "",
+          "units": "SI"
+        },
+        "module": {
+          "length": 2.278,
+          "width": 1.134,
+          "thickness": 0.035,
+          "power": 550,
+          "gap": 0.02,
+          "bifacial": true,
+          "cellColumns": 6,
+          "cellRows": 12,
+          "cellGapX": 0.02,
+          "cellGapY": 0.01,
+          "cellMargin": 0.01,
+          "gapTransmission": 0.9,
+          "gapParTransmission": 0.8
+        },
+        "racking": {
+          "type": "fixed",
+          "tilt": 25,
+          "height": 2.8,
+          "limit": 60,
+          "backtracking": true,
+          "postSize": 0.12
+        },
+        "table": {
+          "high": 2,
+          "wide": 5,
+          "orientation": "portrait"
+        },
+        "row": {
+          "tables": 5,
+          "tableGap": 0.3
+        },
+        "rowPair": {
+          "pitch": 8,
+          "cropSetback": -1.5810280363203173,
+          "croppingWidth": 7
+        },
+        "array": {
+          "rows": 5,
+          "azimuth": 180,
+          "buffer": 3,
+          "groupSize": 4,
+          "aisle": 3
+        },
+        "landUse": {
+          "underPanelWidth": 1,
+          "perimeterBuffer": 3
+        },
+        "site": {
+          "address": "",
+          "utcOffsetApproximate": false,
+          "latitude": 32.22,
+          "longitude": -110.97,
+          "utcOffset": -7,
+          "elevation": 728
+        },
+        "analysis": {
+          "period": "season",
+          "year": 2024,
+          "startMonth": 6,
+          "endMonth": 6,
+          "date": "2024-06-01",
+          "resolution": 0.572443394581508,
+          "receiverHeight": 0.2,
+          "interval": 10,
+          "patches": 577,
+          "parFraction": 0.5,
+          "photonFactor": 4.57,
+          "backend": "cpu"
+        },
+        "weather": {
+          "mode": "sample",
+          "requestKey": "",
+          "name": "Synthetic Tucson benchmark weather",
+          "hash": "",
+          "normalizedHash": "",
+          "format": "sample",
+          "rows": [],
+          "days": []
+        },
+        "experimentSensors": [],
+        "crops": []
+      },
+      "cold": {
+        "cache": {
+          "hits": 0,
+          "misses": 30,
+          "attemptedWrites": 30,
+          "skippedLarge": 30,
+          "largestMatrixBytes": 5816160
+        },
+        "wallSeconds": 83.25359999999776,
+        "completedDays": 30,
+        "lastProgress": {
+          "progress": 0.995852301466869,
+          "message": "Day 30/30 \u00b7 2024-06-30 \u00b7 CPU MeshBVH: integrating diffuse sky (0 cached poses)"
+        },
+        "hiddenDuringRun": false,
+        "mainThreadHeartbeat": {
+          "intervalMs": 50,
+          "samples": 1665,
+          "p95GapMs": 50.69999999925494,
+          "maxGapMs": 51.899999998509884
+        },
+        "mainThreadLongTasks": {
+          "count": 0,
+          "maxMs": 0
+        },
+        "pageJsHeapObservedMaxBytes": 19369413,
+        "solverSeconds": 83.2445,
+        "backend": "CPU MeshBVH",
+        "completedMonths": 1,
+        "cachedPoses": 0,
+        "meanSunlight": 67.9536482943625,
+        "meanDli": 39.987719012828116,
+        "openWh": 215986.89306199993,
+        "warnings": [
+          "Synthetic illustrative weather for every day; replace with site weather before publication.",
+          "Bifacial module: area-averaged internal-gap transmission, opaque cells/perimeter and supports; constant laminate transmittance; each intersected module attenuates once. Cell-scale sunflecks, angular/spectral optics and electrical bifacial yield are not modeled."
+        ],
+        "resultValidation": "passed",
+        "validationSecondsExcludedFromTiming": 0.0055
+      }
+    },
+    {
+      "label": "2/2 \u00b7 250 modules / 5040 receivers \u00b7 fixed \u00b7 year \u00b7 cpu",
+      "spec": {
+        "size": "medium",
+        "mode": "year",
+        "backend": "cpu"
+      },
+      "modules": 250,
+      "receivers": 5040,
+      "areaM2": 1638.4572,
+      "nominalSpacing": 0.572443394581508,
+      "patches": 577,
+      "intervalMinutes": 10,
+      "period": {
+        "mode": "year",
+        "start": "2024-01-01",
+        "end": "2024-12-31",
+        "days": 366
+      },
+      "optics": {
+        "columns": 6,
+        "rows": 12,
+        "gapX": 0.02,
+        "gapY": 0.01,
+        "margin": 0.01,
+        "cellWidth": 0.16899999999999996,
+        "cellLength": 0.17900000000000002,
+        "openFraction": 0.13058733720132598,
+        "broadband": 0.11752860348119339,
+        "par": 0.10446986976106079
+      },
+      "study": {
+        "schemaVersion": 2,
+        "metadata": {
+          "title": "Agrivoltaic field study",
+          "investigator": "",
+          "units": "SI"
+        },
+        "module": {
+          "length": 2.278,
+          "width": 1.134,
+          "thickness": 0.035,
+          "power": 550,
+          "gap": 0.02,
+          "bifacial": true,
+          "cellColumns": 6,
+          "cellRows": 12,
+          "cellGapX": 0.02,
+          "cellGapY": 0.01,
+          "cellMargin": 0.01,
+          "gapTransmission": 0.9,
+          "gapParTransmission": 0.8
+        },
+        "racking": {
+          "type": "fixed",
+          "tilt": 25,
+          "height": 2.8,
+          "limit": 60,
+          "backtracking": true,
+          "postSize": 0.12
+        },
+        "table": {
+          "high": 2,
+          "wide": 5,
+          "orientation": "portrait"
+        },
+        "row": {
+          "tables": 5,
+          "tableGap": 0.3
+        },
+        "rowPair": {
+          "pitch": 8,
+          "cropSetback": -1.5810280363203173,
+          "croppingWidth": 7
+        },
+        "array": {
+          "rows": 5,
+          "azimuth": 180,
+          "buffer": 3,
+          "groupSize": 4,
+          "aisle": 3
+        },
+        "landUse": {
+          "underPanelWidth": 1,
+          "perimeterBuffer": 3
+        },
+        "site": {
+          "address": "",
+          "utcOffsetApproximate": false,
+          "latitude": 32.22,
+          "longitude": -110.97,
+          "utcOffset": -7,
+          "elevation": 728
+        },
+        "analysis": {
+          "period": "year",
+          "year": 2024,
+          "startMonth": 6,
+          "endMonth": 6,
+          "date": "2024-01-01",
+          "resolution": 0.572443394581508,
+          "receiverHeight": 0.2,
+          "interval": 10,
+          "patches": 577,
+          "parFraction": 0.5,
+          "photonFactor": 4.57,
+          "backend": "cpu"
+        },
+        "weather": {
+          "mode": "sample",
+          "requestKey": "",
+          "name": "Synthetic Tucson benchmark weather",
+          "hash": "",
+          "normalizedHash": "",
+          "format": "sample",
+          "rows": [],
+          "days": []
+        },
+        "experimentSensors": [],
+        "crops": []
+      },
+      "cold": {
+        "timeout": true,
+        "wallSeconds": 120.00170000000298,
+        "completedDays": 45,
+        "lastProgress": {
+          "progress": 0.12267419096743441,
+          "message": "Day 45/366 \u00b7 2024-02-14 \u00b7 CPU MeshBVH: integrating diffuse sky (0 cached poses)"
+        },
+        "hiddenDuringRun": false,
+        "mainThreadHeartbeat": {
+          "intervalMs": 50,
+          "samples": 2400,
+          "p95GapMs": 50.400000002235174,
+          "maxGapMs": 52
+        },
+        "mainThreadLongTasks": {
+          "count": 0,
+          "maxMs": 0
+        },
+        "pageJsHeapObservedMaxBytes": 16957536,
+        "backend": "CPU MeshBVH",
+        "cachedPoses": 0
+      }
+    }
+  ],
+  "completed": true,
+  "finishedAt": "2026-09-11T21:41:19.424Z"
+}

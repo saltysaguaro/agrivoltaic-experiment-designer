@@ -1,0 +1,467 @@
+{
+  "createdAt": "2026-09-11T20:14:18.845Z",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+  "hardwareConcurrency": 12,
+  "deviceMemoryGiB": 32,
+  "scope": "Synthetic Tucson June 21, 2026. Bounded real-browser daily solves; cold/warm in-worker memory cache only. 30-second per-solve timeout. No independent physics validation, no crash/memory exhaustion test.",
+  "solves": [
+    {
+      "label": "250 modules / 5k receivers",
+      "requestedBackend": "gpu",
+      "modules": 250,
+      "receivers": 5040,
+      "gridSpacing": 0.572443394581508,
+      "areaM2": 1638.4572,
+      "rack": "fixed",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "backend": "WebGPU BVH",
+        "seconds": 0.19619999999925494,
+        "cells": 5040,
+        "cached": 0,
+        "timings": {
+          "geometryMs": 21,
+          "visibilityMs": 126.59999999776483
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 0.19739999999850988,
+        "maxHeartbeatGapMs": 51.19999999925494
+      },
+      "warm": {
+        "backend": "WebGPU BVH",
+        "seconds": 0.13769999999925495,
+        "cells": 5040,
+        "cached": 1,
+        "timings": {
+          "geometryMs": 17.300000000745058,
+          "visibilityMs": 75.90000002458692
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 0.13840000000223518,
+        "maxHeartbeatGapMs": 51.400000002235174
+      }
+    },
+    {
+      "label": "250 modules / 5k receivers",
+      "requestedBackend": "cpu",
+      "modules": 250,
+      "receivers": 5040,
+      "gridSpacing": 0.572443394581508,
+      "areaM2": 1638.4572,
+      "rack": "fixed",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "backend": "CPU MeshBVH",
+        "seconds": 4.253,
+        "cells": 5040,
+        "cached": 0,
+        "timings": {
+          "geometryMs": 14.199999999254942,
+          "visibilityMs": 4198.799999978393
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 4.254300000000745,
+        "maxHeartbeatGapMs": 51.100000001490116
+      },
+      "warm": {
+        "backend": "CPU MeshBVH",
+        "seconds": 0.503699999999255,
+        "cells": 5040,
+        "cached": 1,
+        "timings": {
+          "geometryMs": 8.300000000745058,
+          "visibilityMs": 453.99999998509884
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 0.5042999999970198,
+        "maxHeartbeatGapMs": 51.100000001490116
+      }
+    },
+    {
+      "label": "2000 modules / 19k receivers",
+      "requestedBackend": "gpu",
+      "modules": 2000,
+      "receivers": 19068,
+      "gridSpacing": 0.7716191042899748,
+      "areaM2": 11312.5248,
+      "rack": "fixed",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "backend": "WebGPU BVH",
+        "seconds": 0.5492999999970197,
+        "cells": 19068,
+        "cached": 0,
+        "timings": {
+          "geometryMs": 115.80000000074506,
+          "visibilityMs": 355.9999999962747
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 0.5513999999985099,
+        "maxHeartbeatGapMs": 52
+      },
+      "warm": {
+        "backend": "WebGPU BVH",
+        "seconds": 0.36169999999925495,
+        "cells": 19068,
+        "cached": 1,
+        "timings": {
+          "geometryMs": 102.79999999701977,
+          "visibilityMs": 178.99999999254942
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 0.36439999999850986,
+        "maxHeartbeatGapMs": 51.099999997764826
+      }
+    },
+    {
+      "label": "2000 modules / 19k receivers",
+      "requestedBackend": "cpu",
+      "modules": 2000,
+      "receivers": 19068,
+      "gridSpacing": 0.7716191042899748,
+      "areaM2": 11312.5248,
+      "rack": "fixed",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "backend": "CPU MeshBVH",
+        "seconds": 22.604199999999256,
+        "cells": 19068,
+        "cached": 0,
+        "timings": {
+          "geometryMs": 55.399999998509884,
+          "visibilityMs": 22480.199999991804
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 22.606199999999255,
+        "maxHeartbeatGapMs": 51.30000000074506
+      },
+      "warm": {
+        "backend": "CPU MeshBVH",
+        "seconds": 2.406300000000745,
+        "cells": 19068,
+        "cached": 1,
+        "timings": {
+          "geometryMs": 38.600000001490116,
+          "visibilityMs": 2297.800000015646
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 2.407800000000745,
+        "maxHeartbeatGapMs": 51.100000001490116
+      }
+    },
+    {
+      "label": "10000 modules / 19k receivers",
+      "requestedBackend": "gpu",
+      "modules": 10000,
+      "receivers": 19136,
+      "gridSpacing": 1.3073277284115428,
+      "areaM2": 32473.010000000002,
+      "rack": "fixed",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "backend": "WebGPU BVH",
+        "seconds": 0.9976000000014901,
+        "cells": 19136,
+        "cached": 0,
+        "timings": {
+          "geometryMs": 471.80000000074506,
+          "visibilityMs": 465.79999999701977
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 0.9995999999977648,
+        "maxHeartbeatGapMs": 51.29999999701977
+      },
+      "warm": {
+        "backend": "WebGPU BVH",
+        "seconds": 0.7588999999985099,
+        "cells": 19136,
+        "cached": 1,
+        "timings": {
+          "geometryMs": 479.30000000074506,
+          "visibilityMs": 219.4999999962747
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 0.761,
+        "maxHeartbeatGapMs": 51.100000001490116
+      }
+    },
+    {
+      "label": "10000 modules / 19k receivers",
+      "requestedBackend": "cpu",
+      "modules": 10000,
+      "receivers": 19136,
+      "gridSpacing": 1.3073277284115428,
+      "areaM2": 32473.010000000002,
+      "rack": "fixed",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "timeout": true,
+        "wallSeconds": 30.001599999997765,
+        "maxHeartbeatGapMs": 51.100000001490116
+      }
+    },
+    {
+      "label": "48000 modules / 19k receivers",
+      "requestedBackend": "gpu",
+      "modules": 48000,
+      "receivers": 19152,
+      "gridSpacing": 2.818991159598543,
+      "areaM2": 150987.51200000002,
+      "rack": "fixed",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "backend": "WebGPU BVH",
+        "seconds": 3.309400000002235,
+        "cells": 19152,
+        "cached": 0,
+        "timings": {
+          "geometryMs": 2780,
+          "visibilityMs": 471.3999999836087
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 3.31139999999851,
+        "maxHeartbeatGapMs": 51.5
+      },
+      "warm": {
+        "backend": "WebGPU BVH",
+        "seconds": 2.91060000000149,
+        "cells": 19152,
+        "cached": 1,
+        "timings": {
+          "geometryMs": 2629.400000002235,
+          "visibilityMs": 221.0000000037253
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 2.912699999999255,
+        "maxHeartbeatGapMs": 51.100000001490116
+      }
+    },
+    {
+      "label": "48000 modules / 19k receivers",
+      "requestedBackend": "cpu",
+      "modules": 48000,
+      "receivers": 19152,
+      "gridSpacing": 2.818991159598543,
+      "areaM2": 150987.51200000002,
+      "rack": "fixed",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "timeout": true,
+        "wallSeconds": 30.001800000000745,
+        "maxHeartbeatGapMs": 51.20000000298023
+      }
+    },
+    {
+      "label": "single-axis 250 modules",
+      "requestedBackend": "gpu",
+      "modules": 250,
+      "receivers": 5040,
+      "gridSpacing": 0.572443394581508,
+      "areaM2": 1638.4572,
+      "rack": "single-axis",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "backend": "WebGPU BVH",
+        "seconds": 2.6962000000029804,
+        "cells": 5040,
+        "cached": 0,
+        "timings": {
+          "geometryMs": 1289.899999987334,
+          "visibilityMs": 1056.699999999255
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 2.69739999999851,
+        "maxHeartbeatGapMs": 51.899999998509884
+      },
+      "warm": {
+        "backend": "WebGPU BVH",
+        "seconds": 1.3825,
+        "cells": 5040,
+        "cached": 26,
+        "timings": {
+          "geometryMs": 852.1999999955297,
+          "visibilityMs": 167.90000000596046
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 1.383,
+        "maxHeartbeatGapMs": 51
+      }
+    },
+    {
+      "label": "dual-axis 250 modules",
+      "requestedBackend": "gpu",
+      "modules": 250,
+      "receivers": 5100,
+      "gridSpacing": 0.6139328302021322,
+      "areaM2": 1884.5676,
+      "rack": "dual-axis",
+      "patches": 577,
+      "intervalMinutes": 10,
+      "cold": {
+        "backend": "WebGPU BVH",
+        "seconds": 5.5685999999977644,
+        "cells": 5100,
+        "cached": 0,
+        "timings": {
+          "geometryMs": 1679.5999999977648,
+          "visibilityMs": 2903.2000000067055
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 5.57,
+        "maxHeartbeatGapMs": 51.900000002235174
+      },
+      "warm": {
+        "backend": "WebGPU BVH",
+        "seconds": 1.9469000000022352,
+        "cells": 5100,
+        "cached": 72,
+        "timings": {
+          "geometryMs": 832.3999999910593,
+          "visibilityMs": 155.00000001862645
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 1.9476000000014901,
+        "maxHeartbeatGapMs": 51.100000001490116
+      }
+    },
+    {
+      "label": "2000 modules / fine sky",
+      "requestedBackend": "gpu",
+      "modules": 2000,
+      "receivers": 19068,
+      "gridSpacing": 0.7716191042899748,
+      "areaM2": 11312.5248,
+      "rack": "fixed",
+      "patches": 2305,
+      "intervalMinutes": 10,
+      "cold": {
+        "backend": "WebGPU BVH",
+        "seconds": 1.27789999999851,
+        "cells": 19068,
+        "cached": 0,
+        "timings": {
+          "geometryMs": 112.60000000149012,
+          "visibilityMs": 960.1000000014901
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 1.280099999997765,
+        "maxHeartbeatGapMs": 51.30000000074506
+      },
+      "warm": {
+        "backend": "WebGPU BVH",
+        "seconds": 0.5495,
+        "cells": 19068,
+        "cached": 1,
+        "timings": {
+          "geometryMs": 112.10000000149012,
+          "visibilityMs": 226.60000000149012
+        },
+        "warnings": [
+          "Synthetic illustrative weather; replace with measured or modeled site weather before publication."
+        ],
+        "finite": true,
+        "wallSeconds": 0.5532000000029802,
+        "maxHeartbeatGapMs": 51
+      }
+    }
+  ],
+  "rendering": [
+    {
+      "modules": 250,
+      "meshes": 325,
+      "geometryBuildMs": 6.299999997019768,
+      "firstRenderSubmitMs": 18.100000001490116,
+      "medianFrameMs": 8.30000000000291,
+      "p95FrameMs": 8.5,
+      "drawCalls": 325,
+      "triangles": 3900,
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro, Unspecified Version)",
+      "scope": "Hardware meshes only, 1000x650, pixel ratio 1; excludes full React UI, receiver map and figure export."
+    },
+    {
+      "modules": 2000,
+      "meshes": 2300,
+      "geometryBuildMs": 21.299999997019768,
+      "firstRenderSubmitMs": 59,
+      "medianFrameMs": 8.30000000000291,
+      "p95FrameMs": 8.69999999999709,
+      "drawCalls": 2300,
+      "triangles": 27600,
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro, Unspecified Version)",
+      "scope": "Hardware meshes only, 1000x650, pixel ratio 1; excludes full React UI, receiver map and figure export."
+    },
+    {
+      "modules": 10000,
+      "meshes": 10300,
+      "geometryBuildMs": 63.600000001490116,
+      "firstRenderSubmitMs": 212.20000000298023,
+      "medianFrameMs": 33.19999999999709,
+      "p95FrameMs": 41.69999999999709,
+      "drawCalls": 10300,
+      "triangles": 123600,
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Pro, Unspecified Version)",
+      "scope": "Hardware meshes only, 1000x650, pixel ratio 1; excludes full React UI, receiver map and figure export."
+    }
+  ],
+  "completed": true
+}

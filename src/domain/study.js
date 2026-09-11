@@ -1,7 +1,9 @@
 import { z } from 'zod';
+import { moduleOptics } from './optics.js';
+import { analysisPeriod, periodKeys } from './period.js';
 import { normalizeCropIdentity } from './crop-catalog.js';
 import { validateWeatherRows } from '../irradiance/weather-validation.js';
-export const VERSION = '0.3.0';
+export const VERSION = '0.4.0';
 const num = (min, max) => z.number().finite().min(min).max(max),
   count = (min, max) => num(min, max).int();
 const text = z.string().max(500);
@@ -20,7 +22,7 @@ export const sensorTypes = [
 ];
 export const studySchema = z
   .object({
-    schemaVersion: z.literal(1),
+    schemaVersion: z.literal(2),
     metadata: z.object({ title: text, investigator: text, units: z.literal('SI') }),
     module: z.object({
       length: num(0.1, 5),
@@ -28,6 +30,14 @@ export const studySchema = z
       thickness: num(0.005, 0.2),
       power: num(1, 1500),
       gap: num(0, 0.5),
+      bifacial: z.boolean().default(false),
+      cellColumns: count(1, 24).default(6),
+      cellRows: count(1, 48).default(12),
+      cellGapX: num(0, 0.2).default(0.002),
+      cellGapY: num(0, 0.2).default(0.002),
+      cellMargin: num(0, 0.2).default(0.01),
+      gapTransmission: num(0, 1).default(0.9),
+      gapParTransmission: num(0, 1).default(0.9),
     }),
     racking: z.object({
       type: z.enum(['fixed', 'single-axis', 'dual-axis', 'vertical', 'pergola']),
@@ -70,6 +80,10 @@ export const studySchema = z
       elevation: num(-500, 9000),
     }),
     analysis: z.object({
+      period: z.enum(['day', 'season', 'year']).default('day'),
+      year: count(1900, 2100).default(2026),
+      startMonth: count(1, 12).default(4),
+      endMonth: count(1, 12).default(9),
       date: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -124,6 +138,34 @@ export const studySchema = z
             context.addIssue({ code: z.ZodIssueCode.custom, message: error.message });
           }
         }),
+      days: z
+        .array(
+          z.object({
+            date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            rows: z
+              .array(
+                z.object({
+                  minute: num(0, 1440),
+                  duration: num(Number.EPSILON, 180),
+                  ghi: num(0, 1500),
+                  dni: num(0, 1600),
+                  dhi: num(0, 1500),
+                  ppfd: num(0, 4000).optional(),
+                  diffusePpfd: num(0, 4000).optional(),
+                }),
+              )
+              .max(1440)
+              .superRefine((rows, context) => {
+                try {
+                  validateWeatherRows(rows);
+                } catch (error) {
+                  context.addIssue({ code: z.ZodIssueCode.custom, message: error.message });
+                }
+              }),
+          }),
+        )
+        .max(366)
+        .default([]),
     }),
     experimentSensors: z
       .array(
@@ -180,7 +222,7 @@ export const studySchema = z
   .transform((s) => synchronizeCropSpacing({ ...s, crops: s.crops.map(normalizeCropIdentity) }));
 export const defaultStudy = () =>
   studySchema.parse({
-    schemaVersion: 1,
+    schemaVersion: 2,
     metadata: { title: 'Agrivoltaic field study', investigator: '', units: 'SI' },
     module: { length: 2.278, width: 1.134, thickness: 0.035, power: 550, gap: 0.02 },
     racking: {
@@ -217,8 +259,10 @@ export const defaultStudy = () =>
     crops: [],
   });
 export function migrateStudy(data) {
-  if (data.schemaVersion !== 1) throw Error('Unsupported study version. Expected schemaVersion 1.');
+  if (![1, 2].includes(data.schemaVersion))
+    throw Error('Unsupported study version. Expected schemaVersion 1 or 2.');
   const candidate = structuredClone(data);
+  candidate.schemaVersion = 2;
   if (!candidate.weather.mode)
     candidate.weather.mode = candidate.weather.format === 'sample' ? 'automatic' : 'upload';
   return studySchema.parse(candidate);
@@ -350,6 +394,8 @@ export function selectRacking(study, type) {
 export function updateStudyInput(study, section, key, value) {
   let s = structuredClone(study);
   s[section][key] = value;
+  if (section === 'analysis' && periodKeys.includes(key) && s.analysis.period !== 'day')
+    s.analysis.date = analysisPeriod(s).start;
   if (section === 'rowPair' && key === 'cropSetback')
     s.landUse.underPanelWidth = dimensions(s).projected + 2 * value;
   if (section === 'rowPair' && key === 'croppingWidth')
@@ -383,6 +429,18 @@ export function validationMessage(issue) {
 export function designIssues(s) {
   const d = dimensions(s),
     issues = [];
+  if (s.module.bifacial) {
+    const o = moduleOptics(s.module);
+    if (o.cellWidth <= 0 || o.cellLength <= 0)
+      issues.push(
+        'Cell gaps and perimeter must fit inside the module. Reduce gaps, cell count or perimeter width.',
+      );
+  }
+  try {
+    analysisPeriod(s);
+  } catch (e) {
+    issues.push(e.message);
+  }
   if (s.racking.type === 'dual-axis') {
     const envelope = Math.hypot(d.width, d.tableLength);
     if (s.rowPair.pitch < envelope + 0.05)

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Bifacial monthly and annual browser benchmarks</title>
+  <style>
+    body {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+      font: 16px/1.5 system-ui;
+    }
+    button {
+      padding: 12px;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    #status {
+      position: sticky;
+      top: 0;
+      background: #edf4ef;
+      padding: 16px;
+    }
+  </style>
+  <h1>Bifacial monthly and annual browser benchmarks</h1>
+  <p>
+    Local synthetic-weather tests. Every selected day is computed. Actual production visibility
+    cache and daily checkpoint transfers; two-minute limit per solve. This fixture must use the
+    dedicated <strong>127.0.0.1:5175</strong> origin. It clears only that origin's numerical
+    visibility cache before each cold case. No field layouts are read or changed.
+  </p>
+  <label
+    >Benchmark suite
+    <select id="suite">
+      <option value="standard">Monthly and annual matrix</option>
+      <option value="cpu-dense">CPU follow-up · 5,040 receivers</option>
+    </select></label
+  >
+  <button id="run">Run period benchmarks</button>
+  <button id="stop" disabled>Stop</button>
+  <button id="download" disabled>Download results</button>
+  <p id="status" role="status">Ready</p>
+  <pre id="results"></pre>
+  <script type="module" src="./period-performance.js"></script>
+</html>

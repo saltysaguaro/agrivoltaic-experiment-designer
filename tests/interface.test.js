@@ -41,7 +41,34 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
   study.analysis.backend = 'cpu';
   study.analysis.patches = 145;
   study.analysis.resolution = 2;
+  study.experimentSensors = [
+    {
+      id: 'OLD-SENSOR',
+      type: 'PAR',
+      x: 0,
+      y: 0,
+      z: 1,
+      treatment: '',
+      replicate: '',
+      model: '',
+      logger: '',
+      notes: '',
+    },
+  ];
+  study.crops = [
+    {
+      id: 'OLD-BED',
+      crop: 'Lettuce',
+      x: 0,
+      y: 0,
+      width: 1,
+      length: 1,
+      treatment: '',
+      replicate: '',
+    },
+  ];
   localStorage.setItem('aed-study-v1', JSON.stringify(study));
+  localStorage.setItem('fieldwork-study-v1', JSON.stringify(study));
   let calculations = 0,
     calculation;
   class TestWorker {
@@ -117,6 +144,10 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     });
     assert.match(document.querySelector('.brand').textContent, /Agrivoltaic Experiment Designer/);
     assert.equal(document.querySelector('.brand svg'), null);
+    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).experimentSensors, []);
+    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).crops, []);
+    assert.equal(localStorage.getItem('fieldwork-study-v1'), null);
+    assert.match(document.body.textContent, /Layout is session-only/);
     const help = document.querySelector('button[aria-label="About Length"]');
     await act(async () => help.focus());
     assert.match(document.querySelector('[role="tooltip"]').textContent, /long outside edge/);
@@ -259,16 +290,31 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     await click(byText('Add at array centre'));
     let saved = JSON.parse(localStorage.getItem('aed-study-v1'));
-    assert.equal(saved.experimentSensors.length, 2);
-    assert.deepEqual(saved.experimentSensors[0].grid, saved.experimentSensors[1].grid);
-    assert.equal(saved.experimentSensors[0].x, saved.experimentSensors[1].x);
+    assert.equal(saved.experimentSensors.length, 0, 'New sensors never enter autosave');
+    assert.equal(
+      document.querySelectorAll('select[aria-label="Select field item"] option[value^="sensor:"]')
+        .length,
+      2,
+    );
+    const fieldValue = (path) => document.querySelector(`[data-annotation="${path}"] input`).value;
+    assert.equal(
+      fieldValue('experimentSensors.0.grid.column'),
+      fieldValue('experimentSensors.1.grid.column'),
+    );
+    assert.equal(
+      fieldValue('experimentSensors.0.grid.row'),
+      fieldValue('experimentSensors.1.grid.row'),
+    );
     await click(byText('Add crop plot'));
     saved = JSON.parse(localStorage.getItem('aed-study-v1'));
-    assert.equal(saved.crops[0].cropId, 'lettuce');
-    assert.equal(saved.crops[0].botanicalName, 'Lactuca sativa');
+    assert.equal(saved.crops.length, 0, 'New beds never enter autosave');
+    assert.match(
+      document.querySelector('select[aria-label="Select field item"]').textContent,
+      /Lettuce/,
+    );
     assert.ok(document.querySelector('[role="dialog"]'));
-    assert.equal(saved.crops[0].grid.columns, 1);
-    assert.equal(saved.crops[0].grid.rows, 1);
+    assert.equal(fieldValue('crops.0.grid.columns'), '1');
+    assert.equal(fieldValue('crops.0.grid.rows'), '1');
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     assert.equal(calculations, 1);
     await click(step('Field layout'));
@@ -291,6 +337,8 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(calculations, 1);
     // Import is previewed before changing storage and restores a matching result without downloading weather.
     const incoming = JSON.parse(localStorage.getItem('aed-study-v1'));
+    incoming.experimentSensors = study.experimentSensors;
+    incoming.crops = study.crops;
     incoming.metadata.title = 'Shared supplemental project';
     incoming.weather = {
       ...incoming.weather,
@@ -339,6 +387,17 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(byText('Relative sunlight').disabled, false);
     assert.match(document.body.textContent, /Using the imported weather snapshot/);
     assert.equal(calculations, 1, 'Opening a package restores results without recalculation');
+    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).experimentSensors, []);
+    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).crops, []);
+    await click(step('Field layout'));
+    assert.match(
+      document.querySelector('select[aria-label="Select field item"]').textContent,
+      /OLD-SENSOR/,
+    );
+    assert.match(
+      document.querySelector('select[aria-label="Select field item"]').textContent,
+      /OLD-BED/,
+    );
   } finally {
     await fs.rm(file, { force: true });
     console.error = originalError;

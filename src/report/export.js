@@ -1,3 +1,5 @@
+import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
+import { isPeriod, periodLabel, analysisPeriod, dliLabel } from '../domain/period.js';
 import {
   landUseSettings,
   landUseSummary,
@@ -60,7 +62,7 @@ export function methodsRows(s, r) {
     ['Coordinates', 'East / north / up (m); origin at array centre'],
     [
       'Module',
-      `${s.module.length} × ${s.module.width} × ${s.module.thickness} m; ${s.module.power} W; opaque`,
+      `${s.module.length} × ${s.module.width} × ${s.module.thickness} m; ${s.module.power} W; ${s.module.bifacial ? 'bifacial, area-averaged gap transmission' : 'opaque'}`,
     ],
     ['Module gap', `${s.module.gap} m`],
     ['Racking', s.racking.type],
@@ -140,10 +142,39 @@ export function methodsRows(s, r) {
       'Field layout',
       'Sensors at receiver-cell centres; crop boundaries follow receiver cells and rotate with the array. Packed marker offsets are display-only; sensor heights/depths remain installation metadata. Grid rows/columns are 1-based in tables.',
     ],
-    ['Analysis date', s.analysis.date],
+    ['Analysis date', periodLabel(s)],
+    ['Analysis mode', s.analysis.period],
     [
-      'Open-field daily irradiation',
-      r ? `${(r.openWh / 1000).toFixed(4)} kWh/m²/day` : 'Not calculated',
+      'DLI basis',
+      isPeriod(s)
+        ? 'Mean daily DLI across all included days; irradiation is the period total'
+        : 'Single day',
+    ],
+    [
+      'Module construction',
+      s.module.bifacial ? 'Bifacial; transparent internal cell gaps' : 'Monofacial; opaque',
+    ],
+    [
+      'Internal cell grid',
+      `${s.module.cellColumns} columns × ${s.module.cellRows} rows; fixed outer dimensions`,
+    ],
+    [
+      'Internal cell gaps X / Y',
+      `${s.module.cellGapX} / ${s.module.cellGapY} m; opaque perimeter ${s.module.cellMargin} m`,
+    ],
+    [
+      'Laminate transmission broadband / PAR',
+      `${s.module.gapTransmission} / ${s.module.gapParTransmission}`,
+    ],
+    [
+      'Effective module transmission broadband / PAR',
+      `${(100 * moduleOptics(s.module).broadband).toFixed(4)}% / ${(100 * moduleOptics(s.module).par).toFixed(4)}%`,
+    ],
+    [
+      isPeriod(s) ? 'Open-field period irradiation' : 'Open-field daily irradiation',
+      r
+        ? `${(r.openWh / 1000).toFixed(4)} kWh/m²/${isPeriod(s) ? 'period' : 'day'}`
+        : 'Not calculated',
     ],
     [
       'Open-field DLI',
@@ -183,7 +214,7 @@ export function methodsRows(s, r) {
     ],
     [
       'Weather input hash encoding',
-      'JSON arrays in interval order: minute, duration, GHI, DNI, DHI, PPFD or null, diffuse PPFD or null',
+      `${isPeriod(s) ? 'JSON array of [date, interval arrays] in day order. ' : ''}JSON arrays in interval order: minute, duration, GHI, DNI, DHI, PPFD or null, diffuse PPFD or null`,
     ],
     ['Requested compute engine', s.analysis.backend],
     ['Solver', r?.backend || 'Not calculated'],
@@ -205,12 +236,12 @@ export function methodsRows(s, r) {
     ],
     [
       'Relative sunlight',
-      '100 × receiver daily irradiation / open-field daily GHI; 0% = no sunlight, 100% = open field',
+      '100 × receiver irradiation / open-field GHI over the selected period; 0% = no sunlight, 100% = open field',
     ],
     ['Tracker diffuse poses', '2° angle bins; direct uses exact pose'],
     [
       'Reflection / transmission',
-      'None; opaque modules and modeled supports; no multiple reflections',
+      opticalAssumptions(s) + ' No reflected radiation or multiple reflections.',
     ],
     ['Solar position', 'NOAA fractional-year approximation; geometric, no refraction'],
     [
@@ -261,7 +292,7 @@ export function publicationTables(s, r) {
       ],
     ],
     [
-      'Site, calculation and daily outputs',
+      'Site, calculation and light outputs',
       [
         'Site',
         'Analysis date',
@@ -272,6 +303,9 @@ export function publicationTables(s, r) {
         'Receiver grid',
         'Numerical receivers',
         'Open-field daily irradiation',
+        'Open-field period irradiation',
+        'Analysis mode',
+        'DLI basis',
         'Open-field DLI',
         'Receiver-area mean relative sunlight / DLI',
       ],
@@ -281,7 +315,7 @@ export function publicationTables(s, r) {
   return {
     sections: groups.map(([title, keys]) => ({
       title,
-      rows: keys.map((key) => rows.find(([name]) => name === key)),
+      rows: keys.map((key) => rows.find(([name]) => name === key)).filter(Boolean),
     })),
     notes: rows.filter(([key]) => !included.has(key)),
   };
@@ -317,7 +351,7 @@ table{width:100%;border-collapse:collapse;margin:5px 0 12px;font-size:11px;table
 svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{font-size:11px;color:#455d51;overflow-wrap:anywhere}.appendix{border-top:2px solid #37564b;margin-top:22px}.methods-notes{columns:2;column-gap:26px}.methods-notes p{break-inside:avoid;overflow-wrap:anywhere;font-size:11px;line-height:1.4}.methods-notes strong{display:block;margin-bottom:2px}button{padding:10px 18px;background:#183d38;color:white;border:0;cursor:pointer}.note{border-left:3px solid #af873e;padding:7px 10px;background:#fff8e7;font-size:11px}.empty{color:#60736a;font-style:italic}.table-scroll{overflow-x:auto}
 @page{size:A4 landscape;margin:12mm}@media(max-width:650px){.methods-notes{columns:1}.parameters{min-width:610px}body{padding:0 12px}}
 @media print{body{margin:0;padding:0;max-width:none;font-size:9pt}h1{font-size:17pt;margin-top:0}h2{font-size:10pt;margin:3mm 0 1mm}table{font-size:8pt;margin:1mm 0 3mm}td,th{padding:1.1mm 1.5mm}button{display:none}.note{font-size:8pt;padding:2mm 3mm}.report-meta{font-size:8pt}.table-scroll{overflow:visible}.parameters{min-width:0}.appendix{break-before:page;border-top:0}.methods-notes p{font-size:8pt}figure{break-before:page;margin:0}figure svg{max-height:165mm;max-width:100%;width:auto;display:block;margin:auto}figcaption{font-size:8pt}thead{display:table-header-group}tr{break-inside:avoid}a{color:inherit;text-decoration:none}}
-</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(s.analysis.date)} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / C / B identify the ground zones. S is the signed PV-edge setback; negative values place crops beneath panels. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Physical field instruments</h2>${table(
+</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(periodLabel(s))} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / C / B identify the ground zones. S is the signed PV-edge setback; negative values place crops beneath panels. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Physical field instruments</h2>${table(
     [
       'ID / type',
       'E / N / Z (m)',
@@ -340,7 +374,7 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
       'Treatment / replicate',
       'Area (m²)',
       'Starting column / row; columns × rows',
-      `Mean / median / SD ${r?.estimated ? 'estimated DLI' : 'DLI'} (mol/m²/day)`,
+      `Mean / median / SD ${dliLabel(r)} (mol/m²/day)`,
       'Range DLI / sunlight; reservation overlap',
     ],
     s.crops.map((c) => {
@@ -358,7 +392,26 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
         `${p ? `${p.min.toFixed(2)}–${p.max.toFixed(2)} / ${p.sunlight.toFixed(1)}%` : '—'}; ${plotZoneOverlap(s, c).toFixed(2)} m² reserved`,
       ];
     }),
-  )}<section class="appendix"><h2>Methods, assumptions and provenance</h2><div class="methods-notes">${publication.notes.map(([key, value]) => `<p><strong>${e(key)}</strong>${e(value)}</p>`).join('')}</div></section>${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric, 'array', true, { compact: true, callouts: false })}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p></body></html>`;
+  )}${
+    r?.monthly
+      ? `<h2>Monthly light summary</h2>${table(
+          [
+            'Month',
+            'Days',
+            'Mean received kWh/m²',
+            'Mean daily DLI (mol/m²/day)',
+            'Relative sunlight (%)',
+          ],
+          r.monthly.map((m) => [
+            m.month,
+            m.days,
+            (m.meanWh / 1000).toFixed(3),
+            m.meanDli.toFixed(3),
+            m.meanSunlight === null ? 'No incoming energy' : m.meanSunlight.toFixed(2),
+          ]),
+        )}`
+      : ''
+  }<section class="appendix"><h2>Methods, assumptions and provenance</h2><div class="methods-notes">${publication.notes.map(([key, value]) => `<p><strong>${e(key)}</strong>${e(value)}</p>`).join('')}</div></section>${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric, 'array', true, { compact: true, callouts: false })}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p></body></html>`;
 }
 export function exportCsv(s, r) {
   const rows = [
@@ -387,10 +440,25 @@ export function exportCsv(s, r) {
       'taxonomy_key',
       'taxonomy_url',
       'crop_catalog_version',
+      'irradiation_wh_m2',
+      'analysis_start',
+      'analysis_end',
+      'dli_basis',
     ],
   ];
   for (const c of r?.cells || [])
-    rows.push(['receiver', '', 'numerical', c.x, c.y, c.z, c.sunlight, c.dli]);
+    rows.push([
+      'receiver',
+      '',
+      'numerical',
+      c.x,
+      c.y,
+      c.z,
+      c.sunlight,
+      c.dli,
+      ...Array(16).fill(''),
+      c.wh,
+    ]);
   for (const v of s.experimentSensors) {
     const c = nearestCell(r, v.x, v.y);
     rows.push([
@@ -444,6 +512,12 @@ export function exportCsv(s, r) {
       p.taxonUrl,
       p.cropCatalogVersion,
     ]);
+  }
+  const period = analysisPeriod(s);
+  for (const row of rows.slice(1)) {
+    row[25] = period.start;
+    row[26] = period.end;
+    row[27] = isPeriod(s) ? 'mean daily over period' : 'single day';
   }
   for (const [key, value] of Object.entries(provenanceRecord(s, r)))
     rows.push(['metadata', key, Array.isArray(value) ? value.join('; ') : value]);

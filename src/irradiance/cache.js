@@ -43,7 +43,12 @@ export async function getCached(key) {
   }
 }
 export async function putCached(key, bits) {
+  // Transmitting layouts use two-byte intersection counts instead of bitsets.
+  // Avoid caching large pose matrices; the solver can stream/recompute them.
+  if (bits.byteLength > 4 * 1024 * 1024) return;
   memory.set(key, bits);
+  while ([...memory.values()].reduce((n, v) => n + v.byteLength, 0) > 32 * 1024 * 1024)
+    memory.delete(memory.keys().next().value);
   if (memory.size > 16) memory.delete(memory.keys().next().value);
   try {
     const d = await database();

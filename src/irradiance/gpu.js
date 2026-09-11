@@ -22,8 +22,31 @@ fn blocked(o:vec3<f32>,d:vec3<f32>)->bool {
  return false;
 }
 @compute @workgroup_size(64) fn main(@builtin(global_invocation_id) id:vec3<u32>){let index=id.x;if(index>=params.points*params.words){return;}let p=index/params.words;let word=index%params.words;var bits=0u;for(var k=0u;k<32u;k++){let j=word*32u+k;if(j<params.directions&&!blocked(points[p].xyz+vec3<f32>(0,0,1e-5),directions[j].xyz)){bits=bits|(1u<<k);}}result[index]=bits;}`;
+const transmissionShader =
+  shader.slice(0, shader.indexOf('@compute')) +
+  `
+@group(0) @binding(6) var<storage,read> moduleNodes:array<vec4<f32>>;
+@group(0) @binding(7) var<storage,read> moduleBoxes:array<vec4<f32>>;
+fn moduleCount(o:vec3<f32>,d:vec3<f32>)->u32 {
+ var n=0u; var hits=0u; let size=arrayLength(&moduleNodes)/3u;
+ loop { if(n>=size){break;} let lo=moduleNodes[n*3u]; let hi=moduleNodes[n*3u+1u];
+  if(!boxHit(o,d,lo.xyz,hi.xyz)){n=u32(moduleNodes[n*3u+2u].x);continue;}
+  for(var b=u32(lo.w);b<u32(lo.w)+u32(hi.w);b++) {
+   let c=moduleBoxes[b*4u].xyz; let x=moduleBoxes[b*4u+1u]; let y=moduleBoxes[b*4u+2u]; let z=moduleBoxes[b*4u+3u];
+   let q=o-c; let localO=vec3<f32>(dot(q,x.xyz),dot(q,y.xyz),dot(q,z.xyz));
+   let localD=vec3<f32>(dot(d,x.xyz),dot(d,y.xyz),dot(d,z.xyz)); let h=vec3<f32>(x.w,y.w,z.w);
+   if(boxHit(localO,localD,-h,h)){hits++;}
+  } n++;
+ } return hits;
+}
+@compute @workgroup_size(64) fn main(@builtin(global_invocation_id) id:vec3<u32>) {
+ let i=id.x; if(i>=params.points*params.directions){return;}
+ let o=points[i/params.directions].xyz+vec3<f32>(0,0,1e-5); let d=directions[i%params.directions].xyz;
+ if(blocked(o,d)){result[i]=65535u;}else{result[i]=moduleCount(o,d);}
+}`;
 export function packBvh(geometry) {
-  if (!geometry) return { triangles: new Float32Array(4), nodes: new Float32Array(4), count: 0 };
+  if (!geometry?.attributes.position.count)
+    return { triangles: new Float32Array(4), nodes: new Float32Array(4), count: 0 };
   const pos = geometry.attributes.position,
     idx = geometry.index;
   const list = [];
@@ -120,12 +143,29 @@ export class WebGpuIrradianceEngine {
   }
   async initializeGeometry(geometry) {
     this.geometryBuffers?.forEach((b) => b.destroy());
+    this.moduleBuffers?.forEach((b) => b.destroy());
+    this.moduleBuffers = null;
+    if (geometry?.userData.moduleBvh) {
+      const m = geometry.userData.moduleBvh;
+      this.moduleBuffers = [this.buffer(m.nodes), this.buffer(m.boxes)];
+      if (!this.transmissionPipeline) {
+        const module = this.device.createShaderModule({ code: transmissionShader });
+        const info = await module.getCompilationInfo();
+        if (info.messages.some((m) => m.type === 'error'))
+          throw Error(info.messages.map((m) => m.message).join('; '));
+        this.transmissionPipeline = await this.device.createComputePipelineAsync({
+          layout: 'auto',
+          compute: { module, entryPoint: 'main' },
+        });
+      }
+    }
     const packed = packBvh(geometry);
     this.count = packed.count;
     this.geometryBuffers = [this.buffer(packed.triangles), this.buffer(packed.nodes)];
   }
   async visibility(points, directions) {
     if (this.lost) throw Error('WebGPU device lost');
+    if (this.moduleBuffers) return this.transmissionCounts(points, directions);
     const words = Math.ceil(directions.length / 32),
       size = points.length * words * 4;
     if (size > this.device.limits.maxStorageBufferBindingSize)
@@ -165,11 +205,60 @@ export class WebGpuIrradianceEngine {
       buffers.slice(2).forEach((b) => b.destroy());
     }
   }
+  async transmissionCounts(points, directions) {
+    const counts = new Uint16Array(points.length * directions.length);
+    for (let start = 0; start < points.length; start += 256) {
+      const batch = points.slice(start, start + 256),
+        size = batch.length * directions.length * 4;
+      const output = this.device.createBuffer({ size, usage: 128 | 4 });
+      const read = this.device.createBuffer({ size, usage: 1 | 8 });
+      const pointBuffer = this.buffer(Float32Array.from(batch.flatMap((p) => [p.x, p.y, p.z, 0])));
+      const dirBuffer = this.buffer(
+        Float32Array.from(directions.flatMap((p) => [p.x, p.y, p.z, 0])),
+      );
+      const params = this.buffer(
+        new Uint32Array([batch.length, directions.length, 0, this.count]),
+        64,
+      );
+      try {
+        this.device.pushErrorScope('validation');
+        const buffers = [
+          ...this.geometryBuffers,
+          pointBuffer,
+          dirBuffer,
+          output,
+          params,
+          ...this.moduleBuffers,
+        ];
+        const bind = this.device.createBindGroup({
+          layout: this.transmissionPipeline.getBindGroupLayout(0),
+          entries: buffers.map((buffer, binding) => ({ binding, resource: { buffer } })),
+        });
+        const encoder = this.device.createCommandEncoder(),
+          pass = encoder.beginComputePass();
+        pass.setPipeline(this.transmissionPipeline);
+        pass.setBindGroup(0, bind);
+        pass.dispatchWorkgroups(Math.ceil((batch.length * directions.length) / 64));
+        pass.end();
+        encoder.copyBufferToBuffer(output, 0, read, 0, size);
+        this.device.queue.submit([encoder.finish()]);
+        const error = await this.device.popErrorScope();
+        if (error) throw Error(error.message);
+        await read.mapAsync(1);
+        const values = new Uint32Array(read.getMappedRange());
+        counts.set(values, start * directions.length);
+      } finally {
+        [output, read, pointBuffer, dirBuffer, params].forEach((b) => b.destroy());
+      }
+    }
+    return counts;
+  }
   cancel() {
     this.dispose();
   }
   dispose() {
     this.geometryBuffers?.forEach((b) => b.destroy());
+    this.moduleBuffers?.forEach((b) => b.destroy());
     this.device?.destroy();
   }
 }

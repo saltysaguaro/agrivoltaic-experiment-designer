@@ -1,4 +1,6 @@
+import { isPeriod, periodLabel, periodKeys, hasWeather, dliLabel } from './domain/period.js';
 import { projectJob } from './project/client.js';
+import { withoutFieldLayout } from './project/browser-study.js';
 import { MAX_ARCHIVE } from './project/zip.js';
 import ProjectImportDialog from './ui/ProjectImportDialog.jsx';
 import React, { useEffect, useRef, useState } from 'react';
@@ -38,7 +40,7 @@ import {
   updateStudyInput,
   validationMessage,
 } from './domain/study.js';
-import { parseWeather, weatherTemplate } from './irradiance/weather.js';
+import { parseWeather, weatherTemplate, periodWeatherTemplate } from './irradiance/weather.js';
 import { downloadWeather, weatherRequestKey } from './irradiance/weather-service.js';
 import { normalizeLayout, cellAt } from './experiment/grid-layout.js';
 import { percentileSensors } from './experiment/layout.js';
@@ -65,7 +67,9 @@ function load() {
   let original = null;
   try {
     original = localStorage.getItem('aed-study-v1') || localStorage.getItem('fieldwork-study-v1');
-    return { study: original ? migrateStudy(JSON.parse(original)) : defaultStudy() };
+    return {
+      study: original ? migrateStudy(withoutFieldLayout(JSON.parse(original))) : defaultStudy(),
+    };
   } catch (error) {
     return {
       study: defaultStudy(),
@@ -113,7 +117,7 @@ function App() {
     [editorOpen, setEditorOpen] = useState(false),
     [undoCount, setUndoCount] = useState(0),
     [weatherStatus, setWeatherStatus] = useState({ state: 'idle', message: '' }),
-    [saveStatus, setSaveStatus] = useState('Saved on this device');
+    [saveStatus, setSaveStatus] = useState('Layout is session-only · export to save');
   function setStudy(update) {
     setRawStudy((current) => {
       const candidate = normalizeLayout(typeof update === 'function' ? update(current) : update);
@@ -207,6 +211,7 @@ function App() {
           ? {
               ...current.weather,
               rows: [],
+              days: [],
               hash: '',
               sourceText: undefined,
               normalizedHash: '',
@@ -227,6 +232,8 @@ function App() {
   const enteredAnalysis = useRef(navigation().step >= 6);
   const weatherFlight = useRef(null),
     runToken = useRef(0);
+  const checkpoint = useRef(null);
+  const [resumeKey, setResumeKey] = useState(null);
   const worker = useRef(null),
     importRef = useRef(),
     latest = useRef(s);
@@ -266,8 +273,9 @@ function App() {
       return;
     }
     try {
-      localStorage.setItem('aed-study-v1', JSON.stringify(s));
-      setSaveStatus('Saved on this device');
+      localStorage.setItem('aed-study-v1', JSON.stringify(withoutFieldLayout(s)));
+      localStorage.removeItem('fieldwork-study-v1');
+      setSaveStatus('Layout is session-only · export to save');
     } catch {
       setSaveStatus('Device storage unavailable · export a project package to save');
     }
@@ -288,7 +296,7 @@ function App() {
       step >= 5 &&
       !weatherPinned &&
       s.weather.mode === 'automatic' &&
-      (!s.weather.rows.length || s.weather.requestKey !== requestKey)
+      (!hasWeather(s) || s.weather.requestKey !== requestKey)
     ) {
       const timer = setTimeout(() => {
         ensureWeather().catch(() => {});
@@ -314,21 +322,24 @@ function App() {
   }, []);
   async function ensureWeather(snapshot = latest.current, force = false) {
     if (snapshot.weather.mode !== 'automatic') {
-      if (snapshot.weather.mode === 'upload' && !snapshot.weather.rows.length)
+      if (snapshot.weather.mode === 'upload' && !hasWeather(snapshot))
         throw Error('Upload a complete weather file, or choose automatic weather.');
       return snapshot.weather;
     }
-    if (!force && weatherPinned && snapshot.weather.rows.length) return snapshot.weather;
+    if (!force && weatherPinned && hasWeather(snapshot)) return snapshot.weather;
     const key = weatherRequestKey(snapshot);
-    if (!force && snapshot.weather.rows.length && snapshot.weather.requestKey === key)
+    if (!force && hasWeather(snapshot) && snapshot.weather.requestKey === key)
       return snapshot.weather;
     if (!force && weatherFlight.current?.key === key) return weatherFlight.current.promise;
     weatherFlight.current?.controller.abort();
     const controller = new AbortController();
     setWeatherStatus({ state: 'loading', message: 'Downloading weather for your site…' });
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    const timeout = setTimeout(() => controller.abort(), isPeriod(snapshot) ? 300000 : 30000);
     const flight = { key, controller };
-    flight.promise = downloadWeather(snapshot, { signal: controller.signal })
+    flight.promise = downloadWeather(snapshot, {
+      signal: controller.signal,
+      onProgress: (message) => setWeatherStatus({ state: 'loading', message }),
+    })
       .then((weather) => {
         if (
           !controller.signal.aborted &&
@@ -365,7 +376,7 @@ function App() {
   function set(section, key, value) {
     if (
       (section === 'site' && ['latitude', 'longitude', 'utcOffset'].includes(key)) ||
-      (section === 'analysis' && key === 'date') ||
+      (section === 'analysis' && periodKeys.includes(key)) ||
       (section === 'weather' && key === 'mode')
     )
       setWeatherPinned(false);
@@ -384,13 +395,14 @@ function App() {
             value === 'automatic'
               ? 'Open-Meteo · ready to download for your site'
               : value === 'sample'
-                ? 'Illustrative clear-sky day · synthetic'
+                ? 'Illustrative clear-sky weather · synthetic'
                 : 'Upload a weather file',
           hash: '',
           sourceText: undefined,
           normalizedHash: '',
           format: value === 'sample' ? 'sample' : value === 'automatic' ? 'Open-Meteo' : 'CSV',
           rows: [],
+          days: [],
         };
       }
       const parsed = studySchema.safeParse(next);
@@ -400,12 +412,13 @@ function App() {
       }
       setNotice('');
       if (
-        (section === 'site' || (section === 'analysis' && key === 'date')) &&
+        (section === 'site' || (section === 'analysis' && periodKeys.includes(key))) &&
         next.weather.mode === 'automatic'
       ) {
         next.weather = {
           ...next.weather,
           rows: [],
+          days: [],
           hash: '',
           sourceText: undefined,
           normalizedHash: '',
@@ -413,10 +426,15 @@ function App() {
           provenance: undefined,
           name: 'Open-Meteo · ready to download for your site',
         };
-      } else if (section === 'analysis' && key === 'date' && next.weather.mode === 'upload') {
+      } else if (
+        section === 'analysis' &&
+        periodKeys.includes(key) &&
+        next.weather.mode === 'upload'
+      ) {
         next.weather = {
           ...next.weather,
           rows: [],
+          days: [],
           hash: '',
           sourceText: undefined,
           normalizedHash: '',
@@ -468,11 +486,16 @@ function App() {
   }
   function cancel() {
     runToken.current++;
+    weatherFlight.current?.controller.abort();
     worker.current?.terminate();
     worker.current = null;
     setBusy(false);
     setProgress(null);
-    setNotice('Calculation cancelled.');
+    setNotice(
+      checkpoint.current
+        ? 'Calculation cancelled. Completed days can be resumed while this page stays open.'
+        : 'Calculation cancelled.',
+    );
   }
   async function run() {
     if (issues.length) {
@@ -498,18 +521,24 @@ function App() {
       w.onmessage = ({ data }) => {
         if (token !== runToken.current) return;
         if (data.type === 'progress') setProgress(data);
+        if (data.type === 'checkpoint') {
+          checkpoint.current = data.checkpoint;
+          setResumeKey(data.checkpoint.key);
+        }
         if (data.type === 'error') {
           setNotice(data.message);
           setBusy(false);
           w.terminate();
         }
         if (data.type === 'result') {
+          checkpoint.current = null;
+          setResumeKey(null);
           setResult(data.result);
           setBusy(false);
           setMetric('sunlight');
           setNotice(
             data.result.key === analysisKey(latest.current)
-              ? `Daily light calculated with ${data.result.backend} in ${data.result.seconds.toFixed(1)} s.`
+              ? `${isPeriod(snapshot) ? 'Period' : 'Daily'} light calculated for ${periodLabel(snapshot)} with ${data.result.backend} in ${data.result.seconds.toFixed(1)} s.`
               : 'Calculation finished for an older design. Recalculate for the current inputs.',
           );
           w.terminate();
@@ -521,7 +550,10 @@ function App() {
         setBusy(false);
         w.terminate();
       };
-      w.postMessage({ study: snapshot });
+      w.postMessage({
+        study: snapshot,
+        checkpoint: checkpoint.current?.key === analysisKey(snapshot) ? checkpoint.current : null,
+      });
     } catch (error) {
       if (token === runToken.current) {
         setNotice(
@@ -535,7 +567,7 @@ function App() {
   }
   async function uploadWeather(file) {
     try {
-      const parsed = await parseWeather(await file.text(), file.name, s.analysis.date);
+      const parsed = await parseWeather(await file.text(), file.name, s);
       const next = studySchema.parse({
         ...s,
         weather: { ...parsed.weather, mode: 'upload' },
@@ -548,7 +580,7 @@ function App() {
       setWeatherPinned(false);
       setStudy(next);
       setNotice(
-        `Loaded ${parsed.weather.rows.length} weather intervals. ${parsed.site ? 'Site metadata imported.' : ''}`,
+        `Loaded ${parsed.weather.days?.length ? `${parsed.weather.days.length} days of` : parsed.weather.rows.length} weather intervals. ${parsed.site ? 'Site metadata imported.' : ''}`,
       );
     } catch (e) {
       setNotice(e.message);
@@ -590,7 +622,7 @@ function App() {
     setRecovery(null);
     setStudy(pendingProject.study);
     setResult(pendingProject.result);
-    setWeatherPinned(pendingProject.study.weather.rows.length > 0);
+    setWeatherPinned(hasWeather(pendingProject.study));
     setWeatherStatus({ state: 'idle', message: '' });
     fieldHistory.current = [];
     setUndoCount(0);
@@ -858,6 +890,7 @@ function App() {
                 </button>
                 {i === step && !compactSidebar && (
                   <Controls
+                    canResume={resumeKey === analysisKey(s)}
                     onInspect={(value) => setInspection({ ...value, step })}
                     step={step}
                     s={s}
@@ -873,7 +906,13 @@ function App() {
                     uploadWeather={uploadWeather}
                     weatherStatus={weatherStatus}
                     refreshWeather={() => ensureWeather(latest.current, true).catch(() => {})}
-                    template={() => download(weatherTemplate, 'weather-template.csv', 'text/csv')}
+                    template={() =>
+                      download(
+                        isPeriod(s) ? periodWeatherTemplate(s) : weatherTemplate,
+                        'weather-template.csv',
+                        'text/csv',
+                      )
+                    }
                     placing={placing}
                     fieldTool={fieldTool}
                     setPlacing={(v, kind) => chooseFieldTool(v ? kind : null)}
@@ -922,7 +961,7 @@ function App() {
                     'Balance solar geometry, crop access, and working space.',
                     'Bring the individual rows together into a finite system.',
                     'Connect your field location to a reproducible weather source.',
-                    'Compare daily ground light with an unobstructed horizontal reference.',
+                    'Compare ground light for the selected period with an unobstructed horizontal reference.',
                     'Arrange sensors and crop beds together over the light field.',
                     'Export clear figures and traceable parameters for your methods section.',
                   ][step]
@@ -935,7 +974,7 @@ function App() {
           </div>
           {weatherPinned && step >= 5 && (
             <div className="snapshot-note">
-              Using the imported weather snapshot. Site/date edits or Refresh weather select new
+              Using the imported weather snapshot. Site/period edits or Refresh weather select new
               weather data.
             </div>
           )}
@@ -1111,7 +1150,7 @@ function App() {
               {busy && (
                 <div className="solving-pill">
                   <Loader2 size={16} className="spin" />
-                  {Math.round((progress?.progress || 0) * 100)}% · Calculating daily light
+                  {Math.round((progress?.progress || 0) * 100)}% · Calculating selected-period light
                 </div>
               )}
             </div>
@@ -1138,7 +1177,7 @@ function App() {
                 {[
                   ['none', 'Geometry'],
                   ['sunlight', 'Relative sunlight'],
-                  ['dli', validResult?.estimated === false ? 'DLI' : 'Estimated DLI'],
+                  ['dli', dliLabel(validResult)],
                 ].map(([v, l]) => (
                   <button
                     key={v}
@@ -1194,7 +1233,11 @@ function App() {
                       ],
                       [
                         Leaf,
-                        validResult.estimated ? 'Mean estimated DLI' : 'Mean DLI',
+                        validResult.period?.days > 1
+                          ? `Receiver-area ${dliLabel(validResult).toLowerCase()}`
+                          : validResult.estimated
+                            ? 'Mean estimated DLI'
+                            : 'Mean DLI',
                         mean.toFixed(1),
                         'mol m⁻² d⁻¹',
                       ],
@@ -1306,7 +1349,7 @@ function App() {
                   {step === 0
                     ? 'Module dimensions and gaps carry through to every row, shadow calculation, and exported figure.'
                     : step >= 6
-                      ? 'Relative sunlight is daily irradiation received as a percentage of incoming GHI (100% = open-field sunlight). DLI uses the same visibility, with documented PAR assumptions.'
+                      ? 'Relative sunlight is irradiation received over the selected period as a percentage of incoming GHI (100% = open-field sunlight). DLI uses the same visibility, with documented PAR assumptions.'
                       : 'The same dimensions drive the interactive view, finite simulation geometry, and publication drawings.'}
                 </p>
               </div>
@@ -1335,7 +1378,7 @@ function App() {
               {recovery
                 ? 'Automatic saving is paused; the original study is retained.'
                 : step < steps.length - 1
-                  ? 'Your changes are saved as you design.'
+                  ? 'Export a project to save sensors, crop beds and results.'
                   : 'Keep the project package with your research records.'}
             </span>
             <div>

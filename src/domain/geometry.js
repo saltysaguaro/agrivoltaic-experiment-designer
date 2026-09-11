@@ -1,3 +1,5 @@
+import { moduleOptics } from './optics.js';
+import { packModuleBvh } from '../irradiance/module-bvh.js';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { dimensions } from './study.js';
@@ -81,6 +83,35 @@ export function buildGeometry(s, scope = 'array', pose = getPose(s)) {
     roughness: 0.45,
     side: THREE.DoubleSide,
   });
+  if (scope === 'module' && s.module.bifacial) {
+    const o = moduleOptics(s.module),
+      w = 512,
+      h = 1024,
+      data = new Uint8Array(w * h * 4);
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) {
+        const u = (x + 0.5) / w,
+          v = (y + 0.5) / h;
+        const px = (s.table.orientation === 'portrait' ? u : v) * s.module.width;
+        const py = (s.table.orientation === 'portrait' ? v : u) * s.module.length;
+        const frame =
+          px < o.margin ||
+          px > s.module.width - o.margin ||
+          py < o.margin ||
+          py > s.module.length - o.margin;
+        const gap =
+          !frame &&
+          ((px - o.margin) % (o.cellWidth + o.gapX) > o.cellWidth ||
+            (py - o.margin) % (o.cellLength + o.gapY) > o.cellLength);
+        const c = frame ? [105, 115, 120] : gap ? [196, 225, 224] : [38, 72, 96];
+        data.set([...c, 255], (y * w + x) * 4);
+      }
+    const texture = new THREE.DataTexture(data, w, h);
+    texture.needsUpdate = true;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    moduleMaterial.map = texture;
+    moduleMaterial.color.set(0xffffff);
+  }
   const steelMaterial = new THREE.MeshStandardMaterial({
     color: 0x87968f,
     metalness: 0.5,
@@ -127,17 +158,50 @@ export function buildGeometry(s, scope = 'array', pose = getPose(s)) {
     }
   }
   group.updateMatrixWorld(true);
-  group.userData = { length, width, span, rowOffsets: rowOffsets.map((x) => x - span / 2), scope };
+  group.userData = {
+    length,
+    width,
+    span,
+    rowOffsets: rowOffsets.map((x) => x - span / 2),
+    scope,
+    transmitting:
+      s.module.bifacial && (moduleOptics(s.module).broadband > 0 || moduleOptics(s.module).par > 0),
+  };
   return group;
 }
 export function simulationGeometry(group) {
-  const parts = [];
+  const parts = [],
+    boxes = [];
   group.traverse((o) => {
-    if (o.isMesh && ['module', 'post', 'tube'].includes(o.userData.kind))
-      parts.push(o.geometry.clone().applyMatrix4(o.matrixWorld));
+    if (!o.isMesh || !['module', 'post', 'tube'].includes(o.userData.kind)) return;
+    if (group.userData.transmitting && o.userData.kind === 'module') {
+      const e = o.matrixWorld.elements,
+        p = o.geometry.parameters;
+      boxes.push([
+        e[12],
+        e[13],
+        e[14],
+        0,
+        e[0],
+        e[1],
+        e[2],
+        p.width / 2,
+        e[4],
+        e[5],
+        e[6],
+        p.height / 2,
+        e[8],
+        e[9],
+        e[10],
+        p.depth / 2,
+      ]);
+    } else parts.push(o.geometry.clone().applyMatrix4(o.matrixWorld));
   });
-  if (!parts.length) return null;
-  const result = mergeGeometries(parts);
+  if (!parts.length && !boxes.length) return null;
+  const result = parts.length
+    ? mergeGeometries(parts)
+    : new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute([], 3));
+  if (group.userData.transmitting) result.userData.moduleBvh = packModuleBvh(boxes);
   parts.forEach((p) => p.dispose());
   return result;
 }
@@ -147,7 +211,10 @@ export function disposeGroup(group) {
     o.geometry?.dispose();
     if (o.material) mats.add(o.material);
   });
-  mats.forEach((m) => m.dispose());
+  mats.forEach((m) => {
+    m.map?.dispose();
+    m.dispose();
+  });
 }
 export function receiverGridSpec(s) {
   const d = dimensions(s),

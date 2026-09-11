@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open the URL printed by Vite. Everything runs locally in the browser, including worker-based irradiance calculations; automatic weather downloads use the public Open-Meteo API. Study inputs autosave on the device; choose **Export project** to keep a durable research record, including calculated results, in one ZIP. **Open project** previews and restores a shared package. See [portable research projects](docs/PROJECT-PACKAGES.md) for contents and compatibility.
+Open the URL printed by Vite. Everything runs locally in the browser, including worker-based irradiance calculations; automatic weather downloads use the public Open-Meteo API. Geometry, site and weather settings autosave on the device. Sensors and crop beds are session-only and disappear on reload; choose **Export project** to preserve the complete layout and calculated results in one ZIP. **Open project** previews and restores a shared package. See [portable research projects](docs/PROJECT-PACKAGES.md) for contents and compatibility.
 
 ## Workflow
 
@@ -21,13 +21,13 @@ Open the URL printed by Vite. Everything runs locally in the browser, including 
 4. **Row spacing** — centre-to-centre pitch, edge clearance, and linked cropping width, non-cultivated width and signed crop setback.
 5. **Full array** — rows, groups, aisles, facing azimuth and perimeter receiver buffer.
 6. **Site and weather** — Mapbox address/place search or manual coordinates, local standard UTC offset, date, automatic Open-Meteo weather, CSV/EPW/TMY3 upload, or clearly labeled synthetic example day.
-7. **Irradiance** — finite direct and diffuse occlusion, daily relative sunlight as a percentage of incoming GHI, and measured or estimated DLI.
+7. **Irradiance** — finite direct and diffuse occlusion, single-day, seasonal or annual relative sunlight as a percentage of incoming GHI, and measured or estimated DLI.
 8. **Field layout** — drag-and-drop sensors and resizable crop beds, installation metadata, controlled botanical identities, and receiver-based light statistics.
 9. **Methods and export** — one portable project ZIP with editable data, saved results, weather, SVG figures, CSV tables and an offline printable report; individual exports remain available.
 
-Full array defaults to Orthographic. Views use an orthographic Three.js camera. In the oblique view, drag to pan, right-drag to orbit, and scroll to zoom. Camera pose and zoom persist through map-layer changes and field-layout edits. Hover over receiver cells for coordinates, relative sunlight, DLI and daily irradiation. Plan/profile keep orientation fixed. Dimensions use metres; coordinates are east/north/up from array centre. Instrument orientation does not change the horizontal receiver grid used for map estimates.
+Full array defaults to Orthographic. Views use an orthographic Three.js camera. In the oblique view, drag to pan, right-drag to orbit, and scroll to zoom. Camera pose and zoom persist through map-layer changes and field-layout edits. Hover over receiver cells for coordinates, relative sunlight, DLI and selected-period irradiation. Plan/profile keep orientation fixed. Dimensions use metres; coordinates are east/north/up from array centre. Instrument orientation does not change the horizontal receiver grid used for map estimates.
 
-Relative sunlight is `100 × receiver daily irradiation / open-field daily GHI`. A value of 100% means full open-field sunlight, and 0% means none. Sunlight and DLI use blue for low values and yellow for high values. CSV exports contain `relative_sunlight_percent`; numerical JSON results retain legacy shade fields alongside sunlight for compatibility. Report figures include a ground grid at z = 0, with labeled spacing, and a ground line in profile.
+Relative sunlight is `100 × summed receiver irradiation / summed open-field GHI` over the selected period. Seasonal/annual DLI is the mean daily value; irradiation is the period total. A value of 100% means full open-field sunlight, and 0% means none. Sunlight and DLI use blue for low values and yellow for high values. CSV exports contain `relative_sunlight_percent`; numerical JSON results retain legacy shade fields alongside sunlight for compatibility. Report figures include a ground grid at z = 0, with labeled spacing, and a ground line in profile.
 
 Selecting racking or changing module/table geometry updates the axis height, row pitch and table gap to meet conservative clearance defaults (5 cm horizontal clearance and 25 cm below the module edge above the receiver plane). Larger existing clearances are retained. Direct height/spacing edits remain user-controlled and are checked before calculation. **Apply minimum clearances** repairs a previously saved layout. The application supports 1–20 tables per row; the field now displays this software limit. Axis height, row pitch and table-gap ranges accommodate the clearances needed by supported module/table dimensions.
 
@@ -35,7 +35,7 @@ Selecting racking or changing module/table geometry updates the axis height, row
 
 Sensors snap to receiver-cell centres in plan and orthographic views. Enter a receiver column/row to move a sensor, and edit installation height/depth separately. Up to nine dots are packed within each cell; denser groups use a readable count badge. Hover over the cell to see the instrument list. Packed dots are display offsets only; reported installation coordinates remain at the cell centre. Profile views retain installation height/depth.
 
-Crop plots start as one receiver cell and expand by whole columns and rows. Their edges follow the array orientation; plot statistics use exactly those cells. Grid indices are retained as the array, azimuth or resolution changes, and clamped to remain in bounds. Existing saved/imported field layouts are snapped when loaded. Coordinates and plot dimensions are derived from those grid selections. Light outlines mark the actual receiver boundaries in interactive and report views. This display geometry never enters the irradiance solver.
+Crop plots start as one receiver cell and expand by whole columns and rows. Their edges follow the array orientation; plot statistics use exactly those cells. Grid indices are retained as the array, azimuth or resolution changes, and clamped to remain in bounds. Explicitly imported field layouts are snapped when loaded. Coordinates and plot dimensions are derived from those grid selections. Light outlines mark the actual receiver boundaries in interactive and report views. This display geometry never enters the irradiance solver.
 
 ## Location search
 
@@ -45,7 +45,7 @@ Mapbox search needs the public token's URL restrictions to permit the page being
 
 ## Automatic site weather
 
-Open-Meteo is the default weather source. Enter latitude, longitude, local standard UTC offset and date; entering Site & weather (or a later step) downloads hourly GHI, DNI and DHI automatically. Calculate daily light also waits for the correct site weather. Coordinate/date changes invalidate downloaded data; failures stay visible and never substitute synthetic weather silently. Choose **Illustrative clear-sky day** explicitly to work offline with example data, or **Upload my weather** for measured/site-specific data.
+Open-Meteo is the default weather source. Enter latitude, longitude, local standard UTC offset and a single day, inclusive month range, or calendar year; entering Site & weather (or a later step) downloads hourly GHI, DNI and DHI automatically. Calculating light also waits for the correct site weather. Coordinate/date changes invalidate downloaded data; failures stay visible and never substitute synthetic weather silently. Choose **Illustrative clear-sky weather** explicitly to work offline with example data, or **Upload my weather** for measured/site-specific data.
 
 Historical dates use a pinned **ERA5 reanalysis** dataset. Recent dates and forecasts use Open-Meteo's forecast/recent model output, explicitly labeled in the study. Dates more than about two weeks ahead require a historical representative date or an uploaded weather file. Automatic weather is modeled regional data, not on-site measurements.
 
@@ -69,7 +69,7 @@ The CSV template contains placeholder nighttime zeros throughout and **must be p
 - Shared broadband/PAR visibility. Default estimated PAR: 0.50 broadband fraction, 4.57 µmol/J, Spitters daily diffuse partition. Measured total/diffuse PPFD are supported.
 - Study schema, software version, actual backend, weather SHA-256 and analysis identity are retained.
 
-**Development model.** CPU finite occlusion matched Radiance on 45,990 rays across nine cases. This comparison uses identical geometry, rays and shared source weights. It does not independently validate the Perez source distribution, solar position, integrated daily energy, GPU execution, reflections or field agreement. Opaque modules and square posts only; flat ground; no vegetation occlusion or reflected radiation. Browser WebGPU/CPU parity passed on five small rack designs, including persistent-cache reuse and device-loss fallback. Forty-four convergence sweeps cover two locations and two seasons. These bounded checks do not replace independent physical or field validation. Real-browser checks cover numeric entry, keyboard receiver inspection, stable rendering and mobile navigation. See [architecture](docs/ARCHITECTURE.md), [status](docs/STATUS.md), [comparison results](docs/radiance-validation.json), and the [original modeling brief](docs/modeling-brief.md).
+**Development model.** CPU finite occlusion matched Radiance on 45,990 rays across nine cases. This comparison uses identical geometry, rays and shared source weights. It does not independently validate the Perez source distribution, solar position, integrated daily energy, GPU execution, reflections or field agreement. Opaque monofacial modules or area-averaged bifacial cell-gap transmission; square posts and flat ground; no vegetation occlusion or reflected radiation. Browser WebGPU/CPU parity passed on five small rack designs, including persistent-cache reuse and device-loss fallback. Forty-four convergence sweeps cover two locations and two seasons. These bounded checks do not replace independent physical or field validation. Real-browser checks cover numeric entry, keyboard receiver inspection, stable rendering and mobile navigation. See [architecture](docs/ARCHITECTURE.md), [status](docs/STATUS.md), [comparison results](docs/radiance-validation.json), and the [original modeling brief](docs/modeling-brief.md).
 
 ## Verify
 
@@ -105,3 +105,9 @@ All 480 original files are preserved with hashes in `archive/manifest.json`; `.g
 - [Three.js](https://threejs.org/) and [three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh).
 
 Attribution for the Radiance-derived coefficients is in `THIRD_PARTY_NOTICES.md`.
+
+## Cell gaps and longer periods (v0.4.0)
+
+Select **Bifacial · transmitting cell gaps** in Module to enable cell columns/rows, separate internal X/Y gaps, an opaque perimeter and laminate broadband/PAR transmission. Fitted cell dimensions and linked module transmission update immediately. The irradiance model applies area-averaged attenuation once per intersected module; the module preview shows the cell layout. This does not resolve individual gap sunflecks or calculate bifacial electrical yield.
+
+Under Site & weather, select **Single day**, **Season · month range**, or **Calendar year**. Seasons include whole months and can cross New Year. Every day is simulated. Period maps use total irradiation, energy-weighted relative sunlight and mean daily DLI; project packages add daily/monthly summary CSVs. Cancellation retains completed days for resume while the page remains open. Complete weather coverage is required. Annual work can take substantially longer than daily work; the 20,000-receiver cap still applies. See [implementation and validation](docs/TRANSMISSION-AND-PERIODS.md).

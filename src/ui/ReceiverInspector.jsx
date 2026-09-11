@@ -1,3 +1,4 @@
+import { dliLabel } from '../domain/period.js';
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Field } from './Controls.jsx';
@@ -55,7 +56,7 @@ export default function ReceiverInspector({
         {value ? (
           <p>
             {value.sunlight.toFixed(1)}% relative sunlight; {value.dli.toFixed(2)}{' '}
-            {result.estimated ? 'estimated DLI' : 'DLI'} mol m⁻² d⁻¹.
+            {dliLabel(result)} mol m⁻² d⁻¹.
           </p>
         ) : (
           <p>Light has not been calculated.</p>

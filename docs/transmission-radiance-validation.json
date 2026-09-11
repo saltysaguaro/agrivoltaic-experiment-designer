@@ -1,0 +1,152 @@
+{
+  "createdAt": "2026-09-11T21:05:23.113Z",
+  "radiance": "RADIANCE 5.3 official release lastmod Mon Aug 28 12:47:29 MDT 2023 by klepley on klepley-39626s",
+  "scope": "Independent Radiance trans-material comparison for constant transmission through one/two modules and opaque support. Uniform unit-radiance environment, no ambient bounces. Interior rays only: does not validate fine cell patterns, angular glass optics, daily sky or field measurements.",
+  "cases": [
+    {
+      "tau": 0,
+      "layers": 1,
+      "rays": 4,
+      "expected": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "radiance": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "maxDifference": 0
+    },
+    {
+      "tau": 0,
+      "layers": 2,
+      "rays": 4,
+      "expected": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "radiance": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "maxDifference": 0
+    },
+    {
+      "tau": 0.2,
+      "layers": 1,
+      "rays": 4,
+      "expected": [
+        0.2,
+        0.2,
+        0,
+        1
+      ],
+      "radiance": [
+        0.2,
+        0.2,
+        0,
+        1
+      ],
+      "maxDifference": 0
+    },
+    {
+      "tau": 0.2,
+      "layers": 2,
+      "rays": 4,
+      "expected": [
+        0.04000000000000001,
+        0.04000000000000001,
+        0,
+        1
+      ],
+      "radiance": [
+        0.04,
+        0.04,
+        0,
+        1
+      ],
+      "maxDifference": 6.938893903907228e-18
+    },
+    {
+      "tau": 0.8,
+      "layers": 1,
+      "rays": 4,
+      "expected": [
+        0.8,
+        0.8,
+        0,
+        1
+      ],
+      "radiance": [
+        0.8,
+        0.8,
+        0,
+        1
+      ],
+      "maxDifference": 0
+    },
+    {
+      "tau": 0.8,
+      "layers": 2,
+      "rays": 4,
+      "expected": [
+        0.6400000000000001,
+        0.6400000000000001,
+        0,
+        1
+      ],
+      "radiance": [
+        0.64,
+        0.64,
+        0,
+        1
+      ],
+      "maxDifference": 1.1102230246251565e-16
+    },
+    {
+      "tau": 1,
+      "layers": 1,
+      "rays": 4,
+      "expected": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "radiance": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "maxDifference": 0
+    },
+    {
+      "tau": 1,
+      "layers": 2,
+      "rays": 4,
+      "expected": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "radiance": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "maxDifference": 0
+    }
+  ],
+  "passed": true
+}

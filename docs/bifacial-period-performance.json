@@ -1,0 +1,282 @@
+{
+  "recordedOn": "2026-09-11",
+  "version": "0.4.0",
+  "recordType": "Retained observations read from the browser benchmark DOM. This compact record contains the fields captured during the run, not the complete original report.",
+  "budgetSeconds": 120,
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 12,
+    "deviceMemoryGiB": 32,
+    "webgpu": {
+      "vendor": "apple",
+      "architecture": "metal-3",
+      "isFallbackAdapter": false,
+      "limits": {
+        "maxBufferSize": 4294967292,
+        "maxStorageBufferBindingSize": 4294967292,
+        "maxComputeWorkgroupsPerDimension": 65535
+      }
+    },
+    "initialVisibility": "visible"
+  },
+  "common": {
+    "weather": "Synthetic Tucson weather, latitude 32.22, longitude -110.97, UTC -7",
+    "month": "2024-06-01 to 2024-06-30",
+    "year": "2024-01-01 to 2024-12-31",
+    "intervalMinutes": 10,
+    "bifacial": true,
+    "cellGapX": 0.02,
+    "cellGapY": 0.01,
+    "gapTransmission": 0.9,
+    "gapParTransmission": 0.8,
+    "cache": "Actual production memory and IndexedDB cache; isolated origin cleared before each cold case",
+    "includes": "Worker compute, completed-day checkpoint and final result transfers",
+    "excludes": "Worker module imports, network weather download, post-run result validation, full app drawing, export"
+  },
+  "solves": [
+    {
+      "size": "typical",
+      "rack": "fixed",
+      "mode": "season",
+      "requestedBackend": "gpu",
+      "modules": 96,
+      "receivers": 735,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 4.11039999999851,
+        "completedDays": 30,
+        "timeout": false,
+        "cache": {
+          "attemptedWrites": 1,
+          "hits": 29,
+          "largestMatrixBytes": 848190,
+          "misses": 1,
+          "skippedLarge": 0
+        },
+        "resultValidation": "passed",
+        "backend": "WebGPU BVH"
+      },
+      "warm": {
+        "wallSeconds": 4.124800000000745,
+        "completedDays": 30
+      }
+    },
+    {
+      "size": "typical",
+      "rack": "fixed",
+      "mode": "year",
+      "requestedBackend": "gpu",
+      "modules": 96,
+      "receivers": 735,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 43.90680000000074,
+        "completedDays": 366,
+        "timeout": false,
+        "cache": {
+          "attemptedWrites": 1,
+          "hits": 365,
+          "largestMatrixBytes": 848190,
+          "misses": 1,
+          "skippedLarge": 0
+        },
+        "backend": "WebGPU BVH"
+      },
+      "warm": {
+        "wallSeconds": 56.09169999999926,
+        "completedDays": 366
+      }
+    },
+    {
+      "size": "typical",
+      "rack": "fixed",
+      "mode": "season",
+      "requestedBackend": "cpu",
+      "modules": 96,
+      "receivers": 735,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 1.417300000000745,
+        "completedDays": 30,
+        "timeout": false,
+        "agreementWithFirstGpu": {
+          "maxWhDifference": 0,
+          "maxDliDifference": 0,
+          "maxSunlightDifference": 0
+        },
+        "backend": "CPU MeshBVH"
+      }
+    },
+    {
+      "size": "typical",
+      "rack": "fixed",
+      "mode": "year",
+      "requestedBackend": "cpu",
+      "modules": 96,
+      "receivers": 735,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 12.85039999999851,
+        "completedDays": 366,
+        "timeout": false,
+        "agreementWithFirstGpu": {
+          "maxWhDifference": 5.168248513713479,
+          "maxDliDifference": 0.00010295643986779623,
+          "maxSunlightDifference": 0.0002711433512416761
+        },
+        "backend": "CPU MeshBVH"
+      }
+    },
+    {
+      "size": "medium",
+      "rack": "fixed",
+      "mode": "season",
+      "requestedBackend": "gpu",
+      "modules": 250,
+      "receivers": 5040,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 37.376,
+        "completedDays": 30,
+        "timeout": false,
+        "cache": {
+          "attemptedWrites": 30,
+          "hits": 0,
+          "largestMatrixBytes": 5816160,
+          "misses": 30,
+          "skippedLarge": 30
+        },
+        "resultValidation": "passed"
+      }
+    },
+    {
+      "size": "medium",
+      "rack": "fixed",
+      "mode": "year",
+      "requestedBackend": "gpu",
+      "modules": 250,
+      "receivers": 5040,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 120.00179999999702,
+        "completedDays": 171,
+        "timeout": true
+      }
+    },
+    {
+      "size": "large",
+      "rack": "fixed",
+      "mode": "season",
+      "requestedBackend": "gpu",
+      "modules": 2000,
+      "receivers": 19068,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 81.47469999999926,
+        "completedDays": 30,
+        "timeout": false,
+        "resultValidation": "passed"
+      }
+    },
+    {
+      "size": "large",
+      "rack": "fixed",
+      "mode": "year",
+      "requestedBackend": "gpu",
+      "modules": 2000,
+      "receivers": 19068,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 120.00239999999852,
+        "completedDays": 51,
+        "timeout": true
+      }
+    },
+    {
+      "size": "maximum",
+      "rack": "fixed",
+      "mode": "season",
+      "requestedBackend": "gpu",
+      "modules": 48000,
+      "receivers": 19152,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 114.29540000000225,
+        "completedDays": 30,
+        "timeout": false,
+        "cache": {
+          "attemptedWrites": 30,
+          "hits": 0,
+          "largestMatrixBytes": 22101408,
+          "misses": 30,
+          "skippedLarge": 30
+        },
+        "mainThreadHeartbeat": {
+          "intervalMs": 50,
+          "maxGapMs": 53.10000000149011,
+          "p95GapMs": 51.099999997764826,
+          "samples": 2285
+        },
+        "resultValidation": "passed"
+      }
+    },
+    {
+      "size": "tracker",
+      "rack": "single-axis",
+      "mode": "season",
+      "requestedBackend": "gpu",
+      "modules": 250,
+      "receivers": 1044,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 24.840300000000745,
+        "completedDays": 30,
+        "timeout": false,
+        "cache": {
+          "attemptedWrites": 33,
+          "hits": 813,
+          "largestMatrixBytes": 1204776,
+          "misses": 33,
+          "skippedLarge": 0
+        },
+        "mainThreadHeartbeat": {
+          "intervalMs": 50,
+          "maxGapMs": 51.69999999925494,
+          "p95GapMs": 51,
+          "samples": 496
+        },
+        "resultValidation": "passed"
+      }
+    },
+    {
+      "size": "tracker",
+      "rack": "single-axis",
+      "mode": "year",
+      "requestedBackend": "gpu",
+      "modules": 250,
+      "receivers": 1044,
+      "patches": 577,
+      "cold": {
+        "wallSeconds": 120.00180000000074,
+        "completedDays": 181,
+        "timeout": true
+      }
+    },
+    {
+      "size": "medium",
+      "rack": "fixed",
+      "mode": "season",
+      "requestedBackend": "gpu",
+      "modules": 250,
+      "receivers": 5040,
+      "patches": 2305,
+      "cold": {
+        "wallSeconds": 40.65640000000224,
+        "completedDays": 30,
+        "timeout": false,
+        "resultValidation": "passed"
+      }
+    }
+  ],
+  "completed": true
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><title>Transmission and period checks</title>
+  <style>
+    body {
+      max-width: 1000px;
+      margin: 32px auto;
+      font: 16px/1.5 system-ui;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+    button {
+      padding: 12px;
+    }
+  </style>
+  <h1>Transmission and period checks</h1>
+  <p>
+    Isolated synthetic validation. Does not read or write saved study layouts. CPU/GPU transmission
+    parity and a complete calendar-year run.
+  </p>
+  <button id="run">Run extension checks</button
+  ><button id="download" disabled>Download validation</button>
+  <p role="status" id="status">Ready</p>
+  <pre id="results"></pre>
+  <script type="module" src="./extensions.js"></script>
+</html>
