@@ -11,20 +11,19 @@ npm ci
 npm run dev
 ```
 
-Open the URL printed by Vite. Everything runs locally in the browser, including worker-based irradiance calculations; automatic weather downloads use the public Open-Meteo API. Study inputs autosave on the device; download JSON to keep a durable research record.
+Open the URL printed by Vite. Everything runs locally in the browser, including worker-based irradiance calculations; automatic weather downloads use the public Open-Meteo API. Study inputs autosave on the device; choose **Export project** to keep a durable research record, including calculated results, in one ZIP. **Open project** previews and restores a shared package. See [portable research projects](docs/PROJECT-PACKAGES.md) for contents and compatibility.
 
 ## Workflow
 
 1. **Module** — frame dimensions, rated power and intermodule gap.
 2. **Racking** — fixed tilt, single-axis tracking, dual-axis tracking, vertical bifacial or raised/pergola; axis height and support dimensions.
 3. **PV table and row** — orientation, modules across/along, tables per row and gaps.
-4. **Row pair** — centre-to-centre pitch, edge clearance, crop setbacks and maintenance space.
+4. **Row spacing** — centre-to-centre pitch, edge clearance, and linked cropping width, non-cultivated width and signed crop setback.
 5. **Full array** — rows, groups, aisles, facing azimuth and perimeter receiver buffer.
 6. **Site and weather** — Mapbox address/place search or manual coordinates, local standard UTC offset, date, automatic Open-Meteo weather, CSV/EPW/TMY3 upload, or clearly labeled synthetic example day.
 7. **Irradiance** — finite direct and diffuse occlusion, daily relative sunlight as a percentage of incoming GHI, and measured or estimated DLI.
-8. **Field sensors** — click-to-place instruments, editable coordinates/depth, treatment/replicate, installation metadata, and DLI-percentile placement.
-9. **Crop plots** — whole-cell crop plots aligned with the receiver grid and receiver-based mean/median/SD/range DLI and mean relative sunlight.
-10. **Methods and export** — SVG/3000-pixel PNG figures, data and methods CSV, study JSON, and a printable HTML methods package with plan, profile, orthographic, relative sunlight and DLI figures.
+8. **Field layout** — drag-and-drop sensors and resizable crop beds, installation metadata, controlled botanical identities, and receiver-based light statistics.
+9. **Methods and export** — one portable project ZIP with editable data, saved results, weather, SVG figures, CSV tables and an offline printable report; individual exports remain available.
 
 Full array defaults to Orthographic. Views use an orthographic Three.js camera. In the oblique view, drag to pan, right-drag to orbit, and scroll to zoom. Camera pose and zoom persist through map-layer changes and field-layout edits. Hover over receiver cells for coordinates, relative sunlight, DLI and daily irradiation. Plan/profile keep orientation fixed. Dimensions use metres; coordinates are east/north/up from array centre. Instrument orientation does not change the horizontal receiver grid used for map estimates.
 

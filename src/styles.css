@@ -1897,6 +1897,137 @@ progress {
 .field-map-overlay.read-only * {
   pointer-events: none;
 }
+.project-progress {
+  position: fixed;
+  z-index: 80;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 88px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #fff;
+  color: #294f40;
+  border: 1px solid #b8cbbd;
+  border-radius: 8px;
+  box-shadow: 0 5px 28px #203c3826;
+  max-width: calc(100vw - 24px);
+}
+.project-progress span {
+  min-width: 0;
+}
+.project-inline-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  background: #edf4ef;
+  border-radius: 6px;
+}
+.project-progress button {
+  margin-left: auto;
+}
+.snapshot-note {
+  font-size: 12px;
+  color: #536b5e;
+  margin: 0 0 12px;
+}
+.project-dialog {
+  width: min(660px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  color: #29463a;
+  border: 1px solid #a9bfad;
+  border-radius: 12px;
+  box-shadow: 0 16px 80px #16302d44;
+}
+.project-dialog::backdrop {
+  background: #152e2855;
+}
+.project-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.project-dialog header,
+.project-dialog footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 22px;
+  flex-shrink: 0;
+}
+.project-dialog header {
+  justify-content: space-between;
+  background: #eef4e8;
+  border-bottom: 1px solid #d7e1d0;
+}
+.project-dialog header h2 {
+  font-size: 21px;
+  margin: 0;
+}
+.project-dialog header button {
+  border: 0;
+  background: none;
+  font-size: 24px;
+}
+.project-preview-content {
+  padding: 8px 22px 16px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+.project-preview-content h3 {
+  margin-bottom: 5px;
+}
+.project-preview-content p,
+.project-import-notes {
+  font-size: 13px;
+  line-height: 1.55;
+}
+.project-preview-content dl {
+  display: grid;
+  grid-template-columns: 105px 1fr;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.project-preview-content dt {
+  font-weight: 600;
+}
+.project-preview-content dd {
+  margin: 0;
+}
+.project-import-notes {
+  padding-left: 20px;
+  color: #715831;
+}
+.project-dialog footer {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  border-top: 1px solid #d7e1d0;
+}
+@media (max-width: 600px) {
+  .project-dialog header,
+  .project-dialog footer {
+    padding: 12px;
+  }
+  .project-preview-content {
+    padding: 6px 12px 12px;
+  }
+  .project-preview-content dl {
+    grid-template-columns: 80px 1fr;
+    gap: 8px;
+  }
+  .project-dialog footer button {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  .project-progress {
+    top: 76px;
+    width: calc(100vw - 24px);
+  }
+}
 .map-editor-anchor {
   position: absolute;
   z-index: 20;

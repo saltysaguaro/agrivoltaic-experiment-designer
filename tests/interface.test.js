@@ -7,6 +7,9 @@ import { JSDOM } from 'jsdom';
 import { build } from 'esbuild';
 import { act } from 'react';
 import { defaultStudy } from '../src/domain/study.js';
+import { projectDocument, readProject } from '../src/project/package.js';
+import { sampleWeather } from '../src/irradiance/solar.js';
+import { weatherRecord } from '../src/irradiance/weather-record.js';
 import { calculateDay } from '../src/irradiance/engine.js';
 // Component integration test in a simulated DOM. Does not open/control a browser.
 test('first calculation succeeds without leaving Irradiance; controls preserve selected view and expose input help', async () => {
@@ -49,6 +52,14 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       this.terminated = true;
     }
     postMessage(data) {
+      if (data.type === 'import') {
+        readProject(data.bytes, data.name)
+          .then((value) => {
+            if (!this.terminated) this.onmessage?.({ data: { type: 'complete', value } });
+          })
+          .catch((error) => this.onmessage?.({ data: { type: 'error', message: error.message } }));
+        return;
+      }
       if (data.type === 'warmup') {
         queueMicrotask(() => !this.terminated && this.onmessage?.({ data: { type: 'ready' } }));
         return;
@@ -278,6 +289,56 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(document.querySelectorAll('.svg-fallback [data-callout]').length, 0);
     assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 8);
     assert.equal(calculations, 1);
+    // Import is previewed before changing storage and restores a matching result without downloading weather.
+    const incoming = JSON.parse(localStorage.getItem('aed-study-v1'));
+    incoming.metadata.title = 'Shared supplemental project';
+    incoming.weather = {
+      ...incoming.weather,
+      mode: 'automatic',
+      requestKey: 'retained-publication-snapshot',
+      ...(await weatherRecord(sampleWeather(incoming), 'retained fixture weather')),
+    };
+    const importedResult = await calculateDay(incoming);
+    const packed = await projectDocument(incoming, importedResult);
+    const bytes = new TextEncoder().encode(JSON.stringify(packed));
+    const input = document.querySelector('input[aria-label="Choose project file"]');
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: [
+        { name: 'project.json', size: bytes.length, arrayBuffer: async () => bytes.slice().buffer },
+      ],
+    });
+    const originalStored = localStorage.getItem('aed-study-v1');
+    async function chooseImport() {
+      await act(async () => {
+        input.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 40));
+      });
+      assert.ok(document.querySelector('.project-dialog[open]'));
+    }
+    await chooseImport();
+    assert.equal(localStorage.getItem('aed-study-v1'), originalStored);
+    await click(
+      [...document.querySelectorAll('.project-dialog button')].find(
+        (b) => b.textContent === 'Cancel',
+      ),
+    );
+    assert.equal(localStorage.getItem('aed-study-v1'), originalStored);
+    await chooseImport();
+    await click(
+      [...document.querySelectorAll('.project-dialog button')].find(
+        (b) => b.textContent === 'Open project',
+      ),
+    );
+    await act(async () => new Promise((r) => setTimeout(r, 700)));
+    assert.equal(
+      JSON.parse(localStorage.getItem('aed-study-v1')).metadata.title,
+      incoming.metadata.title,
+    );
+    assert.equal(localStorage.getItem('aed-weather-pinned'), 'true');
+    assert.equal(byText('Relative sunlight').disabled, false);
+    assert.match(document.body.textContent, /Using the imported weather snapshot/);
+    assert.equal(calculations, 1, 'Opening a package restores results without recalculation');
   } finally {
     await fs.rm(file, { force: true });
     console.error = originalError;
