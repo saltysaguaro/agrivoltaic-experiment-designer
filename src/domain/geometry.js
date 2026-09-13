@@ -50,7 +50,7 @@ export function getPose(s, sun = null, quantize = false) {
   }
   return { tilt, yaw, key: `${tilt.toFixed(4)}:${yaw.toFixed(4)}` };
 }
-export function buildGeometry(s, scope = 'array', pose = getPose(s)) {
+export function buildGeometry(s, scope = 'array', pose = getPose(s), { textures = true } = {}) {
   const d = dimensions(s),
     { u, v } = axes(s),
     up = new THREE.Vector3(0, 0, 1);
@@ -67,7 +67,9 @@ export function buildGeometry(s, scope = 'array', pose = getPose(s)) {
     tables = simple ? 1 : s.row.tables;
   const width = high * d.cross + (high - 1) * s.module.gap,
     tableLength = wide * d.along + (wide - 1) * s.module.gap,
-    length = tables * tableLength + (tables - 1) * s.row.tableGap;
+    rowLength = tables * tableLength + (tables - 1) * s.row.tableGap,
+    stagger = rowCount > 1 ? d.stagger : 0,
+    length = rowLength + stagger;
   const yaw = rad(pose.yaw),
     pu = u.clone().multiplyScalar(Math.cos(yaw)).addScaledVector(v, Math.sin(yaw)),
     pv = v.clone().multiplyScalar(Math.cos(yaw)).addScaledVector(u, -Math.sin(yaw));
@@ -83,7 +85,7 @@ export function buildGeometry(s, scope = 'array', pose = getPose(s)) {
     roughness: 0.45,
     side: THREE.DoubleSide,
   });
-  if (scope === 'module' && s.module.bifacial) {
+  if (textures && (scope === 'module' || s.racking.type === 'vertical') && s.module.bifacial) {
     const o = moduleOptics(s.module),
       w = 512,
       h = 1024,
@@ -132,9 +134,13 @@ export function buildGeometry(s, scope = 'array', pose = getPose(s)) {
   const span = rowOffsets.at(-1) || 0;
   for (let r = 0; r < rowCount; r++) {
     const cy = rowOffsets[r] - span / 2;
+    const rowShift = ((r % 2) - 0.5) * stagger;
+    const columnCenters = [];
     for (let t = 0; t < tables; t++) {
-      const cx = -length / 2 + tableLength / 2 + t * (tableLength + s.row.tableGap);
+      const cx = -rowLength / 2 + tableLength / 2 + t * (tableLength + s.row.tableGap) + rowShift;
       const center = localToWorld(s, cx, cy, scope === 'module' ? 0 : s.racking.height);
+      for (let i = 0; i < wide; i++)
+        columnCenters.push(cx - tableLength / 2 + d.along / 2 + i * (d.along + s.module.gap));
       for (let j = 0; j < high; j++)
         for (let i = 0; i < wide; i++) {
           const p = center
@@ -143,7 +149,7 @@ export function buildGeometry(s, scope = 'array', pose = getPose(s)) {
             .addScaledVector(cv, -width / 2 + d.cross / 2 + j * (d.cross + s.module.gap));
           box([d.along, d.cross, s.module.thickness], p, rotation, 'module');
         }
-      if (scope !== 'module') {
+      if (scope !== 'module' && s.racking.type !== 'vertical') {
         box(
           [tableLength, 0.1, 0.1],
           center.clone().addScaledVector(normal, -0.08),
@@ -156,10 +162,28 @@ export function buildGeometry(s, scope = 'array', pose = getPose(s)) {
         }
       }
     }
+    if (scope !== 'module' && s.racking.type === 'vertical') {
+      // A continuous fence: outer posts flank the modules, and neighboring
+      // columns (including table boundaries) share one upright in their gap.
+      const positions = [columnCenters[0] - d.along / 2 - s.racking.postSize / 2];
+      for (let i = 1; i < columnCenters.length; i++)
+        positions.push((columnCenters[i - 1] + columnCenters[i]) / 2);
+      positions.push(columnCenters.at(-1) + d.along / 2 + s.racking.postSize / 2);
+      const postHeight = s.racking.height + width / 2;
+      for (const x of positions)
+        box(
+          [s.racking.postSize, s.racking.postSize, postHeight],
+          localToWorld(s, x, cy, postHeight / 2),
+          null,
+          'post',
+        );
+    }
   }
   group.updateMatrixWorld(true);
   group.userData = {
     length,
+    rowLength,
+    rowShifts: rowOffsets.map((_, r) => ((r % 2) - 0.5) * stagger),
     width,
     span,
     rowOffsets: rowOffsets.map((x) => x - span / 2),

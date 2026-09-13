@@ -56,7 +56,8 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
     settings = landUseSettings(s);
   const p = (x, y, z = 0) => localToWorld(s, x, y, z);
   const cy = g.rowOffsets[0] || 0,
-    cy1 = g.rowOffsets[1];
+    cy1 = g.rowOffsets[1],
+    rowStart = (g.rowShifts?.[0] || 0) - (g.rowLength ?? g.length) / 2;
   const tilt = (getPose(s).tilt * Math.PI) / 180,
     h = scope === 'module' ? 0 : s.racking.height;
   const surface = (x, y, row = cy) => p(x, row + y * Math.cos(tilt), h + y * Math.sin(tilt));
@@ -141,7 +142,8 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
         surface(-g.length / 2, -g.width / 2),
         surface(-g.length / 2 + d.tableLength, -g.width / 2),
       );
-    else if (id === 'row.tables') dimension(surface(-g.length / 2, 0), surface(g.length / 2, 0));
+    else if (id === 'row.tables')
+      dimension(surface(rowStart, 0), surface(rowStart + (g.rowLength ?? g.length), 0));
     else if (id === 'row.tableGap')
       dimension(
         surface(-g.length / 2 + d.tableLength, 0),

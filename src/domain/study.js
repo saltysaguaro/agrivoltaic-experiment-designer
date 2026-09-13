@@ -3,7 +3,7 @@ import { moduleOptics } from './optics.js';
 import { analysisPeriod, periodKeys } from './period.js';
 import { normalizeCropIdentity } from './crop-catalog.js';
 import { validateWeatherRows } from '../irradiance/weather-validation.js';
-export const VERSION = '0.4.0';
+export const VERSION = '0.4.1';
 const num = (min, max) => z.number().finite().min(min).max(max),
   count = (min, max) => num(min, max).int();
 const text = z.string().max(500);
@@ -29,7 +29,7 @@ export const studySchema = z
       width: num(0.1, 3),
       thickness: num(0.005, 0.2),
       power: num(1, 1500),
-      gap: num(0, 0.5),
+      gap: z.number().finite().nonnegative(),
       bifacial: z.boolean().default(false),
       cellColumns: count(1, 24).default(6),
       cellRows: count(1, 48).default(12),
@@ -46,6 +46,7 @@ export const studySchema = z
       limit: num(0, 85),
       backtracking: z.boolean(),
       postSize: num(0.02, 0.5),
+      pergolaLayout: z.enum(['aligned', 'checkerboard']).default('aligned'),
     }),
     table: z.object({
       high: count(1, 5),
@@ -55,7 +56,8 @@ export const studySchema = z
     row: z.object({ tables: count(1, 20), tableGap: num(0.05, 30) }),
     rowPair: z.object({
       pitch: num(0.5, 120),
-      cropSetback: num(-30, 60),
+      // Derived from panel width, which grows with the uncapped module gap.
+      cropSetback: z.number().finite().max(60),
       croppingWidth: num(0, 120).default(0),
     }),
     array: z.object({
@@ -269,6 +271,7 @@ export function migrateStudy(data) {
 }
 export function analysisKey(s) {
   return JSON.stringify([
+    VERSION,
     s.module,
     s.racking,
     s.table,
@@ -289,7 +292,9 @@ export function dimensions(s) {
     cross = s.table.orientation === 'portrait' ? s.module.length : s.module.width;
   const width = s.table.high * cross + (s.table.high - 1) * s.module.gap,
     tableLength = s.table.wide * along + (s.table.wide - 1) * s.module.gap;
-  const length = s.row.tables * tableLength + (s.row.tables - 1) * s.row.tableGap;
+  const rowLength = s.row.tables * tableLength + (s.row.tables - 1) * s.row.tableGap;
+  const stagger = pergolaStagger(s, along);
+  const length = rowLength + (s.array.rows > 1 ? stagger : 0);
   const tilt =
     s.racking.type === 'vertical' ? 90 : s.racking.type === 'pergola' ? 0 : s.racking.tilt;
   const projected =
@@ -303,6 +308,8 @@ export function dimensions(s) {
     cross,
     width,
     tableLength,
+    rowLength,
+    stagger,
     length,
     projected,
     span,
@@ -321,6 +328,12 @@ export function dimensions(s) {
         ) -
       s.module.thickness / 2,
   };
+}
+// Alternate complete table rows by half the centre-to-centre module spacing.
+export function pergolaStagger(s, along) {
+  return s.racking.type === 'pergola' && s.racking.pergolaLayout === 'checkerboard'
+    ? (along + s.module.gap) / 2
+    : 0;
 }
 // One independent width defines a contiguous partition of the regular row pitch.
 // Stored dependent values are normalized on every import and application edit.
@@ -380,13 +393,14 @@ export function rackingMinimums(s) {
     tableGap: type === 'dual-axis' ? up(diameter - d.tableLength) : 0.05,
   };
 }
-export function selectRacking(study, type) {
+export function selectRacking(study, type, applyDefaults = true) {
   const s = structuredClone(study);
   s.racking.type = type;
+  if (applyDefaults && type === 'vertical') s.module.bifacial = true;
   const minimum = rackingMinimums(s);
-  s.racking.height = Math.max(s.racking.height, minimum.height);
-  s.rowPair.pitch = Math.max(s.rowPair.pitch, minimum.pitch);
-  s.row.tableGap = Math.max(s.row.tableGap, minimum.tableGap);
+  s.racking.height = Math.max(s.racking.height, Math.min(25, minimum.height));
+  s.rowPair.pitch = Math.max(s.rowPair.pitch, Math.min(120, minimum.pitch));
+  s.row.tableGap = Math.max(s.row.tableGap, Math.min(30, minimum.tableGap));
   return synchronizeCropSpacing(s);
 }
 // Later workflow steps can enlarge the assembly after its rack was selected.
@@ -405,7 +419,7 @@ export function updateStudyInput(study, section, key, value) {
     (section === 'racking' && ['type', 'tilt', 'limit'].includes(key)) ||
     (section === 'analysis' && key === 'receiverHeight')
   )
-    s = selectRacking(s, s.racking.type);
+    s = selectRacking(s, s.racking.type, section === 'racking' && key === 'type');
   return synchronizeCropSpacing(s);
 }
 export function validationMessage(issue) {

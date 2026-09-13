@@ -251,7 +251,6 @@ export default function Controls({
             </div>
             {field('module', 'gap', 'Default module gap', 'm', null, {
               min: 0,
-              max: 0.5,
               step: 0.005,
             })}
             <Field
@@ -344,6 +343,11 @@ export default function Controls({
               { value: 'vertical', label: 'Vertical bifacial' },
               { value: 'pergola', label: 'Raised / pergola' },
             ])}
+            {s.racking.type === 'pergola' &&
+              field('racking', 'pergolaLayout', 'Pergola layout', null, [
+                { value: 'aligned', label: 'Aligned table rows' },
+                { value: 'checkerboard', label: 'Checkerboard · staggered table rows' },
+              ])}
             <small>
               Rack, module and table changes increase clearances when needed. Larger custom
               clearances are retained.
@@ -416,7 +420,7 @@ export default function Controls({
               hint: `Suggested minimum for this rack: ${minimum.tableGap.toFixed(2)} m.`,
             })}
             <div className="info-box">
-              Assembly: {d.width.toFixed(2)} m across × {d.length.toFixed(2)} m along the row.
+              Assembly: {d.width.toFixed(2)} m across × {d.rowLength.toFixed(2)} m along the row.
             </div>
           </>
         )}

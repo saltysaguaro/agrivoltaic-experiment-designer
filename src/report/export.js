@@ -66,6 +66,16 @@ export function methodsRows(s, r) {
     ],
     ['Module gap', `${s.module.gap} m`],
     ['Racking', s.racking.type],
+    ...(s.racking.type === 'pergola'
+      ? [
+          [
+            'Pergola layout',
+            s.racking.pergolaLayout === 'checkerboard'
+              ? `Checkerboard; alternating table rows offset ${d.stagger} m along the row (half module-plus-gap spacing)`
+              : 'Aligned table rows',
+          ],
+        ]
+      : []),
     ['Axis / centre height · H', `${s.racking.height} m`],
     ['Support post width · p', `${s.racking.postSize} m`],
     [

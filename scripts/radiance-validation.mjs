@@ -28,6 +28,7 @@ const cases = [
   ['single-axis-afternoon', 'single-axis', 'array'],
   ['dual-axis', 'dual-axis', 'array'],
   ['pergola', 'pergola', 'array'],
+  ['pergola-checkerboard', 'pergola', 'array'],
 ];
 const results = [];
 try {
@@ -37,6 +38,11 @@ try {
     s.row.tables = 1;
     s.array.rows = 4;
     s.racking.type = type;
+    if (name === 'pergola-checkerboard') {
+      s.racking.pergolaLayout = 'checkerboard';
+      s.module.gap = 1.5;
+      s.row.tables = 2;
+    }
     const sun = new Vector3(0.3, name.includes('afternoon') ? 0.75 : -0.75, 0.55).normalize(),
       group = buildGeometry(s, scope, getPose(s, sun)),
       geometry = simulationGeometry(group);

@@ -1261,7 +1261,7 @@ function App() {
                         ((d.modules * s.module.power) / 1000).toFixed(1),
                         'kWp',
                       ],
-                      [Maximize, 'Row length', d.length.toFixed(2), 'm'],
+                      [Maximize, 'Row length', d.rowLength.toFixed(2), 'm'],
                     ]
             ).map(([Icon, label, value, unit]) => (
               <div className="stat" key={label}>

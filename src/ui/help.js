@@ -27,9 +27,11 @@ export const inputHelp = {
   'module.power':
     'The manufacturer’s rated electrical power for one module under standard test conditions. This is used for array capacity, not ground-light calculations.',
   'module.gap':
-    'The clear space between neighboring modules on the same table. Light can pass through these gaps.',
+    'The clear space between neighboring modules on the same table. Light can pass through these gaps. Enter any nonnegative distance in metres; there is no upper gap limit.',
+  'racking.pergolaLayout':
+    'Checkerboard shifts every other complete table row along the row by half the module-plus-gap spacing. Module centres line up with gap centres in neighboring rows. Supports move with their tables, and the array and sampling extents include the offset. Visible from the row-pair step onward.',
   'racking.type':
-    'How the modules are supported and move. Fixed racks stay tilted; single-axis trackers rotate around the row axis; dual-axis trackers also turn horizontally; vertical modules stand upright; pergolas are horizontal. Selecting a system expands the starting clearances when needed; you can fine-tune them in later steps.',
+    'How the modules are supported and move. Fixed racks stay tilted; single-axis trackers rotate around the row axis; dual-axis trackers also turn horizontally; vertical modules stand upright and default to bifacial construction; pergolas are horizontal. Selecting a system expands the starting clearances when needed; you can fine-tune them in later steps.',
   'racking.height':
     'Height above ground at the centre of the module assembly or tracker axis. This is not the height of the lowest edge.',
   'racking.tilt':

@@ -166,7 +166,7 @@ export async function calculateDay(
     const started = performance.now();
     currentPose = pose.key;
     if (currentGeometry) currentGeometry.dispose();
-    const group = buildGeometry(s, 'array', pose);
+    const group = buildGeometry(s, 'array', pose, { textures: false });
     currentGeometry = simulationGeometry(group);
     disposeGroup(group);
     try {
