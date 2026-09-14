@@ -1,6 +1,7 @@
 import { analysisPeriod, periodDates, isPeriod } from '../domain/period.js';
 import { weatherRecord } from './weather-record.js';
 import { validateWeatherRows } from './weather-validation.js';
+import { fetchWeatherText } from './weather-fetch.js';
 const HOUR = 3600000,
   DAY = 24 * HOUR;
 export const WEATHER_ATTRIBUTION =
@@ -99,22 +100,10 @@ export function normalizeWeatherResponse(data, request) {
   validateWeatherRows(rows, { totalMinutes: (request.end - request.start) / 60000 });
   return rows;
 }
-async function downloadDayWeather(
-  s,
-  { signal, fetchImpl = globalThis.fetch, now = new Date() } = {},
-) {
+async function downloadDayWeather(s, options = {}) {
+  const { now = new Date() } = options;
   const request = weatherRequest(s, now),
-    response = await fetchImpl(request.url, { signal });
-  if (!response.ok) {
-    let reason = '';
-    try {
-      reason = (await response.json()).reason || '';
-    } catch {}
-    throw Error(
-      `Weather download failed (${response.status}). ${reason || 'Retry or upload a weather file.'}`,
-    );
-  }
-  const raw = await response.text();
+    raw = await fetchWeatherText(request.url, options);
   let data;
   try {
     data = JSON.parse(raw);
@@ -143,7 +132,7 @@ async function downloadDayWeather(
 
 export async function downloadWeather(s, options = {}) {
   if (!isPeriod(s)) return downloadDayWeather(s, options);
-  const { signal, fetchImpl = globalThis.fetch, now = new Date(), onProgress = () => {} } = options;
+  const { now = new Date(), onProgress = () => {} } = options;
   const dates = periodDates(s),
     requests = dates.map((date) =>
       weatherRequest({ ...s, analysis: { ...s.analysis, period: 'day', date } }, now),
@@ -163,12 +152,10 @@ export async function downloadWeather(s, options = {}) {
     );
     request.url = url.href;
     onProgress(`Downloading weather: ${dates[i]} to ${dates[j - 1]} (${i}/${dates.length} days)`);
-    const response = await fetchImpl(request.url, { signal });
-    if (!response.ok)
-      throw Error(
-        `Weather download failed (${response.status}) for ${dates[i]} to ${dates[j - 1]}. Retry or upload complete period weather.`,
-      );
-    const raw = await response.text(),
+    const raw = await fetchWeatherText(request.url, {
+        ...options,
+        onProgress: (message) => onProgress(`${dates[i]} to ${dates[j - 1]}: ${message}`),
+      }),
       data = JSON.parse(raw),
       rows = normalizeWeatherResponse(data, request);
     metadata ??= data;

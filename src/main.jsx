@@ -330,15 +330,28 @@ function App() {
     const key = weatherRequestKey(snapshot);
     if (!force && hasWeather(snapshot) && snapshot.weather.requestKey === key)
       return snapshot.weather;
-    if (!force && weatherFlight.current?.key === key) return weatherFlight.current.promise;
+    if (
+      !force &&
+      weatherFlight.current?.key === key &&
+      !weatherFlight.current.controller.signal.aborted
+    )
+      return weatherFlight.current.promise;
     weatherFlight.current?.controller.abort();
     const controller = new AbortController();
     setWeatherStatus({ state: 'loading', message: 'Downloading weather for your site…' });
-    const timeout = setTimeout(() => controller.abort(), isPeriod(snapshot) ? 300000 : 30000);
     const flight = { key, controller };
+    weatherFlight.current = flight;
     flight.promise = downloadWeather(snapshot, {
       signal: controller.signal,
-      onProgress: (message) => setWeatherStatus({ state: 'loading', message }),
+      onProgress: (message) => {
+        if (
+          !controller.signal.aborted &&
+          weatherFlight.current === flight &&
+          weatherRequestKey(latest.current) === key &&
+          latest.current.weather.mode === 'automatic'
+        )
+          setWeatherStatus({ state: 'loading', message });
+      },
     })
       .then((weather) => {
         if (
@@ -357,20 +370,22 @@ function App() {
         return weather;
       })
       .catch((error) => {
-        if (weatherFlight.current === flight) {
-          const message =
+        if (
+          weatherFlight.current === flight &&
+          weatherRequestKey(latest.current) === key &&
+          latest.current.weather.mode === 'automatic'
+        ) {
+          setWeatherStatus(
             error.name === 'AbortError'
-              ? 'Weather request timed out or was cancelled. Retry the download.'
-              : error.message;
-          setWeatherStatus({ state: 'error', message });
+              ? { state: 'idle', message: '' }
+              : { state: 'error', message: error.message },
+          );
         }
         throw error;
       })
       .finally(() => {
-        clearTimeout(timeout);
         if (weatherFlight.current === flight) weatherFlight.current = null;
       });
-    weatherFlight.current = flight;
     return flight.promise;
   }
   function set(section, key, value) {

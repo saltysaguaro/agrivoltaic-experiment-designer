@@ -398,6 +398,37 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       document.querySelector('select[aria-label="Select field item"]').textContent,
       /OLD-BED/,
     );
+    // Cancelling a download by changing sources must not leave a timeout error
+    // or prevent a fresh request for the same site and date.
+    let weatherCalls = 0;
+    globalThis.fetch = (_url, { signal }) => {
+      weatherCalls++;
+      return new Promise((_, reject) =>
+        signal.addEventListener(
+          'abort',
+          () => reject(new DOMException('Cancelled', 'AbortError')),
+          {
+            once: true,
+          },
+        ),
+      );
+    };
+    await click(step('Site & weather'));
+    await click(byText('Refresh site weather'));
+    assert.equal(weatherCalls, 1);
+    assert.ok(byText('Downloading…').disabled);
+    const source = document.querySelector('[data-annotation="weather.mode"] select');
+    const chooseSource = async (value) =>
+      act(async () => {
+        source.value = value;
+        source.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+      });
+    await chooseSource('sample');
+    await chooseSource('automatic');
+    assert.equal(document.querySelector('.weather-error'), null);
+    await click(byText('Refresh site weather'));
+    assert.equal(weatherCalls, 2);
+    await chooseSource('sample');
   } finally {
     await fs.rm(file, { force: true });
     console.error = originalError;
