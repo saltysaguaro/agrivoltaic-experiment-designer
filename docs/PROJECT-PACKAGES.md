@@ -54,3 +54,9 @@ ZIP output uses STORE or DEFLATE as specified in [PKWARE APPNOTE](https://pkware
 ## Version 0.4.0 period studies
 
 Study schema 2 adds bifacial cell geometry/transmission and day/season/year selection; schema-1 designs migrate with opaque modules and single-day defaults. Package format remains version 1. Period packages retain all dated weather intervals and original downloaded/imported source snapshots, total receiver irradiation, mean daily DLI, energy-weighted relative sunlight, and `tables/daily.csv` / `tables/monthly.csv` area summaries. They do not retain every receiver on every day. Reports, figures and filenames identify the inclusive date range. Result import checks period completeness, date order and consistency of daily/monthly totals. Old calculated results whose analysis identity changes during migration are omitted as stale while their design remains editable.
+
+## Agrivoltaic and control fields
+
+Study schema 2 now includes an additive, version-1 `controlField` containing an initialization flag, physical sensors and crop beds. Older studies migrate to an uninitialized empty control. Explicit project exports retain both layouts; browser autosave excludes both. The control shares the agrivoltaic receiver footprint and local orientation, without PV infrastructure, and derives uniform full-sun DLI from the matching result's `openDli`. Period DLI remains a daily mean. The same weather and measured/estimated PAR provenance applies.
+
+Reports contain separate tables and a plan figure for Control. Initialized controls also have `figures/control-layout.svg`; `tables/data.csv` adds a `field` column (`agrivoltaic` or `control`) for receiver, sensor and plot rows. The original agrivoltaic result remains the sole saved solver result; control light is derived when reopening. Each field uses its own local coordinate origin, with no implied surveyed offset between the two fields.

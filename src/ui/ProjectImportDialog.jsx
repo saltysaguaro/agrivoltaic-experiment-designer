@@ -45,9 +45,15 @@ export default function ProjectImportDialog({
           <dd>
             {dimensions(s).modules.toLocaleString()} modules · {s.array.rows} PV rows
           </dd>
-          <dt>Research plan</dt>
+          <dt>Agrivoltaic research plan</dt>
           <dd>
             {s.experimentSensors.length} sensors · {s.crops.length} crop beds
+          </dd>
+          <dt>Control research plan</dt>
+          <dd>
+            {s.controlField.initialized
+              ? `${s.controlField.experimentSensors.length} sensors · ${s.controlField.crops.length} crop beds · same-size field without PV`
+              : 'Not initialized'}
           </dd>
           <dt>Site / date</dt>
           <dd>

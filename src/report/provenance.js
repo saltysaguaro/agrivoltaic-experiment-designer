@@ -3,7 +3,7 @@ import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import { cropCatalogVersion, cropCatalogSource } from '../domain/crop-catalog.js';
 import { landUseSettings, landUseDefinition } from '../domain/land-use.js';
 import { VERSION, cropSpacing, dimensions } from '../domain/study.js';
-export function provenanceRecord(s, r) {
+export function provenanceRecord(s, r, { control = false } = {}) {
   return {
     crop_catalog: `${cropCatalogVersion}; ${cropCatalogSource}; species-level identities with taxon URLs per crop bed`,
     software: `Agrivoltaic Experiment Designer ${r?.version || VERSION}`,
@@ -51,5 +51,20 @@ export function provenanceRecord(s, r) {
     validation:
       'CPU occlusion checked against Radiance; independent daily-energy and field validation pending',
     warnings: r?.warnings || [],
+    field: control ? 'control' : 'agrivoltaic',
+    controlField: s.controlField?.initialized
+      ? 'Independent matching receiver footprint; no PV. Uniform full-sun reference from the same site, weather, period and PAR inputs. Field coordinates are local to each field centre.'
+      : 'Not initialized',
+    ...(control
+      ? {
+          racking: 'None (control field)',
+          landUse: 'No PV land reservations; footprint matches the agrivoltaic receiver grid.',
+          landUseDefinition: 'Independent full-sun control field, without PV infrastructure.',
+          moduleTransmission: 'Not applicable; no modules',
+          assumptions:
+            'Uniform unobstructed horizontal light; same site, weather, dates and PAR inputs as Agrivoltaic. Flat ground; no plant shading or reflection. Not measured control-field observations.',
+          model: 'Open-field source integration; no occlusion calculation needed.',
+        }
+      : {}),
   };
 }

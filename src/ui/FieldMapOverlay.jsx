@@ -4,6 +4,7 @@ export default function FieldMapOverlay({
   projection,
   interactive = true,
   selection,
+  selections = [],
   onStart,
   onMove,
   onEnd,
@@ -11,7 +12,10 @@ export default function FieldMapOverlay({
   placing,
 }) {
   if (!projection) return null;
-  const selected = (kind, id) => selection?.kind === kind && selection.id === id;
+  const selected = (kind, id) =>
+    selections.length
+      ? selections.some((v) => v.kind === kind && v.id === id)
+      : selection?.kind === kind && selection.id === id;
   const events = (target, corner) =>
     !interactive
       ? {}

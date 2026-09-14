@@ -7,7 +7,15 @@ import { cropIdentity, cropById } from '../domain/crop-catalog.js';
 import { receiverGridSpec } from '../domain/geometry.js';
 import { plotStats } from '../experiment/layout.js';
 import { plotZoneOverlap } from '../domain/land-use.js';
-export default function FieldEditor({ study, selection, result, onSave, onClose, onDelete }) {
+export default function FieldEditor({
+  study,
+  selection,
+  result,
+  control = false,
+  onSave,
+  onClose,
+  onDelete,
+}) {
   const sensor = selection.kind === 'sensor';
   const items = sensor ? study.experimentSensors : study.crops;
   const item = items.find((v) => v.id === selection.id);
@@ -25,7 +33,7 @@ export default function FieldEditor({ study, selection, result, onSave, onClose,
   const g = receiverGridSpec(study),
     update = (key, v) => setDraft((d) => ({ ...d, [key]: v }));
   const stats = sensor ? null : plotStats(result, item),
-    overlap = sensor ? 0 : plotZoneOverlap(study, item);
+    overlap = sensor || control ? 0 : plotZoneOverlap(study, item);
   function save(e) {
     e.preventDefault();
     if (form.current.querySelector('[aria-invalid="true"]')) {

@@ -20,6 +20,57 @@ export const sensorTypes = [
   'Leaf temperature',
   'Custom',
 ];
+const sensorsSchema = z
+  .array(
+    z.object({
+      id: text,
+      type: z.enum(sensorTypes),
+      grid: z.object({ column: count(0, 20000), row: count(0, 20000) }).optional(),
+      x: num(-10000, 10000),
+      y: num(-10000, 10000),
+      z: num(-5, 20),
+      treatment: text,
+      replicate: text,
+      model: text,
+      logger: text,
+      channel: text.default(''),
+      azimuth: num(0, 360).default(0),
+      tilt: num(0, 180).default(0),
+      notes: text,
+    }),
+  )
+  .max(500);
+const cropsSchema = z
+  .array(
+    z.object({
+      id: text,
+      crop: text,
+      cropId: text.default(''),
+      botanicalName: text.default(''),
+      scientificName: text.default(''),
+      cropFamily: text.default(''),
+      taxonKey: count(0, Number.MAX_SAFE_INTEGER).default(0),
+      taxonUrl: text.default(''),
+      cropCatalogVersion: text.default(''),
+      cultivar: text.default(''),
+      notes: text.default(''),
+      grid: z
+        .object({
+          column: count(0, 20000),
+          row: count(0, 20000),
+          columns: count(1, 20000),
+          rows: count(1, 20000),
+        })
+        .optional(),
+      treatment: text,
+      replicate: text,
+      x: num(-10000, 10000),
+      y: num(-10000, 10000),
+      width: num(0.1, 100),
+      length: num(0.1, 100),
+    }),
+  )
+  .max(200);
 export const studySchema = z
   .object({
     schemaVersion: z.literal(2),
@@ -169,59 +220,24 @@ export const studySchema = z
         .max(366)
         .default([]),
     }),
-    experimentSensors: z
-      .array(
-        z.object({
-          id: text,
-          type: z.enum(sensorTypes),
-          grid: z.object({ column: count(0, 20000), row: count(0, 20000) }).optional(),
-          x: num(-10000, 10000),
-          y: num(-10000, 10000),
-          z: num(-5, 20),
-          treatment: text,
-          replicate: text,
-          model: text,
-          logger: text,
-          channel: text.default(''),
-          azimuth: num(0, 360).default(0),
-          tilt: num(0, 180).default(0),
-          notes: text,
-        }),
-      )
-      .max(500),
-    crops: z
-      .array(
-        z.object({
-          id: text,
-          crop: text,
-          cropId: text.default(''),
-          botanicalName: text.default(''),
-          scientificName: text.default(''),
-          cropFamily: text.default(''),
-          taxonKey: count(0, Number.MAX_SAFE_INTEGER).default(0),
-          taxonUrl: text.default(''),
-          cropCatalogVersion: text.default(''),
-          cultivar: text.default(''),
-          notes: text.default(''),
-          grid: z
-            .object({
-              column: count(0, 20000),
-              row: count(0, 20000),
-              columns: count(1, 20000),
-              rows: count(1, 20000),
-            })
-            .optional(),
-          treatment: text,
-          replicate: text,
-          x: num(-10000, 10000),
-          y: num(-10000, 10000),
-          width: num(0.1, 100),
-          length: num(0.1, 100),
-        }),
-      )
-      .max(200),
+    experimentSensors: sensorsSchema,
+    crops: cropsSchema,
+    controlField: z
+      .object({
+        version: z.literal(1).default(1),
+        initialized: z.boolean().default(false),
+        experimentSensors: sensorsSchema.default([]),
+        crops: cropsSchema.default([]),
+      })
+      .default({}),
   })
-  .transform((s) => synchronizeCropSpacing({ ...s, crops: s.crops.map(normalizeCropIdentity) }));
+  .transform((s) =>
+    synchronizeCropSpacing({
+      ...s,
+      crops: s.crops.map(normalizeCropIdentity),
+      controlField: { ...s.controlField, crops: s.controlField.crops.map(normalizeCropIdentity) },
+    }),
+  );
 export const defaultStudy = () =>
   studySchema.parse({
     schemaVersion: 2,

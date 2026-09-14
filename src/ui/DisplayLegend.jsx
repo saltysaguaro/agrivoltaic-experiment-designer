@@ -1,6 +1,14 @@
 import React from 'react';
 import { zoneStyles } from '../domain/land-use.js';
-export default function DisplayLegend({ scope, layers, setLayer, opacity, setOpacity }) {
+export default function DisplayLegend({
+  scope,
+  layers,
+  setLayer,
+  opacity,
+  setOpacity,
+  control = false,
+  fieldLayout = true,
+}) {
   const array = ['array', 'environment', 'irradiance', 'sensors', 'crops', 'report'].includes(
     scope,
   );
@@ -23,21 +31,28 @@ export default function DisplayLegend({ scope, layers, setLayer, opacity, setOpa
   return (
     <div className="display-legend" aria-label="Drawing layers">
       <div className="layer-buttons">
-        {items.map(([key, label, style]) => (
-          <button
-            key={key}
-            type="button"
-            aria-pressed={layers[key]}
-            onClick={() => setLayer(key, !layers[key])}
-            className={'layer-toggle ' + (layers[key] ? '' : 'hidden-layer')}
-          >
-            <i className={style} />
-            {label}
-          </button>
-        ))}
+        {items
+          .filter(
+            ([key]) =>
+              (!control ||
+                !['modules', 'supports', 'underPanel', 'cropping', 'perimeter'].includes(key)) &&
+              (fieldLayout || !['sensors', 'plots'].includes(key)),
+          )
+          .map(([key, label, style]) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={layers[key]}
+              onClick={() => setLayer(key, !layers[key])}
+              className={'layer-toggle ' + (layers[key] ? '' : 'hidden-layer')}
+            >
+              <i className={style} />
+              {label}
+            </button>
+          ))}
         <small>Click a legend item to show or hide it.</small>
       </div>
-      {array && (
+      {array && !control && (
         <label className="panel-opacity">
           Panel opacity <output>{Math.round(opacity * 100)}%</output>
           <input

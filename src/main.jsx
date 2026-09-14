@@ -1,9 +1,18 @@
+import {
+  fieldStudy,
+  storeField,
+  initializeControl,
+  controlResult,
+  controlLayers,
+  allFieldIds,
+  uniqueFieldId,
+} from './experiment/control-field.js';
 import { isPeriod, periodLabel, periodKeys, hasWeather, dliLabel } from './domain/period.js';
 import { projectJob } from './project/client.js';
 import { withoutFieldLayout } from './project/browser-study.js';
 import { MAX_ARCHIVE } from './project/zip.js';
 import ProjectImportDialog from './ui/ProjectImportDialog.jsx';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   ArrowRight,
@@ -51,7 +60,12 @@ import Scene from './ui/Scene.jsx';
 import FieldTools from './ui/FieldTools.jsx';
 import FieldEditor from './ui/FieldEditor.jsx';
 import { cropIdentity, cropById, unresolvedCrops } from './domain/crop-catalog.js';
-import { layoutSnapshot, replaceFieldItem } from './experiment/field-editing.js';
+import {
+  layoutSnapshot,
+  replaceFieldItem,
+  duplicateFieldGroup,
+  moveFieldGroup,
+} from './experiment/field-editing.js';
 import DisplayLegend from './ui/DisplayLegend.jsx';
 import { designLayers, irradianceLayers } from './ui/display-layers.js';
 import { steps, defaults, normalizeNavigation } from './ui/workflow.js';
@@ -114,6 +128,7 @@ function App() {
     [fieldTool, setFieldTool] = useState(null),
     [newCropId, setNewCropId] = useState('lettuce'),
     [selection, setSelection] = useState(null),
+    [selections, setSelections] = useState([]),
     [editorOpen, setEditorOpen] = useState(false),
     [undoCount, setUndoCount] = useState(0),
     [weatherStatus, setWeatherStatus] = useState({ state: 'idle', message: '' }),
@@ -129,20 +144,65 @@ function App() {
       return parsed.data;
     });
   }
+  const activeStudy = fieldStudy(s, step === 8);
+  const fieldLatest = useRef(activeStudy);
+  fieldLatest.current = activeStudy;
+  function setFieldStudy(update) {
+    setStudy((current) => {
+      const active = fieldStudy(current, step === 8);
+      const edited = typeof update === 'function' ? update(active) : update;
+      return storeField(current, edited, step === 8);
+    });
+  }
+  function duplicateSelection(delta) {
+    try {
+      const copied = duplicateFieldGroup(
+        fieldLatest.current,
+        selections,
+        delta,
+        allFieldIds(latest.current),
+      );
+      rememberFieldLayout();
+      setFieldStudy(copied.study);
+      setSelections(copied.selections);
+      setSelection(copied.selections[0] || null);
+      setEditorOpen(false);
+      setNotice(
+        `Duplicated ${copied.selections.length} items with unique IDs; offset ${copied.offset.column} columns / ${copied.offset.row} rows. The shared offset is limited by field boundaries.`,
+      );
+    } catch (error) {
+      setNotice(error.message);
+    }
+  }
   function rememberFieldLayout() {
-    fieldHistory.current = [...fieldHistory.current.slice(-39), layoutSnapshot(latest.current)];
+    fieldHistory.current = [
+      ...fieldHistory.current.slice(-39),
+      layoutSnapshot(fieldLatest.current),
+    ];
     setUndoCount(fieldHistory.current.length);
   }
   function undoFieldEdit() {
     const previous = fieldHistory.current.pop();
     if (!previous) return;
-    setStudy((current) => ({ ...current, ...previous }));
+    setFieldStudy((current) => ({ ...current, ...previous }));
     setUndoCount(fieldHistory.current.length);
     setSelection(null);
+    setSelections([]);
     setEditorOpen(false);
     setNotice('Field edit undone.');
   }
-  function selectFieldItem(target, open = true) {
+  function selectFieldItem(target, open = true, additive = false) {
+    if (additive && target) {
+      const next = selections.some((v) => v.kind === target.kind && v.id === target.id)
+        ? selections.filter((v) => v.kind !== target.kind || v.id !== target.id)
+        : [...selections, target];
+      setSelections(next);
+      setSelection(next.at(-1) || null);
+      setEditorOpen(false);
+      return;
+    }
+    if (open || !target || !selections.some((v) => v.kind === target.kind && v.id === target.id))
+      setSelections(target ? [target] : []);
     setSelection(target);
     setEditorOpen(Boolean(target && open));
     setInspection(null);
@@ -156,27 +216,53 @@ function App() {
   }
   function editFieldItem(target, item) {
     const key = target.kind === 'sensor' ? 'experimentSensors' : 'crops';
-    const current = latest.current[key].find((v) => v.id === target.id);
+    const current = fieldLatest.current[key].find((v) => v.id === target.id);
     if (!current) return;
     if (JSON.stringify(current) === JSON.stringify(item)) {
       setEditorOpen(false);
       return;
     }
-    const validated = studySchema.safeParse(replaceFieldItem(latest.current, target, item));
+    const grouped =
+      selections.length > 1 &&
+      selections.some((v) => v.kind === target.kind && v.id === target.id) &&
+      item.id === current.id &&
+      item.grid &&
+      current.grid &&
+      item.grid.columns === current.grid.columns &&
+      item.grid.rows === current.grid.rows &&
+      (item.grid.column !== current.grid.column || item.grid.row !== current.grid.row);
+    const edited = grouped
+      ? moveFieldGroup(fieldLatest.current, selections, {
+          column: item.grid.column - current.grid.column,
+          row: item.grid.row - current.grid.row,
+        })
+      : replaceFieldItem(fieldLatest.current, target, item);
+    if (item.id !== current.id && allFieldIds(latest.current).has(item.id)) {
+      setNotice('Choose a unique field item ID.');
+      return;
+    }
+    const validated = studySchema.safeParse(edited);
     if (!validated.success) {
       setNotice(validated.error.issues.map(validationMessage).join(' '));
       return;
     }
     rememberFieldLayout();
-    setStudy((study) => replaceFieldItem(study, target, item));
+    setFieldStudy(edited);
     setSelection({ ...target, id: item.id });
+    setSelections((items) =>
+      items.map((v) => (v.kind === target.kind && v.id === target.id ? { ...v, id: item.id } : v)),
+    );
     setEditorOpen(false);
   }
   function removeFieldItem(target) {
     const key = target.kind === 'sensor' ? 'experimentSensors' : 'crops';
     rememberFieldLayout();
-    setStudy((current) => ({ ...current, [key]: current[key].filter((v) => v.id !== target.id) }));
+    setFieldStudy((current) => ({
+      ...current,
+      [key]: current[key].filter((v) => v.id !== target.id),
+    }));
     setSelection(null);
+    setSelections([]);
     setEditorOpen(false);
   }
   function chooseFieldTool(tool) {
@@ -185,6 +271,7 @@ function App() {
     setPlacing(Boolean(tool));
     setEditorOpen(false);
     setSelection(null);
+    setSelections([]);
     if (tool) {
       const layer = tool === 'sensor' ? 'sensors' : 'plots';
       setLayerPrefs((current) => ({
@@ -242,12 +329,21 @@ function App() {
     validResult = result?.key === analysisKey(s) ? result : null,
     issues = designIssues(s),
     scope = steps[step][2];
-  const fieldWorkspace = step === 7 || (step === 6 && Boolean(validResult));
+  const fieldWorkspace = step === 7 || step === 8;
+  const activeResult = useMemo(
+    () => (step === 8 ? controlResult(validResult) : validResult),
+    [step, validResult],
+  );
   const compactSidebar = fieldWorkspace && !sidebarExpanded;
-  const unidentifiedCrops = unresolvedCrops(s);
-  const layerMode = fieldWorkspace ? 'analysis' : 'design';
+  const unidentifiedCrops = [...unresolvedCrops(s), ...unresolvedCrops(fieldStudy(s, true))];
+  const layerMode = step >= 6 && step <= 8 ? 'analysis' : 'design';
   const opacityMode = step === 6 || (validResult && step >= 6) ? 'analysis' : 'design';
-  const layers = layerPrefs[layerMode],
+  const layers =
+      step === 8
+        ? controlLayers(layerPrefs[layerMode])
+        : step === 6
+          ? { ...layerPrefs[layerMode], sensors: false, plots: false }
+          : layerPrefs[layerMode],
     panelOpacity = opacityPrefs[opacityMode];
   useEffect(() => {
     if (validResult) {
@@ -255,12 +351,15 @@ function App() {
       setEditorOpen(false);
       setLayerPrefs((current) => ({
         ...current,
-        analysis: { ...irradianceLayers, ...(step === 7 ? { sensors: true, plots: true } : {}) },
+        analysis: {
+          ...irradianceLayers,
+          ...(fieldWorkspace ? { sensors: true, plots: true } : {}),
+        },
       }));
     }
   }, [validResult]);
   useEffect(() => {
-    if (step === 7)
+    if (fieldWorkspace)
       setLayerPrefs((current) => ({
         ...current,
         analysis: { ...current.analysis, sensors: true, plots: true },
@@ -282,7 +381,7 @@ function App() {
   }, [s, recovery]);
   useEffect(() => {
     try {
-      sessionStorage.setItem('aed-navigation', JSON.stringify({ version: 2, step, view }));
+      sessionStorage.setItem('aed-navigation', JSON.stringify({ version: 3, step, view }));
     } catch {}
   }, [step, view]);
   useEffect(() => {
@@ -395,7 +494,11 @@ function App() {
       (section === 'weather' && key === 'mode')
     )
       setWeatherPinned(false);
-    if (section === 'experimentSensors' || section === 'crops') rememberFieldLayout();
+    if (section === 'experimentSensors' || section === 'crops') {
+      rememberFieldLayout();
+      setFieldStudy((current) => updateStudyInput(current, section, key, value));
+      return;
+    }
     setStudy((current) => {
       const next = updateStudyInput(current, section, key, value);
       if (section === 'site' && key === 'utcOffset') next.site.utcOffsetApproximate = false;
@@ -472,16 +575,27 @@ function App() {
     );
     return () => clearInterval(timer);
   }, [busy]);
-  function preview() {
+  function preview(standard = false) {
     setStudy((current) => ({
       ...current,
-      analysis: { ...current.analysis, patches: 145, resolution: 3, interval: 15 },
+      analysis: {
+        ...current.analysis,
+        patches: standard ? 577 : 145,
+        resolution: standard ? 1 : 3,
+        interval: standard ? 10 : 15,
+      },
     }));
     setNotice(
-      'Preview settings applied: 145 patches, 3 m cells, 15-minute direct steps. Recheck cell-based layouts, then calculate.',
+      standard
+        ? 'Standard settings applied: 577 patches, 1 m cells, 10-minute steps. Recalculate light.'
+        : 'Preview settings applied: 145 patches, 3 m cells, 15-minute direct steps. Receiver spacing controls ground detail; sky patches control angular detail. Recalculate light.',
     );
   }
   function go(n) {
+    if (n === 8) setStudy((current) => initializeControl(current));
+    fieldHistory.current = [];
+    setUndoCount(0);
+    setSelections([]);
     mainRef.current?.scrollTo({ top: 0 });
     setStep(n);
     setInspection(null);
@@ -658,23 +772,18 @@ function App() {
     );
     setPendingProject(null);
   }
-  function newId(prefix, items) {
-    let i = 1;
-    while (items.some((v) => v.id === `${prefix}-${String(i).padStart(2, '0')}`)) i++;
-    return `${prefix}-${String(i).padStart(2, '0')}`;
-  }
   function addSensor(point = { x: 0, y: 0 }) {
-    if (latest.current.experimentSensors.length >= 500) {
+    if (fieldLatest.current.experimentSensors.length >= 500) {
       setNotice('The study supports up to 500 sensors.');
       return;
     }
-    const id = newId('S', latest.current.experimentSensors);
-    if (!cellAt(s, point, undefined, false)) {
+    const id = uniqueFieldId(step === 8 ? 'C-S' : 'S', allFieldIds(latest.current));
+    if (!cellAt(activeStudy, point, undefined, false)) {
       setNotice('Choose a receiver cell inside the array grid.');
       return;
     }
     rememberFieldLayout();
-    setStudy((current) => ({
+    setFieldStudy((current) => ({
       ...current,
       experimentSensors: [
         ...current.experimentSensors,
@@ -685,7 +794,7 @@ function App() {
           y: point.y,
           grid: cellAt(current, point),
           z: current.analysis.receiverHeight,
-          treatment: 'Interior',
+          treatment: step === 8 ? 'Control' : 'Interior',
           replicate: '1',
           model: '',
           logger: '',
@@ -701,7 +810,7 @@ function App() {
     selectFieldItem({ kind: 'sensor', id });
   }
   function addPlot(point = { x: 0, y: 0 }, cropId = newCropId) {
-    if (latest.current.crops.length >= 200) {
+    if (fieldLatest.current.crops.length >= 200) {
       setNotice('The study supports up to 200 crop beds.');
       return;
     }
@@ -709,13 +818,13 @@ function App() {
       setNotice('Select a crop from the catalog before placing a bed.');
       return;
     }
-    const id = newId('P', latest.current.crops);
-    if (!cellAt(s, point, undefined, false)) {
+    const id = uniqueFieldId(step === 8 ? 'C-P' : 'P', allFieldIds(latest.current));
+    if (!cellAt(activeStudy, point, undefined, false)) {
       setNotice('Choose a receiver cell inside the array grid.');
       return;
     }
     rememberFieldLayout();
-    setStudy((current) => ({
+    setFieldStudy((current) => ({
       ...current,
       crops: [
         ...current.crops,
@@ -724,7 +833,7 @@ function App() {
           ...cropIdentity(cropId),
           cultivar: '',
           notes: '',
-          treatment: 'Interrow',
+          treatment: step === 8 ? 'Control' : 'Interrow',
           replicate: '1',
           x: point.x,
           y: point.y,
@@ -763,7 +872,8 @@ function App() {
   }
   async function exportFigure(format) {
     try {
-      const svg = figureSvg(s, validResult, view, metric, scope, grid, {
+      const svg = figureSvg(activeStudy, activeResult, view, metric, scope, grid, {
+        control: step === 8,
         layers,
         panelOpacity,
         callouts: !fieldWorkspace && scope !== 'report',
@@ -786,7 +896,7 @@ function App() {
       setNotice('Methods report export failed: ' + error.message);
     }
   }
-  const mean = validResult?.meanDli;
+  const mean = activeResult?.meanDli;
   return (
     <div className="app">
       <header className="app-header">
@@ -894,7 +1004,18 @@ function App() {
                 >
                   {compactSidebar &&
                     React.createElement(
-                      [PanelTop, Box, Layers, ArrowLeft, Grid2X2, MapPin, Sun, Sprout, FileText][i],
+                      [
+                        PanelTop,
+                        Box,
+                        Layers,
+                        ArrowLeft,
+                        Grid2X2,
+                        MapPin,
+                        Sun,
+                        Sprout,
+                        Sprout,
+                        FileText,
+                      ][i],
                       { size: 20, className: 'rail-icon' },
                     )}
                   <span className={'step-number ' + (i < step ? 'visited' : '')}>
@@ -908,14 +1029,15 @@ function App() {
                     canResume={resumeKey === analysisKey(s)}
                     onInspect={(value) => setInspection({ ...value, step })}
                     step={step}
-                    s={s}
+                    s={activeStudy}
                     set={set}
                     selectLocation={selectLocation}
-                    result={validResult}
+                    result={activeResult}
                     busy={busy}
                     progress={progress}
                     elapsed={elapsed}
-                    preview={preview}
+                    preview={() => preview(false)}
+                    standard={() => preview(true)}
                     run={run}
                     cancel={cancel}
                     uploadWeather={uploadWeather}
@@ -934,19 +1056,21 @@ function App() {
                     addSensor={() => addSensor()}
                     addPercentiles={() => {
                       rememberFieldLayout();
-                      setStudy({
-                        ...s,
+                      setFieldStudy({
+                        ...activeStudy,
                         experimentSensors: [
-                          ...s.experimentSensors,
-                          ...percentileSensors(s, validResult),
+                          ...activeStudy.experimentSensors,
+                          ...percentileSensors(activeStudy, activeResult),
                         ],
                       });
                     }}
                     addPlot={() => addPlot()}
                     removeSensor={(i) =>
-                      removeFieldItem({ kind: 'sensor', id: s.experimentSensors[i].id })
+                      removeFieldItem({ kind: 'sensor', id: activeStudy.experimentSensors[i].id })
                     }
-                    removePlot={(i) => removeFieldItem({ kind: 'crop', id: s.crops[i].id })}
+                    removePlot={(i) =>
+                      removeFieldItem({ kind: 'crop', id: activeStudy.crops[i].id })
+                    }
                   />
                 )}
               </section>
@@ -977,7 +1101,8 @@ function App() {
                     'Bring the individual rows together into a finite system.',
                     'Connect your field location to a reproducible weather source.',
                     'Compare ground light for the selected period with an unobstructed horizontal reference.',
-                    'Arrange sensors and crop beds together over the light field.',
+                    'Arrange sensors and crop beds over the agrivoltaic light field.',
+                    'Edit the matching field without PV; uniform light comes from the full-sun reference.',
                     'Export clear figures and traceable parameters for your methods section.',
                   ][step]
                 }
@@ -1028,6 +1153,15 @@ function App() {
           <a className="mobile-jump" href="#study-controls">
             Back to inputs ↑
           </a>
+          {step === 8 && (
+            <p className="info-box">
+              Control field · same receiver footprint as Agrivoltaic · no PV infrastructure.{' '}
+              {activeResult
+                ? `${dliLabel(activeResult)}: ${activeResult.openDli.toFixed(2)} mol/m²/day uniformly; 100% relative sunlight.`
+                : 'Calculate irradiance to obtain the full-sun DLI for this site and period.'}{' '}
+              Layouts are copied on first entry and edited independently afterward.
+            </p>
+          )}
           {fieldWorkspace && (
             <FieldTools
               onDropPalette={(tool, event) => {
@@ -1043,8 +1177,10 @@ function App() {
               setCropId={setNewCropId}
               onUndo={undoFieldEdit}
               canUndo={undoCount > 0}
-              study={s}
+              study={activeStudy}
               selection={selection}
+              selections={selections}
+              onDuplicate={duplicateSelection}
               onSelect={selectFieldItem}
               view={view}
             />
@@ -1099,19 +1235,21 @@ function App() {
             </div>
             <div className="scene-wrap">
               <Scene
+                control={step === 8}
                 focus={inspection?.step === step ? inspection : null}
                 layers={layers}
                 panelOpacity={panelOpacity}
-                study={s}
+                study={activeStudy}
                 scope={scope}
                 view={view}
-                result={validResult}
+                result={activeResult}
                 metric={metric}
                 showGrid={grid}
                 onPlace={fieldTool === 'crop' ? addPlot : addSensor}
                 interactionRef={fieldInteraction}
                 editing={fieldWorkspace}
                 selection={selection}
+                selections={selections}
                 onSelect={selectFieldItem}
                 onEditItem={editFieldItem}
                 onDropTool={(tool, point) =>
@@ -1121,9 +1259,10 @@ function App() {
                   fieldWorkspace && editorOpen && selection ? (
                     <FieldEditor
                       key={`${selection.kind}:${selection.id}`}
-                      study={s}
+                      study={activeStudy}
                       selection={selection}
-                      result={validResult}
+                      control={step === 8}
+                      result={activeResult}
                       onSave={(item) => editFieldItem(selection, item)}
                       onClose={() => setEditorOpen(false)}
                       onDelete={() => removeFieldItem(selection)}
@@ -1136,7 +1275,12 @@ function App() {
               />
               <div className="scene-label">
                 <i />
-                {step < 5 ? steps[step][0].toUpperCase() : 'FINITE ARRAY'} <span>·</span>{' '}
+                {step === 8
+                  ? 'CONTROL · NO PV'
+                  : step < 5
+                    ? steps[step][0].toUpperCase()
+                    : 'FINITE ARRAY'}{' '}
+                <span>·</span>{' '}
                 {view === 'oblique'
                   ? 'ORTHOGRAPHIC'
                   : view === 'plan'
@@ -1171,6 +1315,8 @@ function App() {
             </div>
             <div id="drawing-annotations" />
             <DisplayLegend
+              control={step === 8}
+              fieldLayout={step !== 6}
               scope={scope}
               layers={layers}
               opacity={panelOpacity}
@@ -1243,7 +1389,7 @@ function App() {
                       [
                         Sun,
                         'Receiver-area mean relative sunlight',
-                        validResult.meanSunlight.toFixed(1),
+                        activeResult.meanSunlight.toFixed(1),
                         '%',
                       ],
                       [
@@ -1263,21 +1409,37 @@ function App() {
                         'points',
                       ],
                     ]
-                  : [
-                      [
-                        Layers,
-                        step < 4 ? 'Modules in row' : 'Modules in array',
-                        step < 4 ? s.table.high * s.table.wide * s.row.tables : d.modules,
-                        'modules',
-                      ],
-                      [
-                        Sun,
-                        'Array DC capacity',
-                        ((d.modules * s.module.power) / 1000).toFixed(1),
-                        'kWp',
-                      ],
-                      [Maximize, 'Row length', d.rowLength.toFixed(2), 'm'],
-                    ]
+                  : step === 8
+                    ? [
+                        [
+                          Maximize,
+                          'Control footprint',
+                          `${d.footprintX.toFixed(2)} × ${d.footprintY.toFixed(2)}`,
+                          'm',
+                        ],
+                        [
+                          MapPin,
+                          'Control sensors',
+                          activeStudy.experimentSensors.length,
+                          'instruments',
+                        ],
+                        [Leaf, 'Control crop beds', activeStudy.crops.length, 'beds'],
+                      ]
+                    : [
+                        [
+                          Layers,
+                          step < 4 ? 'Modules in row' : 'Modules in array',
+                          step < 4 ? s.table.high * s.table.wide * s.row.tables : d.modules,
+                          'modules',
+                        ],
+                        [
+                          Sun,
+                          'Array DC capacity',
+                          ((d.modules * s.module.power) / 1000).toFixed(1),
+                          'kWp',
+                        ],
+                        [Maximize, 'Row length', d.rowLength.toFixed(2), 'm'],
+                      ]
             ).map(([Icon, label, value, unit]) => (
               <div className="stat" key={label}>
                 <span className="stat-icon">
@@ -1293,7 +1455,7 @@ function App() {
               </div>
             ))}
           </div>
-          {step === 8 ? (
+          {step === 9 ? (
             <section className="export-panel">
               <div>
                 <FileText size={21} />
@@ -1373,7 +1535,7 @@ function App() {
           )}
           {step >= 6 && validResult && (
             <div className="model-disclosure">
-              <strong>{validResult.backend}</strong>
+              <strong>{activeResult.backend}</strong>
               <span>
                 {' '}
                 · {s.analysis.patches} sky patches · {s.analysis.interval}-minute direct steps ·

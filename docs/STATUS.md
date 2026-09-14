@@ -1,5 +1,15 @@
 # Implementation status
 
+## Agrivoltaic and control layouts (September 14)
+
+- Ten-stage workflow: Irradiance → Agrivoltaic → Control → Methods & export. Irradiance retains expanded inputs and excludes sensor/crop placement tools after calculation. Saved navigation migrates to the correct stages.
+- First entry to Control copies sensor and crop layouts with distinct IDs into an independently editable, versioned `controlField`. Its receiver footprint, rotation and cell boundaries match Agrivoltaic; PV and PV land reservations are absent from the control drawing. Re-entry preserves control edits. Both layouts normalize after grid/geometry changes and remain excluded from browser autosave, as before; explicit JSON/ZIP exports preserve both.
+- Control light uses the calculated unobstructed source reference uniformly: 100% relative sunlight and `openDli` (mean daily for period analyses), with the original measured/estimated PAR basis. No extra solver run is needed; stale agrivoltaic inputs invalidate both light displays. Without a matching result, control DLI is explicitly uncalculated.
+- Shift-click or the item checklist selects multiple sensors and beds. Group duplication assigns unique IDs, retains dimensions and installation/crop metadata, and applies one configurable cell offset. Group movement and copies clamp their common translation at boundaries, preserving relationships; undo covers these edits.
+- Reports include separate control instrument/crop tables, full-sun assumptions and a control plan figure. CSV rows identify their field; project packages contain both layouts and a separate control SVG. Control coordinates are local to each field centre; no surveyed control-site position is invented.
+- Coarse preview changed three independent inputs; raising sky resolution alone could not refine its 3 m receiver spacing. Added a standard-settings reset (1 m / 577 patches / 10 minutes), current grid counts/actual spacing, and an explanation of spatial versus angular/temporal resolution.
+- Verification: 97 tests pass, including two-field independence, boundary-preserving duplication, daily/period full-sun values, measured/estimated provenance, JSON/ZIP round trips, reports and the simulated-DOM workflow. Production build and frozen-archive verification pass. The installed Radiance oracle reports zero occlusion mismatches across 51,100 rays / 10 cases; independent sky, daily energy, GPU and field validation remain outside that comparison. Browser checks confirmed a PV-free control drawing and a standard reset refining the example grid from 7 × 12 to 21 × 35 cells.
+
 ## Weather download recovery (September 14)
 
 - Daily and period downloads now share a 60-second deadline per HTTP request (including the response body), with one automatic retry after two seconds for timeouts, network failures and transient HTTP 408/500/502/503/504 errors. Progress identifies the retry and period chunk. HTTP 4xx rejection/rate limits and invalid weather data remain explicit failures; no synthetic or alternate-model fallback is introduced.
@@ -19,7 +29,7 @@
 - Frozen 480-file baseline, SHA-256 manifest, local write protection, archive CI check; original modeling brief and new AGENTS.md.
 - New hierarchical version-2 Study schema (migrates version 1) with defaults, bounds, explicit unknown-version rejection and schema round trips.
 - Plain-language help on every parameter, compatible defaults when selecting racking and after later module/table changes, persistent camera state, closer orthographic framing and receiver hover values.
-- Nine-stage left-input/right-visualization workflow with a unified Field layout stage; orthographic Three.js scene; plan/profile/oblique views; responsive layout and keyboard controls.
+- Ten-stage left-input/right-visualization workflow with separate Agrivoltaic and Control layout stages; orthographic Three.js scene; plan/profile/oblique views; responsive layout and keyboard controls.
 - Fixed, single-axis, dual-axis, vertical bifacial and pergola geometry; table/row spacing, groups, supports and receiver extent.
 - CPU MeshBVH and WebGPU WGSL BVH adapters; worker execution, progress, cancellation and CPU fallback.
 - NOAA geometric sun; normalized Perez/Reinhart sky; daily aggregation by fixed/quantized tracker pose; bitsets and bounded IndexedDB cache.

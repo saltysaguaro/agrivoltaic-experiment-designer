@@ -15,6 +15,18 @@ export function cellCenter(study, cell, grid = receiverGridSpec(study)) {
   );
 }
 export function normalizeLayout(study) {
+  const normalized = normalizeField(study);
+  if (study.controlField) {
+    const control = normalizeField({ ...study, ...study.controlField });
+    normalized.controlField = {
+      ...study.controlField,
+      experimentSensors: control.experimentSensors,
+      crops: control.crops,
+    };
+  }
+  return normalized;
+}
+function normalizeField(study) {
   const g = receiverGridSpec(study);
   return {
     ...study,

@@ -1,3 +1,4 @@
+import { controlLayers } from '../experiment/control-field.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import * as THREE from 'three';
 import { buildGeometry, disposeGroup, localToWorld, worldToLocal } from '../domain/geometry.js';
@@ -46,11 +47,15 @@ export function figureSvg(
   // A stale/absent result must export a geometry figure, never a labeled light map.
   if (!result) metric = 'none';
   const noCallouts =
-    ['irradiance', 'report'].includes(scope) || metric !== 'none' || options.callouts === false;
-  const layers = options.layers || (metric !== 'none' ? irradianceLayers : designLayers);
+    options.control ||
+    ['irradiance', 'report'].includes(scope) ||
+    metric !== 'none' ||
+    options.callouts === false;
+  const baseLayers = options.layers || (metric !== 'none' ? irradianceLayers : designLayers);
+  const layers = options.control ? controlLayers(baseLayers) : baseLayers;
   const opacity = options.panelOpacity ?? (metric !== 'none' || scope === 'irradiance' ? 0.2 : 1);
   const group = buildGeometry(s, scope),
-    meshes = group.children.filter((o) => o.isMesh);
+    meshes = options.control ? [] : group.children.filter((o) => o.isMesh);
   const ground = scope !== 'module' && showGrid ? groundGrid(s, group.userData) : null;
   const arrayScope = ['array', 'environment', 'irradiance', 'sensors', 'crops', 'report'].includes(
     scope,
@@ -67,7 +72,7 @@ export function figureSvg(
   const annotations = noCallouts
     ? []
     : engineeringAnnotations(s, annotationScope, group, options.focus);
-  const hardware = hardwarePoints(group);
+  const hardware = options.control ? [] : hardwarePoints(group);
   if (!noCallouts && arrayScope && view === 'profile' && !options.focus)
     annotations.unshift(...engineeringAnnotations(s, 'racking', group).slice(0, 1));
   const receiverBoundary = [
@@ -268,7 +273,7 @@ export function figureSvg(
       legend += `<rect x="${650 + i * 2.5}" y="535" width="2.6" height="10" fill="${heatColor((i / 99) * 100)}"/>`;
     legend += `<text x="650" y="565" font-size="12">0</text><text x="900" y="565" text-anchor="end" font-size="12">${metric === 'sunlight' ? '100% sunlight' : result.openDli.toFixed(1) + ' mol m⁻² d⁻¹'}</text>`;
   }
-  const title =
+  const baseTitle =
     metric === 'sunlight'
       ? isPeriod(s)
         ? 'Period relative sunlight'
@@ -284,7 +289,8 @@ export function figureSvg(
           : view === 'oblique'
             ? 'Orthographic system view'
             : 'Array plan';
-  const provenance = provenanceRecord(s, result);
+  const title = (options.control ? 'Control field · ' : '') + baseTitle;
+  const provenance = provenanceRecord(s, result, { control: options.control });
   const wrap = (text, width = 135) => {
     const lines = [];
     let line = '';
@@ -329,13 +335,17 @@ export function figureSvg(
     provenance.model,
     provenance.assumptions,
     provenance.validation,
-    provenance.landUse,
-    landUseDefinition,
+    ...(options.control
+      ? [
+          'Control field: same receiver footprint; no PV or PV land reservations. Uniform full-sun light from the source integration.',
+        ]
+      : [provenance.landUse, landUseDefinition]),
     ...provenance.warnings,
     ...sensorFooter,
   ].flatMap((text) => wrap(text));
   const drawingKey = annotations.map((a) => `${a.symbol}: ${a.label} ${a.value}`).join('; ');
   const footer = [
+    ...(options.control ? ['CONTROL FIELD · no PV infrastructure · uniform open-field light'] : []),
     ...wrap(drawingKey),
     ...(options.compact
       ? [

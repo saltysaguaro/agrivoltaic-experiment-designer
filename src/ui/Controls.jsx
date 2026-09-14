@@ -191,6 +191,7 @@ export default function Controls({
   progress,
   elapsed,
   preview,
+  standard,
   run,
   cancel,
   uploadWeather,
@@ -712,17 +713,26 @@ export default function Controls({
             <button className="secondary wide" disabled={busy} onClick={preview}>
               Apply coarse preview settings
             </button>
+            <button className="secondary wide" disabled={busy} onClick={standard}>
+              Apply standard settings
+            </button>
             <small>
-              Changes to 145 patches, 3 m cells and 15-minute steps. Check sensor/plot cells after
-              changing resolution.
+              Preview: 3 m cells, 145 sky patches, 15-minute steps. Standard: 1 m cells, 577
+              patches, 10-minute steps. Receiver spacing controls ground-grid detail; smaller
+              spacing gives finer cells. Sky resolution and time interval are independent and do not
+              change receiver spacing. Recalculate after editing.
             </small>
+            <p className="control-note">
+              Current grid: {receiver.nx} × {receiver.ny} cells; actual spacing{' '}
+              {receiver.dx.toFixed(2)} × {receiver.dy.toFixed(2)} m.
+            </p>
             <div className="info-box">
               Numerical receivers sample the horizontal light field. Place physical instruments in
               the next step.
             </div>
           </>
         )}
-        {step === 7 && (
+        {(step === 7 || step === 8) && (
           <>
             <h3>Field sensors</h3>
             <p className="control-note">
@@ -824,7 +834,7 @@ export default function Controls({
             ))}
           </>
         )}
-        {step === 7 && (
+        {(step === 7 || step === 8) && (
           <>
             <h3>Crop beds</h3>
             <button
@@ -843,7 +853,7 @@ export default function Controls({
             <button className="secondary wide" onClick={addPlot}>
               <Plus size={16} /> Add crop plot
             </button>
-            {landUseSummary(s).conflicts.length > 0 && (
+            {step !== 8 && landUseSummary(s).conflicts.length > 0 && (
               <div className="info-box zone-warning" role="status">
                 Some plots intersect non-cultivated or perimeter zones. Their locations are
                 retained; review the marked areas below.
@@ -851,7 +861,7 @@ export default function Controls({
             )}
             {s.crops.map((v, i) => {
               const stats = plotStats(result, v);
-              const overlap = plotZoneOverlap(s, v);
+              const overlap = step === 8 ? 0 : plotZoneOverlap(s, v);
               return (
                 <details className="item-card" key={v.id} open={i === s.crops.length - 1}>
                   <summary>
@@ -924,7 +934,7 @@ export default function Controls({
             })}
           </>
         )}
-        {step === 8 && (
+        {step === 9 && (
           <>
             {field('metadata', 'title', 'Study title', null, null, { type: 'text' })}
             {field('metadata', 'investigator', 'Investigator / group', null, null, {

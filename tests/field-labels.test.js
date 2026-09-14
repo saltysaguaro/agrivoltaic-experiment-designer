@@ -42,16 +42,17 @@ test('shared ID tags stay spaced and inside the drawing at mobile/desktop sizes,
   assert.equal(grouped[0].title, 'Sensors · A, B');
 });
 
-test('saved sensor/crop navigation converges to one layout stage while publication stays publication', () => {
-  assert.equal(steps.length, 9);
+test('saved navigation migrates to Agrivoltaic and keeps publication at the final stage', () => {
+  assert.equal(steps.length, 10);
   for (const old of [7, 8]) assert.equal(normalizeNavigation({ step: old, view: 'plan' }).step, 7);
-  assert.equal(normalizeNavigation({ step: 9, view: 'profile' }).step, 8);
+  assert.equal(normalizeNavigation({ step: 9, view: 'profile' }).step, 9);
   assert.deepEqual(normalizeNavigation({ version: 2, step: 8, view: 'oblique' }), {
-    version: 2,
-    step: 8,
+    version: 3,
+    step: 9,
     view: 'oblique',
   });
   assert.equal(normalizeNavigation({ version: 2, step: 9, view: 'plan' }).step, 0);
+  assert.equal(normalizeNavigation({ version: 3, step: 8, view: 'plan' }).step, 8);
 });
 
 test('methods/report figures omit all engineering callouts and use legible ID tags with complete field keys', () => {

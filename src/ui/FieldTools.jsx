@@ -10,6 +10,8 @@ export default function FieldTools({
   canUndo,
   study,
   selection,
+  selections = [],
+  onDuplicate,
   onSelect,
   view,
   onDropPalette,
@@ -17,6 +19,7 @@ export default function FieldTools({
   const gesture = useRef(null),
     suppressClick = useRef(false);
   const [ghost, setGhost] = useState(null);
+  const [offset, setOffset] = useState({ column: 1, row: 1 });
   function palette(kind) {
     return {
       className: 'palette-tool',
@@ -103,6 +106,9 @@ export default function FieldTools({
         <button disabled={!canUndo} onClick={onUndo} aria-label="Undo field edit">
           <Undo2 size={16} /> Undo
         </button>
+        <button disabled={!selections.length} onClick={() => onDuplicate(offset)}>
+          Duplicate selected ({selections.length})
+        </button>
         <label className="item-select-label">
           Find item
           <select
@@ -127,6 +133,50 @@ export default function FieldTools({
           </select>
         </label>
       </div>
+      {selections.length > 0 && (
+        <div className="copy-offsets">
+          {' '}
+          <label className="copy-offset-label">
+            Copy offset · columns
+            <input
+              aria-label="Copy column offset"
+              type="number"
+              step="1"
+              value={offset.column}
+              onChange={(e) => setOffset({ ...offset, column: Number(e.target.value) })}
+            />
+          </label>
+          <label className="copy-offset-label">
+            rows
+            <input
+              aria-label="Copy row offset"
+              type="number"
+              step="1"
+              value={offset.row}
+              onChange={(e) => setOffset({ ...offset, row: Number(e.target.value) })}
+            />
+          </label>
+        </div>
+      )}
+      <details className="field-multiselect">
+        <summary>Select multiple items ({selections.length} selected)</summary>
+        <div className="field-selection-list">
+          {[
+            ...study.experimentSensors.map((item) => ({ ...item, kind: 'sensor' })),
+            ...study.crops.map((item) => ({ ...item, kind: 'crop' })),
+          ].map((item) => (
+            <label key={`${item.kind}:${item.id}`}>
+              <input
+                type="checkbox"
+                aria-label={`Select ${item.id}`}
+                checked={selections.some((v) => v.kind === item.kind && v.id === item.id)}
+                onChange={() => onSelect({ kind: item.kind, id: item.id }, false, true)}
+              />
+              {item.id} · {item.kind === 'sensor' ? item.type : item.crop}
+            </label>
+          ))}
+        </div>
+      </details>
       {tool === 'crop' && (
         <CropPicker label="Crop for new beds" value={cropId} onChange={setCropId} />
       )}
@@ -135,7 +185,7 @@ export default function FieldTools({
           ? 'Choose Top-down or Orthographic to drag items; the item list opens their editors in any view.'
           : tool
             ? `Click a receiver cell to place ${tool === 'sensor' ? 'a sensor' : 'a crop bed'}, or drag its toolbar button onto the drawing.`
-            : 'Click an item to edit. Drag to move; drag a selected bed’s corners to resize. Arrow keys move a focused item; Shift + arrows resize a bed. Escape cancels a drag.'}
+            : 'Click to edit; Shift-click to select a group. Drag to move; drag bed corners to resize. Arrow keys move; Shift + arrows resize. Escape cancels.'}
       </p>
     </div>
   );

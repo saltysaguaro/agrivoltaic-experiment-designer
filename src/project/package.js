@@ -1,3 +1,5 @@
+import { fieldStudy, controlResult } from '../experiment/control-field.js';
+import { designLayers } from '../ui/display-layers.js';
 import { isPeriod, periodLabel, analysisPeriod } from '../domain/period.js';
 import { weatherForPeriod } from '../irradiance/period-engine.js';
 import { VERSION, migrateStudy, studySchema, sha256, designIssues } from '../domain/study.js';
@@ -39,6 +41,8 @@ function validateIds(study) {
   for (const [name, items] of [
     ['sensor', study.experimentSensors],
     ['crop bed', study.crops],
+    ['control sensor', study.controlField.experimentSensors],
+    ['control crop bed', study.controlField.crops],
   ]) {
     if (items.some((v) => !v.id.trim()) || new Set(items.map((v) => v.id)).size !== items.length)
       throw Error(`Every ${name} needs a non-empty, unique ID.`);
@@ -210,6 +214,16 @@ export async function buildProjectPackage(study, result, onProgress = () => {}) 
   for (const [view, metric, name] of figures) {
     onProgress('Preparing ' + name + ' figure');
     add(`figures/${name}.svg`, figureSvg(s, r, view, metric, 'report', true), 'image/svg+xml');
+  }
+  if (s.controlField.initialized) {
+    add(
+      'figures/control-layout.svg',
+      figureSvg(fieldStudy(s, true), controlResult(r), 'plan', r ? 'dli' : 'none', 'report', true, {
+        control: true,
+        layers: designLayers,
+      }),
+      'image/svg+xml',
+    );
   }
   add(
     'README.md',

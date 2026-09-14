@@ -281,7 +281,18 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await click(byText('Top-down'));
     await click(byText('Estimated DLI'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
-    await click(step('Field layout'));
+    assert.equal(
+      document.querySelector('.compact-sidebar'),
+      null,
+      'Irradiance keeps input controls open after calculation',
+    );
+    assert.equal(
+      document.querySelector('.field-tools'),
+      null,
+      'No placement toolbar in Irradiance',
+    );
+    assert.ok(document.querySelector('[data-annotation="analysis.resolution"] input'));
+    await click(step('Agrivoltaic'));
     assert.ok(document.querySelector('.compact-sidebar'));
     await click(document.querySelector('button[aria-label="Expand inputs"]'));
     await click(byText('Place a sensor in the view'));
@@ -317,23 +328,69 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(fieldValue('crops.0.grid.rows'), '1');
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     assert.equal(calculations, 1);
-    await click(step('Field layout'));
+    await click(step('Agrivoltaic'));
     await click(byText('Orthographic'));
     await click(byText('Relative sunlight'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
     assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 7);
     const workflowButtons = [...document.querySelectorAll('.step-toggle')];
-    assert.equal(workflowButtons.length, 9);
+    assert.equal(workflowButtons.length, 10);
     assert.ok(
       !workflowButtons.some((b) =>
         ['Field sensors', 'Crop plots'].includes(b.getAttribute('aria-label')),
       ),
     );
+    // First control entry clones all field items; edits remain independent and never solve.
+    await click(step('Control'));
+    assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 8);
+    assert.match(document.querySelector('.scene-label').textContent, /CONTROL/);
+    assert.match(document.body.textContent, /100% relative sunlight/);
+    const choices = () =>
+      [...document.querySelectorAll('select[aria-label="Select field item"] option')].filter(
+        (o) => o.value,
+      );
+    assert.equal(choices().length, 3);
+    assert.ok(choices().every((o) => o.value.includes(':C-')));
+    assert.equal(document.querySelector('button[aria-label="Panel opacity"]'), null);
+    await click(document.querySelector('input[aria-label="Select C-S-01"]'));
+    await click(document.querySelector('input[aria-label="Select C-P-01"]'));
+    await click(byText('Duplicate selected (2)'));
+    assert.equal(choices().length, 5);
+    await click(byText('Undo'));
+    assert.equal(choices().length, 3);
+    await click(document.querySelector('input[aria-label="Select C-S-01"]'));
+    await click(byText('Duplicate selected (1)'));
+    assert.equal(choices().length, 4);
+    await click(step('Agrivoltaic'));
+    assert.equal(choices().length, 3, 'Control duplication did not change Agrivoltaic');
+    await click(step('Control'));
+    assert.equal(choices().length, 4, 'Revisiting Control does not overwrite edits');
+    assert.equal(calculations, 1);
+    await click(step('Irradiance'));
+    assert.equal(document.querySelector('.field-tools'), null);
+    assert.equal(document.querySelector('.compact-sidebar'), null);
+    await click(byText('Apply coarse preview settings'));
+    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.resolution, 3);
+    await click(byText('Apply standard settings'));
+    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.resolution, 1);
+    assert.match(document.querySelector('.control-content').textContent, /Current grid:/);
+    // Restore the original numerical inputs without running another calculation.
+    await act(async () => {
+      const spacing = document.querySelector('[data-annotation="analysis.resolution"] input');
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+        spacing,
+        '2',
+      );
+      spacing.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+      const patches = document.querySelector('[data-annotation="analysis.patches"] select');
+      patches.value = '145';
+      patches.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    });
     await click(step('Methods & export'));
     assert.ok(document.querySelector('.export-panel'));
     assert.equal(document.querySelector('[aria-label="Drawing callouts"]'), null);
     assert.equal(document.querySelectorAll('.svg-fallback [data-callout]').length, 0);
-    assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 8);
+    assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 9);
     assert.equal(calculations, 1);
     // Import is previewed before changing storage and restores a matching result without downloading weather.
     const incoming = JSON.parse(localStorage.getItem('aed-study-v1'));
@@ -389,7 +446,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(calculations, 1, 'Opening a package restores results without recalculation');
     assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).experimentSensors, []);
     assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).crops, []);
-    await click(step('Field layout'));
+    await click(step('Agrivoltaic'));
     assert.match(
       document.querySelector('select[aria-label="Select field item"]').textContent,
       /OLD-SENSOR/,

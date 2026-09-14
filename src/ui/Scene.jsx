@@ -23,6 +23,7 @@ import {
   resizeGrid,
   replaceFieldItem,
   layoutItems,
+  moveFieldGroup,
 } from '../experiment/field-editing.js';
 
 export default function Scene({
@@ -41,6 +42,8 @@ export default function Scene({
   resetKey,
   editing = false,
   selection = null,
+  selections = [],
+  control = false,
   onSelect,
   onEditItem,
   onDropTool,
@@ -155,7 +158,8 @@ export default function Scene({
       const current = latest.current;
       if (current.editing || current.scope === 'report') {
         const displayed = rt.preview
-          ? replaceFieldItem(current.study, rt.preview.selection, rt.preview.item)
+          ? rt.preview.study ||
+            replaceFieldItem(current.study, rt.preview.selection, rt.preview.item)
           : current.study;
         const chosen =
           current.selection &&
@@ -614,6 +618,10 @@ export default function Scene({
     if (e.button !== 0 || placing) return;
     e.preventDefault();
     e.stopPropagation();
+    if (e.shiftKey || e.metaKey || e.ctrlKey) {
+      onSelect?.(target, false, true);
+      return;
+    }
     if (view === 'profile') {
       onSelect?.(target, true);
       return;
@@ -628,6 +636,9 @@ export default function Scene({
       target,
       item,
       base: study,
+      selections: selections.some((v) => v.kind === target.kind && v.id === target.id)
+        ? selections
+        : [target],
       start: gridPoint(study, point),
       x: e.clientX,
       y: e.clientY,
@@ -656,7 +667,14 @@ export default function Scene({
           column: p.column - drag.start.column,
           row: p.row - drag.start.row,
         });
-    rt.preview = { selection: drag.target, item: { ...drag.item, grid } };
+    const groupStudy =
+      !drag.corner && drag.selections.length > 1
+        ? moveFieldGroup(drag.base, drag.selections, {
+            column: grid.column - drag.item.grid.column,
+            row: grid.row - drag.item.grid.row,
+          })
+        : null;
+    rt.preview = { selection: drag.target, item: { ...drag.item, grid }, study: groupStudy };
     rt.draw();
   }
   function endItemDrag(e, commit) {
@@ -750,6 +768,7 @@ export default function Scene({
             projection={projection}
             interactive={editing}
             selection={selection}
+            selections={selections}
             placing={placing}
             onStart={startItemDrag}
             onMove={moveItemDrag}
@@ -823,6 +842,7 @@ export default function Scene({
             dangerouslySetInnerHTML={{
               __html: figureSvg(study, result, view, metric, scope, showGrid, {
                 focus,
+                control,
                 callouts: !editing && scope !== 'report',
                 layers,
                 panelOpacity,

@@ -1,3 +1,6 @@
+import { fieldStudy, controlResult, controlLayers } from '../experiment/control-field.js';
+import { designLayers } from '../ui/display-layers.js';
+import { receiverGridSpec } from '../domain/geometry.js';
 import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
 import { isPeriod, periodLabel, analysisPeriod, dliLabel } from '../domain/period.js';
 import {
@@ -151,6 +154,16 @@ export function methodsRows(s, r) {
     [
       'Field layout',
       'Sensors at receiver-cell centres; crop boundaries follow receiver cells and rotate with the array. Packed marker offsets are display-only; sensor heights/depths remain installation metadata. Grid rows/columns are 1-based in tables.',
+    ],
+    [
+      'Control field',
+      s.controlField?.initialized
+        ? `Independent full-sun field; same ${receiverGridSpec(s).width.toFixed(3)} × ${receiverGridSpec(s).height.toFixed(3)} m receiver footprint and grid as Agrivoltaic; no PV infrastructure. ${s.controlField.experimentSensors.length} sensors; ${s.controlField.crops.length} crop beds. Copied on first entry, then edited independently. Coordinates are local to each field, not a surveyed control-site position.`
+        : 'Not initialized',
+    ],
+    [
+      'Control light assumption',
+      'Spatially uniform unobstructed horizontal reference from the same site, weather, dates and PAR conversion (or measured PPFD). 100% relative sunlight; DLI equals open-field DLI, averaged daily for a period. Does not represent measured field observations.',
     ],
     ['Analysis date', periodLabel(s)],
     ['Analysis mode', s.analysis.period],
@@ -340,6 +353,47 @@ function pairedTable(rows) {
     )
     .join('')}</tbody></table>`;
 }
+function controlReport(study, result) {
+  if (!study.controlField?.initialized) return '<h2>Control field</h2><p>Not initialized.</p>';
+  const s = fieldStudy(study, true),
+    r = controlResult(result),
+    g = receiverGridSpec(s);
+  return `<section><h2>Control field · no PV infrastructure</h2><p>Same ${g.width.toFixed(3)} × ${g.height.toFixed(3)} m footprint and receiver cells as Agrivoltaic. Coordinates are relative to the control-field centre. The layout was copied on first entry and is independently editable; IDs are distinct.</p><p>${r ? `Uniform ${e(dliLabel(r))}: ${r.openDli.toFixed(3)} mol/m²/day; 100% relative sunlight. ${isPeriod(s) ? 'DLI is the mean daily value across the selected period.' : ''}` : 'Full-sun DLI not calculated.'} The unobstructed horizontal reference uses the same site, weather and PAR inputs as the agrivoltaic calculation; there are no PV occluders or PV land reservations.</p><h2>Control physical field instruments</h2>${table(
+    [
+      'ID / type',
+      'E / N / Z (m)',
+      'Column / row',
+      'Treatment / replicate',
+      'Model / logger / channel',
+      'Orientation / notes',
+    ],
+    s.experimentSensors.map((v) => [
+      v.id + ' · ' + v.type,
+      `${v.x.toFixed(3)} / ${v.y.toFixed(3)} / ${v.z}`,
+      v.grid ? `${v.grid.column + 1} / ${v.grid.row + 1}` : '—',
+      `${v.treatment} / ${v.replicate}`,
+      `${v.model} / ${v.logger} / ${v.channel}`,
+      `${v.azimuth}° azimuth / ${v.tilt}° tilt; ${v.notes}`,
+    ]),
+  )}<h2>Control crop bed identities and layout</h2>${table(
+    [
+      'ID / crop',
+      'Botanical identity / cultivar',
+      'Treatment / replicate',
+      'E / N; width × length (m)',
+      'Column / row; columns × rows',
+      `${dliLabel(r)} (mol/m²/day); notes`,
+    ],
+    s.crops.map((c) => [
+      c.id + ' · ' + c.crop,
+      `${c.scientificName || c.botanicalName || 'Catalog selection required'}; family ${c.cropFamily}; cultivar ${c.cultivar}; ${c.taxonUrl}; catalog ${c.cropCatalogVersion} / ${c.cropId}`,
+      `${c.treatment} / ${c.replicate}`,
+      `${c.x.toFixed(3)} / ${c.y.toFixed(3)}; ${c.width.toFixed(3)} × ${c.length.toFixed(3)}`,
+      c.grid ? `${c.grid.column + 1} / ${c.grid.row + 1}; ${c.grid.columns} × ${c.grid.rows}` : '—',
+      `${r ? `Mean / median / min / max ${r.openDli.toFixed(3)}; SD 0; sunlight 100%` : 'Not calculated'}; ${c.notes}`,
+    ]),
+  )}</section><figure>${figureSvg(s, r, 'plan', r ? 'dli' : 'none', 'array', true, { control: true, compact: true, callouts: false, layers: controlLayers(designLayers) })}<figcaption>Control field layout, with uniform full-sun light when calculated. Ground grid at z = 0; sensor installation heights/depths are recorded in the table.</figcaption></figure>`;
+}
 export function reportHtml(s, r) {
   const publication = publicationTables(s, r);
   const crops = s.crops.map(normalizeCropIdentity);
@@ -361,7 +415,7 @@ table{width:100%;border-collapse:collapse;margin:5px 0 12px;font-size:11px;table
 svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{font-size:11px;color:#455d51;overflow-wrap:anywhere}.appendix{border-top:2px solid #37564b;margin-top:22px}.methods-notes{columns:2;column-gap:26px}.methods-notes p{break-inside:avoid;overflow-wrap:anywhere;font-size:11px;line-height:1.4}.methods-notes strong{display:block;margin-bottom:2px}button{padding:10px 18px;background:#183d38;color:white;border:0;cursor:pointer}.note{border-left:3px solid #af873e;padding:7px 10px;background:#fff8e7;font-size:11px}.empty{color:#60736a;font-style:italic}.table-scroll{overflow-x:auto}
 @page{size:A4 landscape;margin:12mm}@media(max-width:650px){.methods-notes{columns:1}.parameters{min-width:610px}body{padding:0 12px}}
 @media print{body{margin:0;padding:0;max-width:none;font-size:9pt}h1{font-size:17pt;margin-top:0}h2{font-size:10pt;margin:3mm 0 1mm}table{font-size:8pt;margin:1mm 0 3mm}td,th{padding:1.1mm 1.5mm}button{display:none}.note{font-size:8pt;padding:2mm 3mm}.report-meta{font-size:8pt}.table-scroll{overflow:visible}.parameters{min-width:0}.appendix{break-before:page;border-top:0}.methods-notes p{font-size:8pt}figure{break-before:page;margin:0}figure svg{max-height:165mm;max-width:100%;width:auto;display:block;margin:auto}figcaption{font-size:8pt}thead{display:table-header-group}tr{break-inside:avoid}a{color:inherit;text-decoration:none}}
-</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(periodLabel(s))} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / C / B identify the ground zones. S is the signed PV-edge setback; negative values place crops beneath panels. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Physical field instruments</h2>${table(
+</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(periodLabel(s))} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / C / B identify the ground zones. S is the signed PV-edge setback; negative values place crops beneath panels. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Agrivoltaic physical field instruments</h2>${table(
     [
       'ID / type',
       'E / N / Z (m)',
@@ -378,7 +432,7 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
       v.model + ' / ' + v.logger + ' / ' + (v.channel || ''),
       v.notes + `; orientation ${v.azimuth ?? 0}° azimuth / ${v.tilt ?? 0}° tilt`,
     ]),
-  )}<h2>Crop bed identities</h2>${crops.length ? `<table class="crop-identities"><thead><tr><th>Bed / crop</th><th>Botanical name / cultivar</th><th>Family</th><th>Taxonomy record</th></tr></thead><tbody>${crops.map((c) => `<tr><td>${e(c.id)} · ${e(c.crop)}</td><td>${botanicalLabel(c)}${c.cultivar ? `<br>Cultivar: ${e(c.cultivar)}` : ''}${c.notes ? `<br>Notes: ${e(c.notes)}` : ''}</td><td>${e(c.cropFamily || 'Unresolved')}</td><td>${c.taxonUrl ? `<a href="${e(c.taxonUrl)}">GBIF ${c.taxonKey}</a><br>Catalog ${e(c.cropCatalogVersion)}<br>${e(c.cropId)}` : 'No botanical identity assigned'}</td></tr>`).join('')}</tbody></table>` : '<p class="empty">None specified.</p>'}<h2>Crop bed layout and light</h2>${table(
+  )}<h2>Agrivoltaic crop bed identities</h2>${crops.length ? `<table class="crop-identities"><thead><tr><th>Bed / crop</th><th>Botanical name / cultivar</th><th>Family</th><th>Taxonomy record</th></tr></thead><tbody>${crops.map((c) => `<tr><td>${e(c.id)} · ${e(c.crop)}</td><td>${botanicalLabel(c)}${c.cultivar ? `<br>Cultivar: ${e(c.cultivar)}` : ''}${c.notes ? `<br>Notes: ${e(c.notes)}` : ''}</td><td>${e(c.cropFamily || 'Unresolved')}</td><td>${c.taxonUrl ? `<a href="${e(c.taxonUrl)}">GBIF ${c.taxonKey}</a><br>Catalog ${e(c.cropCatalogVersion)}<br>${e(c.cropId)}` : 'No botanical identity assigned'}</td></tr>`).join('')}</tbody></table>` : '<p class="empty">None specified.</p>'}<h2>Agrivoltaic crop bed layout and light</h2>${table(
     [
       'ID / crop',
       'Treatment / replicate',
@@ -421,9 +475,9 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
           ]),
         )}`
       : ''
-  }<section class="appendix"><h2>Methods, assumptions and provenance</h2><div class="methods-notes">${publication.notes.map(([key, value]) => `<p><strong>${e(key)}</strong>${e(value)}</p>`).join('')}</div></section>${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric, 'array', true, { compact: true, callouts: false })}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p></body></html>`;
+  }${controlReport(s, r)}<section class="appendix"><h2>Methods, assumptions and provenance</h2><div class="methods-notes">${publication.notes.map(([key, value]) => `<p><strong>${e(key)}</strong>${e(value)}</p>`).join('')}</div></section>${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric, 'array', true, { compact: true, callouts: false })}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p></body></html>`;
 }
-export function exportCsv(s, r) {
+export function exportCsv(study, result) {
   const rows = [
     [
       'record',
@@ -454,75 +508,87 @@ export function exportCsv(s, r) {
       'analysis_start',
       'analysis_end',
       'dli_basis',
+      'field',
     ],
   ];
-  for (const c of r?.cells || [])
-    rows.push([
-      'receiver',
-      '',
-      'numerical',
-      c.x,
-      c.y,
-      c.z,
-      c.sunlight,
-      c.dli,
-      ...Array(16).fill(''),
-      c.wh,
-    ]);
-  for (const v of s.experimentSensors) {
-    const c = nearestCell(r, v.x, v.y);
-    rows.push([
-      'sensor',
-      v.id,
-      v.type,
-      v.x,
-      v.y,
-      v.z,
-      c?.sunlight,
-      c?.dli,
-      v.treatment,
-      v.replicate,
-      v.model,
-      v.logger,
-      v.channel,
-      v.azimuth,
-      v.tilt,
-      v.notes +
-        '; horizontal receiver estimate; ' +
-        rowRelative(s, v) +
-        (v.grid ? `; receiver_column=${v.grid.column + 1}; receiver_row=${v.grid.row + 1}` : ''),
-    ]);
+  for (const [field, s, r] of [
+    ['agrivoltaic', study, result],
+    ...(study.controlField?.initialized
+      ? [['control', fieldStudy(study, true), controlResult(result)]]
+      : []),
+  ]) {
+    const start = rows.length;
+    for (const c of r?.cells || [])
+      rows.push([
+        'receiver',
+        '',
+        'numerical',
+        c.x,
+        c.y,
+        c.z,
+        c.sunlight,
+        c.dli,
+        ...Array(16).fill(''),
+        c.wh,
+      ]);
+    for (const v of s.experimentSensors) {
+      const c = nearestCell(r, v.x, v.y);
+      rows.push([
+        'sensor',
+        v.id,
+        v.type,
+        v.x,
+        v.y,
+        v.z,
+        c?.sunlight,
+        c?.dli,
+        v.treatment,
+        v.replicate,
+        v.model,
+        v.logger,
+        v.channel,
+        v.azimuth,
+        v.tilt,
+        v.notes +
+          '; horizontal receiver estimate; ' +
+          rowRelative(s, v) +
+          (v.grid ? `; receiver_column=${v.grid.column + 1}; receiver_row=${v.grid.row + 1}` : ''),
+      ]);
+    }
+    for (const raw of s.crops) {
+      const p = normalizeCropIdentity(raw);
+      const stats = plotStats(r, p);
+      rows.push([
+        'plot',
+        p.id,
+        p.crop,
+        p.x,
+        p.y,
+        0,
+        stats?.sunlight,
+        stats?.mean,
+        p.treatment,
+        p.replicate,
+        '',
+        '',
+        '',
+        '',
+        '',
+        `width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; reserved_overlap_m2=${(field === 'control' ? 0 : plotZoneOverlap(s, p)).toFixed(4)}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}; notes=${p.notes || ''}`,
+        p.cropId,
+        p.botanicalName,
+        p.scientificName,
+        p.cropFamily,
+        p.cultivar,
+        p.taxonKey || '',
+        p.taxonUrl,
+        p.cropCatalogVersion,
+      ]);
+    }
+    for (const row of rows.slice(start)) row[28] = field;
   }
-  for (const raw of s.crops) {
-    const p = normalizeCropIdentity(raw);
-    const stats = plotStats(r, p);
-    rows.push([
-      'plot',
-      p.id,
-      p.crop,
-      p.x,
-      p.y,
-      0,
-      stats?.sunlight,
-      stats?.mean,
-      p.treatment,
-      p.replicate,
-      '',
-      '',
-      '',
-      '',
-      '',
-      `width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; reserved_overlap_m2=${plotZoneOverlap(s, p).toFixed(4)}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}; notes=${p.notes || ''}`,
-      p.cropId,
-      p.botanicalName,
-      p.scientificName,
-      p.cropFamily,
-      p.cultivar,
-      p.taxonKey || '',
-      p.taxonUrl,
-      p.cropCatalogVersion,
-    ]);
-  }
+  const s = study,
+    r = result;
   const period = analysisPeriod(s);
   for (const row of rows.slice(1)) {
     row[25] = period.start;
