@@ -323,6 +323,14 @@ test('publication dimensions clear modules and irradiance figures omit callouts 
   });
   assert.doesNotMatch(svg, /data-callout=/);
   assert.doesNotMatch(svg, /data-land-zone=/);
+  assert.match(svg, /data-receiver-boundary="true"/);
+  for (const view of ['plan', 'oblique']) {
+    const outlineOnly = figureSvg(s, null, view, 'none', 'irradiance', false, {
+      layers: irradianceLayers,
+    });
+    assert.match(outlineOnly, /data-receiver-boundary="true"/);
+    assert.doesNotMatch(outlineOnly, /data-receiver-grid=/);
+  }
   assert.match(svg, /data-hardware="module"[^]*opacity="0.2"/);
   const restored = figureSvg(s, null, 'plan', 'none', 'irradiance', true, {
     layers: { ...irradianceLayers, cropping: true },

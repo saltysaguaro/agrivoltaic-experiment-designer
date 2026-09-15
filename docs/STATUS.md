@@ -1,5 +1,10 @@
 # Implementation status
 
+## Receiver boundary before irradiance calculation (September 15)
+
+- The Irradiance stage enables the Receiver boundary layer by default before and after calculation. It shows the numerical field footprint, including the receiver buffer, in both the interactive view and SVG output. The existing grid button controls internal grid lines; turning those off retains the outer boundary. The boundary layer remains user-toggleable, and sensor/crop placement still begins in the field-layout stages.
+- Verification: 114 tests pass, including the pre-calculation layer state and boundary-only plan/ortho exports. Production build and frozen-archive verification pass. The unchanged Radiance oracle comparison again reports zero mismatches over 51,100 rays / 10 cases; this is a display-only change.
+
 ## Engineering callout geometry and placement (September 15)
 
 - Callout clearance now uses the exact convex hull of hardware vertices, computed once per geometry change and compacted in bounded batches. World-axis and array-aligned bounding boxes had invented empty corners above tilted panels and beside rotated rows, sending dimension lines far away or below ground. The true hull is shared by the interactive overlay and SVG figures.

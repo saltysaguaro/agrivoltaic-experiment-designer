@@ -13,7 +13,7 @@ export const irradianceLayers = Object.freeze({
   underPanel: false,
   cropping: false,
   perimeter: false,
-  receiver: false,
+  receiver: true,
   sensors: false,
   plots: false,
 });

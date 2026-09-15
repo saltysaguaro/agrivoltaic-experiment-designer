@@ -191,7 +191,14 @@ export function figureSvg(
       );
     }
   }
-  if (ground && (!arrayScope || layers.receiver || view === 'profile')) {
+  // Standalone light maps retain their clear interiors; an explicit UI layer
+  // selection can include cell lines. The outer receiver boundary is independent.
+  if (
+    ground &&
+    (!arrayScope ||
+      (layers.receiver && (metric === 'none' || options.layers)) ||
+      view === 'profile')
+  ) {
     const segment = (a, b) => {
       const p = xy(project(a)),
         q = xy(project(b));
@@ -210,7 +217,7 @@ export function figureSvg(
     muted: metric !== 'none',
   });
   if (arrayScope && layers.receiver && view !== 'profile')
-    content += `<polygon points="${receiverBoundary.map((p) => xy(project(p)).join(',')).join(' ')}" fill="none" stroke="#276a80" stroke-dasharray="5 4"/>`;
+    content += `<polygon data-receiver-boundary="true" points="${receiverBoundary.map((p) => xy(project(p)).join(',')).join(' ')}" fill="none" stroke="#276a80" stroke-dasharray="5 4"/>`;
   const fieldProjection = { beds: [], markers: [] };
   if (arrayScope) {
     for (const c of layers.plots ? s.crops : []) {

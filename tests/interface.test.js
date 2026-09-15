@@ -210,6 +210,11 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(selectedSite.utcOffsetApproximate, true);
     await click(step('Irradiance'));
     assert.equal(
+      byText('Receiver boundary').getAttribute('aria-pressed'),
+      'true',
+      'Field outline is visible before calculation',
+    );
+    assert.equal(
       document.querySelector('.drawing-annotations'),
       null,
       'Irradiance has no callouts before calculating',
