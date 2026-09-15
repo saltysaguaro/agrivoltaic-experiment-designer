@@ -1,4 +1,5 @@
 import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
+import { cellSamplingDescription } from '../domain/receiver-grid.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import { cropCatalogVersion, cropCatalogSource } from '../domain/crop-catalog.js';
 import { landUseSettings, landUseDefinition } from '../domain/land-use.js';
@@ -22,7 +23,7 @@ export function provenanceRecord(s, r, { control = false } = {}) {
     study: s.metadata.title,
     date: periodLabel(s),
     site: `${s.site.latitude}°, ${s.site.longitude}°; UTC ${s.site.utcOffset}; elevation ${s.site.elevation} m`,
-    receivers: `${s.analysis.gridAlignment === 'row-centres' ? `${s.analysis.cellsPerRow} cells per PV row-centre gap (wider cells in aisle gaps); ${s.analysis.resolution} m nominal along-row spacing; area-weighted summaries` : `${s.analysis.resolution} m nominal uniform spacing`}; ${s.analysis.receiverHeight} m height; horizontal`,
+    receivers: `${s.analysis.gridAlignment === 'row-centres' ? `${s.analysis.cellsPerRow} cells per PV row-centre gap (wider cells in aisle gaps); ${s.analysis.resolution} m nominal along-row spacing; area-weighted summaries` : `${s.analysis.resolution} m nominal uniform spacing`}; ${s.analysis.receiverHeight} m height; horizontal. ${cellSamplingDescription(s.analysis.samplesPerCell)}`,
     openField: r
       ? `${r.openWh} Wh/m²/${isPeriod(s) ? 'period' : 'day'}; ${r.openDli} mol/m²/day${isPeriod(s) ? ' (period mean)' : ''}`
       : 'Not calculated',

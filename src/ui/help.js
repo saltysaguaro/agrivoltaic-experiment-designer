@@ -85,7 +85,9 @@ export const inputHelp = {
   'analysis.cellsPerRow':
     'Number of cells across each PV row-centre gap. The default is nine. More cells resolve variation across the rows at greater calculation cost. This is across the PV rows, not along individual modules.',
   'analysis.resolution':
-    'Nominal spacing along PV rows when row alignment is enabled; spacing in both directions in uniform mode. Smaller spacing gives finer maps but takes more time and memory. These points are not physical instruments.',
+    'Nominal spacing along PV rows when row alignment is enabled; spacing in both directions in uniform mode. Smaller spacing gives finer maps but takes more time and memory. Samples per grid cell controls averaging within each tile independently. These points are not physical instruments.',
+  'analysis.samplesPerCell':
+    'Choose 1–9 sample locations per grid cell. The default 1 samples its centre. Higher counts average equally weighted points at the centres of equal-area subrectangles; 4 uses 2 × 2 and 9 uses 3 × 3. All samples use the receiver height. Ray-tracing work grows roughly with the count. Small shadows may still be missed. Cell boundaries and field layouts stay fixed.',
   'analysis.receiverHeight':
     'Height of the horizontal surface where light is calculated, such as crop-canopy height. Physical instruments can be placed at other heights.',
   'analysis.patches':

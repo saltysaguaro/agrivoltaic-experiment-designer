@@ -31,6 +31,48 @@ import { figureSvg } from '../src/report/figures.js';
 import { calculateDay } from '../src/irradiance/engine.js';
 import { buildProjectPackage, readProject } from '../src/project/package.js';
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-7, `${a} != ${b}`);
+
+test('uniform-grid point inside a vertical support reads zero; aligned samples avoid that collision', async () => {
+  const s = defaultStudy();
+  s.racking.type = 'vertical';
+  s.module.bifacial = true;
+  s.table.high = 1;
+  s.table.wide = 2;
+  s.row.tables = 1;
+  s.array.rows = 1;
+  s.weather.mode = 'sample';
+  Object.assign(s.analysis, {
+    gridAlignment: 'spacing',
+    resolution: 1,
+    date: '2025-04-01',
+    backend: 'cpu',
+  });
+  const cache = { get: async () => null, put: async () => {} };
+  const geometry = buildGeometry(s, 'array', undefined, { textures: false });
+  assert.ok(
+    geometry.children.some(
+      (m) => m.userData.kind === 'post' && Math.hypot(m.position.x, m.position.y) < 1e-8,
+    ),
+  );
+  disposeGroup(geometry);
+  for (const patches of [145, 577]) {
+    s.analysis.patches = patches;
+    const result = await calculateDay(s, () => {}, { cache });
+    const centre = result.cells.find((c) => Math.hypot(c.x, c.y) < 1e-8);
+    assert.equal(centre.wh, 0);
+    assert.equal(centre.dli, 0);
+    assert.equal(centre.sunlight, 0);
+    assert.ok(result.cells.some((c) => Math.hypot(c.x, c.y) < 1 && c.wh > 0));
+  }
+  s.analysis.samplesPerCell = 4;
+  const averaged = await calculateDay(s, () => {}, { cache });
+  assert.ok(averaged.cells.find((c) => Math.hypot(c.x, c.y) < 1e-8).wh > 0);
+  s.analysis.samplesPerCell = 1;
+  s.analysis.gridAlignment = 'row-centres';
+  const aligned = await calculateDay(s, () => {}, { cache });
+  assert.ok(aligned.cells.every((c) => c.wh > 0));
+});
+
 function fixture() {
   const s = defaultStudy();
   s.array.rows = 5;

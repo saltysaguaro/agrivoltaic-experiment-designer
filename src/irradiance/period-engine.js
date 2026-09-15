@@ -149,6 +149,7 @@ export async function calculateStudy(s, onProgress = () => {}, options = {}) {
     weatherHash: s.weather.hash || weatherInputHash,
     weatherInputHash,
     date: s.analysis.date,
+    samplesPerCell: s.analysis.samplesPerCell ?? 1,
     period,
     cells,
     grid: last.grid,

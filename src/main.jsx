@@ -9,7 +9,7 @@ import {
 } from './experiment/control-field.js';
 import { isPeriod, periodLabel, periodKeys, hasWeather, dliLabel } from './domain/period.js';
 import { projectJob } from './project/client.js';
-import { withoutFieldLayout } from './project/browser-study.js';
+import { browserStudyRecord, restoreBrowserStudy } from './project/browser-study.js';
 import { MAX_ARCHIVE } from './project/zip.js';
 import ProjectImportDialog from './ui/ProjectImportDialog.jsx';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -41,7 +41,6 @@ import {
 import {
   defaultStudy,
   VERSION,
-  migrateStudy,
   studySchema,
   dimensions,
   designIssues,
@@ -83,7 +82,7 @@ function load() {
   try {
     original = localStorage.getItem('aed-study-v1') || localStorage.getItem('fieldwork-study-v1');
     return {
-      study: original ? migrateStudy(withoutFieldLayout(JSON.parse(original))) : defaultStudy(),
+      study: original ? restoreBrowserStudy(JSON.parse(original)) : defaultStudy(),
     };
   } catch (error) {
     return {
@@ -376,7 +375,7 @@ function App() {
       return;
     }
     try {
-      localStorage.setItem('aed-study-v1', JSON.stringify(withoutFieldLayout(s)));
+      localStorage.setItem('aed-study-v1', JSON.stringify(browserStudyRecord(s)));
       localStorage.removeItem('fieldwork-study-v1');
       setSaveStatus('Layout is session-only · export to save');
     } catch {

@@ -156,6 +156,7 @@ test('monthly runs aggregate daily energy ratios, mean DLI, checkpoint resume an
     startMonth: 2,
     endMonth: 2,
     date: '2024-02-01',
+    samplesPerCell: 4,
   });
   s.module.bifacial = true;
   let checkpoint;

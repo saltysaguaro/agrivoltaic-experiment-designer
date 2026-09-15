@@ -40,7 +40,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
   study.weather.name = 'Illustrative clear-sky day · synthetic';
   study.analysis.backend = 'cpu';
   study.analysis.patches = 145;
-  study.analysis.resolution = 2;
+  study.analysis.resolution = 1;
   study.experimentSensors = [
     {
       id: 'OLD-SENSOR',
@@ -67,8 +67,12 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       replicate: '',
     },
   ];
-  localStorage.setItem('aed-study-v1', JSON.stringify(study));
-  localStorage.setItem('fieldwork-study-v1', JSON.stringify(study));
+  const legacyBrowserStudy = {
+    ...study,
+    analysis: { ...study.analysis, gridAlignment: 'spacing', resolution: 3 },
+  };
+  localStorage.setItem('aed-study-v1', JSON.stringify(legacyBrowserStudy));
+  localStorage.setItem('fieldwork-study-v1', JSON.stringify(legacyBrowserStudy));
   let calculations = 0,
     calculation;
   class TestWorker {
@@ -146,6 +150,8 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(document.querySelector('.brand svg'), null);
     assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).experimentSensors, []);
     assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).crops, []);
+    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).analysis, study.analysis);
+    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).browserGridDefaultsVersion, 1);
     assert.equal(localStorage.getItem('fieldwork-study-v1'), null);
     assert.match(document.body.textContent, /Layout is session-only/);
     const help = document.querySelector('button[aria-label="About Length"]');
@@ -228,6 +234,22 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.match(document.querySelector('.notice').textContent, /Daily light calculated/);
     assert.equal(document.querySelector('.model-disclosure'), null);
     assert.doesNotMatch(document.body.textContent, /GHI closure:|CPU occlusion matched Radiance/);
+    const sampleInput = document.querySelector('[data-annotation="analysis.samplesPerCell"] input');
+    assert.equal(sampleInput.value, '1');
+    assert.equal(sampleInput.min, '1');
+    assert.equal(sampleInput.max, '9');
+    for (const count of [9, 1]) {
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+          sampleInput,
+          String(count),
+        );
+        sampleInput.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+      });
+      assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.samplesPerCell, count);
+      assert.equal(byText('Relative sunlight').disabled, count !== 1);
+      assert.equal(calculations, 1, 'Sampling edits invalidate results without starting a solve');
+    }
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
     await click(step('Row spacing'));
     const reservation = document.querySelector('[data-annotation="landUse.underPanelWidth"] input');
@@ -386,7 +408,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       const spacing = document.querySelector('[data-annotation="analysis.resolution"] input');
       Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
         spacing,
-        '2',
+        '1',
       );
       spacing.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
       const patches = document.querySelector('[data-annotation="analysis.patches"] select');

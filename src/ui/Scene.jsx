@@ -819,7 +819,14 @@ export default function Scene({
             <span>
               East {hover.cell.x.toFixed(2)} m · North {hover.cell.y.toFixed(2)} m
             </span>
-            <span>Height {hover.cell.z.toFixed(2)} m</span>
+            <span>
+              {control
+                ? 'Uniform full-sun reference'
+                : (result?.samplesPerCell ?? 1) > 1
+                  ? `Estimated cell mean · ${result.samplesPerCell} samples`
+                  : 'Cell-centre sample'}{' '}
+              · height {hover.cell.z.toFixed(2)} m
+            </span>
             {hover.cell.sunlight !== undefined && (
               <>
                 <div>
@@ -832,6 +839,13 @@ export default function Scene({
                   {(hover.cell.wh / 1000).toFixed(3)} kWh m⁻²{' '}
                   {result?.period ? 'over period' : 'day⁻¹'}
                 </span>
+                {hover.cell.wh === 0 && (
+                  <span>
+                    {(result?.samplesPerCell ?? 1) > 1
+                      ? 'No light reached the sampled points. Supports may block samples; finite sampling can miss small sunlit areas.'
+                      : 'No light reached this sample point. A point inside a support can read zero; this value is not an average over the cell.'}
+                  </span>
+                )}
               </>
             )}
             {hover.sensors.length > 0 && (

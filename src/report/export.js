@@ -1,4 +1,4 @@
-import { gridSpacingLabel } from '../domain/receiver-grid.js';
+import { gridSpacingLabel, cellSamplingDescription } from '../domain/receiver-grid.js';
 import { fieldStudy, controlResult, controlLayers } from '../experiment/control-field.js';
 import { designLayers } from '../ui/display-layers.js';
 import { receiverGridSpec } from '../domain/geometry.js';
@@ -242,6 +242,7 @@ export function methodsRows(s, r) {
     ['Solver', r?.backend || 'Not calculated'],
     ['Sky', 'Perez 1993 relative sky distribution normalized to DHI'],
     ['Sky subdivision', `Reinhart ${s.analysis.patches} patches`],
+    ['Within-cell sampling', cellSamplingDescription(s.analysis.samplesPerCell)],
     [
       'Direct integration',
       `${s.analysis.interval} min; source interval energy conserved; GHI authoritative`,

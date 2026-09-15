@@ -1,5 +1,29 @@
 // Pure grid math shared by solver geometry, field editing, hit testing and exports.
 // x is along PV rows; y is across row centre lines. Bounds retain the exact footprint.
+export function cellSampleOffsets(count = 1) {
+  if (!Number.isInteger(count) || count < 1 || count > 9)
+    throw Error('Samples per cell must be an integer from 1 to 9.');
+  // Partition into equal-area rectangles and sample each rectangle's centre.
+  // Row heights scale with their column counts, so every sample has weight 1/N.
+  // Four and nine samples give regular 2×2 and 3×3 patterns.
+  const rows = Math.round(Math.sqrt(count)),
+    points = [];
+  let used = 0;
+  for (let row = 0; row < rows; row++) {
+    const columns = Math.floor(count / rows) + (row >= rows - (count % rows) ? 1 : 0);
+    for (let column = 0; column < columns; column++)
+      points.push({ x: (column + 0.5) / columns, y: (used + columns / 2) / count });
+    used += columns;
+  }
+  return points;
+}
+
+export function cellSamplingDescription(count = 1) {
+  return count === 1
+    ? '1 cell-centre point sample; not a within-cell spatial average. A sample inside an opaque support can read zero.'
+    : `${count} samples per cell; estimated cell mean from equally weighted centres of equal-area subrectangles. Supports remain opaque; finite sampling can miss small shadows.`;
+}
+
 export function receiverSpec(study, dimensions) {
   const s = study,
     d = dimensions;

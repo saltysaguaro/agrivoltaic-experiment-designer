@@ -692,6 +692,16 @@ export default function Controls({
               { value: 577, label: 'Standard · 577 patches' },
               { value: 2305, label: 'High · 2,305 patches' },
             ])}
+            {field('analysis', 'samplesPerCell', 'Samples per grid cell', null, null, {
+              min: 1,
+              max: 9,
+              step: 1,
+              integer: true,
+            })}
+            <p className="control-note">
+              1 uses the cell centre. 2–9 estimate the cell mean. More samples increase calculation
+              time without changing cell boundaries. Recalculate after editing.
+            </p>
             {field('analysis', 'interval', 'Direct integration interval', null, [
               { value: 5, label: '5 minutes' },
               { value: 10, label: '10 minutes' },

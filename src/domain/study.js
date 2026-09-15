@@ -146,6 +146,7 @@ export const studySchema = z
           return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === v;
         }, 'Use a valid calendar date'),
       resolution: num(0.25, 5),
+      samplesPerCell: count(1, 9).default(1),
       gridAlignment: z.enum(['spacing', 'row-centres']).default('spacing'),
       cellsPerRow: count(1, 99).default(9),
       receiverHeight: num(0, 5),
@@ -291,6 +292,11 @@ export function migrateStudy(data) {
   return studySchema.parse(candidate);
 }
 export function analysisKey(s) {
+  // One centre sample preserves keys from projects created before this option.
+  const analysis = {
+    ...s.analysis,
+    samplesPerCell: (s.analysis.samplesPerCell ?? 1) === 1 ? undefined : s.analysis.samplesPerCell,
+  };
   return JSON.stringify([
     VERSION,
     s.module,
@@ -301,8 +307,8 @@ export function analysisKey(s) {
     s.array,
     s.site,
     s.analysis.gridAlignment === 'row-centres'
-      ? s.analysis
-      : { ...s.analysis, gridAlignment: undefined, cellsPerRow: undefined },
+      ? analysis
+      : { ...analysis, gridAlignment: undefined, cellsPerRow: undefined },
     { ...s.weather, sourceText: undefined },
   ]);
 }

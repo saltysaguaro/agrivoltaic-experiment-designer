@@ -1,4 +1,4 @@
-import { gridMean } from '../domain/receiver-grid.js';
+import { gridMean, cellSampleOffsets, rowEdge, rowHeight } from '../domain/receiver-grid.js';
 import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
 import { validateWeatherRows, canonicalWeatherRows } from './weather-validation.js';
 import { verifyWeatherRecord } from './weather-record.js';
@@ -8,6 +8,7 @@ import {
   disposeGroup,
   receiverGrid,
   getPose,
+  localToWorld,
 } from '../domain/geometry.js';
 import { analysisKey, sha256, VERSION, designIssues } from '../domain/study.js';
 import { solarPosition, sampleWeather, spitters } from './solar.js';
@@ -133,6 +134,22 @@ export async function calculateDay(
     energy = new Float64Array(grid.points.length),
     dli = new Float64Array(grid.points.length),
     warnings = [...source.warnings];
+  const samplesPerCell = s.analysis.samplesPerCell ?? 1;
+  // Trace one offset across the grid at a time, bounding visibility-buffer size
+  // at the existing single-sample size even at nine samples per cell.
+  const sampleBatches = cellSampleOffsets(samplesPerCell).map((offset) =>
+    samplesPerCell === 1
+      ? grid.points
+      : grid.points.map((_, i) =>
+          localToWorld(
+            s,
+            -grid.width / 2 + ((i % grid.nx) + offset.x) * grid.dx,
+            rowEdge(grid, Math.floor(i / grid.nx)) +
+              offset.y * rowHeight(grid, Math.floor(i / grid.nx)),
+            s.analysis.receiverHeight,
+          ),
+        ),
+  );
   const optics = moduleOptics(s.module),
     transmitting = optics.broadband > 0 || optics.par > 0;
   const weights = transmitting
@@ -177,13 +194,13 @@ export async function calculateDay(
     }
     timings.geometryMs += performance.now() - started;
   }
-  async function visibility(directions) {
+  async function visibility(points, directions) {
     const started = performance.now();
     try {
-      return await engine.visibility(grid.points, directions);
+      return await engine.visibility(points, directions);
     } catch (e) {
       await fallback(e);
-      return await engine.visibility(grid.points, directions);
+      return await engine.visibility(points, directions);
     } finally {
       timings.visibilityMs += performance.now() - started;
     }
@@ -201,6 +218,7 @@ export async function calculateDay(
       s.analysis.resolution,
       s.analysis.receiverHeight,
       s.analysis.patches,
+      ...(samplesPerCell > 1 ? ['equal-area-cell-samples-v1', samplesPerCell] : []),
       ...(s.analysis.gridAlignment === 'row-centres'
         ? ['row-centres', s.analysis.cellsPerRow ?? 9]
         : []),
@@ -232,50 +250,61 @@ export async function calculateDay(
     }
     let done = 0,
       total =
-        groups.size * source.patches.length +
-        source.steps.filter((v) => v.direct || v.parDirect).length;
+        samplesPerCell *
+        (groups.size * source.patches.length +
+          source.steps.filter((v) => v.direct || v.parDirect).length);
     for (const group of groups.values()) {
-      const key = `${geometryHash}:${engine.name}:${group.pose.key}`,
-        existing = await cache.get(key).catch(() => null);
-      let bits = existing;
-      if (bits) cached++;
-      else {
-        await initialize(group.pose);
-        bits = await visibility(source.patches.map((p) => p.direction));
-        // The backend may change after a failed GPU dispatch. Do not label CPU
-        // visibility as GPU data in a later run.
-        await cache.put(`${geometryHash}:${engine.name}:${group.pose.key}`, bits).catch(() => {});
+      for (const [sample, points] of sampleBatches.entries()) {
+        const suffix = samplesPerCell > 1 ? `:sample-${sample}` : '';
+        const key = `${geometryHash}:${engine.name}:${group.pose.key}${suffix}`,
+          existing = await cache.get(key).catch(() => null);
+        let bits = existing;
+        if (bits) cached++;
+        else {
+          await initialize(group.pose);
+          bits = await visibility(
+            points,
+            source.patches.map((p) => p.direction),
+          );
+          // The backend may change after a failed GPU dispatch. Do not label CPU
+          // visibility as GPU data in a later run.
+          await cache
+            .put(`${geometryHash}:${engine.name}:${group.pose.key}${suffix}`, bits)
+            .catch(() => {});
+        }
+        const words = Math.ceil(source.patches.length / 32);
+        for (let i = 0; i < grid.points.length; i++)
+          for (let j = 0; j < source.patches.length; j++)
+            if (transmitting) {
+              const n = bits[i * source.patches.length + j];
+              energy[i] += (group.sky[j] * weights[0][n]) / samplesPerCell;
+              dli[i] += (group.par[j] * weights[1][n]) / samplesPerCell;
+            } else if (bits[i * words + (j >>> 5)] & (1 << (j & 31))) {
+              energy[i] += group.sky[j] / samplesPerCell;
+              dli[i] += group.par[j] / samplesPerCell;
+            }
+        done += source.patches.length;
+        onProgress({
+          progress: done / total,
+          message: `${engine.name}: integrating diffuse sky (${cached} cached sample batches)`,
+        });
       }
-      const words = Math.ceil(source.patches.length / 32);
-      for (let i = 0; i < grid.points.length; i++)
-        for (let j = 0; j < source.patches.length; j++)
-          if (transmitting) {
-            const n = bits[i * source.patches.length + j];
-            energy[i] += group.sky[j] * weights[0][n];
-            dli[i] += group.par[j] * weights[1][n];
-          } else if (bits[i * words + (j >>> 5)] & (1 << (j & 31))) {
-            energy[i] += group.sky[j];
-            dli[i] += group.par[j];
-          }
-      done += source.patches.length;
-      onProgress({
-        progress: done / total,
-        message: `${engine.name}: integrating diffuse sky (${cached} cached poses)`,
-      });
     }
     for (const step of source.steps) {
       if (!step.direct && !step.parDirect) continue;
       await initialize(getPose(s, step.sun));
-      const bits = await visibility([step.sun]);
-      for (let i = 0; i < grid.points.length; i++)
-        if (transmitting) {
-          energy[i] += step.direct * weights[0][bits[i]];
-          dli[i] += step.parDirect * weights[1][bits[i]];
-        } else if (bits[i] & 1) {
-          energy[i] += step.direct;
-          dli[i] += step.parDirect;
-        }
-      onProgress({ progress: ++done / total, message: 'Tracing moving direct shadows' });
+      for (const points of sampleBatches) {
+        const bits = await visibility(points, [step.sun]);
+        for (let i = 0; i < grid.points.length; i++)
+          if (transmitting) {
+            energy[i] += (step.direct * weights[0][bits[i]]) / samplesPerCell;
+            dli[i] += (step.parDirect * weights[1][bits[i]]) / samplesPerCell;
+          } else if (bits[i] & 1) {
+            energy[i] += step.direct / samplesPerCell;
+            dli[i] += step.parDirect / samplesPerCell;
+          }
+        onProgress({ progress: ++done / total, message: 'Tracing moving direct shadows' });
+      }
     }
     const cells = grid.points.map((p, i) => ({
       ...p,
@@ -296,6 +325,7 @@ export async function calculateDay(
         canonicalWeatherRows(s.weather.rows.length ? s.weather.rows : sampleWeather(s)),
       ),
       date: s.analysis.date,
+      samplesPerCell,
       cells,
       grid: { ...grid, points: undefined },
       openWh: source.open,

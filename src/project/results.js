@@ -10,6 +10,8 @@ const close = (a, b) =>
 export async function validateResult(s, r) {
   if (!r || typeof r !== 'object') throw Error('No calculated results were included.');
   const key = analysisKey(s);
+  if ((r.samplesPerCell ?? 1) !== (s.analysis.samplesPerCell ?? 1))
+    throw Error('Saved within-cell sampling does not match this project.');
   if (r.key !== key || r.studyHash !== (await sha256(key)) || r.date !== s.analysis.date)
     throw Error('Saved light results belong to different or older analysis inputs.');
   const weatherHash = await resultWeatherHash(s);
