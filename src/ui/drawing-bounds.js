@@ -1,13 +1,36 @@
-import { Box3, Vector3 } from 'three';
+import { Vector3 } from 'three';
+import { ConvexHull } from 'three/addons/math/ConvexHull.js';
 import { fitOrthographic } from './camera.js';
 export function hardwarePoints(group) {
-  // A module uses its exact oriented box; larger assemblies use a bounded envelope.
+  // Project the true hardware hull. Even an array-aligned bounding box invents
+  // empty corners above a tilted panel and can force dimensions below the ground.
   if (group.userData.scope === 'module') {
     const mesh = group.children.find((o) => o.userData.kind === 'module');
     mesh.geometry.computeBoundingBox();
     return corners(mesh.geometry.boundingBox).map((p) => p.applyMatrix4(mesh.matrixWorld));
   }
-  return corners(new Box3().setFromObject(group));
+  let points = [];
+  const compact = () => {
+    if (points.length <= 8) return;
+    const hull = new ConvexHull().setFromPoints(points),
+      vertices = new Set();
+    for (const face of hull.faces) {
+      let edge = face.edge;
+      do {
+        vertices.add(edge.head().point);
+        edge = edge.next;
+      } while (edge !== face.edge);
+    }
+    points = [...vertices];
+  };
+  for (const mesh of group.children.filter((o) => o.isMesh)) {
+    mesh.geometry.computeBoundingBox();
+    points.push(...corners(mesh.geometry.boundingBox).map((p) => p.applyMatrix4(mesh.matrixWorld)));
+    // The hull of accumulated hulls is exact, and keeps large arrays bounded.
+    if (points.length >= 2048) compact();
+  }
+  compact();
+  return points;
 }
 function corners(b) {
   const ps = [];

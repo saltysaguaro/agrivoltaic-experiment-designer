@@ -66,7 +66,13 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
     (g.width * Math.cos(tilt) + s.module.thickness * Math.abs(Math.sin(tilt))) / 2;
   const first = group.children.find((o) => o.userData.kind === 'module');
   const modulePoint = (x, y, z) => new Vector3(x, y, z).applyMatrix4(first.matrixWorld);
-  const ids = focus ? [focus.id] : defaults[scope] || defaults.array;
+  const ids = focus
+    ? [focus.id]
+    : (defaults[scope] || defaults.array).filter(
+        (id) =>
+          !(id === 'row.tableGap' && s.row.tables === 1) &&
+          !(id === 'racking.tilt' && ['vertical', 'pergola'].includes(s.racking.type)),
+      );
   return ids.map((id) => {
     const named = labels[id];
     let value = id.split('.').reduce((o, key) => o?.[key], s);
@@ -88,10 +94,10 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
       active: Boolean(focus),
     };
     const dimension = (from, to, note) => {
-      a.kind = 'dimension';
+      a.kind = from.distanceTo(to) < 1e-8 ? 'leader' : 'dimension';
       a.external =
         /^(module|table|racking|row)\./.test(id) || ['array.rows', 'array.groupSize'].includes(id);
-      a.points = [from, to];
+      a.points = a.kind === 'leader' ? [from] : [from, to];
       if (note) a.detail = note;
     };
     const along = d.along / 2,
@@ -105,13 +111,22 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
       );
     } else if (id === 'module.thickness')
       dimension(modulePoint(along, -cross, -thick), modulePoint(along, -cross, thick));
-    else if (id === 'module.gap')
-      dimension(
-        modulePoint(along, -cross, thick),
-        modulePoint(along + s.module.gap, -cross, thick),
-        'Clear gap beyond this frame; repeats between modules when a table is assembled.',
-      );
-    else if (id === 'racking.height') dimension(p(0, cy), p(0, cy, h));
+    else if (id === 'module.gap') {
+      const simple = ['module', 'racking'].includes(g.scope);
+      if (!simple && s.table.wide > 1)
+        dimension(
+          modulePoint(along, -cross, thick),
+          modulePoint(along + s.module.gap, -cross, thick),
+        );
+      else if (!simple && s.table.high > 1)
+        dimension(
+          modulePoint(-along, cross, thick),
+          modulePoint(-along, cross + s.module.gap, thick),
+        );
+      else
+        a.detail =
+          'This view has no adjacent modules within a table. The module gap is shown when the table contains multiple modules.';
+    } else if (id === 'racking.height') dimension(p(0, cy), p(0, cy, h));
     else if (id === 'racking.postSize') {
       const post = group.children.find((o) => o.userData.kind === 'post');
       if (post)
@@ -137,22 +152,22 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
       ];
       if (limit && s.racking.type === 'dual-axis') a.value = `0–${s.racking.limit}° tilt`;
     } else if (id === 'table.high')
-      dimension(surface(-g.length / 2, -g.width / 2), surface(-g.length / 2, g.width / 2));
+      dimension(surface(rowStart, -g.width / 2), surface(rowStart, g.width / 2));
     else if (id === 'table.wide')
-      dimension(
-        surface(-g.length / 2, -g.width / 2),
-        surface(-g.length / 2 + d.tableLength, -g.width / 2),
-      );
+      dimension(surface(rowStart, -g.width / 2), surface(rowStart + d.tableLength, -g.width / 2));
     else if (id === 'row.tables')
       dimension(surface(rowStart, 0), surface(rowStart + (g.rowLength ?? g.length), 0));
-    else if (id === 'row.tableGap')
-      dimension(
-        surface(-g.length / 2 + d.tableLength, 0),
-        surface(-g.length / 2 + d.tableLength + s.row.tableGap, 0),
-        s.row.tables === 1 ? 'Gap to the next table, once another table is added.' : a.detail,
-      );
-    else if (id === 'rowPair.pitch' && cy1 !== undefined) {
-      dimension(p(-g.length / 2, cy), p(-g.length / 2, cy + s.rowPair.pitch));
+    else if (id === 'row.tableGap') {
+      if (s.row.tables > 1)
+        dimension(
+          surface(rowStart + d.tableLength, -g.width / 2),
+          surface(rowStart + d.tableLength + s.row.tableGap, -g.width / 2),
+        );
+      else
+        a.detail =
+          'There is only one table in this row. This gap applies when another table is added.';
+    } else if (id === 'rowPair.pitch' && cy1 !== undefined) {
+      dimension(p(rowStart, cy), p(rowStart, cy + s.rowPair.pitch));
       if (cy1 - cy > s.rowPair.pitch + 1e-6)
         a.detail += ' The displayed pair also includes the extra group aisle.';
     } else if (id === 'landUse.underPanelWidth')
@@ -185,18 +200,18 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
         p(g.length / 2 + b, id === 'array.buffer' ? g.span / 2 : -g.span / 2),
       );
     } else if (id === 'array.rows') dimension(p(0, cy), p(0, g.rowOffsets.at(-1)));
-    else if (id === 'array.groupSize')
-      dimension(
-        p(g.length / 2, cy),
-        p(g.length / 2, g.rowOffsets[Math.min(s.array.groupSize, g.rowOffsets.length) - 1]),
-      );
-    else if (id === 'array.aisle') {
+    else if (id === 'array.groupSize') {
+      if (g.rowOffsets.length >= s.array.groupSize)
+        dimension(
+          p(g.length / 2, cy),
+          p(g.length / 2, g.rowOffsets[Math.min(s.array.groupSize, g.rowOffsets.length) - 1]),
+        );
+      else
+        a.detail = `Configured for ${s.array.groupSize} rows per group; only ${g.rowOffsets.length} rows are present in this view.`;
+    } else if (id === 'array.aisle') {
       const prev = g.rowOffsets[s.array.groupSize - 1];
       if (g.rowOffsets.length > s.array.groupSize)
-        dimension(
-          p(0, prev + s.rowPair.pitch / 2),
-          p(0, prev + s.rowPair.pitch / 2 + s.array.aisle),
-        );
+        dimension(p(0, prev + s.rowPair.pitch), p(0, g.rowOffsets[s.array.groupSize]));
       else
         a.detail =
           'No group boundary in this view. This extra spacing appears once the array has more rows than one group.';

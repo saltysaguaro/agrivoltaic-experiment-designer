@@ -125,6 +125,7 @@ export function figureSvg(
     return lower.slice(0, -1).concat(upper.slice(0, -1));
   }
   let all = shapes.flatMap((s) => s.points);
+  for (const annotation of annotations) all.push(...annotation.points.map(project));
   if (ground) all.push(...ground.corners.map(project));
   for (const zone of zones) all.push(...zone.corners.map(project));
   if (arrayScope) all.push(...receiverBoundary.map(project));
@@ -266,6 +267,7 @@ export function figureSvg(
   }
   content += annotationSvg(annotations, (p) => xy(project(p)), 1000, 520, {
     obstacles: hardware.map((p) => xy(project(p))),
+    top: 75,
   });
   if (!noCallouts && arrayScope && layers.modules && view === 'plan')
     rowOffsets.forEach((offset, i) => {

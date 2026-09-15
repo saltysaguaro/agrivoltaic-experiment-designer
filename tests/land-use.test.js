@@ -137,10 +137,13 @@ test('engineering witnesses match actual rotated module edges, land widths, sens
     s.array.azimuth = 123;
     s.table.orientation = orientation;
     const group = buildGeometry(s, 'module');
-    for (const key of ['length', 'width', 'thickness', 'gap']) {
+    for (const key of ['length', 'width', 'thickness']) {
       const [a] = engineeringAnnotations(s, 'module', group, { id: `module.${key}` });
       near(a.points[0].distanceTo(a.points[1]), s.module[key]);
     }
+    const [gap] = engineeringAnnotations(s, 'module', group, { id: 'module.gap' });
+    assert.equal(gap.kind, 'context');
+    assert.equal(gap.points.length, 0, 'A single module has no physical gap to measure');
     disposeGroup(group);
   }
   for (const type of ['fixed', 'vertical', 'pergola', 'single-axis', 'dual-axis']) {
