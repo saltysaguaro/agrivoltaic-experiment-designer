@@ -1,3 +1,4 @@
+import { receiverSpec, cellLocal } from './receiver-grid.js';
 import { moduleOptics } from './optics.js';
 import { packModuleBvh } from '../irradiance/module-bvh.js';
 import * as THREE from 'three';
@@ -241,21 +242,16 @@ export function disposeGroup(group) {
   });
 }
 export function receiverGridSpec(s) {
-  const d = dimensions(s),
-    nx = Math.ceil(d.footprintX / s.analysis.resolution),
-    ny = Math.ceil(d.footprintY / s.analysis.resolution),
-    dx = d.footprintX / nx,
-    dy = d.footprintY / ny;
-  return { nx, ny, dx, dy, width: d.footprintX, height: d.footprintY, azimuth: s.array.azimuth };
+  return receiverSpec(s, dimensions(s));
 }
+
 export function receiverGrid(s) {
   const grid = receiverGridSpec(s),
     { nx, ny, dx, dy } = grid;
   const points = [];
   for (let j = 0; j < ny; j++)
     for (let i = 0; i < nx; i++) {
-      const x = -grid.width / 2 + (i + 0.5) * dx,
-        y = -grid.height / 2 + (j + 0.5) * dy,
+      const { x, y } = cellLocal(grid, i, j),
         p = localToWorld(s, x, y, s.analysis.receiverHeight);
       points.push({ x: p.x, y: p.y, z: p.z, lx: x, ly: y });
     }

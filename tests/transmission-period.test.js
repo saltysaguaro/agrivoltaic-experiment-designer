@@ -180,8 +180,8 @@ test('monthly runs aggregate daily energy ratios, mean DLI, checkpoint resume an
     full.openWh,
     full.daily.reduce((n, d) => n + d.openWh, 0),
   );
-  near(full.cells[0].dli, full.daily.reduce((n, d) => n + d.meanDli, 0) / 29);
-  near(full.cells[0].sunlight, (100 * full.daily.reduce((n, d) => n + d.meanWh, 0)) / full.openWh);
+  near(full.meanDli, full.daily.reduce((n, d) => n + d.meanDli, 0) / 29);
+  near(full.meanSunlight, (100 * full.daily.reduce((n, d) => n + d.meanWh, 0)) / full.openWh);
   assert.ok(full.daily.some((d) => Math.abs(d.openWh - full.daily[0].openWh) > 1));
   await validateResult(s, full);
   const bad = structuredClone(full);

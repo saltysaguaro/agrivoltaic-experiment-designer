@@ -80,8 +80,12 @@ export const inputHelp = {
     'The calendar day to model in local standard time. Automatic weather downloads use this day and your location.',
   'weather.mode':
     'Automatic downloads site weather from Open-Meteo. Uploaded uses your own weather file. Illustrative uses a synthetic clear-sky day and is only for exploring the designer.',
+  'analysis.gridAlignment':
+    'Row alignment puts cell boundaries on adjacent PV row centre lines. Each gap contains the chosen number of cells, including wider aisle gaps. Uniform spacing retains the older footprint-fitted grid.',
+  'analysis.cellsPerRow':
+    'Number of cells across each PV row-centre gap. The default is nine. More cells resolve variation across the rows at greater calculation cost. This is across the PV rows, not along individual modules.',
   'analysis.resolution':
-    'Distance between numerical ground-light samples. Smaller spacing gives finer maps but takes more time and memory. These points are not physical instruments.',
+    'Nominal spacing along PV rows when row alignment is enabled; spacing in both directions in uniform mode. Smaller spacing gives finer maps but takes more time and memory. These points are not physical instruments.',
   'analysis.receiverHeight':
     'Height of the horizontal surface where light is calculated, such as crop-canopy height. Physical instruments can be placed at other heights.',
   'analysis.patches':

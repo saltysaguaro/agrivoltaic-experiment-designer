@@ -1,3 +1,4 @@
+import { gridSpacingLabel } from '../domain/receiver-grid.js';
 import { moduleOptics } from '../domain/optics.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import React, { useId, useState, useEffect, useRef, createContext, useContext } from 'react';
@@ -647,12 +648,40 @@ export default function Controls({
               {periodLabel(s)}
               {isPeriod(s) ? ' · Maps show period-total irradiation and mean daily DLI.' : ''}
             </p>
+            {field('analysis', 'gridAlignment', 'Receiver grid alignment', null, [
+              { value: 'row-centres', label: 'Align to PV row centres (default)' },
+              { value: 'spacing', label: 'Uniform spacing (custom)' },
+            ])}
+            {s.analysis.gridAlignment === 'row-centres' && (
+              <>
+                {field('analysis', 'cellsPerRow', 'Cells between PV row centres', null, null, {
+                  min: 1,
+                  max: 99,
+                  step: 1,
+                  integer: true,
+                })}
+                <p className="control-note">
+                  Cell boundaries meet each PV row centre line, with {s.analysis.cellsPerRow} cells
+                  across every gap. Wider aisle gaps have wider cells. The outer buffer fills the
+                  remaining footprint.
+                </p>
+              </>
+            )}
             <div className="field-pair">
-              {field('analysis', 'resolution', 'Receiver spacing', 'm', null, {
-                min: 0.25,
-                max: 5,
-                step: 0.25,
-              })}
+              {field(
+                'analysis',
+                'resolution',
+                s.analysis.gridAlignment === 'row-centres'
+                  ? 'Along-row receiver spacing'
+                  : 'Receiver spacing',
+                'm',
+                null,
+                {
+                  min: 0.25,
+                  max: 5,
+                  step: 0.25,
+                },
+              )}
               {field('analysis', 'receiverHeight', 'Receiver height', 'm', null, {
                 min: 0,
                 max: 5,
@@ -717,14 +746,14 @@ export default function Controls({
               Apply standard settings
             </button>
             <small>
-              Preview: 3 m cells, 145 sky patches, 15-minute steps. Standard: 1 m cells, 577
-              patches, 10-minute steps. Receiver spacing controls ground-grid detail; smaller
-              spacing gives finer cells. Sky resolution and time interval are independent and do not
-              change receiver spacing. Recalculate after editing.
+              Preview uses a uniform 3 m grid, 145 sky patches and 15-minute steps. Standard uses
+              nine cells between row centres, 1 m along-row spacing, 577 patches and 10-minute
+              steps. Sky resolution and time interval do not change cell alignment. Recalculate
+              after editing.
             </small>
             <p className="control-note">
               Current grid: {receiver.nx} × {receiver.ny} cells; actual spacing{' '}
-              {receiver.dx.toFixed(2)} × {receiver.dy.toFixed(2)} m.
+              {gridSpacingLabel(receiver, 2)}.
             </p>
             <div className="info-box">
               Numerical receivers sample the horizontal light field. Place physical instruments in

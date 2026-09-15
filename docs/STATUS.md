@@ -1,5 +1,13 @@
 # Implementation status
 
+## Row-centred receiver grid and quiet diagnostics (September 15)
+
+- New studies and Apply standard settings default to nine cells between adjacent PV row centre lines. Cell boundaries anchor to every row centre; wider access-aisle gaps still contain nine cells with larger across-row widths. Outer cells fit the original numerical footprint. Along-row spacing remains independent. Custom uniform spacing and the coarse-preview preset remain available; legacy imports retain their previous uniform grids and analysis keys.
+- A shared grid description supplies exact row boundaries to sampling, Three.js/SVG tiles, hit testing, receiver outlines, physical sensors and crop beds. The control field uses the identical footprint/grid. Receiver and crop means, standard deviations and crop medians account for unequal cell areas; daily/period/project validation uses the same area weighting. Group copies/moves snap to compatible translations to preserve physical sizes and relationships across unequal cell widths.
+- Grid alignment and cell count participate in numerical invalidation, visibility-cache keys and display refreshes. Exported JSON includes exact `yEdges`; CSV, figure captions and methods/provenance describe the alignment and spacing range. Crop lengths can represent sub-0.1 m receiver cells, while retaining the 100 m maximum.
+- Routine backend, sky/time settings, GHI closure warnings and validation details are logged in one collapsed browser-console group. The long on-page model disclosure is removed; errors remain visible and exported provenance retains diagnostics. Console validation details use the checked-in Radiance record; report ray counts have been refreshed to 51,100 / 10 cases.
+- Verification: 103 tests pass, including row/aisle alignment, rotated hit tests, unequal-area summaries, legacy key compatibility, cache isolation, field copies, package round trips and quiet UI checks. Production build, formatting and archive verification pass. The installed Radiance harness again reports zero occlusion mismatches across 51,100 rays / 10 cases; this is not independent sky, daily-energy, GPU or field validation. Browser checks verified the alignment selector, visible row-centred boundaries and changing nine to eighteen cells (21 × 39 to 21 × 78 in the example).
+
 ## Agrivoltaic and control layouts (September 14)
 
 - Ten-stage workflow: Irradiance → Agrivoltaic → Control → Methods & export. Irradiance retains expanded inputs and excludes sensor/crop placement tools after calculation. Saved navigation migrates to the correct stages.

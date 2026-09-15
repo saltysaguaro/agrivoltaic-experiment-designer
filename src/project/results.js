@@ -1,8 +1,12 @@
+import { cellLocal, gridMean } from '../domain/receiver-grid.js';
 import { resultWeatherHash } from '../irradiance/period-engine.js';
 import { isPeriod, analysisPeriod, periodDates } from '../domain/period.js';
 import { analysisKey, sha256 } from '../domain/study.js';
 import { receiverGridSpec, localToWorld } from '../domain/geometry.js';
-const close = (a, b) => Number.isFinite(a) && Math.abs(a - b) <= 1e-7 * Math.max(1, Math.abs(b));
+const close = (a, b) =>
+  Array.isArray(b)
+    ? Array.isArray(a) && a.length === b.length && b.every((v, i) => close(a[i], v))
+    : Number.isFinite(a) && Math.abs(a - b) <= 1e-7 * Math.max(1, Math.abs(b));
 export async function validateResult(s, r) {
   if (!r || typeof r !== 'object') throw Error('No calculated results were included.');
   const key = analysisKey(s);
@@ -15,7 +19,11 @@ export async function validateResult(s, r) {
     count = g.nx * g.ny;
   if (count > 20000 || !Array.isArray(r.cells) || r.cells.length !== count)
     throw Error('Saved receiver count does not match this project.');
-  if (!r.grid || !Object.entries(g).every(([k, v]) => close(r.grid[k], v)))
+  if (
+    !r.grid ||
+    (!g.yEdges && r.grid.yEdges !== undefined) ||
+    !Object.entries(g).every(([k, v]) => close(r.grid[k], v))
+  )
     throw Error('Saved receiver-grid geometry does not match this project.');
   for (const key of ['openWh', 'openDli', 'seconds', 'meanSunlight', 'meanShade', 'meanDli'])
     if (!Number.isFinite(r[key]) || r[key] < 0 || r[key] > 1e9)
@@ -37,12 +45,9 @@ export async function validateResult(s, r) {
     r.warnings.some((w) => typeof w !== 'string' || w.length > 2000)
   )
     throw Error('Invalid saved calculation warnings.');
-  let sunlight = 0,
-    shade = 0,
-    dli = 0;
+
   for (const [i, c] of r.cells.entries()) {
-    const lx = -g.width / 2 + ((i % g.nx) + 0.5) * g.dx,
-      ly = -g.height / 2 + (Math.floor(i / g.nx) + 0.5) * g.dy;
+    const { x: lx, y: ly } = cellLocal(g, i % g.nx, Math.floor(i / g.nx));
     const point = localToWorld(s, lx, ly, s.analysis.receiverHeight);
     if (
       !c ||
@@ -63,14 +68,11 @@ export async function validateResult(s, r) {
     const fraction = Math.max(0, Math.min(100, (100 * c.wh) / r.openWh));
     if (!close(c.sunlight, fraction) || !close(c.shade, 100 - fraction))
       throw Error('Inconsistent sunlight values in receiver ' + (i + 1));
-    sunlight += c.sunlight;
-    shade += c.shade;
-    dli += c.dli;
   }
   if (
-    !close(r.meanSunlight, sunlight / count) ||
-    !close(r.meanShade, shade / count) ||
-    !close(r.meanDli, dli / count)
+    !close(r.meanSunlight, gridMean(r.cells, g, 'sunlight')) ||
+    !close(r.meanShade, gridMean(r.cells, g, 'shade')) ||
+    !close(r.meanDli, gridMean(r.cells, g, 'dli'))
   )
     throw Error('Saved summary does not match the receiver values.');
   if (isPeriod(s)) {
@@ -101,7 +103,7 @@ export async function validateResult(s, r) {
       !close(sum('openWh'), r.openWh) ||
       !close(sum('openDli') / p.days, r.openDli) ||
       !close(sum('meanDli') / p.days, r.meanDli) ||
-      !close(sum('meanWh'), r.cells.reduce((n, c) => n + c.wh, 0) / count)
+      !close(sum('meanWh'), gridMean(r.cells, g, 'wh'))
     )
       throw Error('Period totals do not match daily summaries.');
     const months = [...new Set(dates.map((d) => d.slice(0, 7)))];

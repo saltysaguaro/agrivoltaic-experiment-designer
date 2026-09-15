@@ -1,3 +1,4 @@
+import { rowIndex } from '../domain/receiver-grid.js';
 import { landUseZones } from '../domain/land-use.js';
 import { Vector3, Box3 } from 'three';
 import { receiverGridSpec, localToWorld } from '../domain/geometry.js';
@@ -69,7 +70,7 @@ export function receiverAtPoint(result, point) {
     x = -Math.cos(a) * point.x + Math.sin(a) * point.y,
     y = -Math.sin(a) * point.x - Math.cos(a) * point.y,
     i = Math.floor((x + g.width / 2) / g.dx),
-    j = Math.floor((y + g.height / 2) / g.dy);
+    j = Math.floor(rowIndex(g, y));
   return i < 0 || j < 0 || i >= g.nx || j >= g.ny
     ? null
     : { cell: result.cells[j * g.nx + i], index: j * g.nx + i };

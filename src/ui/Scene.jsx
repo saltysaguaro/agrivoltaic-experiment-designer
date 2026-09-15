@@ -1,3 +1,4 @@
+import { rowHeight, maxRows } from '../domain/receiver-grid.js';
 import { dliLabel } from '../domain/period.js';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -97,6 +98,8 @@ export default function Scene({
     study.rowPair.cropSetback,
     study.rowPair.croppingWidth,
     study.analysis.resolution,
+    study.analysis.gridAlignment,
+    study.analysis.cellsPerRow,
     study.analysis.receiverHeight,
     study.experimentSensors.map((s) => [s.id, s.x, s.y, s.z, s.grid]),
     study.crops.map((p) => [p.id, p.x, p.y, p.width, p.length, p.grid]),
@@ -464,6 +467,13 @@ export default function Scene({
           const matrix = new THREE.Matrix4().makeRotationZ(
             Math.atan2(axes(study).u.y, axes(study).u.x),
           );
+          matrix.scale(
+            new THREE.Vector3(
+              1,
+              rowHeight(result.grid, Math.floor(i / result.grid.nx)) / result.grid.dy,
+              1,
+            ),
+          );
           matrix.setPosition(c.x, c.y, 0.01);
           mesh.setMatrixAt(i, matrix);
           mesh.setColorAt(
@@ -727,7 +737,7 @@ export default function Scene({
         ),
         rows: Math.max(
           1,
-          Math.min(g.ny - item.grid.row, Math.floor(100 / g.dy), item.grid.rows + y),
+          Math.min(g.ny - item.grid.row, maxRows(g, item.grid.row), item.grid.rows + y),
         ),
       };
     } else grid = moveGrid(study, item.grid, { column: x, row: y });

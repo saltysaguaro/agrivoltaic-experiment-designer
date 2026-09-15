@@ -1,18 +1,23 @@
+import {
+  rowIndex,
+  rowEdge,
+  rowHeight,
+  rowSpan,
+  cellLocal,
+  maxRows,
+} from '../domain/receiver-grid.js';
 import { receiverGridSpec, localToWorld, worldToLocal } from '../domain/geometry.js';
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(v)));
 export function cellAt(study, point, grid = receiverGridSpec(study), clampOutside = true) {
   const p = worldToLocal(study, point.x, point.y);
   const column = Math.floor((p.x + grid.width / 2) / grid.dx);
-  const row = Math.floor((p.y + grid.height / 2) / grid.dy);
+  const row = Math.floor(rowIndex(grid, p.y));
   if (!clampOutside && (column < 0 || row < 0 || column >= grid.nx || row >= grid.ny)) return null;
   return { column: clamp(column, 0, grid.nx - 1), row: clamp(row, 0, grid.ny - 1) };
 }
 export function cellCenter(study, cell, grid = receiverGridSpec(study)) {
-  return localToWorld(
-    study,
-    -grid.width / 2 + (cell.column + 0.5) * grid.dx,
-    -grid.height / 2 + (cell.row + 0.5) * grid.dy,
-  );
+  const p = cellLocal(grid, cell.column, cell.row);
+  return localToWorld(study, p.x, p.y);
 }
 export function normalizeLayout(study) {
   const normalized = normalizeField(study);
@@ -42,10 +47,12 @@ function normalizeField(study) {
         1,
         Math.min(g.nx, Math.floor(100 / g.dx)),
       );
-      const rows = clamp(
-        plot.grid?.rows ?? plot.length / g.dy,
+      const local = worldToLocal(study, plot.x, plot.y);
+      let rows = clamp(
+        plot.grid?.rows ??
+          rowIndex(g, local.y + plot.length / 2) - rowIndex(g, local.y - plot.length / 2),
         1,
-        Math.min(g.ny, Math.floor(100 / g.dy)),
+        g.ny,
       );
       const p = worldToLocal(study, plot.x, plot.y);
       const column = clamp(
@@ -53,11 +60,12 @@ function normalizeField(study) {
         0,
         g.nx - columns,
       );
-      const row = clamp(plot.grid?.row ?? (p.y + g.height / 2) / g.dy - rows / 2, 0, g.ny - rows);
+      const row = clamp(plot.grid?.row ?? rowIndex(g, p.y - plot.length / 2), 0, g.ny - rows);
+      rows = Math.min(rows, maxRows(g, row));
       const center = localToWorld(
         study,
         -g.width / 2 + (column + columns / 2) * g.dx,
-        -g.height / 2 + (row + rows / 2) * g.dy,
+        (rowEdge(g, row) + rowEdge(g, row + rows)) / 2,
       );
       return {
         ...plot,
@@ -65,7 +73,7 @@ function normalizeField(study) {
         x: center.x,
         y: center.y,
         width: columns * g.dx,
-        length: rows * g.dy,
+        length: rowSpan(g, row, rows),
       };
     }),
   };
@@ -90,7 +98,7 @@ export function receiverLines(study, grid = receiverGridSpec(study)) {
     lines.push([localToWorld(study, x, -grid.height / 2), localToWorld(study, x, grid.height / 2)]);
   }
   for (let j = 0; j <= grid.ny; j++) {
-    const y = -grid.height / 2 + j * grid.dy;
+    const y = rowEdge(grid, j);
     lines.push([localToWorld(study, -grid.width / 2, y), localToWorld(study, grid.width / 2, y)]);
   }
   return lines;
@@ -111,7 +119,8 @@ export function sensorMarkers(study, { profile = false } = {}) {
       count = crowded ? 1 : sensors.length,
       cols = Math.ceil(Math.sqrt(count)),
       rows = Math.ceil(count / cols);
-    const radius = Math.min(g.dx / cols, g.dy / rows) * 0.28;
+    const dy = rowHeight(g, cell.row);
+    const radius = Math.min(g.dx / cols, dy / rows) * 0.28;
     return Array.from({ length: count }, (_, i) => {
       const lastCount = Math.min(cols, count - Math.floor(i / cols) * cols);
       const x =
@@ -119,9 +128,8 @@ export function sensorMarkers(study, { profile = false } = {}) {
         (cell.column + 0.5) * g.dx +
         ((((i % cols) - (lastCount - 1) / 2) * g.dx) / cols) * 0.8;
       const y =
-        -g.height / 2 +
-        (cell.row + 0.5) * g.dy +
-        (((Math.floor(i / cols) - (rows - 1) / 2) * g.dy) / rows) * 0.8;
+        cellLocal(g, cell.column, cell.row).y +
+        (((Math.floor(i / cols) - (rows - 1) / 2) * dy) / rows) * 0.8;
       const members = crowded ? sensors : [sensors[i]];
       return {
         position: localToWorld(study, x, y),

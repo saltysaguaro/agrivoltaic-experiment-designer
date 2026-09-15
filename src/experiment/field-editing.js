@@ -1,3 +1,4 @@
+import { rowIndex, rowEdge, rowSpan, cellLocal } from '../domain/receiver-grid.js';
 import { allFieldIds, uniqueFieldId } from './control-field.js';
 import { receiverGridSpec, worldToLocal } from '../domain/geometry.js';
 import { normalizeLayout } from './grid-layout.js';
@@ -8,7 +9,7 @@ export function layoutItems(study, kind) {
 export function gridPoint(study, point) {
   const g = receiverGridSpec(study),
     p = worldToLocal(study, point.x, point.y);
-  return { column: (p.x + g.width / 2) / g.dx, row: (p.y + g.height / 2) / g.dy };
+  return { column: (p.x + g.width / 2) / g.dx, row: rowIndex(g, p.y) };
 }
 // The opposite corner stays fixed. A bed cannot flip, leave the grid, or exceed 100 m.
 export function resizeGrid(study, original, corner, point) {
@@ -19,17 +20,14 @@ export function resizeGrid(study, original, corner, point) {
   const fixedX = original.column + (right ? 0 : original.columns);
   const fixedY = original.row + (top ? 0 : original.rows);
   const maxX = Math.max(1, Math.min(g.nx, Math.floor(100 / g.dx)));
-  const maxY = Math.max(1, Math.min(g.ny, Math.floor(100 / g.dy)));
+  const minY = Math.max(0, Math.ceil(rowIndex(g, rowEdge(g, fixedY) - 100) - 1e-9));
+  const maxY = Math.min(g.ny, Math.floor(rowIndex(g, rowEdge(g, fixedY) + 100) + 1e-9));
   const x = clamp(
     Math.round(p.column),
     right ? fixedX + 1 : Math.max(0, fixedX - maxX),
     right ? Math.min(g.nx, fixedX + maxX) : fixedX - 1,
   );
-  const y = clamp(
-    Math.round(p.row),
-    top ? fixedY + 1 : Math.max(0, fixedY - maxY),
-    top ? Math.min(g.ny, fixedY + maxY) : fixedY - 1,
-  );
+  const y = clamp(Math.round(p.row), top ? fixedY + 1 : minY, top ? maxY : fixedY - 1);
   return {
     column: Math.min(x, fixedX),
     row: Math.min(y, fixedY),
@@ -37,12 +35,37 @@ export function resizeGrid(study, original, corner, point) {
     rows: Math.abs(y - fixedY),
   };
 }
+// Unequal aisle cells cannot always accept an exact translated copy. Snap to the
+// nearest compatible row offset, preserving physical bed sizes and group spacing.
+function compatibleRowOffset(g, grids, requested) {
+  const min = Math.max(...grids.map((v) => -v.row));
+  const max = Math.min(...grids.map((v) => g.ny - v.row - (v.rows || 1)));
+  const target = clamp(Math.round(requested), min, max);
+  if (!g.yEdges) return target;
+  const centre = (v, offset) =>
+    (rowEdge(g, v.row + offset) + rowEdge(g, v.row + offset + (v.rows || 1))) / 2;
+  const valid = (offset) => {
+    const delta = centre(grids[0], offset) - centre(grids[0], 0);
+    return grids.every(
+      (v) =>
+        Math.abs(centre(v, offset) - centre(v, 0) - delta) < 1e-7 &&
+        (!v.rows ||
+          Math.abs(rowSpan(g, v.row + offset, v.rows) - rowSpan(g, v.row, v.rows)) < 1e-7),
+    );
+  };
+  for (let distance = 0; distance <= max - min; distance++) {
+    for (const offset of distance ? [target - distance, target + distance] : [target]) {
+      if (offset >= min && offset <= max && valid(offset)) return offset;
+    }
+  }
+  return 0;
+}
 export function moveGrid(study, original, delta) {
   const g = receiverGridSpec(study);
   return {
     ...original,
     column: clamp(original.column + Math.round(delta.column), 0, g.nx - (original.columns || 1)),
-    row: clamp(original.row + Math.round(delta.row), 0, g.ny - (original.rows || 1)),
+    row: original.row + compatibleRowOffset(g, [original], delta.row),
   };
 }
 export function replaceFieldItem(study, selection, item) {
@@ -76,10 +99,10 @@ export function groupDelta(study, selections, delta) {
       Math.max(...items.map(({ item }) => -item.grid.column)),
       Math.min(...items.map(({ item }) => g.nx - item.grid.column - (item.grid.columns || 1))),
     ),
-    row: clamp(
-      Math.round(delta.row),
-      Math.max(...items.map(({ item }) => -item.grid.row)),
-      Math.min(...items.map(({ item }) => g.ny - item.grid.row - (item.grid.rows || 1))),
+    row: compatibleRowOffset(
+      g,
+      items.map(({ item }) => item.grid),
+      delta.row,
     ),
   };
 }

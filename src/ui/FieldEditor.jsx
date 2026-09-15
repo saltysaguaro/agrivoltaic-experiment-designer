@@ -1,3 +1,4 @@
+import { maxRows } from '../domain/receiver-grid.js';
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { Field } from './Controls.jsx';
@@ -110,7 +111,7 @@ export default function FieldEditor({
             const max = size
               ? Math.min(
                   limit - draft.grid[horizontal ? 'column' : 'row'],
-                  Math.floor(100 / (horizontal ? g.dx : g.dy)),
+                  horizontal ? Math.floor(100 / g.dx) : maxRows(g, draft.grid.row),
                 )
               : limit - (extent || 1) + 1;
             return (

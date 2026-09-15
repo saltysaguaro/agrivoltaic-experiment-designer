@@ -69,6 +69,7 @@ import {
 import DisplayLegend from './ui/DisplayLegend.jsx';
 import { designLayers, irradianceLayers } from './ui/display-layers.js';
 import { steps, defaults, normalizeNavigation } from './ui/workflow.js';
+import { logCalculationDiagnostics } from './ui/calculation-diagnostics.js';
 import './styles.css';
 function navigation() {
   try {
@@ -168,7 +169,7 @@ function App() {
       setSelection(copied.selections[0] || null);
       setEditorOpen(false);
       setNotice(
-        `Duplicated ${copied.selections.length} items with unique IDs; offset ${copied.offset.column} columns / ${copied.offset.row} rows. The shared offset is limited by field boundaries.`,
+        `Duplicated ${copied.selections.length} items with unique IDs; offset ${copied.offset.column} columns / ${copied.offset.row} rows. The shared offset is limited to compatible cells within the field so sizes and spacing are preserved.`,
       );
     } catch (error) {
       setNotice(error.message);
@@ -334,6 +335,9 @@ function App() {
     () => (step === 8 ? controlResult(validResult) : validResult),
     [step, validResult],
   );
+  useEffect(() => {
+    if (validResult) logCalculationDiagnostics(s, validResult);
+  }, [validResult]);
   const compactSidebar = fieldWorkspace && !sidebarExpanded;
   const unidentifiedCrops = [...unresolvedCrops(s), ...unresolvedCrops(fieldStudy(s, true))];
   const layerMode = step >= 6 && step <= 8 ? 'analysis' : 'design';
@@ -582,12 +586,14 @@ function App() {
         ...current.analysis,
         patches: standard ? 577 : 145,
         resolution: standard ? 1 : 3,
+        gridAlignment: standard ? 'row-centres' : 'spacing',
+        cellsPerRow: standard ? 9 : current.analysis.cellsPerRow,
         interval: standard ? 10 : 15,
       },
     }));
     setNotice(
       standard
-        ? 'Standard settings applied: 577 patches, 1 m cells, 10-minute steps. Recalculate light.'
+        ? 'Standard settings applied: 9 cells between PV row centres, 1 m along-row spacing, 577 patches, 10-minute steps. Recalculate light.'
         : 'Preview settings applied: 145 patches, 3 m cells, 15-minute direct steps. Receiver spacing controls ground detail; sky patches control angular detail. Recalculate light.',
     );
   }
@@ -1531,23 +1537,6 @@ function App() {
                 </p>
               </div>
               {step === 0 && <span className="tag">01 / MODULE</span>}
-            </div>
-          )}
-          {step >= 6 && validResult && (
-            <div className="model-disclosure">
-              <strong>{activeResult.backend}</strong>
-              <span>
-                {' '}
-                · {s.analysis.patches} sky patches · {s.analysis.interval}-minute direct steps ·
-                reflection excluded
-              </span>
-              {validResult.warnings.map((w) => (
-                <p key={w}>{w}</p>
-              ))}
-              <p>
-                CPU occlusion matched Radiance on 45,990 rays. Independent sky, daily-energy, GPU
-                and field validation remain pending.
-              </p>
             </div>
           )}
           <footer className="step-footer">

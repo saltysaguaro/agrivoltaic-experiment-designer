@@ -1,3 +1,4 @@
+import { rowEdge, rowSpan } from '../src/domain/receiver-grid.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { defaultStudy, analysisKey, studySchema } from '../src/domain/study.js';
@@ -10,8 +11,9 @@ import {
   layoutSnapshot,
 } from '../src/experiment/field-editing.js';
 import { cropIdentity } from '../src/domain/crop-catalog.js';
-function fixture() {
+function fixture(gridAlignment = 'row-centres') {
   const s = defaultStudy();
+  s.analysis.gridAlignment = gridAlignment;
   s.array.azimuth = 137;
   s.analysis.resolution = 1.3;
   s.experimentSensors = [
@@ -47,7 +49,7 @@ function fixture() {
   return studySchema.parse(normalizeLayout(s));
 }
 test('sensor and bed moves snap, clamp and retain independent depth, metadata and numerical results', () => {
-  const s = fixture(),
+  const s = fixture('spacing'),
     key = analysisKey(s),
     snap = layoutSnapshot(s),
     g = receiverGridSpec(s);
@@ -79,7 +81,7 @@ test('all four crop-bed corners resize from their opposite anchor in a rotated r
     g = receiverGridSpec(s),
     old = s.crops[0].grid;
   for (const [corner, xy] of Object.entries({ sw: [1, 2], se: [7, 2], ne: [7, 9], nw: [1, 9] })) {
-    const point = localToWorld(s, -g.width / 2 + xy[0] * g.dx, -g.height / 2 + xy[1] * g.dy);
+    const point = localToWorld(s, -g.width / 2 + xy[0] * g.dx, rowEdge(g, xy[1]));
     const grid = resizeGrid(s, old, corner, point);
     const fixedX = old.column + (corner.includes('e') ? 0 : old.columns),
       fixedY = old.row + (corner.includes('n') ? 0 : old.rows);
@@ -87,7 +89,7 @@ test('all four crop-bed corners resize from their opposite anchor in a rotated r
     assert.equal(corner.includes('n') ? grid.row : grid.row + grid.rows, fixedY);
     const updated = replaceFieldItem(s, { kind: 'crop', id: 'P1' }, { ...s.crops[0], grid });
     assert.ok(Math.abs(updated.crops[0].width - grid.columns * g.dx) < 1e-10);
-    assert.ok(Math.abs(updated.crops[0].length - grid.rows * g.dy) < 1e-10);
+    assert.ok(Math.abs(updated.crops[0].length - rowSpan(g, grid.row, grid.rows)) < 1e-10);
     assert.equal(analysisKey(updated), analysisKey(s));
     assert.equal(plotCorners(updated, updated.crops[0]).length, 4);
   }
@@ -103,6 +105,6 @@ test('resizing cannot flip a bed, leave the receiver domain or exceed software d
         assert.ok(grid.columns >= 1 && grid.rows >= 1);
         assert.ok(grid.column >= 0 && grid.row >= 0);
         assert.ok(grid.column + grid.columns <= g.nx && grid.row + grid.rows <= g.ny);
-        assert.ok(grid.columns * g.dx <= 100 && grid.rows * g.dy <= 100);
+        assert.ok(grid.columns * g.dx <= 100 && rowSpan(g, grid.row, grid.rows) <= 100);
       }
 });

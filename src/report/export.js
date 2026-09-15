@@ -1,3 +1,4 @@
+import { gridSpacingLabel } from '../domain/receiver-grid.js';
 import { fieldStudy, controlResult, controlLayers } from '../experiment/control-field.js';
 import { designLayers } from '../ui/display-layers.js';
 import { receiverGridSpec } from '../domain/geometry.js';
@@ -213,9 +214,7 @@ export function methodsRows(s, r) {
     ],
     [
       'Numerical receivers',
-      r
-        ? `${r.cells.length}; actual cell ${r.grid.dx.toFixed(4)} × ${r.grid.dy.toFixed(4)} m`
-        : 'Not calculated',
+      r ? `${r.cells.length}; actual cell ${gridSpacingLabel(r.grid, 4)}` : 'Not calculated',
     ],
     ['Weather mode', s.weather.mode],
     ['Weather', s.weather.name],
@@ -249,7 +248,7 @@ export function methodsRows(s, r) {
     ],
     [
       'Receiver grid',
-      `${s.analysis.resolution} m nominal; height ${s.analysis.receiverHeight} m; horizontal`,
+      `${s.analysis.gridAlignment === 'row-centres' ? `${s.analysis.cellsPerRow} cells between adjacent PV row centre lines, including wider aisles; ${s.analysis.resolution} m nominal along-row spacing; outer-buffer cells fitted to footprint; area-weighted summaries` : `${s.analysis.resolution} m nominal uniform spacing`}; height ${s.analysis.receiverHeight} m; horizontal`,
     ],
     [
       'PAR method',
@@ -269,7 +268,7 @@ export function methodsRows(s, r) {
     ['Solar position', 'NOAA fractional-year approximation; geometric, no refraction'],
     [
       'Scientific validation',
-      'Analytical invariant tests; CPU occlusion matched Radiance on 45,990 rays / 9 cases. Independent sky, daily-energy and GPU validation pending',
+      'Analytical invariant tests; CPU occlusion matched Radiance on 51,100 rays / 10 cases. Independent sky, daily-energy and GPU validation pending',
     ],
     ['Analysis inputs SHA-256', r?.studyHash || 'Not calculated'],
   ];
@@ -415,7 +414,7 @@ table{width:100%;border-collapse:collapse;margin:5px 0 12px;font-size:11px;table
 svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{font-size:11px;color:#455d51;overflow-wrap:anywhere}.appendix{border-top:2px solid #37564b;margin-top:22px}.methods-notes{columns:2;column-gap:26px}.methods-notes p{break-inside:avoid;overflow-wrap:anywhere;font-size:11px;line-height:1.4}.methods-notes strong{display:block;margin-bottom:2px}button{padding:10px 18px;background:#183d38;color:white;border:0;cursor:pointer}.note{border-left:3px solid #af873e;padding:7px 10px;background:#fff8e7;font-size:11px}.empty{color:#60736a;font-style:italic}.table-scroll{overflow-x:auto}
 @page{size:A4 landscape;margin:12mm}@media(max-width:650px){.methods-notes{columns:1}.parameters{min-width:610px}body{padding:0 12px}}
 @media print{body{margin:0;padding:0;max-width:none;font-size:9pt}h1{font-size:17pt;margin-top:0}h2{font-size:10pt;margin:3mm 0 1mm}table{font-size:8pt;margin:1mm 0 3mm}td,th{padding:1.1mm 1.5mm}button{display:none}.note{font-size:8pt;padding:2mm 3mm}.report-meta{font-size:8pt}.table-scroll{overflow:visible}.parameters{min-width:0}.appendix{break-before:page;border-top:0}.methods-notes p{font-size:8pt}figure{break-before:page;margin:0}figure svg{max-height:165mm;max-width:100%;width:auto;display:block;margin:auto}figcaption{font-size:8pt}thead{display:table-header-group}tr{break-inside:avoid}a{color:inherit;text-decoration:none}}
-</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(periodLabel(s))} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 45,990 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / C / B identify the ground zones. S is the signed PV-edge setback; negative values place crops beneath panels. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Agrivoltaic physical field instruments</h2>${table(
+</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(periodLabel(s))} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 51,100 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / C / B identify the ground zones. S is the signed PV-edge setback; negative values place crops beneath panels. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Agrivoltaic physical field instruments</h2>${table(
     [
       'ID / type',
       'E / N / Z (m)',

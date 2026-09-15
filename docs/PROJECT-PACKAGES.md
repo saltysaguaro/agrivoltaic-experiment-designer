@@ -60,3 +60,9 @@ Study schema 2 adds bifacial cell geometry/transmission and day/season/year sele
 Study schema 2 now includes an additive, version-1 `controlField` containing an initialization flag, physical sensors and crop beds. Older studies migrate to an uninitialized empty control. Explicit project exports retain both layouts; browser autosave excludes both. The control shares the agrivoltaic receiver footprint and local orientation, without PV infrastructure, and derives uniform full-sun DLI from the matching result's `openDli`. Period DLI remains a daily mean. The same weather and measured/estimated PAR provenance applies.
 
 Reports contain separate tables and a plan figure for Control. Initialized controls also have `figures/control-layout.svg`; `tables/data.csv` adds a `field` column (`agrivoltaic` or `control`) for receiver, sensor and plot rows. The original agrivoltaic result remains the sole saved solver result; control light is derived when reopening. Each field uses its own local coordinate origin, with no implied surveyed offset between the two fields.
+
+## Row-centred receiver grids
+
+`analysis.gridAlignment` selects `row-centres` or legacy `spacing`. New studies use `row-centres` with `cellsPerRow: 9`; existing documents missing these fields retain uniform spacing. In aligned mode `analysis.resolution` controls nominal along-row spacing. Every adjacent PV row-centre interval, including wider aisle gaps, contains exactly `cellsPerRow` cells; outer intervals fit the receiver footprint.
+
+Aligned results carry the local across-row boundary array `grid.yEdges` (length `ny + 1`). `grid.dy` is only the mean cell height; consumers must use consecutive `yEdges` for each cell's actual height and centre. Uniform results retain the original `dy` convention without `yEdges`. Field/crop summaries use cell-area weighting, and import validation checks the full boundary array and weighted summaries. Both agrivoltaic and control fields use the same grid.

@@ -1,3 +1,4 @@
+import { receiverSpec } from './receiver-grid.js';
 import { z } from 'zod';
 import { moduleOptics } from './optics.js';
 import { analysisPeriod, periodKeys } from './period.js';
@@ -67,7 +68,7 @@ const cropsSchema = z
       x: num(-10000, 10000),
       y: num(-10000, 10000),
       width: num(0.1, 100),
-      length: num(0.1, 100),
+      length: num(0.000001, 100),
     }),
   )
   .max(200);
@@ -145,6 +146,8 @@ export const studySchema = z
           return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === v;
         }, 'Use a valid calendar date'),
       resolution: num(0.25, 5),
+      gridAlignment: z.enum(['spacing', 'row-centres']).default('spacing'),
+      cellsPerRow: count(1, 99).default(9),
       receiverHeight: num(0, 5),
       interval: z.union([z.literal(5), z.literal(10), z.literal(15)]),
       patches: z.union([z.literal(145), z.literal(577), z.literal(2305)]),
@@ -259,6 +262,8 @@ export const defaultStudy = () =>
     analysis: {
       date: '2026-06-21',
       resolution: 1,
+      gridAlignment: 'row-centres',
+      cellsPerRow: 9,
       receiverHeight: 0.2,
       interval: 10,
       patches: 577,
@@ -295,7 +300,9 @@ export function analysisKey(s) {
     { pitch: s.rowPair.pitch },
     s.array,
     s.site,
-    s.analysis,
+    s.analysis.gridAlignment === 'row-centres'
+      ? s.analysis
+      : { ...s.analysis, gridAlignment: undefined, cellsPerRow: undefined },
     { ...s.weather, sourceText: undefined },
   ]);
 }
@@ -497,11 +504,10 @@ export function designIssues(s) {
     issues.push('Adjacent row envelopes overlap. Increase row pitch.');
   if (s.analysis.receiverHeight >= d.minHeight)
     issues.push('Receiver height must be below the lowest module edge.');
-  if (
-    Math.ceil(d.footprintX / s.analysis.resolution) *
-      Math.ceil(d.footprintY / s.analysis.resolution) >
-    20000
-  )
-    issues.push('This grid exceeds 20,000 receivers. Increase grid spacing or reduce the array.');
+  const grid = receiverSpec(s, d);
+  if (grid.nx * grid.ny > 20000)
+    issues.push(
+      'This grid exceeds 20,000 receivers. Increase along-row spacing, reduce cells per row gap, or reduce the array.',
+    );
   return issues;
 }

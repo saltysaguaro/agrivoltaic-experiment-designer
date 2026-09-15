@@ -226,6 +226,8 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       /Irradiance/,
     );
     assert.match(document.querySelector('.notice').textContent, /Daily light calculated/);
+    assert.equal(document.querySelector('.model-disclosure'), null);
+    assert.doesNotMatch(document.body.textContent, /GHI closure:|CPU occlusion matched Radiance/);
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
     await click(step('Row spacing'));
     const reservation = document.querySelector('[data-annotation="landUse.underPanelWidth"] input');
@@ -373,6 +375,11 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.resolution, 3);
     await click(byText('Apply standard settings'));
     assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.resolution, 1);
+    assert.equal(
+      JSON.parse(localStorage.getItem('aed-study-v1')).analysis.gridAlignment,
+      'row-centres',
+    );
+    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.cellsPerRow, 9);
     assert.match(document.querySelector('.control-content').textContent, /Current grid:/);
     // Restore the original numerical inputs without running another calculation.
     await act(async () => {

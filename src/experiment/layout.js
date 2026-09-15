@@ -1,3 +1,4 @@
+import { rowHeight, rowIndex } from '../domain/receiver-grid.js';
 import { worldToLocal } from '../domain/geometry.js';
 export function nearestCell(result, x, y) {
   if (!result?.cells.length) return null;
@@ -7,6 +8,12 @@ export function nearestCell(result, x, y) {
     const across = -Math.sin(a) * x - Math.cos(a) * y;
     if (Math.abs(along) > result.grid.width / 2 || Math.abs(across) > result.grid.height / 2)
       return null;
+    const column = Math.min(
+      result.grid.nx - 1,
+      Math.floor((along + result.grid.width / 2) / result.grid.dx),
+    );
+    const row = Math.min(result.grid.ny - 1, Math.floor(rowIndex(result.grid, across)));
+    return result.cells[row * result.grid.nx + column] || null;
   }
   return result.cells.reduce((a, c) =>
     (c.x - x) ** 2 + (c.y - y) ** 2 < (a.x - x) ** 2 + (a.y - y) ** 2 ? c : a,
@@ -14,7 +21,11 @@ export function nearestCell(result, x, y) {
 }
 export function plotStats(result, plot) {
   if (!result) return null;
-  const cells = result.cells.filter((c, i) => {
+  const samples = result.cells.map((c, i) => ({
+    ...c,
+    weight: result.grid ? rowHeight(result.grid, Math.floor(i / result.grid.nx)) : 1,
+  }));
+  const cells = samples.filter((c, i) => {
     if (plot.grid && result.grid) {
       const column = i % result.grid.nx,
         row = Math.floor(i / result.grid.nx),
@@ -26,17 +37,31 @@ export function plotStats(result, plot) {
     return Math.abs(c.x - plot.x) <= plot.width / 2 && Math.abs(c.y - plot.y) <= plot.length / 2;
   });
   if (!cells.length) return null;
-  const a = cells.map((c) => c.dli).sort((a, b) => a - b),
-    mean = a.reduce((n, v) => n + v, 0) / a.length;
+  const ordered = [...cells].sort((a, b) => a.dli - b.dli);
+  const weight = cells.reduce((n, c) => n + c.weight, 0);
+  const meanOf = (fn) => cells.reduce((n, c) => n + fn(c) * c.weight, 0) / weight;
+  const mean = meanOf((c) => c.dli);
+  let cumulative = 0,
+    median = ordered.at(-1).dli;
+  for (let i = 0; i < ordered.length; i++) {
+    cumulative += ordered[i].weight;
+    if (cumulative >= weight / 2 - 1e-9) {
+      median =
+        Math.abs(cumulative - weight / 2) < 1e-9 && i + 1 < ordered.length
+          ? (ordered[i].dli + ordered[i + 1].dli) / 2
+          : ordered[i].dli;
+      break;
+    }
+  }
   return {
-    count: a.length,
+    count: cells.length,
     mean,
-    median: (a[Math.floor((a.length - 1) / 2)] + a[Math.ceil((a.length - 1) / 2)]) / 2,
-    sd: Math.sqrt(a.reduce((n, v) => n + (v - mean) ** 2, 0) / a.length),
-    min: a[0],
-    max: a.at(-1),
-    sunlight: cells.reduce((n, c) => n + (c.sunlight ?? 100 - c.shade), 0) / cells.length,
-    shade: cells.reduce((n, c) => n + c.shade, 0) / cells.length,
+    median,
+    sd: Math.sqrt(meanOf((c) => (c.dli - mean) ** 2)),
+    min: ordered[0].dli,
+    max: ordered.at(-1).dli,
+    sunlight: meanOf((c) => c.sunlight ?? 100 - c.shade),
+    shade: meanOf((c) => c.shade),
   };
 }
 export function percentileSensors(s, result) {

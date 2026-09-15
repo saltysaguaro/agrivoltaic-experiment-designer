@@ -1,3 +1,4 @@
+import { gridMean } from '../domain/receiver-grid.js';
 import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
 import { validateWeatherRows, canonicalWeatherRows } from './weather-validation.js';
 import { verifyWeatherRecord } from './weather-record.js';
@@ -200,6 +201,9 @@ export async function calculateDay(
       s.analysis.resolution,
       s.analysis.receiverHeight,
       s.analysis.patches,
+      ...(s.analysis.gridAlignment === 'row-centres'
+        ? ['row-centres', s.analysis.cellsPerRow ?? 9]
+        : []),
     ]),
   );
   let cached = 0;
@@ -304,9 +308,9 @@ export async function calculateDay(
       cached,
       timings,
       warnings,
-      meanSunlight: sum(cells.map((c) => c.sunlight)) / cells.length,
-      meanShade: sum(cells.map((c) => c.shade)) / cells.length,
-      meanDli: sum(cells.map((c) => c.dli)) / cells.length,
+      meanSunlight: gridMean(cells, grid, 'sunlight'),
+      meanShade: gridMean(cells, grid, 'shade'),
+      meanDli: gridMean(cells, grid, 'dli'),
     };
   } finally {
     engine.dispose();

@@ -64,6 +64,7 @@ test('placement snaps to rotated receiver centres, preserves depths and survives
 
 test('rotated crops occupy exact whole cells, include the correct samples, and stay within boundaries', () => {
   let s = defaultStudy();
+  s.analysis.gridAlignment = 'spacing';
   s.array.azimuth = 53;
   s.crops = [
     {

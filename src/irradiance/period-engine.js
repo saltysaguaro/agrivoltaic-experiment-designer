@@ -1,3 +1,4 @@
+import { gridMean } from '../domain/receiver-grid.js';
 import { analysisPeriod, periodDates, isPeriod } from '../domain/period.js';
 import { analysisKey, sha256, VERSION } from '../domain/study.js';
 import { calculateDay } from './engine.js';
@@ -101,7 +102,7 @@ export async function calculateStudy(s, onProgress = () => {}, options = {}) {
       date: day.date,
       openWh: r.openWh,
       openDli: r.openDli,
-      meanWh: r.cells.reduce((n, c) => n + c.wh, 0) / r.cells.length,
+      meanWh: gridMean(r.cells, r.grid, 'wh'),
       meanDli: r.meanDli,
       meanSunlight: r.openWh ? r.meanSunlight : null,
       backend: r.backend,
@@ -162,8 +163,8 @@ export async function calculateStudy(s, onProgress = () => {}, options = {}) {
     warnings: state.warnings,
     daily: state.daily,
     monthly,
-    meanSunlight: cells.reduce((n, c) => n + c.sunlight, 0) / cells.length,
-    meanShade: cells.reduce((n, c) => n + c.shade, 0) / cells.length,
-    meanDli: cells.reduce((n, c) => n + c.dli, 0) / cells.length,
+    meanSunlight: gridMean(cells, last.grid, 'sunlight'),
+    meanShade: gridMean(cells, last.grid, 'shade'),
+    meanDli: gridMean(cells, last.grid, 'dli'),
   };
 }

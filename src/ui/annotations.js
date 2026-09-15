@@ -1,3 +1,4 @@
+import { cellLocal, gridSpacingLabel } from '../domain/receiver-grid.js';
 import { Vector3 } from 'three';
 import { dimensions, cropSpacing } from '../domain/study.js';
 import { localToWorld, getPose, receiverGridSpec } from '../domain/geometry.js';
@@ -212,14 +213,14 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
     } else if (id.startsWith('analysis.')) {
       const grid = receiverGridSpec(s),
         x = -grid.width / 2 + grid.dx / 2,
-        y = -grid.height / 2 + grid.dy / 2;
+        y = cellLocal(grid, 0, 0).y;
       if (id === 'analysis.receiverHeight') dimension(p(x, y), p(x, y, s.analysis.receiverHeight));
       if (id === 'analysis.resolution') {
         dimension(
           p(-grid.width / 2, -grid.height / 2),
           p(-grid.width / 2 + grid.dx, -grid.height / 2),
         );
-        a.detail = `Actual cells: ${grid.dx.toFixed(3)} × ${grid.dy.toFixed(3)} m; ${grid.nx} columns × ${grid.ny} rows. The marked edge is one actual cell.`;
+        a.detail = `Actual cells: ${gridSpacingLabel(grid)}; ${grid.nx} columns × ${grid.ny} rows. The marked edge is one actual cell.`;
       }
     } else if (id.startsWith('experimentSensors.')) {
       const sensor = s.experimentSensors[Number(id.split('.')[1])];
