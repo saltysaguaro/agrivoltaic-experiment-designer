@@ -15,6 +15,7 @@ export default function FieldTools({
   onSelect,
   view,
   onDropPalette,
+  onAddCropBeds,
 }) {
   const gesture = useRef(null),
     suppressClick = useRef(false);
@@ -97,11 +98,8 @@ export default function FieldTools({
         >
           <MousePointer2 size={16} /> Select / move
         </button>
-        <button {...palette('sensor')} aria-pressed={tool === 'sensor'}>
-          <MapPin size={16} /> Add sensor
-        </button>
-        <button {...palette('crop')} aria-pressed={tool === 'crop'}>
-          <Sprout size={16} /> Add crop bed
+        <button className="bulk-crop-button" onClick={onAddCropBeds}>
+          <Sprout size={16} /> Add crop beds
         </button>
         <button disabled={!canUndo} onClick={onUndo} aria-label="Undo field edit">
           <Undo2 size={16} /> Undo
@@ -132,6 +130,12 @@ export default function FieldTools({
             ))}
           </select>
         </label>
+        <button {...palette('sensor')} aria-pressed={tool === 'sensor'}>
+          <MapPin size={16} /> Add sensor
+        </button>
+        <button {...palette('crop')} aria-pressed={tool === 'crop'}>
+          <Sprout size={16} /> Add single crop bed
+        </button>
       </div>
       {selections.length > 0 && (
         <div className="copy-offsets">

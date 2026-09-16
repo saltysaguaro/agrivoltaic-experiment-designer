@@ -1,11 +1,12 @@
-import { maxRows } from '../domain/receiver-grid.js';
+import { maxRows, rowIndex } from '../domain/receiver-grid.js';
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { Field } from './Controls.jsx';
 import CropPicker from './CropPicker.jsx';
 import { sensorTypes } from '../domain/study.js';
 import { cropIdentity, cropById } from '../domain/crop-catalog.js';
-import { receiverGridSpec } from '../domain/geometry.js';
+import { receiverGridSpec, worldToLocal } from '../domain/geometry.js';
+import { normalizeLayout } from '../experiment/grid-layout.js';
 import { plotStats } from '../experiment/layout.js';
 import { plotZoneOverlap } from '../domain/land-use.js';
 export default function FieldEditor({
@@ -33,6 +34,8 @@ export default function FieldEditor({
   if (!item) return null;
   const g = receiverGridSpec(study),
     update = (key, v) => setDraft((d) => ({ ...d, [key]: v }));
+  const exact = !sensor && draft.gridMode === 'exact';
+  const local = worldToLocal(study, draft.x, draft.y);
   const stats = sensor ? null : plotStats(result, item),
     overlap = sensor || control ? 0 : plotZoneOverlap(study, item);
   function save(e) {
@@ -103,38 +106,94 @@ export default function FieldEditor({
           </>
         )}
         <div className="field-pair">
-          {['column', 'row', ...(sensor ? [] : ['columns', 'rows'])].map((key) => {
-            const size = key.endsWith('s'),
-              horizontal = key.startsWith('column');
-            const limit = horizontal ? g.nx : g.ny,
-              extent = horizontal ? draft.grid.columns : draft.grid.rows;
-            const max = size
-              ? Math.min(
-                  limit - draft.grid[horizontal ? 'column' : 'row'],
-                  horizontal ? Math.floor(100 / g.dx) : maxRows(g, draft.grid.row),
-                )
-              : limit - (extent || 1) + 1;
-            return (
-              <Field
-                key={key}
-                label={
-                  {
-                    column: 'Receiver column',
-                    row: 'Receiver row',
-                    columns: 'Columns wide',
-                    rows: 'Rows long',
-                  }[key]
-                }
-                value={draft.grid[key] + (size ? 0 : 1)}
-                min={1}
-                max={Math.max(1, max)}
-                step={1}
-                integer
-                help="Coordinates snap to whole receiver cells; columns run along the PV rows."
-                onChange={(v) => update('grid', { ...draft.grid, [key]: v - (size ? 0 : 1) })}
-              />
-            );
-          })}
+          {exact
+            ? [
+                [
+                  'x',
+                  'Along-row centre',
+                  -g.width / 2 + draft.width / 2,
+                  g.width / 2 - draft.width / 2,
+                  local.x,
+                ],
+                [
+                  'y',
+                  'Across-row centre',
+                  -g.height / 2 + draft.length / 2,
+                  g.height / 2 - draft.length / 2,
+                  local.y,
+                ],
+                [
+                  'width',
+                  'Bed length along row',
+                  0.1,
+                  Math.min(100, g.width - 2 * Math.abs(local.x)),
+                  draft.width,
+                ],
+                [
+                  'length',
+                  'Bed width across row',
+                  0.000001,
+                  Math.min(100, g.height - 2 * Math.abs(local.y)),
+                  draft.length,
+                ],
+              ].map(([key, label, min, max, value]) => (
+                <Field
+                  key={key}
+                  label={label}
+                  unit="m"
+                  min={min}
+                  max={max}
+                  value={value}
+                  help="Bulk beds use exact dimensions and may cross receiver-cell boundaries. Light summaries weight cells by the area inside the bed."
+                  onChange={(v) => {
+                    const x = key === 'x' ? v : local.x,
+                      y = key === 'y' ? v : local.y;
+                    const width = key === 'width' ? v : draft.width,
+                      length = key === 'length' ? v : draft.length;
+                    const grid = {
+                      column: (x - width / 2 + g.width / 2) / g.dx,
+                      columns: width / g.dx,
+                      row: rowIndex(g, y - length / 2),
+                      rows: rowIndex(g, y + length / 2) - rowIndex(g, y - length / 2),
+                    };
+                    setDraft(
+                      (d) => normalizeLayout({ ...study, crops: [{ ...d, grid }] }).crops[0],
+                    );
+                  }}
+                />
+              ))
+            : ['column', 'row', ...(sensor ? [] : ['columns', 'rows'])].map((key) => {
+                const size = key.endsWith('s'),
+                  horizontal = key.startsWith('column');
+                const limit = horizontal ? g.nx : g.ny,
+                  extent = horizontal ? draft.grid.columns : draft.grid.rows;
+                const max = size
+                  ? Math.min(
+                      limit - draft.grid[horizontal ? 'column' : 'row'],
+                      horizontal ? Math.floor(100 / g.dx) : maxRows(g, draft.grid.row),
+                    )
+                  : limit - (extent || 1) + 1;
+                return (
+                  <Field
+                    key={key}
+                    label={
+                      {
+                        column: 'Receiver column',
+                        row: 'Receiver row',
+                        columns: 'Columns wide',
+                        rows: 'Rows long',
+                      }[key]
+                    }
+                    value={draft.grid[key] + (size ? 0 : 1)}
+                    min={1}
+                    max={Math.max(1, max)}
+                    step={1}
+                    integer
+                    help="Coordinates snap to whole receiver cells; columns run along the PV rows."
+                    onChange={(v) => update('grid', { ...draft.grid, [key]: v - (size ? 0 : 1) })}
+                  />
+                );
+              })}
         </div>
         <small>
           East {item.x.toFixed(3)} m · North {item.y.toFixed(3)} m

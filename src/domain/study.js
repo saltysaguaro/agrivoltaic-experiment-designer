@@ -43,33 +43,42 @@ const sensorsSchema = z
   .max(500);
 const cropsSchema = z
   .array(
-    z.object({
-      id: text,
-      crop: text,
-      cropId: text.default(''),
-      botanicalName: text.default(''),
-      scientificName: text.default(''),
-      cropFamily: text.default(''),
-      taxonKey: count(0, Number.MAX_SAFE_INTEGER).default(0),
-      taxonUrl: text.default(''),
-      cropCatalogVersion: text.default(''),
-      cultivar: text.default(''),
-      notes: text.default(''),
-      grid: z
-        .object({
-          column: count(0, 20000),
-          row: count(0, 20000),
-          columns: count(1, 20000),
-          rows: count(1, 20000),
-        })
-        .optional(),
-      treatment: text,
-      replicate: text,
-      x: num(-10000, 10000),
-      y: num(-10000, 10000),
-      width: num(0.1, 100),
-      length: num(0.000001, 100),
-    }),
+    z
+      .object({
+        id: text,
+        crop: text,
+        cropId: text.default(''),
+        botanicalName: text.default(''),
+        scientificName: text.default(''),
+        cropFamily: text.default(''),
+        taxonKey: count(0, Number.MAX_SAFE_INTEGER).default(0),
+        taxonUrl: text.default(''),
+        cropCatalogVersion: text.default(''),
+        cultivar: text.default(''),
+        notes: text.default(''),
+        gridMode: z.enum(['cells', 'exact']).optional(),
+        grid: z
+          .object({
+            column: num(0, 20000),
+            row: num(0, 20000),
+            columns: num(Number.EPSILON, 20000),
+            rows: num(Number.EPSILON, 20000),
+          })
+          .optional(),
+        treatment: text,
+        replicate: text,
+        x: num(-10000, 10000),
+        y: num(-10000, 10000),
+        width: num(0.1, 100),
+        length: num(0.000001, 100),
+      })
+      .refine(
+        (plot) =>
+          plot.gridMode === 'exact' ||
+          !plot.grid ||
+          Object.values(plot.grid).every(Number.isInteger),
+        { message: 'Cell-aligned crop beds require whole receiver cells.' },
+      ),
   )
   .max(200);
 export const studySchema = z

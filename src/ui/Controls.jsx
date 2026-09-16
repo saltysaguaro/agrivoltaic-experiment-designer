@@ -886,8 +886,8 @@ export default function Controls({
                 : 'Place a crop plot in the view'}
             </button>
             <p className="control-note">
-              Crop plots occupy whole receiver cells and rotate with the array. Choose a starting
-              cell and the number of cells along and across the rows.
+              Single crop beds occupy whole receiver cells. Bulk beds use exact cropping-area
+              divisions. All beds rotate with the array.
             </p>
             <button className="secondary wide" onClick={addPlot}>
               <Plus size={16} /> Add crop plot
@@ -922,34 +922,41 @@ export default function Controls({
                     />
                   ))}
                   <div className="field-pair">
-                    {['column', 'row', 'columns', 'rows'].map((k) => (
-                      <Field
-                        key={k}
-                        annotation={`crops.${i}.grid.${k}`}
-                        label={
-                          {
-                            column: 'Starting column',
-                            row: 'Starting row',
-                            columns: 'Columns wide',
-                            rows: 'Rows long',
-                          }[k]
-                        }
-                        value={
-                          (v.grid?.[k] ?? (k.endsWith('s') ? 1 : 0)) + (k.endsWith('s') ? 0 : 1)
-                        }
-                        min={1}
-                        max={k.startsWith('column') ? receiver.nx : receiver.ny}
-                        step={1}
-                        integer
-                        help="Crop boundaries follow whole receiver cells. Columns run along the PV rows; receiver rows run across them. Plots stay inside the grid."
-                        onChange={(value) =>
-                          set('crops', i, {
-                            ...v,
-                            grid: { ...v.grid, [k]: value - (k.endsWith('s') ? 0 : 1) },
-                          })
-                        }
-                      />
-                    ))}
+                    {v.gridMode === 'exact' ? (
+                      <p className="control-note">
+                        Exact bed dimensions. Select this bed in the drawing or Find item menu to
+                        edit its position and size in metres.
+                      </p>
+                    ) : (
+                      ['column', 'row', 'columns', 'rows'].map((k) => (
+                        <Field
+                          key={k}
+                          annotation={`crops.${i}.grid.${k}`}
+                          label={
+                            {
+                              column: 'Starting column',
+                              row: 'Starting row',
+                              columns: 'Columns wide',
+                              rows: 'Rows long',
+                            }[k]
+                          }
+                          value={
+                            (v.grid?.[k] ?? (k.endsWith('s') ? 1 : 0)) + (k.endsWith('s') ? 0 : 1)
+                          }
+                          min={1}
+                          max={k.startsWith('column') ? receiver.nx : receiver.ny}
+                          step={1}
+                          integer
+                          help="Crop boundaries follow whole receiver cells. Columns run along the PV rows; receiver rows run across them. Plots stay inside the grid."
+                          onChange={(value) =>
+                            set('crops', i, {
+                              ...v,
+                              grid: { ...v.grid, [k]: value - (k.endsWith('s') ? 0 : 1) },
+                            })
+                          }
+                        />
+                      ))
+                    )}
                   </div>
                   <small>
                     {v.width.toFixed(3)} m along × {v.length.toFixed(3)} m across · centre E{' '}

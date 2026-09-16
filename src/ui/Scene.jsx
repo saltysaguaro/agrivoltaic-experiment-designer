@@ -1,4 +1,4 @@
-import { rowHeight, maxRows } from '../domain/receiver-grid.js';
+import { rowHeight, maxRows, rowEdge } from '../domain/receiver-grid.js';
 import { dliLabel } from '../domain/period.js';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -9,7 +9,13 @@ import { designLayers } from './display-layers.js';
 import { landUseZones } from '../domain/land-use.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { buildGeometry, disposeGroup, axes, receiverGridSpec } from '../domain/geometry.js';
+import {
+  buildGeometry,
+  disposeGroup,
+  axes,
+  receiverGridSpec,
+  localToWorld,
+} from '../domain/geometry.js';
 import { heatColor, figureSvg } from '../report/figures.js';
 import { displayBounds } from './camera.js';
 import { hardwarePoints, fitDrawing } from './drawing-bounds.js';
@@ -672,7 +678,7 @@ export default function Scene({
     drag.moved = true;
     const p = gridPoint(drag.base, point);
     const grid = drag.corner
-      ? resizeGrid(drag.base, drag.item.grid, drag.corner, point)
+      ? resizeGrid(drag.base, drag.item.grid, drag.corner, point, drag.item.gridMode === 'exact')
       : moveGrid(drag.base, drag.item.grid, {
           column: p.column - drag.start.column,
           row: p.row - drag.start.row,
@@ -729,17 +735,30 @@ export default function Scene({
     let grid;
     if (e.shiftKey && target.kind === 'crop') {
       const g = receiverGridSpec(study);
-      grid = {
-        ...item.grid,
-        columns: Math.max(
-          1,
-          Math.min(g.nx - item.grid.column, Math.floor(100 / g.dx), item.grid.columns + x),
-        ),
-        rows: Math.max(
-          1,
-          Math.min(g.ny - item.grid.row, maxRows(g, item.grid.row), item.grid.rows + y),
-        ),
-      };
+      grid =
+        item.gridMode === 'exact'
+          ? resizeGrid(
+              study,
+              item.grid,
+              'ne',
+              localToWorld(
+                study,
+                -g.width / 2 + (item.grid.column + item.grid.columns + x) * g.dx,
+                rowEdge(g, item.grid.row + item.grid.rows + y),
+              ),
+              true,
+            )
+          : {
+              ...item.grid,
+              columns: Math.max(
+                1,
+                Math.min(g.nx - item.grid.column, Math.floor(100 / g.dx), item.grid.columns + x),
+              ),
+              rows: Math.max(
+                1,
+                Math.min(g.ny - item.grid.row, maxRows(g, item.grid.row), item.grid.rows + y),
+              ),
+            };
     } else grid = moveGrid(study, item.grid, { column: x, row: y });
     onSelect?.(target, false);
     onEditItem?.(target, { ...item, grid });

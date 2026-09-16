@@ -1,4 +1,4 @@
-import { rowHeight, rowIndex } from '../domain/receiver-grid.js';
+import { rowHeight, rowIndex, rowEdge } from '../domain/receiver-grid.js';
 import { worldToLocal } from '../domain/geometry.js';
 export function nearestCell(result, x, y) {
   if (!result?.cells.length) return null;
@@ -23,9 +23,27 @@ export function plotStats(result, plot) {
   if (!result) return null;
   const samples = result.cells.map((c, i) => ({
     ...c,
-    weight: result.grid ? rowHeight(result.grid, Math.floor(i / result.grid.nx)) : 1,
+    weight: (() => {
+      if (!result.grid) return 1;
+      const g = result.grid,
+        row = Math.floor(i / g.nx);
+      if (plot.gridMode !== 'exact' || !plot.grid) return rowHeight(g, row);
+      const column = i % g.nx,
+        p = plot.grid;
+      const across = Math.max(
+        0,
+        Math.min(rowEdge(g, row + 1), rowEdge(g, p.row + p.rows)) -
+          Math.max(rowEdge(g, row), rowEdge(g, p.row)),
+      );
+      const along = Math.max(
+        0,
+        Math.min(column + 1, p.column + p.columns) - Math.max(column, p.column),
+      );
+      return along * across;
+    })(),
   }));
   const cells = samples.filter((c, i) => {
+    if (plot.gridMode === 'exact' && plot.grid && result.grid) return c.weight > 1e-12;
     if (plot.grid && result.grid) {
       const column = i % result.grid.nx,
         row = Math.floor(i / result.grid.nx),

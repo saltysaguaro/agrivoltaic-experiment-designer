@@ -154,7 +154,7 @@ export function methodsRows(s, r) {
     ],
     [
       'Field layout',
-      'Sensors at receiver-cell centres; crop boundaries follow receiver cells and rotate with the array. Packed marker offsets are display-only; sensor heights/depths remain installation metadata. Grid rows/columns are 1-based in tables.',
+      'Sensors are at receiver-cell centres. Single beds follow whole cells; bulk beds use exact cropping-area divisions and may cross cell boundaries. All beds rotate with the array. Exact-bed light statistics weight cell values by overlap area, assuming uniform light within each cell. Packed marker offsets are display-only; sensor heights/depths remain installation metadata. Grid rows/columns are 1-based in tables; fractional values describe exact bed boundaries.',
     ],
     [
       'Control field',
@@ -574,7 +574,7 @@ export function exportCsv(study, result) {
         '',
         '',
         '',
-        `width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; reserved_overlap_m2=${(field === 'control' ? 0 : plotZoneOverlap(s, p)).toFixed(4)}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}; notes=${p.notes || ''}`,
+        `bed_alignment=${p.gridMode || 'cells'}; width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; reserved_overlap_m2=${(field === 'control' ? 0 : plotZoneOverlap(s, p)).toFixed(4)}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}; notes=${p.notes || ''}`,
         p.cropId,
         p.botanicalName,
         p.scientificName,

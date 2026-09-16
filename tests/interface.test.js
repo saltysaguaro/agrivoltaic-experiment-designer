@@ -323,6 +323,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.ok(document.querySelector('[data-annotation="analysis.resolution"] input'));
     await click(step('Agrivoltaic'));
     assert.ok(document.querySelector('.compact-sidebar'));
+    assert.equal(byText('C · Cropping area').getAttribute('aria-pressed'), 'true');
     await click(document.querySelector('button[aria-label="Expand inputs"]'));
     await click(byText('Place a sensor in the view'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
@@ -369,10 +370,38 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
         ['Field sensors', 'Crop plots'].includes(b.getAttribute('aria-label')),
       ),
     );
+    // Bulk layout is one undoable edit, preserves the view/result, and accepts a subset of rows.
+    await click(byText('Add crop beds'));
+    assert.ok(document.querySelector('.crop-beds-dialog[open]'));
+    await click(
+      [...document.querySelectorAll('.crop-beds-dialog button')].find(
+        (b) => b.textContent === 'Clear',
+      ),
+    );
+    assert.equal(document.querySelector('.crop-beds-dialog button[type="submit"]').disabled, true);
+    await click(document.querySelector('.crop-beds-dialog [role="checkbox"]'));
+    await click(document.querySelector('.crop-beds-dialog button[type="submit"]'));
+    assert.equal(document.querySelector('.crop-beds-dialog'), null);
+    assert.equal(
+      document.querySelectorAll('select[aria-label="Select field item"] option[value^="crop:"]')
+        .length,
+      4,
+    );
+    assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
+    assert.equal(calculations, 1);
+    await click(byText('Undo'));
+    assert.equal(
+      document.querySelectorAll('select[aria-label="Select field item"] option[value^="crop:"]')
+        .length,
+      1,
+    );
     // First control entry clones all field items; edits remain independent and never solve.
     await click(step('Control'));
     assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 8);
     assert.match(document.querySelector('.scene-label').textContent, /CONTROL/);
+    assert.equal(byText('C · Cropping area').getAttribute('aria-pressed'), 'true');
+    await click(byText('C · Cropping area'));
+    assert.equal(byText('C · Cropping area').getAttribute('aria-pressed'), 'false');
     assert.match(document.body.textContent, /100% relative sunlight/);
     const choices = () =>
       [...document.querySelectorAll('select[aria-label="Select field item"] option')].filter(

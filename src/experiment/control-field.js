@@ -80,6 +80,5 @@ export const controlLayers = (layers) => ({
   modules: false,
   supports: false,
   underPanel: false,
-  cropping: false,
   perimeter: false,
 });

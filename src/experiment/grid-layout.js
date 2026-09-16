@@ -42,6 +42,31 @@ function normalizeField(study) {
       return { ...sensor, grid, x: p.x, y: p.y };
     }),
     crops: study.crops.map((plot) => {
+      if (plot.gridMode === 'exact' && plot.grid) {
+        const bound = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+        const columns = bound(
+          plot.grid.columns,
+          Math.min(g.nx, 0.1 / g.dx),
+          Math.min(g.nx, 100 / g.dx),
+        );
+        const column = bound(plot.grid.column, 0, g.nx - columns);
+        let rows = bound(plot.grid.rows, 1e-9, g.ny);
+        const row = bound(plot.grid.row, 0, g.ny - rows);
+        rows = Math.min(rows, rowIndex(g, rowEdge(g, row) + 100) - row);
+        const center = localToWorld(
+          study,
+          -g.width / 2 + (column + columns / 2) * g.dx,
+          (rowEdge(g, row) + rowEdge(g, row + rows)) / 2,
+        );
+        return {
+          ...plot,
+          grid: { column, row, columns, rows },
+          x: center.x,
+          y: center.y,
+          width: columns * g.dx,
+          length: rowSpan(g, row, rows),
+        };
+      }
       const columns = clamp(
         plot.grid?.columns ?? plot.width / g.dx,
         1,

@@ -57,6 +57,8 @@ import { figureSvg } from './report/figures.js';
 import Controls from './ui/Controls.jsx';
 import Scene from './ui/Scene.jsx';
 import FieldTools from './ui/FieldTools.jsx';
+import CropBedsDialog from './ui/CropBedsDialog.jsx';
+import { addCropBeds } from './experiment/crop-beds.js';
 import FieldEditor from './ui/FieldEditor.jsx';
 import { cropIdentity, cropById, unresolvedCrops } from './domain/crop-catalog.js';
 import {
@@ -127,6 +129,7 @@ function App() {
     [sidebarExpanded, setSidebarExpanded] = useState(false),
     [fieldTool, setFieldTool] = useState(null),
     [newCropId, setNewCropId] = useState('lettuce'),
+    [cropBedsOpen, setCropBedsOpen] = useState(false),
     [selection, setSelection] = useState(null),
     [selections, setSelections] = useState([]),
     [editorOpen, setEditorOpen] = useState(false),
@@ -356,7 +359,7 @@ function App() {
         ...current,
         analysis: {
           ...irradianceLayers,
-          ...(fieldWorkspace ? { sensors: true, plots: true } : {}),
+          ...(fieldWorkspace ? { sensors: true, plots: true, cropping: true } : {}),
         },
       }));
     }
@@ -365,7 +368,7 @@ function App() {
     if (fieldWorkspace)
       setLayerPrefs((current) => ({
         ...current,
-        analysis: { ...current.analysis, sensors: true, plots: true },
+        analysis: { ...current.analysis, sensors: true, plots: true, cropping: true },
       }));
   }, [step]);
 
@@ -1169,6 +1172,10 @@ function App() {
           )}
           {fieldWorkspace && (
             <FieldTools
+              onAddCropBeds={() => {
+                chooseFieldTool(null);
+                setCropBedsOpen(true);
+              }}
               onDropPalette={(tool, event) => {
                 const point = fieldInteraction.current?.pointAtClient(event);
                 if (point) {
@@ -1188,6 +1195,36 @@ function App() {
               onDuplicate={duplicateSelection}
               onSelect={selectFieldItem}
               view={view}
+            />
+          )}
+          {fieldWorkspace && cropBedsOpen && (
+            <CropBedsDialog
+              study={activeStudy}
+              cropId={newCropId}
+              control={step === 8}
+              onClose={() => setCropBedsOpen(false)}
+              onApply={(options) => {
+                const added = addCropBeds(fieldLatest.current, options, {
+                  control: step === 8,
+                  reservedIds: allFieldIds(latest.current),
+                });
+                const parsed = studySchema.safeParse(added.study);
+                if (!parsed.success)
+                  throw Error(parsed.error.issues.map(validationMessage).join(' '));
+                rememberFieldLayout();
+                setFieldStudy(parsed.data);
+                setNewCropId(options.cropId);
+                setSelections(added.selections);
+                setSelection(added.selections[0]);
+                setLayerPrefs((current) => ({
+                  ...current,
+                  analysis: { ...current.analysis, plots: true, cropping: true },
+                }));
+                setCropBedsOpen(false);
+                setNotice(
+                  `Added ${added.selections.length} crop beds across ${new Set(options.rowIds).size} crop ${new Set(options.rowIds).size === 1 ? 'row' : 'rows'}.`,
+                );
+              }}
             />
           )}
           <section className="visual-card" id="design-drawing" tabIndex={-1}>

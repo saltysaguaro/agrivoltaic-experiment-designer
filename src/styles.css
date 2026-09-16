@@ -2301,3 +2301,62 @@ progress {
   align-items: center;
   font-size: 11px;
 }
+
+.tool-buttons > .bulk-crop-button {
+  background: #315f51;
+  color: white;
+}
+.crop-beds-dialog form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.crop-bed-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 20px;
+}
+.crop-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.crop-row-actions strong {
+  margin-right: auto;
+}
+.crop-row-preview {
+  max-height: min(380px, 32vh);
+  overflow: auto;
+  margin-top: 12px;
+  border: 1px solid #d2ddce;
+  border-radius: 6px;
+  background: #fafcf7;
+}
+.crop-row-preview svg {
+  width: 100%;
+  display: block;
+  min-width: 400px;
+}
+.crop-row-preview text {
+  font-size: 12px;
+  fill: #29463a;
+  pointer-events: none;
+}
+.crop-row-choice {
+  cursor: pointer;
+}
+.crop-row-choice:focus {
+  outline: none;
+}
+.crop-row-choice:focus rect {
+  stroke: #155bce;
+  stroke-width: 3;
+}
+@media (max-width: 600px) {
+  .crop-bed-inputs {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

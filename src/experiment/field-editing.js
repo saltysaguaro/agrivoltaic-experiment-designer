@@ -12,13 +12,32 @@ export function gridPoint(study, point) {
   return { column: (p.x + g.width / 2) / g.dx, row: rowIndex(g, p.y) };
 }
 // The opposite corner stays fixed. A bed cannot flip, leave the grid, or exceed 100 m.
-export function resizeGrid(study, original, corner, point) {
+export function resizeGrid(study, original, corner, point, exact = false) {
   const g = receiverGridSpec(study),
     p = gridPoint(study, point);
   const right = corner.includes('e'),
     top = corner.includes('n');
   const fixedX = original.column + (right ? 0 : original.columns);
   const fixedY = original.row + (top ? 0 : original.rows);
+  if (exact) {
+    const x = clamp(
+      p.column,
+      right ? fixedX + 0.1 / g.dx : Math.max(0, fixedX - 100 / g.dx),
+      right ? Math.min(g.nx, fixedX + 100 / g.dx) : fixedX - 0.1 / g.dx,
+    );
+    const fixedMetres = rowEdge(g, fixedY);
+    const y = clamp(
+      p.row,
+      top ? rowIndex(g, fixedMetres + 0.000001) : Math.max(0, rowIndex(g, fixedMetres - 100)),
+      top ? Math.min(g.ny, rowIndex(g, fixedMetres + 100)) : rowIndex(g, fixedMetres - 0.000001),
+    );
+    return {
+      column: Math.min(x, fixedX),
+      row: Math.min(y, fixedY),
+      columns: Math.abs(x - fixedX),
+      rows: Math.abs(y - fixedY),
+    };
+  }
   const maxX = Math.max(1, Math.min(g.nx, Math.floor(100 / g.dx)));
   const minY = Math.max(0, Math.ceil(rowIndex(g, rowEdge(g, fixedY) - 100) - 1e-9));
   const maxY = Math.min(g.ny, Math.floor(rowIndex(g, rowEdge(g, fixedY) + 100) + 1e-9));
@@ -38,8 +57,8 @@ export function resizeGrid(study, original, corner, point) {
 // Unequal aisle cells cannot always accept an exact translated copy. Snap to the
 // nearest compatible row offset, preserving physical bed sizes and group spacing.
 function compatibleRowOffset(g, grids, requested) {
-  const min = Math.max(...grids.map((v) => -v.row));
-  const max = Math.min(...grids.map((v) => g.ny - v.row - (v.rows || 1)));
+  const min = Math.ceil(Math.max(...grids.map((v) => -v.row)));
+  const max = Math.floor(Math.min(...grids.map((v) => g.ny - v.row - (v.rows || 1))));
   const target = clamp(Math.round(requested), min, max);
   if (!g.yEdges) return target;
   const centre = (v, offset) =>

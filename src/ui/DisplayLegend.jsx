@@ -34,8 +34,7 @@ export default function DisplayLegend({
         {items
           .filter(
             ([key]) =>
-              (!control ||
-                !['modules', 'supports', 'underPanel', 'cropping', 'perimeter'].includes(key)) &&
+              (!control || !['modules', 'supports', 'underPanel', 'perimeter'].includes(key)) &&
               (fieldLayout || !['sensors', 'plots'].includes(key)),
           )
           .map(([key, label, style]) => (
