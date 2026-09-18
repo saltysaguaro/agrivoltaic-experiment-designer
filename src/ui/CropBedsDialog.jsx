@@ -8,7 +8,7 @@ export default function CropBedsDialog({ study, cropId, control, onApply, onClos
   const rows = cropRows(study);
   const [count, setCount] = useState('3');
   const [crop, setCrop] = useState(cropId);
-  const [chosen, setChosen] = useState(() => rows.map((r) => r.id));
+  const [chosen, setChosen] = useState([]);
   const [error, setError] = useState('');
   useEffect(() => {
     const previous = document.activeElement;

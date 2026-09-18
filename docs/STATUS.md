@@ -1,5 +1,12 @@
 # Implementation status
 
+## Bulk sensor selection and explicit crop-row defaults (September 18)
+
+- **Add sensors** sits beside **Add crop beds** in both field-planning workspaces. Its modal defaults to 3 rows across each cropping area's width and 10 columns along its length, with every cell unchecked. Users choose a sensor type and individual cells, or select/clear a crop row or the entire array. Changing grid dimensions clears the selection; reopening starts empty and remembers the last applied type. The single-item tools retain their placement/drag behavior and stay grouped on the right.
+- Each checked planning cell adds one independent physical sensor at its centre snapped to the existing receiver cell. The popup reports shared receiver locations when a fine planning grid maps several sensors to the same cell. Rotation, unequal aisle widths, installation heights, unique IDs across both fields, control treatment, export round trips and one-step undo are preserved. Sensor additions do not change the numerical grid, rerun irradiance or reset the camera. The UI explains the 500-sensor field limit and bounded preview size; invalid batches are rejected before editing.
+- **Add crop beds** now opens with every crop row unselected. Add remains disabled until the user chooses a row.
+- Verification: 123 tests pass, including rotated/aisle placement, all instrument types, cell collisions, limits, control independence and project round trips; the simulated-DOM workflow checks empty defaults, dimension-change clearing, type selection, adding/undoing a batch and no extra solve. Browser checks confirmed the popup layout, selected-cell placement across crop rows, crop defaults and modal help. Production build, formatting and frozen-archive verification pass. The installed Radiance comparison reports zero mismatches over 51,100 rays / 10 cases; its scope remains first-hit occlusion, not independent field, sky or GPU validation.
+
 ## Bulk crop-bed layouts and cropping-area references (September 16)
 
 - **Add crop beds** opens a modal with a bed count, catalog crop picker, and keyboard-accessible top-down crop-row selector. Selected cropping areas are divided into equal-width, full-length beds, including wider group aisles. Existing beds are retained; each batch is one undoable edit. **Add sensor** and **Add single crop bed** sit on the right and retain their placement/drag behavior.

@@ -1762,7 +1762,8 @@ progress {
   gap: 8px;
   flex-wrap: wrap;
 }
-.tool-buttons > button {
+.tool-buttons > button,
+.single-field-tools > button {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1773,11 +1774,12 @@ progress {
   background: white;
   font-size: 12px;
 }
-.tool-buttons > button[aria-pressed='true'] {
+.tool-buttons > button[aria-pressed='true'],
+.single-field-tools > button[aria-pressed='true'] {
   background: #315f51;
   color: white;
 }
-.tool-buttons > button.palette-tool {
+.single-field-tools > button.palette-tool {
   cursor: grab;
   touch-action: none;
 }
@@ -2204,7 +2206,8 @@ progress {
   .tool-buttons {
     gap: 5px;
   }
-  .tool-buttons > button {
+  .tool-buttons > button,
+  .single-field-tools > button {
     padding: 8px;
     font-size: 11px;
   }
@@ -2359,4 +2362,111 @@ progress {
     grid-template-columns: 1fr;
     gap: 0;
   }
+}
+
+.tool-buttons > .bulk-sensor-button {
+  background: #315f51;
+  color: white;
+}
+.sensors-dialog {
+  width: min(820px, calc(100vw - 24px));
+}
+.sensor-grid-inputs {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 16px;
+}
+.sensor-grid-inputs input,
+.sensor-grid-inputs select {
+  width: 100%;
+  min-width: 0;
+}
+.sensor-grid-help {
+  font-size: 12px;
+  margin: 8px 0 16px;
+}
+.sensor-grid-help summary {
+  cursor: pointer;
+}
+.sensor-array-preview {
+  max-height: 36vh;
+  overflow: auto;
+  margin-top: 12px;
+  border: 1px solid #d2ddce;
+  border-radius: 6px;
+}
+.sensor-crop-row {
+  padding: 12px;
+  background: #f4f8ee;
+}
+.sensor-crop-row + .sensor-crop-row {
+  border-top: 1px solid #c1ceba;
+}
+.sensor-crop-row .crop-row-actions {
+  margin: 8px 0;
+}
+.sensor-pv-strip {
+  background: #536d7c;
+  color: white;
+  text-align: center;
+  font-size: 11px;
+  padding: 3px;
+  border-radius: 3px;
+}
+.sensor-cell-scroll {
+  overflow-x: auto;
+  margin: 10px 0;
+}
+.sensor-selection-grid {
+  display: grid;
+  gap: 3px;
+}
+.sensor-grid-axis {
+  text-align: center;
+  align-self: center;
+  font-size: 11px;
+}
+.sensor-selection-cell {
+  display: grid;
+  place-items: center;
+  min-height: 32px;
+  background: #fff;
+  border: 1px solid #b8cbb1;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.sensor-selection-cell:has(input:checked) {
+  background: #bfd99e;
+  border-color: #315f51;
+}
+.sensor-selection-cell:focus-within {
+  outline: 2px solid #155bce;
+  outline-offset: -2px;
+}
+.sensor-selection-cell input {
+  accent-color: #315f51;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .sensor-grid-inputs {
+    grid-template-columns: 1fr 1fr;
+  }
+  .sensor-grid-inputs > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.single-field-tools {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.sensor-grid-inputs input {
+  padding: 10px 12px;
+  border: 1px solid #becfba;
+  border-radius: 4px;
+  font: inherit;
 }

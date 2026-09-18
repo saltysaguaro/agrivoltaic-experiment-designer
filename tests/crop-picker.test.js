@@ -92,8 +92,8 @@ test('crop picker requires a matching selection and palette gestures commit only
         }),
       ),
     );
-    const button = [...document.querySelectorAll('button')].find((b) =>
-      b.textContent.includes('Add sensor'),
+    const button = [...document.querySelectorAll('button')].find(
+      (b) => b.textContent.trim() === 'Add sensor',
     );
     async function pointer(type, x, y) {
       await act(async () => {

@@ -373,9 +373,9 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     // Bulk layout is one undoable edit, preserves the view/result, and accepts a subset of rows.
     await click(byText('Add crop beds'));
     assert.ok(document.querySelector('.crop-beds-dialog[open]'));
-    await click(
-      [...document.querySelectorAll('.crop-beds-dialog button')].find(
-        (b) => b.textContent === 'Clear',
+    assert.ok(
+      [...document.querySelectorAll('.crop-beds-dialog [role="checkbox"]')].every(
+        (c) => c.getAttribute('aria-checked') === 'false',
       ),
     );
     assert.equal(document.querySelector('.crop-beds-dialog button[type="submit"]').disabled, true);
@@ -395,6 +395,70 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
         .length,
       1,
     );
+    // Sensor grid starts empty, clears selection after resizing, and commits one undoable batch.
+    await click(byText('Add sensors'));
+    const sensorDialog = () => document.querySelector('.sensors-dialog');
+    assert.equal(
+      sensorDialog().querySelector('.sensor-crop-row').querySelectorAll('input[type="checkbox"]')
+        .length,
+      30,
+    );
+    await click(sensorDialog().querySelector('[aria-label="About Rows per crop row"]'));
+    assert.match(sensorDialog().querySelector('[role="tooltip"]').textContent, /cropping width/);
+    assert.equal(sensorDialog().querySelector('[aria-label="Rows per crop row"]').value, '3');
+    assert.equal(sensorDialog().querySelector('[aria-label="Columns per crop row"]').value, '10');
+    assert.ok(
+      [...sensorDialog().querySelectorAll('input[type="checkbox"]')].every((c) => !c.checked),
+    );
+    assert.equal(sensorDialog().querySelector('button[type="submit"]').disabled, true);
+    await click(sensorDialog().querySelector('input[type="checkbox"]'));
+    await act(async () => {
+      const input = sensorDialog().querySelector('[aria-label="Rows per crop row"]');
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+        input,
+        '2',
+      );
+      input.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    });
+    assert.ok(
+      [...sensorDialog().querySelectorAll('input[type="checkbox"]')].every((c) => !c.checked),
+    );
+    await click(sensorDialog().querySelector('input[type="checkbox"]'));
+    await click(sensorDialog().querySelectorAll('input[type="checkbox"]')[19]);
+    await act(async () => {
+      const select = sensorDialog().querySelector('select');
+      select.value = 'Soil moisture';
+      select.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    });
+    await click(sensorDialog().querySelector('button[type="submit"]'));
+    assert.equal(sensorDialog(), null);
+    assert.equal(
+      document.querySelectorAll('select[aria-label="Select field item"] option[value^="sensor:"]')
+        .length,
+      4,
+    );
+    assert.equal(
+      document.querySelectorAll('select[aria-label="Select field item"] option').length,
+      6,
+    );
+    assert.match(
+      document.querySelector('select[aria-label="Select field item"]').textContent,
+      /Soil moisture/,
+    );
+    assert.equal(calculations, 1);
+    assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
+    await click(byText('Undo'));
+    assert.equal(
+      document.querySelectorAll('select[aria-label="Select field item"] option[value^="sensor:"]')
+        .length,
+      2,
+    );
+    await click(byText('Add sensors'));
+    assert.equal(sensorDialog().querySelector('select').value, 'Soil moisture');
+    assert.ok(
+      [...sensorDialog().querySelectorAll('input[type="checkbox"]')].every((c) => !c.checked),
+    );
+    await click(sensorDialog().querySelector('[aria-label="Close sensor layout"]'));
     // First control entry clones all field items; edits remain independent and never solve.
     await click(step('Control'));
     assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 8);

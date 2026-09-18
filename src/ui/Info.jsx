@@ -1,7 +1,7 @@
 import React, { useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Info as InfoIcon } from 'lucide-react';
-export default function Info({ label, children }) {
+export default function Info({ label, children, portalTarget }) {
   const id = useId(),
     [position, setPosition] = useState(null);
   const show = (e) => {
@@ -38,7 +38,7 @@ export default function Info({ label, children }) {
           <div id={id} role="tooltip" className="input-tooltip" style={position}>
             {children}
           </div>,
-          document.body,
+          portalTarget?.current || document.body,
         )}
     </>
   );

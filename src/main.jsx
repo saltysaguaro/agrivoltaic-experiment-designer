@@ -58,6 +58,8 @@ import Controls from './ui/Controls.jsx';
 import Scene from './ui/Scene.jsx';
 import FieldTools from './ui/FieldTools.jsx';
 import CropBedsDialog from './ui/CropBedsDialog.jsx';
+import SensorsDialog from './ui/SensorsDialog.jsx';
+import { addSensors } from './experiment/sensor-grid.js';
 import { addCropBeds } from './experiment/crop-beds.js';
 import FieldEditor from './ui/FieldEditor.jsx';
 import { cropIdentity, cropById, unresolvedCrops } from './domain/crop-catalog.js';
@@ -130,6 +132,8 @@ function App() {
     [fieldTool, setFieldTool] = useState(null),
     [newCropId, setNewCropId] = useState('lettuce'),
     [cropBedsOpen, setCropBedsOpen] = useState(false),
+    [sensorsOpen, setSensorsOpen] = useState(false),
+    [newSensorType, setNewSensorType] = useState('PAR'),
     [selection, setSelection] = useState(null),
     [selections, setSelections] = useState([]),
     [editorOpen, setEditorOpen] = useState(false),
@@ -1172,6 +1176,10 @@ function App() {
           )}
           {fieldWorkspace && (
             <FieldTools
+              onAddSensors={() => {
+                chooseFieldTool(null);
+                setSensorsOpen(true);
+              }}
               onAddCropBeds={() => {
                 chooseFieldTool(null);
                 setCropBedsOpen(true);
@@ -1195,6 +1203,34 @@ function App() {
               onDuplicate={duplicateSelection}
               onSelect={selectFieldItem}
               view={view}
+            />
+          )}
+          {fieldWorkspace && sensorsOpen && (
+            <SensorsDialog
+              study={activeStudy}
+              sensorType={newSensorType}
+              control={step === 8}
+              onClose={() => setSensorsOpen(false)}
+              onApply={(options) => {
+                const added = addSensors(fieldLatest.current, options, {
+                  control: step === 8,
+                  reservedIds: allFieldIds(latest.current),
+                });
+                const parsed = studySchema.safeParse(added.study);
+                if (!parsed.success)
+                  throw Error(parsed.error.issues.map(validationMessage).join(' '));
+                rememberFieldLayout();
+                setFieldStudy(parsed.data);
+                setNewSensorType(options.type);
+                setSelections(added.selections);
+                setSelection(added.selections[0]);
+                setLayerPrefs((current) => ({
+                  ...current,
+                  analysis: { ...current.analysis, sensors: true, cropping: true },
+                }));
+                setSensorsOpen(false);
+                setNotice(`Added ${added.selections.length} ${options.type} sensors.`);
+              }}
             />
           )}
           {fieldWorkspace && cropBedsOpen && (
