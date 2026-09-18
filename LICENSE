@@ -1,0 +1,76 @@
+Agrivoltaic Experiment Designer — Proprietary License
+Version 1.0, September 18, 2026
+
+Copyright (c) 2026 the respective copyright holders.
+All rights reserved except as expressly stated below.
+
+1. Scope
+
+These terms apply to the original source code, compiled application,
+documentation and assets of Agrivoltaic Experiment Designer (the "Project")
+to the extent owned by the Project's copyright holders. This is a proprietary
+license, not an open-source license.
+
+2. Limited permission for the official hosted application
+
+You may access and run an official instance made publicly available by the
+copyright holders solely for noncommercial personal, educational or research
+purposes. This permission includes only the browser downloads and incidental
+copies technically necessary for that use. It does not permit extracting,
+reusing, redistributing or separately hosting the application or its code.
+
+3. Duplication and redistribution require written permission
+
+Except as permitted by sections 2, 5 and 6, you may not copy,
+duplicate, reproduce, modify, create derivative works of, distribute, publish,
+sublicense, sell, rent, mirror or deploy all or any part of the Project without
+prior written permission from the applicable copyright holders. These
+restrictions apply whether or not a fee is charged.
+
+4. Commercial use requires written permission
+
+You may not use any part of the Project for commercial purposes without prior
+written permission from the applicable copyright holders. Commercial purposes
+include use for commercial advantage or monetary compensation, internal
+business operations, paid consulting or services, commercial product
+development, and incorporation into a commercial product or hosted service.
+Providing the Project free of charge does not authorize commercial use.
+
+5. Third-party material and existing rights
+
+Third-party code, dependencies, data and other material remain governed by
+their own licenses and terms, including those in THIRD_PARTY_NOTICES.md.
+The frozen baseline in archive/ retains its existing rights and terms; this
+license does not relicense it. Nothing here restricts rights granted under
+those terms, rights that applicable law does not allow to be restricted, or
+rights already granted under an applicable prior license.
+
+Where the Project is hosted on GitHub, rights granted under the applicable
+GitHub Terms of Service remain unaffected, including viewing and forking
+public repositories through GitHub's service. Public availability does not
+grant additional permission under this license.
+
+6. User data and research outputs
+
+These terms do not claim ownership of user-supplied data or independently
+created study designs. Users of the official application under section 2 may
+save, reproduce and share its exported study data, numerical results, figures
+and methods reports for noncommercial purposes, including scholarly
+publication. This permission does not include the application's source code
+or compiled application. Retain applicable third-party attribution in exports.
+
+7. Permission requests
+
+Contact the repository maintainer through
+https://github.com/saltysaguaro/agrivoltaic-experiment-designer to request
+permission. Permission must be granted in writing by the applicable copyright
+holders before a restricted activity begins.
+
+8. Disclaimer
+
+TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE PROJECT IS PROVIDED "AS IS",
+WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+THE COPYRIGHT HOLDERS ARE NOT LIABLE FOR CLAIMS, DAMAGES OR OTHER LIABILITY
+ARISING FROM USE OF THE PROJECT. RESEARCH RESULTS REQUIRE INDEPENDENT
+ASSESSMENT AND VALIDATION FOR THEIR INTENDED USE.

@@ -2,7 +2,23 @@
 
 A new browser-only application for designing reproducible agrivoltaic field experiments. The original `agrivoltaic_bf` project is preserved in [`archive/agrivoltaic_bf`](archive/agrivoltaic_bf), with checksums and local read-only protection. No archived code is imported into the new application.
 
-## Run locally
+## License
+
+This project uses a [proprietary license](LICENSE). Duplication, redistribution,
+modification, separate hosting and commercial use require prior written
+permission from the applicable copyright holders. Noncommercial personal,
+educational and research use of the official hosted application is permitted,
+including sharing research exports as described in the license.
+
+Third-party licenses, existing rights in the frozen archive and rights granted
+under [GitHub's terms](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service#5-license-grant-to-other-users)
+remain unaffected. Public GitHub repositories can still be viewed and forked
+through GitHub. See [third-party notices](THIRD_PARTY_NOTICES.md).
+
+## Run locally (authorized development)
+
+These instructions do not grant permission to copy or deploy the application;
+such permission must come from the copyright holders under the license.
 
 Requires Node.js 22.12 or newer.
 

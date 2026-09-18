@@ -1,5 +1,11 @@
 # Implementation status
 
+## Proprietary licensing (September 18)
+
+- Added a root proprietary license requiring written permission for duplication, redistribution, modification, separate hosting and commercial use. It permits noncommercial use of the official browser application and sharing research exports, and preserves third-party licenses, frozen-archive rights, prior grants, statutory exceptions and GitHub platform rights.
+- README documents the terms and identifies local setup as authorized development; package metadata and its lockfile point to `LICENSE`. Application and solver code are unchanged.
+- Verification: `npm test`, `npm run build`, and `npm run archive:verify` pass. All 480 archived files match their recorded checksums. No new scientific validation is claimed for this documentation and metadata change.
+
 ## Bulk sensor selection and explicit crop-row defaults (September 18)
 
 - **Add sensors** sits beside **Add crop beds** in both field-planning workspaces. Its modal defaults to 3 rows across each cropping area's width and 10 columns along its length, with every cell unchecked. Users choose a sensor type and individual cells, or select/clear a crop row or the entire array. Changing grid dimensions clears the selection; reopening starts empty and remembers the last applied type. The single-item tools retain their placement/drag behavior and stay grouped on the right.
