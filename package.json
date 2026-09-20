@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "lucide-react": "0.468.0",
-    "react": "19.1.1",
+    "react": "19.3.0",
     "react-dom": "19.1.1",
     "three": "0.185.0",
     "three-mesh-bvh": "0.9.1",
