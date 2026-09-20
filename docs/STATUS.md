@@ -1,5 +1,11 @@
 # Implementation status
 
+## Automatic receiver sizing with exact row alignment (September 20)
+
+- Removed **Along-row receiver spacing** and the grid-alignment selector. **Cells between PV row centres** now controls detail in both directions: the along-row target is regular row pitch divided by the cell count, adjusted to fit the exact footprint. Every PV row centre remains a cell boundary; wider aisles and outer edges can have rectangular cells. Standard remains 15 cells per gap; coarse preview uses 5 and retains row alignment.
+- Imported projects retain their legacy grid coordinates, analysis keys and saved light results until the count is edited or **Use automatic cell sizing** is selected. Older browser preferences adopt automatic sizing once. Solver caches, field layouts, hover boundaries and methods/provenance exports use the effective grid sizing.
+- Verification: **148 tests pass**, production build and changed-file formatting pass, and all **480 archived files are unchanged**. Live browser checks confirmed removal of the spacing control, the pitch/count explanation, grid resizing from 38 × 65 to 26 × 44 when changing 15 to 10 cells, and the retained one-sample Advanced setting. Native Radiance comparison reports **0 mismatches over 51,100 rays / 10 cases** (first-hit occlusion scope). No production deployment was made.
+
 ## Irradiance defaults and advanced sampling (September 20)
 
 - Moved **Samples per grid cell** into a collapsed **Advanced settings** section in Irradiance. The default remains **1**, with the existing 1–9 sampling behavior retained.

@@ -169,8 +169,8 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(document.querySelector('.brand svg'), null);
     assert.deepEqual((await savedStudy()).experimentSensors, []);
     assert.deepEqual((await savedStudy()).crops, []);
-    assert.deepEqual((await savedStudy()).analysis, study.analysis);
-    assert.equal((await savedStudy()).browserGridDefaultsVersion, 1);
+    assert.deepEqual((await savedStudy()).analysis, { ...study.analysis, resolution: 3 });
+    assert.equal((await savedStudy()).browserGridDefaultsVersion, 2);
     assert.equal(localStorage.getItem('fieldwork-study-v1'), null);
     assert.match(document.body.textContent, /Layout is session-only/);
     const help = document.querySelector('button[aria-label="About Length"]');
@@ -384,7 +384,8 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       null,
       'No placement toolbar in Irradiance',
     );
-    assert.ok(document.querySelector('[data-annotation="analysis.resolution"] input'));
+    assert.equal(document.querySelector('[data-annotation="analysis.resolution"] input'), null);
+    assert.ok(document.querySelector('[data-annotation="analysis.cellsPerRow"] input'));
     await click(step('Agrivoltaic'));
     assert.ok(document.querySelector('.compact-sidebar'));
     assert.equal(byText('C · Cropping area').getAttribute('aria-pressed'), 'true');
@@ -556,20 +557,15 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(document.querySelector('.field-tools'), null);
     assert.equal(document.querySelector('.compact-sidebar'), null);
     await click(byText('Apply coarse preview settings'));
-    assert.equal((await savedStudy()).analysis.resolution, 3);
+    assert.equal((await savedStudy()).analysis.cellsPerRow, 5);
+    assert.equal((await savedStudy()).analysis.gridSizing, 'row-pitch');
     await click(byText('Apply standard settings'));
-    assert.equal((await savedStudy()).analysis.resolution, 1);
+    assert.equal((await savedStudy()).analysis.gridSizing, 'row-pitch');
     assert.equal((await savedStudy()).analysis.gridAlignment, 'row-centres');
     assert.equal((await savedStudy()).analysis.cellsPerRow, 15);
     assert.match(document.querySelector('.control-content').textContent, /Current grid:/);
     // Restore the original numerical inputs without running another calculation.
     await act(async () => {
-      const spacing = document.querySelector('[data-annotation="analysis.resolution"] input');
-      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
-        spacing,
-        '1',
-      );
-      spacing.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
       const patches = document.querySelector('[data-annotation="analysis.patches"] select');
       patches.value = '145';
       patches.dispatchEvent(new dom.window.Event('change', { bubbles: true }));

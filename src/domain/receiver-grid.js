@@ -1,5 +1,18 @@
 export const MAX_RECEIVERS = 20000;
 export const DEFAULT_CELLS_PER_ROW = 15;
+export const PREVIEW_CELLS_PER_ROW = 5;
+export const automaticGridSizing = (s) =>
+  s.analysis.gridAlignment === 'row-centres' && s.analysis.gridSizing === 'row-pitch';
+export const nominalReceiverSpacing = (s) =>
+  automaticGridSizing(s)
+    ? s.rowPair.pitch / (s.analysis.cellsPerRow ?? DEFAULT_CELLS_PER_ROW)
+    : s.analysis.resolution;
+
+export function receiverGridDescription(s) {
+  if (s.analysis.gridAlignment !== 'row-centres')
+    return `${s.analysis.resolution} m nominal uniform spacing (legacy grid)`;
+  return `${s.analysis.cellsPerRow} cells between adjacent PV row centre lines, including wider aisles; ${automaticGridSizing(s) ? `${nominalReceiverSpacing(s).toFixed(4)} m target along-row size derived from regular pitch / cell count` : `${s.analysis.resolution} m nominal along-row spacing (legacy independent sizing)`}; along-row widths and outer-buffer cells fitted to the exact footprint; wider aisles may have rectangular cells; area-weighted summaries`;
+}
 // Pure grid math shared by solver geometry, field editing, hit testing and exports.
 // x is along PV rows; y is across row centre lines. Bounds retain the exact footprint.
 export function cellSampleOffsets(count = 1) {
@@ -29,11 +42,12 @@ export function cellSamplingDescription(count = 1) {
 export function receiverSpec(study, dimensions) {
   const s = study,
     d = dimensions;
-  const nx = Math.ceil(d.footprintX / s.analysis.resolution),
+  const resolution = nominalReceiverSpacing(s);
+  const nx = Math.ceil(d.footprintX / resolution),
     width = d.footprintX,
     height = d.footprintY;
   if (s.analysis.gridAlignment !== 'row-centres') {
-    const ny = Math.ceil(height / s.analysis.resolution);
+    const ny = Math.ceil(height / resolution);
     return {
       nx,
       ny,
@@ -121,7 +135,8 @@ export function maxRows(g, row, limit = 100) {
   );
 }
 export function gridSpacingLabel(g, digits = 3) {
-  if (g.exceeded) return 'Grid exceeds 20,000 receivers; reduce dimensions or increase spacing';
+  if (g.exceeded)
+    return 'Grid exceeds 20,000 receivers; reduce dimensions or cells between PV row centres';
   if (!g.yEdges) return `${g.dx.toFixed(digits)} × ${g.dy.toFixed(digits)} m`;
   let min = Infinity,
     max = -Infinity;

@@ -40,8 +40,8 @@ export default function Scene(props) {
   if (receiverGridSpec(props.study).exceeded)
     return (
       <div role="status" className="scene-fallback">
-        This grid exceeds 20,000 receivers. Reduce the array dimensions or increase grid spacing to
-        restore the drawing. Your inputs remain editable.
+        This grid exceeds 20,000 receivers. Reduce the array dimensions or cells between PV row
+        centres to restore the drawing. Your inputs remain editable.
       </div>
     );
   return <SceneView {...props} />;
@@ -119,6 +119,7 @@ function SceneView({
     study.rowPair.cropSetback,
     study.rowPair.croppingWidth,
     study.analysis.resolution,
+    study.analysis.gridSizing,
     study.analysis.gridAlignment,
     study.analysis.cellsPerRow,
     study.analysis.receiverHeight,

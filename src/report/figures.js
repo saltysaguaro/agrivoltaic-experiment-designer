@@ -102,7 +102,7 @@ export function figureSvg(
   const opacity = options.panelOpacity ?? (metric !== 'none' || scope === 'irradiance' ? 0.2 : 1);
   if (receiverGridSpec(s).exceeded)
     throw Error(
-      'This grid exceeds 20,000 receivers. Reduce dimensions or increase spacing before exporting figures.',
+      'This grid exceeds 20,000 receivers. Reduce dimensions or cells between PV row centres before exporting figures.',
     );
   const group =
       options.context?.get(s, scope) || buildGeometry(s, scope, undefined, { textures: false }),

@@ -259,7 +259,9 @@ export function receiverGrid(s) {
   const grid = receiverGridSpec(s),
     { nx, ny, dx, dy } = grid;
   if (grid.exceeded)
-    throw Error('This grid exceeds 20,000 receivers. Reduce dimensions or increase spacing.');
+    throw Error(
+      'This grid exceeds 20,000 receivers. Reduce dimensions or cells between PV row centres.',
+    );
   const points = [];
   for (let j = 0; j < ny; j++)
     for (let i = 0; i < nx; i++) {

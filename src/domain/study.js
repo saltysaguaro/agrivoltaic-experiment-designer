@@ -1,5 +1,5 @@
 import { DEFAULT_DLI_ZONES, MAX_DLI_ZONES } from './dli-zones.js';
-import { receiverSpec, DEFAULT_CELLS_PER_ROW } from './receiver-grid.js';
+import { receiverSpec, DEFAULT_CELLS_PER_ROW, automaticGridSizing } from './receiver-grid.js';
 import { defaultRackingAzimuth } from './racking-orientation.js';
 import { z } from 'zod';
 import { moduleOptics } from './optics.js';
@@ -157,7 +157,9 @@ export const studySchema = z
           const t = Date.parse(v + 'T12:00:00Z');
           return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === v;
         }, 'Use a valid calendar date'),
-      resolution: num(0.25, 5),
+      // Retained for reproducible imports of independently sized legacy grids.
+      resolution: num(0.25, 5).default(1),
+      gridSizing: z.enum(['independent', 'row-pitch']).default('independent'),
       samplesPerCell: count(1, 9).default(1),
       dliZoneCount: count(1, MAX_DLI_ZONES).default(DEFAULT_DLI_ZONES),
       gridAlignment: z.enum(['spacing', 'row-centres']).default('spacing'),
@@ -277,6 +279,7 @@ export const defaultStudy = () =>
       date: '2026-06-21',
       resolution: 1,
       gridAlignment: 'row-centres',
+      gridSizing: 'row-pitch',
       cellsPerRow: DEFAULT_CELLS_PER_ROW,
       receiverHeight: 0.2,
       interval: 10,
@@ -308,6 +311,8 @@ export function analysisKey(s) {
   // One centre sample preserves keys from projects created before this option.
   const analysis = {
     ...s.analysis,
+    gridSizing: automaticGridSizing(s) ? 'row-pitch' : undefined,
+    resolution: automaticGridSizing(s) ? undefined : s.analysis.resolution,
     // Zoning is display-only and must preserve saved numerical result keys.
     dliZoneCount: undefined,
     samplesPerCell: (s.analysis.samplesPerCell ?? 1) === 1 ? undefined : s.analysis.samplesPerCell,
@@ -463,6 +468,13 @@ export function updateStudyInput(study, section, key, value) {
   let s = structuredClone(study);
   s[section][key] = value;
   if (
+    section === 'analysis' &&
+    (key === 'cellsPerRow' || (key === 'gridSizing' && value === 'row-pitch'))
+  ) {
+    s.analysis.gridSizing = 'row-pitch';
+    s.analysis.gridAlignment = 'row-centres';
+  }
+  if (
     section === 'site' &&
     key === 'latitude' &&
     s.racking.type === 'fixed' &&
@@ -545,7 +557,7 @@ export function designIssues(s) {
   const grid = receiverSpec(s, d);
   if (grid.nx * grid.ny > 20000)
     issues.push(
-      'This grid exceeds 20,000 receivers. Increase along-row spacing, reduce cells per row gap, or reduce the array.',
+      'This grid exceeds 20,000 receivers. Reduce cells between PV row centres or reduce the array.',
     );
   return issues;
 }

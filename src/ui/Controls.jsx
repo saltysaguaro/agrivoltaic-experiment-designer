@@ -1,4 +1,10 @@
-import { gridSpacingLabel, DEFAULT_CELLS_PER_ROW } from '../domain/receiver-grid.js';
+import {
+  gridSpacingLabel,
+  DEFAULT_CELLS_PER_ROW,
+  PREVIEW_CELLS_PER_ROW,
+  automaticGridSizing,
+  nominalReceiverSpacing,
+} from '../domain/receiver-grid.js';
 import { moduleOptics } from '../domain/optics.js';
 import { defaultRackingAzimuth, rackingOrientation } from '../domain/racking-orientation.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
@@ -660,45 +666,35 @@ export default function Controls({
               {periodLabel(s)}
               {isPeriod(s) ? ' · Maps show period-total irradiation and mean daily DLI.' : ''}
             </p>
-            {field('analysis', 'gridAlignment', 'Receiver grid alignment', null, [
-              { value: 'row-centres', label: 'Align to PV row centres (default)' },
-              { value: 'spacing', label: 'Uniform spacing (custom)' },
-            ])}
-            {s.analysis.gridAlignment === 'row-centres' && (
-              <>
-                {field('analysis', 'cellsPerRow', 'Cells between PV row centres', null, null, {
-                  min: 1,
-                  max: 99,
-                  step: 1,
-                  integer: true,
-                })}
-                <p className="control-note">
-                  Cell boundaries meet each PV row centre line, with {s.analysis.cellsPerRow} cells
-                  across every gap. Wider aisle gaps have wider cells. The outer buffer fills the
-                  remaining footprint.
-                </p>
-              </>
+            {field('analysis', 'cellsPerRow', 'Cells between PV row centres', null, null, {
+              min: 1,
+              max: 99,
+              step: 1,
+              integer: true,
+            })}
+            {automaticGridSizing(s) ? (
+              <p className="control-note">
+                Cell size follows row pitch ÷ cell count: {s.rowPair.pitch} m ÷{' '}
+                {s.analysis.cellsPerRow} = {nominalReceiverSpacing(s).toFixed(3)} m target size.
+                Along-row widths adjust slightly to fit the footprint. Cell boundaries meet every PV
+                row centre; wider aisles and outer edges can have rectangular cells.
+              </p>
+            ) : (
+              <div className="info-box">
+                This saved study retains its original receiver grid. Change the cell count or apply
+                automatic sizing to update it. Recalculate light after changing the grid.
+                <button
+                  className="text-button"
+                  onClick={() => set('analysis', 'gridSizing', 'row-pitch')}
+                >
+                  Use automatic cell sizing
+                </button>
+              </div>
             )}
-            <div className="field-pair">
-              {field(
-                'analysis',
-                'resolution',
-                s.analysis.gridAlignment === 'row-centres'
-                  ? 'Along-row receiver spacing'
-                  : 'Receiver spacing',
-                'm',
-                null,
-                {
-                  min: 0.25,
-                  max: 5,
-                  step: 0.25,
-                },
-              )}
-              {field('analysis', 'receiverHeight', 'Receiver height', 'm', null, {
-                min: 0,
-                max: 5,
-              })}
-            </div>
+            {field('analysis', 'receiverHeight', 'Receiver height', 'm', null, {
+              min: 0,
+              max: 5,
+            })}
             {field('analysis', 'dliZoneCount', 'Number of DLI zones', null, null, {
               min: 1,
               max: 10,
@@ -781,10 +777,10 @@ export default function Controls({
               Apply standard settings
             </button>
             <small>
-              Preview uses a uniform 3 m grid, 145 sky patches and 15-minute steps. Standard uses
-              {DEFAULT_CELLS_PER_ROW} cells between row centres, 1 m along-row spacing, 577 patches
-              and 10-minute steps. Sky resolution and time interval do not change cell alignment.
-              Recalculate after editing.
+              Preview uses {PREVIEW_CELLS_PER_ROW} cells between row centres, 145 sky patches and
+              15-minute steps. Standard uses {DEFAULT_CELLS_PER_ROW} cells between row centres, 577
+              patches and 10-minute steps. Both derive along-row cell size from row pitch. Sky
+              resolution and time interval do not change cell alignment. Recalculate after editing.
             </small>
             <p className="control-note">
               Current grid: {receiver.nx} × {receiver.ny} cells; actual spacing{' '}

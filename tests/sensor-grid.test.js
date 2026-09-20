@@ -109,7 +109,7 @@ test('invalid sensor grids, empty selection, stale cells and field limits reject
 
 test('multiple checked planning cells sharing a receiver location still create independent sensors', () => {
   const s = defaultStudy();
-  s.analysis.resolution = 10;
+  s.analysis.cellsPerRow = 1;
   const areas = sensorGrid(s, { rows: 10, columns: 50 });
   const [a, b] = areas[0].cells;
   assert.deepEqual(a.grid, b.grid);

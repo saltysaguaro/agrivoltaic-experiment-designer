@@ -1,5 +1,9 @@
 import { dliZones, dliZoneSummary } from '../domain/dli-zones.js';
-import { gridSpacingLabel, cellSamplingDescription } from '../domain/receiver-grid.js';
+import {
+  gridSpacingLabel,
+  cellSamplingDescription,
+  receiverGridDescription,
+} from '../domain/receiver-grid.js';
 import { fieldStudy, controlResult, controlLayers } from '../experiment/control-field.js';
 import { designLayers } from '../ui/display-layers.js';
 import { receiverGridSpec } from '../domain/geometry.js';
@@ -244,7 +248,7 @@ export function methodsRows(s, r) {
     ],
     [
       'Receiver grid',
-      `${s.analysis.gridAlignment === 'row-centres' ? `${s.analysis.cellsPerRow} cells between adjacent PV row centre lines, including wider aisles; ${s.analysis.resolution} m nominal along-row spacing; outer-buffer cells fitted to footprint; area-weighted summaries` : `${s.analysis.resolution} m nominal uniform spacing`}; height ${s.analysis.receiverHeight} m; horizontal`,
+      `${receiverGridDescription(s)}; height ${s.analysis.receiverHeight} m; horizontal`,
     ],
     [
       'PAR method',

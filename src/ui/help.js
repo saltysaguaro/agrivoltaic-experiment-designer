@@ -83,7 +83,7 @@ export const inputHelp = {
   'analysis.gridAlignment':
     'Row alignment puts cell boundaries on adjacent PV row centre lines. Each gap contains the chosen number of cells, including wider aisle gaps. Uniform spacing retains the older footprint-fitted grid.',
   'analysis.cellsPerRow':
-    'Number of cells across each PV row-centre gap. The default is 15. More cells resolve variation across the rows at greater calculation cost. This is across the PV rows, not along individual modules.',
+    'Number of cells across each PV row-centre gap, default 15. This also sets the target along-row size: regular row pitch divided by this count. More cells give finer detail in both directions and increase calculation cost. Exact row-centre alignment and footprint boundaries are retained, so wider aisles and outer edges may have rectangular cells.',
   'analysis.resolution':
     'Nominal spacing along PV rows when row alignment is enabled; spacing in both directions in uniform mode. Smaller spacing gives finer maps but takes more time and memory. Samples per grid cell in Advanced settings controls averaging within each tile independently. These points are not physical instruments.',
   'analysis.dliZoneCount':

@@ -6,6 +6,8 @@ import {
   analysisKey,
   dimensions,
   studySchema,
+  updateStudyInput,
+  designIssues,
 } from '../src/domain/study.js';
 import {
   buildGeometry,
@@ -15,7 +17,14 @@ import {
   localToWorld,
   worldToLocal,
 } from '../src/domain/geometry.js';
-import { cellLocal, rowEdge, rowSpan, gridMean, rowHeight } from '../src/domain/receiver-grid.js';
+import {
+  cellLocal,
+  rowEdge,
+  rowSpan,
+  gridMean,
+  rowHeight,
+  nominalReceiverSpacing,
+} from '../src/domain/receiver-grid.js';
 import {
   normalizeLayout,
   cellAt,
@@ -88,6 +97,8 @@ test('default grid has exactly fifteen cells per actual row-centre interval, inc
     geometry = buildGeometry(s);
   assert.equal(s.analysis.gridAlignment, 'row-centres');
   assert.equal(s.analysis.cellsPerRow, 15);
+  near(nominalReceiverSpacing(s), s.rowPair.pitch / 15);
+  assert.equal(g.nx, Math.ceil(d.footprintX / (s.rowPair.pitch / 15)));
   const centres = geometry.userData.rowOffsets;
   const indices = centres.map((y) => g.yEdges.findIndex((edge) => Math.abs(edge - y) < 1e-8));
   assert.ok(indices.every((i) => i >= 0));
@@ -100,6 +111,64 @@ test('default grid has exactly fifteen cells per actual row-centre interval, inc
   near(g.yEdges.at(-1), d.footprintY / 2);
   near(g.width, d.footprintX);
   disposeGroup(geometry);
+});
+
+test('cell count controls both grid directions; legacy spacing cannot alter automatic results', () => {
+  const s = fixture(),
+    first = receiverGridSpec(s),
+    key = analysisKey(s);
+  s.analysis.resolution = 5;
+  assert.deepEqual(receiverGridSpec(s), first);
+  assert.equal(analysisKey(s), key);
+  const finer = updateStudyInput(s, 'analysis', 'cellsPerRow', 30);
+  assert.ok(receiverGridSpec(finer).nx > first.nx);
+  assert.ok(receiverGridSpec(finer).ny > first.ny);
+  assert.notEqual(analysisKey(finer), key);
+  const wider = updateStudyInput(s, 'rowPair', 'pitch', 16);
+  near(nominalReceiverSpacing(wider), 16 / 15);
+  assert.ok(receiverGridSpec(wider).nx < first.nx);
+  const oversized = defaultStudy();
+  oversized.analysis.cellsPerRow = 99;
+  oversized.array.rows = 24;
+  const grid = receiverGridSpec(oversized);
+  assert.equal(grid.exceeded, true);
+  assert.equal(grid.yEdges, undefined, 'Reject excessive grids before allocating edges or points');
+  assert.ok(
+    designIssues(oversized).some((message) =>
+      message.includes('Reduce cells between PV row centres'),
+    ),
+  );
+});
+
+test('legacy independent grids retain coordinates and keys until explicit conversion', async () => {
+  const raw = defaultStudy();
+  raw.table.high = raw.table.wide = raw.row.tables = 1;
+  raw.array.rows = 2;
+  raw.array.buffer = 0.5;
+  raw.weather.mode = 'sample';
+  raw.analysis.backend = 'cpu';
+  raw.analysis.patches = 145;
+  delete raw.analysis.gridSizing;
+  raw.analysis.resolution = 3;
+  const key = analysisKey(raw),
+    grid = receiverGridSpec(raw);
+  const restored = migrateStudy(JSON.parse(JSON.stringify(raw)));
+  assert.equal(restored.analysis.gridSizing, 'independent');
+  assert.equal(analysisKey(restored), key);
+  assert.deepEqual(receiverGridSpec(restored), grid);
+  const result = await calculateDay(raw);
+  const file = await buildProjectPackage(restored, result);
+  const reopened = await readProject(file.archive, 'legacy-grid.agrivoltaic.zip');
+  assert.ok(reopened.result, 'Saved light remains valid when a legacy project is opened');
+  assert.deepEqual(reopened.result.grid, JSON.parse(JSON.stringify(result.grid)));
+  const converted = updateStudyInput(restored, 'analysis', 'gridSizing', 'row-pitch');
+  assert.notEqual(analysisKey(converted), key);
+  assert.notEqual(receiverGridSpec(converted).nx, grid.nx);
+  assert.equal(
+    updateStudyInput(restored, 'analysis', 'cellsPerRow', 15).analysis.gridSizing,
+    'row-pitch',
+  );
+  assert.equal(migrateStudy(converted).analysis.gridSizing, 'row-pitch');
 });
 test('cell centres, hover selection, outlines, crops and sensor glyphs share the aligned rotated grid', () => {
   let s = fixture();

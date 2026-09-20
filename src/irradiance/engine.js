@@ -1,5 +1,6 @@
 import {
   DEFAULT_CELLS_PER_ROW,
+  nominalReceiverSpacing,
   gridMean,
   cellSampleOffsets,
   rowEdge,
@@ -272,7 +273,7 @@ export async function calculateDay(
       s.row,
       s.rowPair,
       s.array,
-      s.analysis.resolution,
+      nominalReceiverSpacing(s),
       s.analysis.receiverHeight,
       s.analysis.patches,
       ...(samplesPerCell > 1 ? ['equal-area-cell-samples-v1', samplesPerCell] : []),
