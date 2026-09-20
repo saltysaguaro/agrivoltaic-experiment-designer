@@ -19,7 +19,7 @@ test('old browser preferences adopt the aligned grid once, preserving other stud
     assert.deepEqual(restored.analysis, {
       ...old.analysis,
       gridAlignment: 'row-centres',
-      cellsPerRow: 9,
+      cellsPerRow: 15,
       resolution: 1,
     });
     assert.deepEqual(restored.array, old.array);
@@ -40,6 +40,9 @@ test('project imports preserve custom grids and existing aligned browser grids r
   assert.equal(migrateStudy(s).analysis.resolution, 3);
   assert.equal(migrateStudy(s).analysis.gridAlignment, 'spacing');
   assert.deepEqual(restoreBrowserStudy(browserStudyRecord(migrateStudy(s))).analysis, s.analysis);
+  Object.assign(s.analysis, { gridAlignment: 'row-centres', cellsPerRow: 9, samplesPerCell: 4 });
+  assert.deepEqual(restoreBrowserStudy(browserStudyRecord(s)).analysis, s.analysis);
+  assert.deepEqual(migrateStudy(s).analysis, s.analysis);
   Object.assign(s.analysis, { gridAlignment: 'row-centres', resolution: 0.5, cellsPerRow: 18 });
   assert.deepEqual(restoreBrowserStudy(s).analysis, s.analysis);
   assert.throws(() => restoreBrowserStudy({ ...s, schemaVersion: 99 }), /Unsupported/);

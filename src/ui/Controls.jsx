@@ -1,4 +1,4 @@
-import { gridSpacingLabel } from '../domain/receiver-grid.js';
+import { gridSpacingLabel, DEFAULT_CELLS_PER_ROW } from '../domain/receiver-grid.js';
 import { moduleOptics } from '../domain/optics.js';
 import { defaultRackingAzimuth, rackingOrientation } from '../domain/racking-orientation.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
@@ -714,16 +714,6 @@ export default function Controls({
               { value: 577, label: 'Standard · 577 patches' },
               { value: 2305, label: 'High · 2,305 patches' },
             ])}
-            {field('analysis', 'samplesPerCell', 'Samples per grid cell', null, null, {
-              min: 1,
-              max: 9,
-              step: 1,
-              integer: true,
-            })}
-            <p className="control-note">
-              1 uses the cell centre. 2–9 estimate the cell mean. More samples increase calculation
-              time without changing cell boundaries. Recalculate after editing.
-            </p>
             {field('analysis', 'interval', 'Direct integration interval', null, [
               { value: 5, label: '5 minutes' },
               { value: 10, label: '10 minutes' },
@@ -734,6 +724,19 @@ export default function Controls({
               { value: 'cpu', label: 'CPU reference' },
               { value: 'gpu', label: 'WebGPU with CPU fallback' },
             ])}
+            <details>
+              <summary>Advanced settings</summary>
+              {field('analysis', 'samplesPerCell', 'Samples per grid cell', null, null, {
+                min: 1,
+                max: 9,
+                step: 1,
+                integer: true,
+              })}
+              <p className="control-note">
+                1 uses the cell centre. 2–9 estimate the cell mean. More samples increase
+                calculation time without changing cell boundaries. Recalculate after editing.
+              </p>
+            </details>
             <details>
               <summary>PAR conversion assumptions</summary>
               <div className="field-pair">
@@ -779,9 +782,9 @@ export default function Controls({
             </button>
             <small>
               Preview uses a uniform 3 m grid, 145 sky patches and 15-minute steps. Standard uses
-              nine cells between row centres, 1 m along-row spacing, 577 patches and 10-minute
-              steps. Sky resolution and time interval do not change cell alignment. Recalculate
-              after editing.
+              {DEFAULT_CELLS_PER_ROW} cells between row centres, 1 m along-row spacing, 577 patches
+              and 10-minute steps. Sky resolution and time interval do not change cell alignment.
+              Recalculate after editing.
             </small>
             <p className="control-note">
               Current grid: {receiver.nx} × {receiver.ny} cells; actual spacing{' '}

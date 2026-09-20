@@ -1,4 +1,5 @@
 export const MAX_RECEIVERS = 20000;
+export const DEFAULT_CELLS_PER_ROW = 15;
 // Pure grid math shared by solver geometry, field editing, hit testing and exports.
 // x is along PV rows; y is across row centre lines. Bounds retain the exact footprint.
 export function cellSampleOffsets(count = 1) {
@@ -48,7 +49,7 @@ export function receiverSpec(study, dimensions) {
     { length: s.array.rows },
     (_, i) => i * s.rowPair.pitch + Math.floor(i / s.array.groupSize) * s.array.aisle - d.span / 2,
   );
-  const count = s.analysis.cellsPerRow ?? 9,
+  const count = s.analysis.cellsPerRow ?? DEFAULT_CELLS_PER_ROW,
     spacing = s.rowPair.pitch / count;
   const anchors = [-height / 2, ...centres, height / 2];
   const segments = anchors.slice(0, -1).map((start, i) => ({

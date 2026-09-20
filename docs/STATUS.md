@@ -1,5 +1,11 @@
 # Implementation status
 
+## Irradiance defaults and advanced sampling (September 20)
+
+- Moved **Samples per grid cell** into a collapsed **Advanced settings** section in Irradiance. The default remains **1**, with the existing 1–9 sampling behavior retained.
+- New studies and **Apply standard settings** now use **15 cells between PV row centres**. Schema/grid/cache defaults and input guidance agree. Saved explicit grid and sampling choices survive browser restore and project import.
+- Verification: **146 tests pass**, production build succeeds, and all **480 archived files are unchanged**. In-app browser checks confirmed the collapsed control, one-sample value and 15-cell standard preset. Native Radiance comparison reports **0 mismatches over 51,100 rays / 10 cases**; this remains first-hit occlusion validation.
+
 ## Zoned DLI (September 20)
 
 - Added **Zoned DLI** beside continuous sunlight/DLI maps, with **Number of DLI zones** in Irradiance (1–10, default 5). Area-weighted natural breaks on a bounded 256-bucket histogram classifies daily or period-mean daily DLI without rerunning irradiance or invalidating saved results. Uniform maps use one class; equal values stay together. Entire receiver footprint and buffer are included.

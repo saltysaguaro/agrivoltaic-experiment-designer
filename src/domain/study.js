@@ -1,5 +1,5 @@
 import { DEFAULT_DLI_ZONES, MAX_DLI_ZONES } from './dli-zones.js';
-import { receiverSpec } from './receiver-grid.js';
+import { receiverSpec, DEFAULT_CELLS_PER_ROW } from './receiver-grid.js';
 import { defaultRackingAzimuth } from './racking-orientation.js';
 import { z } from 'zod';
 import { moduleOptics } from './optics.js';
@@ -161,7 +161,7 @@ export const studySchema = z
       samplesPerCell: count(1, 9).default(1),
       dliZoneCount: count(1, MAX_DLI_ZONES).default(DEFAULT_DLI_ZONES),
       gridAlignment: z.enum(['spacing', 'row-centres']).default('spacing'),
-      cellsPerRow: count(1, 99).default(9),
+      cellsPerRow: count(1, 99).default(DEFAULT_CELLS_PER_ROW),
       receiverHeight: num(0, 5),
       interval: z.union([z.literal(5), z.literal(10), z.literal(15)]),
       patches: z.union([z.literal(145), z.literal(577), z.literal(2305)]),
@@ -277,7 +277,7 @@ export const defaultStudy = () =>
       date: '2026-06-21',
       resolution: 1,
       gridAlignment: 'row-centres',
-      cellsPerRow: 9,
+      cellsPerRow: DEFAULT_CELLS_PER_ROW,
       receiverHeight: 0.2,
       interval: 10,
       patches: 577,

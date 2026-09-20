@@ -83,9 +83,9 @@ export const inputHelp = {
   'analysis.gridAlignment':
     'Row alignment puts cell boundaries on adjacent PV row centre lines. Each gap contains the chosen number of cells, including wider aisle gaps. Uniform spacing retains the older footprint-fitted grid.',
   'analysis.cellsPerRow':
-    'Number of cells across each PV row-centre gap. The default is nine. More cells resolve variation across the rows at greater calculation cost. This is across the PV rows, not along individual modules.',
+    'Number of cells across each PV row-centre gap. The default is 15. More cells resolve variation across the rows at greater calculation cost. This is across the PV rows, not along individual modules.',
   'analysis.resolution':
-    'Nominal spacing along PV rows when row alignment is enabled; spacing in both directions in uniform mode. Smaller spacing gives finer maps but takes more time and memory. Samples per grid cell controls averaging within each tile independently. These points are not physical instruments.',
+    'Nominal spacing along PV rows when row alignment is enabled; spacing in both directions in uniform mode. Smaller spacing gives finer maps but takes more time and memory. Samples per grid cell in Advanced settings controls averaging within each tile independently. These points are not physical instruments.',
   'analysis.dliZoneCount':
     'Choose 1–10 light classes. Area-weighted natural breaks group similar daily DLI (mean daily for a season or year), using a fast 256-bin histogram. Fewer zones may be available for uniform or nearly uniform values. These are exploratory classes, not statistical or crop-response thresholds. The full receiver footprint, including its buffer, is classified. This display setting does not rerun irradiance.',
   'analysis.samplesPerCell':

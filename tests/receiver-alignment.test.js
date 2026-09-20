@@ -81,20 +81,20 @@ function fixture() {
   s.array.azimuth = 37;
   return s;
 }
-test('default grid has exactly nine cells per actual row-centre interval, including wider aisles', () => {
+test('default grid has exactly fifteen cells per actual row-centre interval, including wider aisles', () => {
   const s = fixture(),
     g = receiverGridSpec(s),
     d = dimensions(s),
     geometry = buildGeometry(s);
   assert.equal(s.analysis.gridAlignment, 'row-centres');
-  assert.equal(s.analysis.cellsPerRow, 9);
+  assert.equal(s.analysis.cellsPerRow, 15);
   const centres = geometry.userData.rowOffsets;
   const indices = centres.map((y) => g.yEdges.findIndex((edge) => Math.abs(edge - y) < 1e-8));
   assert.ok(indices.every((i) => i >= 0));
   for (let r = 1; r < indices.length; r++) {
-    assert.equal(indices[r] - indices[r - 1], 9);
-    for (let k = 0; k < 9; k++)
-      near(rowHeight(g, indices[r - 1] + k), (centres[r] - centres[r - 1]) / 9);
+    assert.equal(indices[r] - indices[r - 1], 15);
+    for (let k = 0; k < 15; k++)
+      near(rowHeight(g, indices[r - 1] + k), (centres[r] - centres[r - 1]) / 15);
   }
   near(g.yEdges[0], -d.footprintY / 2);
   near(g.yEdges.at(-1), d.footprintY / 2);

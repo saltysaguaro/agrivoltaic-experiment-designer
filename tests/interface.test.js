@@ -303,6 +303,11 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     );
     await click(byText('Relative sunlight'));
     const sampleInput = document.querySelector('[data-annotation="analysis.samplesPerCell"] input');
+    const advanced = sampleInput.closest('details');
+    assert.equal(advanced.open, false);
+    assert.equal(advanced.querySelector('summary').textContent, 'Advanced settings');
+    await click(advanced.querySelector('summary'));
+    assert.equal(advanced.open, true);
     assert.equal(sampleInput.value, '1');
     assert.equal(sampleInput.min, '1');
     assert.equal(sampleInput.max, '9');
@@ -555,7 +560,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await click(byText('Apply standard settings'));
     assert.equal((await savedStudy()).analysis.resolution, 1);
     assert.equal((await savedStudy()).analysis.gridAlignment, 'row-centres');
-    assert.equal((await savedStudy()).analysis.cellsPerRow, 9);
+    assert.equal((await savedStudy()).analysis.cellsPerRow, 15);
     assert.match(document.querySelector('.control-content').textContent, /Current grid:/);
     // Restore the original numerical inputs without running another calculation.
     await act(async () => {

@@ -63,13 +63,13 @@ Reports contain separate tables and a plan figure for Control. Initialized contr
 
 ## Row-centred receiver grids
 
-`analysis.gridAlignment` selects `row-centres` or legacy `spacing`. New studies use `row-centres` with `cellsPerRow: 9`; existing documents missing these fields retain uniform spacing. In aligned mode `analysis.resolution` controls nominal along-row spacing. Every adjacent PV row-centre interval, including wider aisle gaps, contains exactly `cellsPerRow` cells; outer intervals fit the receiver footprint.
+`analysis.gridAlignment` selects `row-centres` or legacy `spacing`. New studies use `row-centres` with `cellsPerRow: 15`; existing documents missing these fields retain uniform spacing. In aligned mode `analysis.resolution` controls nominal along-row spacing. Every adjacent PV row-centre interval, including wider aisle gaps, contains exactly `cellsPerRow` cells; outer intervals fit the receiver footprint.
 
 Aligned results carry the local across-row boundary array `grid.yEdges` (length `ny + 1`). `grid.dy` is only the mean cell height; consumers must use consecutive `yEdges` for each cell's actual height and centre. Uniform results retain the original `dy` convention without `yEdges`. Field/crop summaries use cell-area weighting, and import validation checks the full boundary array and weighted summaries. Both agrivoltaic and control fields use the same grid.
 
 ## Within-cell sampling
 
-`analysis.samplesPerCell` is an integer from 1 to 9, defaulting to 1 for new and older studies. Results also record `samplesPerCell`; older results without it represent one sample. Receiver coordinates remain cell centres. With more than one sample, receiver irradiation and DLI are equally weighted means over the sample locations, and relative sunlight is computed from the averaged irradiation. Control values remain the uniform unobstructed reference.
+The Irradiance **Advanced settings** control `analysis.samplesPerCell` is an integer from 1 to 9, defaulting to 1 for new and older studies. Results also record `samplesPerCell`; older results without it represent one sample. Receiver coordinates remain cell centres. With more than one sample, receiver irradiation and DLI are equally weighted means over the sample locations, and relative sunlight is computed from the averaged irradiation. Control values remain the uniform unobstructed reference.
 
 The deterministic `equal-area-cell-samples-v1` pattern partitions each cell into `round(sqrt(N))` rows. Each row gets `floor(N / rows)` columns, with one extra column in each of the last `N % rows` rows. A row's height is its column count divided by N times the cell height. Each subrectangle contributes its centre with weight `1/N`, all at the receiver height and rotated with the array. N = 4 and N = 9 are regular 2 × 2 and 3 × 3 patterns. Samples inside opaque supports contribute zero; this is finite quadrature over the whole cell, not a mean restricted to unobstructed ground.
 
