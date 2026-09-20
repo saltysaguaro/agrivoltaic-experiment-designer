@@ -30,6 +30,8 @@ const cases = [
   ['dual-axis', 'dual-axis', 'array'],
   ['pergola', 'pergola', 'array'],
   ['pergola-checkerboard', 'pergola', 'array'],
+  ['pergola-tilted', 'pergola', 'array'],
+  ['pergola-checkerboard-tilted', 'pergola', 'array'],
 ];
 const results = [];
 try {
@@ -40,7 +42,8 @@ try {
     s.array.rows = 4;
     s.racking.type = type;
     s.array.azimuth = defaultRackingAzimuth(type, s.site.latitude);
-    if (name === 'pergola-checkerboard') {
+    if (name.includes('tilted')) s.racking.pergolaTilt = 23.7;
+    if (name.startsWith('pergola-checkerboard')) {
       s.racking.pergolaLayout = 'checkerboard';
       s.module.gap = 1.5;
       s.row.tables = 2;

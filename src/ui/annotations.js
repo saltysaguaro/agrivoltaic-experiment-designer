@@ -14,6 +14,7 @@ const labels = {
   'module.gap': ['g', 'Module gap', 'm'],
   'racking.height': ['H', 'Axis height', 'm'],
   'racking.tilt': ['θ', 'Fixed / preview tilt', '°'],
+  'racking.pergolaTilt': ['θ', 'Pergola tilt angle', '°'],
   'racking.limit': ['θmax', 'Rotation limit', '°'],
   'racking.postSize': ['p', 'Post width', 'm'],
   'table.high': ['Nc', 'Modules across'],
@@ -71,11 +72,15 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
   const modulePoint = (x, y, z) => new Vector3(x, y, z).applyMatrix4(first.matrixWorld);
   const ids = focus
     ? [focus.id]
-    : (defaults[scope] || defaults.array).filter(
-        (id) =>
-          !(id === 'row.tableGap' && s.row.tables === 1) &&
-          !(id === 'racking.tilt' && ['vertical', 'pergola'].includes(s.racking.type)),
-      );
+    : (defaults[scope] || defaults.array)
+        .map((id) =>
+          id === 'racking.tilt' && s.racking.type === 'pergola' ? 'racking.pergolaTilt' : id,
+        )
+        .filter(
+          (id) =>
+            !(id === 'row.tableGap' && s.row.tables === 1) &&
+            !(id === 'racking.tilt' && ['vertical', 'pergola'].includes(s.racking.type)),
+        );
   return ids.map((id) => {
     const named = labels[id];
     let value = id.split('.').reduce((o, key) => o?.[key], s);
@@ -139,7 +144,7 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
           post.position.clone().add(new Vector3(-s.racking.postSize / 2, 0, 0)),
           post.position.clone().add(new Vector3(s.racking.postSize / 2, 0, 0)),
         );
-    } else if (id === 'racking.tilt' || id === 'racking.limit') {
+    } else if (['racking.tilt', 'racking.pergolaTilt', 'racking.limit'].includes(id)) {
       const limit = id.endsWith('limit'),
         angle = limit ? (s.racking.limit * Math.PI) / 180 : tilt;
       a.value = `${limit ? '±' : ''}${limit ? s.racking.limit : getPose(s).tilt}°`;

@@ -1,3 +1,4 @@
+import { dliZones } from '../domain/dli-zones.js';
 import { batchHardware } from './hardware-display.js';
 import { rowHeight, maxRows, rowEdge } from '../domain/receiver-grid.js';
 import { dliLabel } from '../domain/period.js';
@@ -18,7 +19,7 @@ import {
   receiverGridSpec,
   localToWorld,
 } from '../domain/geometry.js';
-import { heatColor, figureSvg } from '../report/figures.js';
+import { heatColor, dliZoneColor, figureSvg } from '../report/figures.js';
 import { displayBounds } from './camera.js';
 import { hardwarePoints, fitDrawing } from './drawing-bounds.js';
 import { groundGrid } from './ground-grid.js';
@@ -39,8 +40,8 @@ export default function Scene(props) {
   if (receiverGridSpec(props.study).exceeded)
     return (
       <div role="status" className="scene-fallback">
-        This grid exceeds 20,000 receivers. Reduce the array dimensions or increase grid spacing to
-        restore the drawing. Your inputs remain editable.
+        This grid exceeds 20,000 receivers. Reduce the array dimensions or cells between PV row
+        centres to restore the drawing. Your inputs remain editable.
       </div>
     );
   return <SceneView {...props} />;
@@ -69,6 +70,7 @@ function SceneView({
   editor,
   interactionRef,
 }) {
+  const zoning = metric === 'zoned-dli' ? dliZones(result, study.analysis.dliZoneCount) : null;
   const host = useRef(null),
     runtime = useRef(null),
     latest = useRef(null),
@@ -117,6 +119,7 @@ function SceneView({
     study.rowPair.cropSetback,
     study.rowPair.croppingWidth,
     study.analysis.resolution,
+    study.analysis.gridSizing,
     study.analysis.gridAlignment,
     study.analysis.cellsPerRow,
     study.analysis.receiverHeight,
@@ -487,7 +490,10 @@ function SceneView({
       metric !== 'none' &&
       ['array', 'irradiance', 'sensors', 'crops', 'report'].includes(scope)
     ) {
-      if (rt.heatmap && (rt.heatmapResult !== result || rt.heatmapMetric !== metric)) {
+      if (
+        rt.heatmap &&
+        (rt.heatmapResult !== result || rt.heatmapMetric !== metric || rt.heatmapZoning !== zoning)
+      ) {
         rt.heatmap.geometry.dispose();
         rt.heatmap.material.dispose();
         rt.heatmap = null;
@@ -512,16 +518,19 @@ function SceneView({
           mesh.setColorAt(
             i,
             new THREE.Color(
-              heatColor(
-                metric === 'sunlight' ? c.sunlight : c.dli,
-                metric === 'sunlight' ? 100 : result.openDli,
-              ),
+              zoning
+                ? dliZoneColor(zoning, zoning.cellZones[i])
+                : heatColor(
+                    metric === 'sunlight' ? c.sunlight : c.dli,
+                    metric === 'sunlight' ? 100 : result.openDli,
+                  ),
             ),
           );
         });
         rt.heatmap = mesh;
         rt.heatmapResult = result;
         rt.heatmapMetric = metric;
+        rt.heatmapZoning = zoning;
       }
       overlay.add(rt.heatmap);
     } else if (rt.heatmap) {
@@ -638,7 +647,7 @@ function SceneView({
       rt.framingKey = framingKey;
     }
     rt.resize();
-  }, [structureKey, overlayKey, view, scopeKey, scope, metric, result, showGrid, resetKey]);
+  }, [structureKey, overlayKey, view, scopeKey, scope, metric, result, zoning, showGrid, resetKey]);
   useEffect(() => {
     const rt = runtime.current;
     if (rt?.group) {
@@ -901,6 +910,11 @@ function SceneView({
                   : 'Cell-centre sample'}{' '}
               · height {hover.cell.z.toFixed(2)} m
             </span>
+            {zoning && (
+              <div>
+                <b>DLI zone {zoning.cellZones[hover.index]}</b>
+              </div>
+            )}
             {hover.cell.sunlight !== undefined && (
               <>
                 <div>
@@ -974,6 +988,7 @@ function SceneView({
         <ReceiverInspector
           study={study}
           result={result}
+          zoning={zoning}
           cell={selectedCell}
           setCell={setSelectedCell}
           open={inspectorOpen}

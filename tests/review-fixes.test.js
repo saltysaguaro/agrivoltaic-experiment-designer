@@ -96,7 +96,7 @@ test('all figure projections and report handle a large accepted array', () => {
   const s = defaultStudy();
   s.row.tables = 20;
   s.array.rows = 24;
-  s.analysis.resolution = 5;
+  s.analysis.cellsPerRow = 5;
   assert.deepEqual(designIssues(s), []);
   for (const view of ['plan', 'profile', 'oblique']) {
     const svg = figureSvg(s, null, view);

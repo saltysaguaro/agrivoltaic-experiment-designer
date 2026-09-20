@@ -1,5 +1,44 @@
 # Implementation status
 
+## GitHub check repairs (September 20)
+
+- Browser tests probe WebGL2 independently of the application and require either the live canvas or the SVG fallback according to that capability. Context-loss recovery runs only when the browser exposes the required extension; a separate forced-unavailable test checks SVG rendering and editable dimensions in every browser. This addresses Firefox's `AllowWebgl2:false` failures on GitHub's hosted runner without treating renderer errors on capable browsers as passes.
+- Zoned DLI uses an explicit small fixed-array fixture, five receiver cells per row gap and 15-minute integration. It retains four samples per cell, five-to-three zone changes, view/worker preservation and the uniform control-field check. The fixture no longer inherits the new tracker default and its many sky poses, which exceeded the browser assertion timeout.
+- Dependabot groups React with React DOM, and Vite with esbuild, so coupled updates can be proposed together. Existing React and Vite PRs also need their companion dependencies corrected.
+- Local verification: **151 tests pass**, production build and formatting pass, and all **480 archived files are unchanged**. The four-browser Playwright suite reports **19 passed, 5 skipped**: four explicit hardware-WebGPU gates and Chromium context-loss recovery where the local browser has no WebGL2 context. Firefox and both WebKit projects exercise real context loss/restoration; all four exercise forced SVG fallback. Native Radiance first-hit comparison again reports **0 mismatches over 61,320 rays / 12 cases**. The existing production chunk-size advisory remains. GitHub verification is recorded separately after the repaired branches run; this change makes no new physical-model validation claim.
+
+## Pergola tilt (September 20)
+
+- Added **Pergola tilt angle** (0–85°, default 0°) in Racking for both aligned and checkerboard pergolas. Each table uses the fixed tilt in the interactive drawing, scientific occluders and publication figures; staggered row offsets remain unchanged. Full array azimuth controls the facing direction when tilted. Clearance guidance, automatic height adjustments, projected cropping boundaries, angle callouts and methods/provenance follow the effective tilt.
+- Stored `racking.pergolaTilt` defaults to zero, preserving the horizontal geometry and analysis keys of older pergola projects whose generic tilt field was previously ignored. Changing pergola tilt invalidates light results and visibility caches; project packages retain the new angle and matching results.
+- Verification: **151 tests pass**, production build succeeds (main chunk size advisory), changed-file formatting passes, and all **480 archived files are unchanged**. New tests cover rotated aligned/checkerboard geometry, clearances, old/new project result round trips, cache invalidation and numerical agreement with equivalent fixed geometry. Browser checks confirmed the angle control, facing text, clearance update and tilted profile drawing. Native Radiance comparison reports **0 mismatches over 61,320 rays / 12 cases**, including tilted aligned/checkerboard cases; this is first-hit occlusion validation. No production deployment was made.
+
+## Single-axis starting layout (September 20)
+
+- New studies default to **single-axis tracking**, **1 module across × 6 modules along**, **5 tables per row**, and **4 rows** (120 modules), revised from the initial 12-row default. The tracking reference azimuth is 90°, giving north–south rows with east–west tracking. Existing browser preferences and imported project choices remain intact.
+- The four-row starting layout passes clearance checks and uses 4,819 receivers, within the 20,000-cell limit. Browser checks confirmed the initial tracking/table defaults; domain checks confirmed the revised row count, module total and receiver count. Scientific tests that require fixed arrays or particular row counts now define those fixtures explicitly.
+- Verification: **148 tests pass**, production build and changed-file formatting pass; all **480 archived files are unchanged**. Native Radiance comparison reports **0 mismatches over 51,100 rays / 10 cases** (first-hit occlusion scope). No production deployment was made.
+
+## Automatic receiver sizing with exact row alignment (September 20)
+
+- Removed **Along-row receiver spacing** and the grid-alignment selector. **Cells between PV row centres** now controls detail in both directions: the along-row target is regular row pitch divided by the cell count, adjusted to fit the exact footprint. Every PV row centre remains a cell boundary; wider aisles and outer edges can have rectangular cells. Standard remains 15 cells per gap; coarse preview uses 5 and retains row alignment.
+- Imported projects retain their legacy grid coordinates, analysis keys and saved light results until the count is edited or **Use automatic cell sizing** is selected. Older browser preferences adopt automatic sizing once. Solver caches, field layouts, hover boundaries and methods/provenance exports use the effective grid sizing.
+- Verification: **148 tests pass**, production build and changed-file formatting pass, and all **480 archived files are unchanged**. Live browser checks confirmed removal of the spacing control, the pitch/count explanation, grid resizing from 38 × 65 to 26 × 44 when changing 15 to 10 cells, and the retained one-sample Advanced setting. Native Radiance comparison reports **0 mismatches over 51,100 rays / 10 cases** (first-hit occlusion scope). No production deployment was made.
+
+## Irradiance defaults and advanced sampling (September 20)
+
+- Moved **Samples per grid cell** into a collapsed **Advanced settings** section in Irradiance. The default remains **1**, with the existing 1–9 sampling behavior retained.
+- New studies and **Apply standard settings** now use **15 cells between PV row centres**. Schema/grid/cache defaults and input guidance agree. Saved explicit grid and sampling choices survive browser restore and project import.
+- Verification: **146 tests pass**, production build succeeds, and all **480 archived files are unchanged**. In-app browser checks confirmed the collapsed control, one-sample value and 15-cell standard preset. Native Radiance comparison reports **0 mismatches over 51,100 rays / 10 cases**; this remains first-hit occlusion validation.
+
+## Zoned DLI (September 20)
+
+- Added **Zoned DLI** beside continuous sunlight/DLI maps, with **Number of DLI zones** in Irradiance (1–10, default 5). Area-weighted natural breaks on a bounded 256-bucket histogram classifies daily or period-mean daily DLI without rerunning irradiance or invalidating saved results. Uniform maps use one class; equal values stay together. Entire receiver footprint and buffer are included.
+- Discrete blue-to-yellow colors, cell hover/inspection zone IDs, observed ranges, weighted means and area percentages support exploratory sensor/bed placement. The UI explains that adaptive classes are not crop-response thresholds or statistical significance; disconnected cells can share a class and colors are not comparable across independently classified maps.
+- SVG/PNG, receiver CSV, provenance, project packages and methods reports preserve classifications and settings. Added a zoned plan figure to packages/reports and a per-receiver CSV zone column. See [DLI zoning methods and interpretation](DLI-ZONING.md).
+- Verification: **146 tests pass**, production build and changed-file formatting pass; all **480 archived files are unchanged**. Native Radiance comparison rerun: **0 mismatches over 51,100 rays / 10 cases** (first-hit occlusion scope unchanged). A local 20,000-cell / 10-zone benchmark measured 2.61 ms median over 25 uncached runs.
+- Live in-app browser verification used actual WebGPU results: five-zone map, immediate change to three zones with the selected plan view retained, readable narrow-viewport legend, and one-zone uniform control field. Added an automated Playwright scenario, but its runner could not execute here because the test browser was missing and the vendor download failed certificate validation; browser UI verification used the in-app browser instead. No new biological/field validation or production deployment is claimed.
+
 ## Review fixes and efficiency work (version 0.5.0, September 20)
 
 - All eight reviewed defects are repaired. Added safe worker imports, strict weather timestamps, hemisphere-aware imported defaults, patched Vite, finite zero-DLI rendering, early grid budgets, live material refresh and physically bounded saved results/checkpoints.

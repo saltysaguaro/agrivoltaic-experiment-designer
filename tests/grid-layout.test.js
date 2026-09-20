@@ -53,7 +53,7 @@ test('placement snaps to rotated receiver centres, preserves depths and survives
   );
   const cell = { ...v.grid };
   s.array.azimuth = 82;
-  s.analysis.resolution = 2;
+  s.analysis.cellsPerRow = 7;
   s = normalizeLayout(s);
   assert.deepEqual(s.experimentSensors[0].grid, cell);
   const next = cellCenter(s, cell);
