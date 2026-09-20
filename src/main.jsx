@@ -1,3 +1,5 @@
+import { DEFAULT_CELLS_PER_ROW, PREVIEW_CELLS_PER_ROW } from './domain/receiver-grid.js';
+import DliZoneLegend from './ui/DliZoneLegend.jsx';
 import {
   fieldStudy,
   storeField,
@@ -678,16 +680,16 @@ function App() {
       analysis: {
         ...current.analysis,
         patches: standard ? 577 : 145,
-        resolution: standard ? 1 : 3,
-        gridAlignment: standard ? 'row-centres' : 'spacing',
-        cellsPerRow: standard ? 9 : current.analysis.cellsPerRow,
+        gridSizing: 'row-pitch',
+        gridAlignment: 'row-centres',
+        cellsPerRow: standard ? DEFAULT_CELLS_PER_ROW : PREVIEW_CELLS_PER_ROW,
         interval: standard ? 10 : 15,
       },
     }));
     setNotice(
       standard
-        ? 'Standard settings applied: 9 cells between PV row centres, 1 m along-row spacing, 577 patches, 10-minute steps. Recalculate light.'
-        : 'Preview settings applied: 145 patches, 3 m cells, 15-minute direct steps. Receiver spacing controls ground detail; sky patches control angular detail. Recalculate light.',
+        ? `Standard settings applied: ${DEFAULT_CELLS_PER_ROW} cells between PV row centres, automatic cell sizing, 577 patches, 10-minute steps. Recalculate light.`
+        : `Preview settings applied: ${PREVIEW_CELLS_PER_ROW} cells between PV row centres, automatic cell sizing, 145 patches, 15-minute direct steps. Recalculate light.`,
     );
   }
   function go(n) {
@@ -1558,6 +1560,7 @@ function App() {
                   ['none', 'Geometry'],
                   ['sunlight', 'Relative sunlight'],
                   ['dli', dliLabel(validResult)],
+                  ['zoned-dli', 'Zoned DLI'],
                 ].map(([v, l]) => (
                   <button
                     key={v}
@@ -1572,7 +1575,10 @@ function App() {
                   </button>
                 ))}
               </div>
-              {validResult && metric !== 'none' && (
+              {validResult && metric === 'zoned-dli' && (
+                <DliZoneLegend result={activeResult} count={s.analysis.dliZoneCount} />
+              )}
+              {validResult && metric !== 'none' && metric !== 'zoned-dli' && (
                 <div className="heat-legend">
                   <span>0</span>
                   <i />

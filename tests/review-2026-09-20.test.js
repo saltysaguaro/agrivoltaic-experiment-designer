@@ -77,7 +77,7 @@ test('annual parsing retains leap days and source provenance in a single indexed
   assert.equal(parsed.weather.hash.length, 64);
 });
 test('site imports share hemisphere rules while preserving geometry and custom bearings', () => {
-  let s = small(),
+  let s = selectRacking(small(), 'fixed'),
     parsed = {
       site: { latitude: -33, longitude: 151, utcOffset: 10, elevation: 30 },
       weather: { ...s.weather },
@@ -186,7 +186,7 @@ test('saved results reject excess receiver energy and tampered source provenance
   }
 });
 test('period sessions reuse one backend/geometry and reject corrupted checkpoints', async () => {
-  const s = small();
+  const s = selectRacking(small(), 'fixed');
   Object.assign(s.analysis, {
     period: 'season',
     year: 2026,

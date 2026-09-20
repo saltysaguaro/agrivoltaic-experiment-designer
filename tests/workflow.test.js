@@ -43,7 +43,7 @@ test('every racking choice starts with compatible clearances and retains larger 
   for (const type of ['fixed', 'single-axis', 'dual-axis', 'vertical', 'pergola']) {
     const s = selectRacking(original, type);
     assert.deepEqual(designIssues(s), []);
-    assert.equal(original.racking.type, 'fixed');
+    assert.equal(original.racking.type, 'single-axis');
   }
   const s = defaultStudy();
   s.rowPair.pitch = 20;
