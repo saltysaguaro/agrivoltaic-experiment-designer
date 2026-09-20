@@ -216,6 +216,7 @@ async function makeProjectPackage(study, result, onProgress, context) {
       ? [
           ['plan', 'sunlight', 'sunlight'],
           ['plan', 'dli', 'dli'],
+          ['plan', 'zoned-dli', 'zoned-dli'],
         ]
       : []),
   ];

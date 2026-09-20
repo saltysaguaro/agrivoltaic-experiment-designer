@@ -73,6 +73,7 @@ test('land-use inputs migrate, validate and round-trip without changing the solv
 
 test('reserved rectangles rotate with the array, retain metric widths and include group lanes and buffer corners', () => {
   const s = defaultStudy();
+  s.array.rows = 4;
   s.array.azimuth = 137;
   s.array.groupSize = 2;
   const d = dimensions(s),
@@ -237,6 +238,7 @@ test('publication tables retain every methods value exactly once and all figure 
 
 test('editing any linked width or signed setback maintains a contiguous crop partition across geometry changes', () => {
   let s = defaultStudy();
+  s.array.rows = 4;
   const check = () => {
     const d = cropSpacing(s);
     near(s.rowPair.cropSetback, (s.landUse.underPanelWidth - d.projected) / 2);
