@@ -2,8 +2,8 @@
 
 ## Single-axis starting layout (September 20)
 
-- New studies default to **single-axis tracking**, **1 module across × 6 modules along**, **5 tables per row**, and **12 rows** (360 modules). The tracking reference azimuth is 90°, giving north–south rows with east–west tracking. Existing browser preferences and imported project choices remain intact.
-- The starting layout passes clearance checks and uses 14,299 receivers, within the 20,000-cell limit. Browser checks confirmed all five requested defaults. Scientific tests that require fixed arrays or particular row counts now define those fixtures explicitly.
+- New studies default to **single-axis tracking**, **1 module across × 6 modules along**, **5 tables per row**, and **4 rows** (120 modules), revised from the initial 12-row default. The tracking reference azimuth is 90°, giving north–south rows with east–west tracking. Existing browser preferences and imported project choices remain intact.
+- The four-row starting layout passes clearance checks and uses 4,819 receivers, within the 20,000-cell limit. Browser checks confirmed the initial tracking/table defaults; domain checks confirmed the revised row count, module total and receiver count. Scientific tests that require fixed arrays or particular row counts now define those fixtures explicitly.
 - Verification: **148 tests pass**, production build and changed-file formatting pass; all **480 archived files are unchanged**. Native Radiance comparison reports **0 mismatches over 51,100 rays / 10 cases** (first-hit occlusion scope). No production deployment was made.
 
 ## Automatic receiver sizing with exact row alignment (September 20)

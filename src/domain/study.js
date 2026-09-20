@@ -273,7 +273,7 @@ export const defaultStudy = () =>
     table: { high: 1, wide: 6, orientation: 'portrait' },
     row: { tables: 5, tableGap: 0.3 },
     rowPair: { pitch: 8, cropSetback: 0, croppingWidth: 7 },
-    array: { rows: 12, azimuth: 90, buffer: 3, groupSize: 4, aisle: 3 },
+    array: { rows: 4, azimuth: 90, buffer: 3, groupSize: 4, aisle: 3 },
     site: { latitude: 32.22, longitude: -110.97, utcOffset: -7, elevation: 728 },
     analysis: {
       date: '2026-06-21',
