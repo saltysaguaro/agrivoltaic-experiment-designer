@@ -51,6 +51,10 @@ test('table-count validation explains the field and software limit', () => {
 
 test('relative sunlight complements shade and is consistent across report, CSV, maps and legends', async () => {
   const s = defaultStudy();
+  s.table.high = 1;
+  s.table.wide = 2;
+  s.row.tables = 1;
+  s.array.rows = 2;
   s.weather.mode = 'sample';
   s.analysis = { ...s.analysis, backend: 'cpu', resolution: 3, patches: 145 };
   const r = await calculateDay(s);

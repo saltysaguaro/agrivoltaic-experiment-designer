@@ -1,4 +1,9 @@
-import { gridSpacingLabel, cellSamplingDescription } from '../domain/receiver-grid.js';
+import { dliZones, dliZoneSummary } from '../domain/dli-zones.js';
+import {
+  gridSpacingLabel,
+  cellSamplingDescription,
+  receiverGridDescription,
+} from '../domain/receiver-grid.js';
 import { fieldStudy, controlResult, controlLayers } from '../experiment/control-field.js';
 import { designLayers } from '../ui/display-layers.js';
 import { receiverGridSpec } from '../domain/geometry.js';
@@ -209,6 +214,7 @@ export function methodsRows(s, r) {
       'Numerical receivers',
       r ? `${r.cells.length}; actual cell ${gridSpacingLabel(r.grid, 4)}` : 'Not calculated',
     ],
+    ['Zoned DLI', dliZoneSummary(dliZones(r, s.analysis.dliZoneCount))],
     ['Weather mode', s.weather.mode],
     ['Weather', s.weather.name],
     [
@@ -242,7 +248,7 @@ export function methodsRows(s, r) {
     ],
     [
       'Receiver grid',
-      `${s.analysis.gridAlignment === 'row-centres' ? `${s.analysis.cellsPerRow} cells between adjacent PV row centre lines, including wider aisles; ${s.analysis.resolution} m nominal along-row spacing; outer-buffer cells fitted to footprint; area-weighted summaries` : `${s.analysis.resolution} m nominal uniform spacing`}; height ${s.analysis.receiverHeight} m; horizontal`,
+      `${receiverGridDescription(s)}; height ${s.analysis.receiverHeight} m; horizontal`,
     ],
     [
       'PAR method',
@@ -407,6 +413,7 @@ function makeReportHtml(s, r, context) {
       ? [
           ['plan', 'sunlight'],
           ['plan', 'dli'],
+          ['plan', 'zoned-dli'],
         ]
       : []),
   ];
@@ -511,6 +518,7 @@ export function exportCsv(study, result) {
       'analysis_end',
       'dli_basis',
       'field',
+      'dli_zone',
     ],
   ];
   for (const [field, s, r] of [
@@ -520,7 +528,8 @@ export function exportCsv(study, result) {
       : []),
   ]) {
     const start = rows.length;
-    for (const c of r?.cells || [])
+    const zoning = dliZones(r, s.analysis.dliZoneCount);
+    for (const [index, c] of (r?.cells || []).entries())
       rows.push([
         'receiver',
         '',
@@ -532,6 +541,11 @@ export function exportCsv(study, result) {
         c.dli,
         ...Array(16).fill(''),
         c.wh,
+        '',
+        '',
+        '',
+        field,
+        zoning.cellZones[index],
       ]);
     for (const v of s.experimentSensors) {
       const c = nearestCell(r, v.x, v.y);

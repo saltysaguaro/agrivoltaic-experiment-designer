@@ -1,4 +1,10 @@
-import { gridSpacingLabel } from '../domain/receiver-grid.js';
+import {
+  gridSpacingLabel,
+  DEFAULT_CELLS_PER_ROW,
+  PREVIEW_CELLS_PER_ROW,
+  automaticGridSizing,
+  nominalReceiverSpacing,
+} from '../domain/receiver-grid.js';
 import { moduleOptics } from '../domain/optics.js';
 import { defaultRackingAzimuth, rackingOrientation } from '../domain/racking-orientation.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
@@ -374,6 +380,12 @@ export default function Controls({
               step: 0.01,
               hint: `Suggested minimum: ${minimum.height.toFixed(2)} m.`,
             })}
+            {s.racking.type === 'pergola' &&
+              field('racking', 'pergolaTilt', 'Pergola tilt angle', '°', null, {
+                min: 0,
+                max: 85,
+                step: 1,
+              })}
             {!['vertical', 'pergola'].includes(s.racking.type) &&
               field('racking', 'tilt', 'Fixed / preview tilt', '°', null, {
                 min: 0,
@@ -660,60 +672,50 @@ export default function Controls({
               {periodLabel(s)}
               {isPeriod(s) ? ' · Maps show period-total irradiation and mean daily DLI.' : ''}
             </p>
-            {field('analysis', 'gridAlignment', 'Receiver grid alignment', null, [
-              { value: 'row-centres', label: 'Align to PV row centres (default)' },
-              { value: 'spacing', label: 'Uniform spacing (custom)' },
-            ])}
-            {s.analysis.gridAlignment === 'row-centres' && (
-              <>
-                {field('analysis', 'cellsPerRow', 'Cells between PV row centres', null, null, {
-                  min: 1,
-                  max: 99,
-                  step: 1,
-                  integer: true,
-                })}
-                <p className="control-note">
-                  Cell boundaries meet each PV row centre line, with {s.analysis.cellsPerRow} cells
-                  across every gap. Wider aisle gaps have wider cells. The outer buffer fills the
-                  remaining footprint.
-                </p>
-              </>
+            {field('analysis', 'cellsPerRow', 'Cells between PV row centres', null, null, {
+              min: 1,
+              max: 99,
+              step: 1,
+              integer: true,
+            })}
+            {automaticGridSizing(s) ? (
+              <p className="control-note">
+                Cell size follows row pitch ÷ cell count: {s.rowPair.pitch} m ÷{' '}
+                {s.analysis.cellsPerRow} = {nominalReceiverSpacing(s).toFixed(3)} m target size.
+                Along-row widths adjust slightly to fit the footprint. Cell boundaries meet every PV
+                row centre; wider aisles and outer edges can have rectangular cells.
+              </p>
+            ) : (
+              <div className="info-box">
+                This saved study retains its original receiver grid. Change the cell count or apply
+                automatic sizing to update it. Recalculate light after changing the grid.
+                <button
+                  className="text-button"
+                  onClick={() => set('analysis', 'gridSizing', 'row-pitch')}
+                >
+                  Use automatic cell sizing
+                </button>
+              </div>
             )}
-            <div className="field-pair">
-              {field(
-                'analysis',
-                'resolution',
-                s.analysis.gridAlignment === 'row-centres'
-                  ? 'Along-row receiver spacing'
-                  : 'Receiver spacing',
-                'm',
-                null,
-                {
-                  min: 0.25,
-                  max: 5,
-                  step: 0.25,
-                },
-              )}
-              {field('analysis', 'receiverHeight', 'Receiver height', 'm', null, {
-                min: 0,
-                max: 5,
-              })}
-            </div>
+            {field('analysis', 'receiverHeight', 'Receiver height', 'm', null, {
+              min: 0,
+              max: 5,
+            })}
+            {field('analysis', 'dliZoneCount', 'Number of DLI zones', null, null, {
+              min: 1,
+              max: 10,
+              step: 1,
+              integer: true,
+            })}
+            <p className="control-note">
+              Start with 3–5 zones. Changing this count updates Zoned DLI immediately after
+              calculation, without recalculating light. Uniform light produces one zone.
+            </p>
             {field('analysis', 'patches', 'Diffuse sky resolution', null, [
               { value: 145, label: 'Preview · 145 patches' },
               { value: 577, label: 'Standard · 577 patches' },
               { value: 2305, label: 'High · 2,305 patches' },
             ])}
-            {field('analysis', 'samplesPerCell', 'Samples per grid cell', null, null, {
-              min: 1,
-              max: 9,
-              step: 1,
-              integer: true,
-            })}
-            <p className="control-note">
-              1 uses the cell centre. 2–9 estimate the cell mean. More samples increase calculation
-              time without changing cell boundaries. Recalculate after editing.
-            </p>
             {field('analysis', 'interval', 'Direct integration interval', null, [
               { value: 5, label: '5 minutes' },
               { value: 10, label: '10 minutes' },
@@ -724,6 +726,19 @@ export default function Controls({
               { value: 'cpu', label: 'CPU reference' },
               { value: 'gpu', label: 'WebGPU with CPU fallback' },
             ])}
+            <details>
+              <summary>Advanced settings</summary>
+              {field('analysis', 'samplesPerCell', 'Samples per grid cell', null, null, {
+                min: 1,
+                max: 9,
+                step: 1,
+                integer: true,
+              })}
+              <p className="control-note">
+                1 uses the cell centre. 2–9 estimate the cell mean. More samples increase
+                calculation time without changing cell boundaries. Recalculate after editing.
+              </p>
+            </details>
             <details>
               <summary>PAR conversion assumptions</summary>
               <div className="field-pair">
@@ -768,10 +783,10 @@ export default function Controls({
               Apply standard settings
             </button>
             <small>
-              Preview uses a uniform 3 m grid, 145 sky patches and 15-minute steps. Standard uses
-              nine cells between row centres, 1 m along-row spacing, 577 patches and 10-minute
-              steps. Sky resolution and time interval do not change cell alignment. Recalculate
-              after editing.
+              Preview uses {PREVIEW_CELLS_PER_ROW} cells between row centres, 145 sky patches and
+              15-minute steps. Standard uses {DEFAULT_CELLS_PER_ROW} cells between row centres, 577
+              patches and 10-minute steps. Both derive along-row cell size from row pitch. Sky
+              resolution and time interval do not change cell alignment. Recalculate after editing.
             </small>
             <p className="control-note">
               Current grid: {receiver.nx} × {receiver.ny} cells; actual spacing{' '}

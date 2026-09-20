@@ -28,9 +28,15 @@ import { figureSvg } from '../src/report/figures.js';
 import { reportHtml, csv } from '../src/report/export.js';
 const defaultStudy = () => {
   const s = baseStudy();
+  // Keep the fixed-array scientific reference independent of startup defaults.
+  s.racking.type = 'fixed';
+  s.table.high = 2;
+  s.row.tables = 2;
+  s.array.rows = 4;
+  s.array.azimuth = 180;
   s.weather.mode = 'sample';
   s.weather.name = 'Illustrative clear-sky day · synthetic';
-  return s;
+  return migrateStudy(s);
 };
 const near = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) < tol, `${a} ≠ ${b}`);
 test('versioned study round-trips and rejects invalid versions / dimensions', () => {
@@ -53,7 +59,7 @@ test('receiver coordinates rotate with the study, preserve area, and exclude fie
   assert.deepEqual(receiverGrid(s), a);
 });
 test('finite scene has the correct module count and ground clearance', () => {
-  const s = defaultStudy(),
+  const s = baseStudy(),
     group = buildGeometry(s),
     geo = simulationGeometry(group);
   assert.equal(

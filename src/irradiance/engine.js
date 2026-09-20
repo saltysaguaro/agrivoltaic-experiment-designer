@@ -1,4 +1,11 @@
-import { gridMean, cellSampleOffsets, rowEdge, rowHeight } from '../domain/receiver-grid.js';
+import {
+  DEFAULT_CELLS_PER_ROW,
+  nominalReceiverSpacing,
+  gridMean,
+  cellSampleOffsets,
+  rowEdge,
+  rowHeight,
+} from '../domain/receiver-grid.js';
 import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
 import { validateWeatherRows, canonicalWeatherRows } from './weather-validation.js';
 import { verifyWeatherRecord } from './weather-record.js';
@@ -266,12 +273,12 @@ export async function calculateDay(
       s.row,
       s.rowPair,
       s.array,
-      s.analysis.resolution,
+      nominalReceiverSpacing(s),
       s.analysis.receiverHeight,
       s.analysis.patches,
       ...(samplesPerCell > 1 ? ['equal-area-cell-samples-v1', samplesPerCell] : []),
       ...(s.analysis.gridAlignment === 'row-centres'
-        ? ['row-centres', s.analysis.cellsPerRow ?? 9]
+        ? ['row-centres', s.analysis.cellsPerRow ?? DEFAULT_CELLS_PER_ROW]
         : []),
     ]),
   );
