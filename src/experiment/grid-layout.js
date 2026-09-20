@@ -9,6 +9,7 @@ import {
 import { receiverGridSpec, localToWorld, worldToLocal } from '../domain/geometry.js';
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(v)));
 export function cellAt(study, point, grid = receiverGridSpec(study), clampOutside = true) {
+  if (grid.exceeded) return null;
   const p = worldToLocal(study, point.x, point.y);
   const column = Math.floor((p.x + grid.width / 2) / grid.dx);
   const row = Math.floor(rowIndex(grid, p.y));
@@ -33,6 +34,7 @@ export function normalizeLayout(study) {
 }
 function normalizeField(study) {
   const g = receiverGridSpec(study);
+  if (g.exceeded) return { ...study };
   return {
     ...study,
     experimentSensors: study.experimentSensors.map((sensor) => {
@@ -117,6 +119,7 @@ export function plotCorners(study, plot) {
   );
 }
 export function receiverLines(study, grid = receiverGridSpec(study)) {
+  if (grid.exceeded) return [];
   const lines = [];
   for (let i = 0; i <= grid.nx; i++) {
     const x = -grid.width / 2 + i * grid.dx;

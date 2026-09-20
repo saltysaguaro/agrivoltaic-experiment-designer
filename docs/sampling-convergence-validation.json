@@ -1,0 +1,143 @@
+{
+  "createdAt": "2026-09-20T17:33:26.619Z",
+  "version": "0.5.0",
+  "scope": "Dense 384-module winter arrays in both hemispheres, opaque and transmitting modules. One, four and nine samples per receiver; differences from nine samples are sensitivity observations, not accuracy bounds.",
+  "cases": [
+    {
+      "hemisphere": "north",
+      "bifacial": false,
+      "date": "2026-12-21",
+      "rows": [
+        {
+          "samplesPerCell": 1,
+          "receivers": 288,
+          "meanSunlight": 59.59596392305334,
+          "meanDli": 4.169429623440543,
+          "seconds": 2.467089083,
+          "deltaMeanSunlight": 0.03888055597076345,
+          "deltaMeanDli": 0.0019042411944720783
+        },
+        {
+          "samplesPerCell": 4,
+          "receivers": 288,
+          "meanSunlight": 59.62520354425073,
+          "meanDli": 4.17238210871096,
+          "seconds": 8.462254667000002,
+          "deltaMeanSunlight": 0.06812017716815433,
+          "deltaMeanDli": 0.004856726464889327
+        },
+        {
+          "samplesPerCell": 9,
+          "receivers": 288,
+          "meanSunlight": 59.557083367082576,
+          "meanDli": 4.167525382246071,
+          "seconds": 18.8549005,
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "hemisphere": "north",
+      "bifacial": true,
+      "date": "2026-12-21",
+      "rows": [
+        {
+          "samplesPerCell": 1,
+          "receivers": 288,
+          "meanSunlight": 60.156276603750904,
+          "meanDli": 4.208446512039524,
+          "seconds": 1.0574391660000002,
+          "deltaMeanSunlight": 0.04091227813177056,
+          "deltaMeanDli": 0.0020645437590482985
+        },
+        {
+          "samplesPerCell": 4,
+          "receivers": 288,
+          "meanSunlight": 60.18152295115584,
+          "meanDli": 4.211131526318783,
+          "seconds": 3.5399647499999953,
+          "deltaMeanSunlight": 0.06615862553670837,
+          "deltaMeanDli": 0.004749558038307455
+        },
+        {
+          "samplesPerCell": 9,
+          "receivers": 288,
+          "meanSunlight": 60.11536432561913,
+          "meanDli": 4.206381968280476,
+          "seconds": 7.823921750000001,
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "hemisphere": "south",
+      "bifacial": false,
+      "date": "2026-06-21",
+      "rows": [
+        {
+          "samplesPerCell": 1,
+          "receivers": 288,
+          "meanSunlight": 36.65181143845196,
+          "meanDli": 8.223213060443374,
+          "seconds": 1.9612512500000012,
+          "deltaMeanSunlight": -0.2216517643222744,
+          "deltaMeanDli": -0.04897283787360074
+        },
+        {
+          "samplesPerCell": 4,
+          "receivers": 288,
+          "meanSunlight": 36.749968450384756,
+          "meanDli": 8.245171690683458,
+          "seconds": 6.923052625000004,
+          "deltaMeanSunlight": -0.12349475238947605,
+          "deltaMeanDli": -0.027014207633516918
+        },
+        {
+          "samplesPerCell": 9,
+          "receivers": 288,
+          "meanSunlight": 36.87346320277423,
+          "meanDli": 8.272185898316975,
+          "seconds": 15.106756207999998,
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "hemisphere": "south",
+      "bifacial": true,
+      "date": "2026-06-21",
+      "rows": [
+        {
+          "samplesPerCell": 1,
+          "receivers": 288,
+          "meanSunlight": 37.600277298961146,
+          "meanDli": 8.428348424406968,
+          "seconds": 0.7784694170000003,
+          "deltaMeanSunlight": -0.22041568730860206,
+          "deltaMeanDli": -0.04867431853597104
+        },
+        {
+          "samplesPerCell": 4,
+          "receivers": 288,
+          "meanSunlight": 37.69252562341646,
+          "meanDli": 8.449047500151284,
+          "seconds": 3.784935291000002,
+          "deltaMeanSunlight": -0.12816736285329,
+          "deltaMeanDli": -0.027975242791654864
+        },
+        {
+          "samplesPerCell": 9,
+          "receivers": 288,
+          "meanSunlight": 37.82069298626975,
+          "meanDli": 8.477022742942939,
+          "seconds": 6.025042415999996,
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    }
+  ]
+}

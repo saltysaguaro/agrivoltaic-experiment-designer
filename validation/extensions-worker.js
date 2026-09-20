@@ -55,7 +55,14 @@ self.onmessage = async () => {
     gpu.dispose();
     geometry.dispose();
     disposeGroup(group);
-    for (const type of ['fixed', 'single-axis', 'dual-axis', 'vertical', 'pergola']) {
+    for (const type of [
+      'fixed',
+      'single-axis',
+      'dual-axis',
+      'vertical',
+      'pergola',
+      'tiled-fixed',
+    ]) {
       self.postMessage({ message: 'Checking transmitting ' + type, report });
       let s = defaultStudy();
       s.table.high = 1;
@@ -71,7 +78,11 @@ self.onmessage = async () => {
       s.module.cellGapY = 0.02;
       s.module.gapTransmission = 0.9;
       s.module.gapParTransmission = 0.7;
-      s = selectRacking(s, type);
+      s = selectRacking(s, type === 'tiled-fixed' ? 'fixed' : type);
+      if (type === 'tiled-fixed') {
+        s.analysis.resolution = 0.25;
+        s.analysis.patches = 2305;
+      }
       s.analysis.backend = 'cpu';
       const cpu = await calculateDay(s, () => {}, { cache });
       s.analysis.backend = 'gpu';

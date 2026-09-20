@@ -1,7 +1,7 @@
 {
-  "createdAt": "2026-09-10T14:13:14.946Z",
-  "version": "0.1.1",
-  "scope": "CPU sensitivity on small fixed and tracking arrays at two latitudes and two seasons. Each sweep changes only one setting. Differences describe convergence; they are not field accuracy or universal acceptance tolerances.",
+  "createdAt": "2026-09-20T17:23:48.533Z",
+  "version": "0.5.0",
+  "scope": "CPU sensitivity on small fixed and tracking arrays at three latitudes across both hemispheres and two seasons. Each sweep changes only one setting. Differences describe convergence; they are not field accuracy or universal acceptance tolerances.",
   "cases": [
     {
       "site": "Tucson",
@@ -12,39 +12,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 91.59663223457827,
-          "meanDli": 54.42697943124215,
-          "seconds": 0.036470540999999995,
+          "receivers": 190,
+          "meanSunlight": 90.85263175961347,
+          "meanDli": 53.9897429285511,
+          "seconds": 0.038697125,
           "timings": {
-            "geometryMs": 3.9223750000000024,
-            "visibilityMs": 21.859468000000035
+            "geometryMs": 4.210417000000007,
+            "visibilityMs": 23.751499999999993
           },
-          "deltaMeanSunlight": 0.017600776089423675,
-          "deltaMeanDli": 0.011474678902253288
+          "deltaMeanSunlight": -0.026780990524542858,
+          "deltaMeanDli": -0.017459642995078184
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 91.60100959592036,
-          "meanDli": 54.429833215392605,
-          "seconds": 0.07656733399999999,
+          "receivers": 190,
+          "meanSunlight": 90.87445500695387,
+          "meanDli": 54.00397041230334,
+          "seconds": 0.09692091700000002,
           "timings": {
-            "geometryMs": 1.218874999999997,
-            "visibilityMs": 63.567129000000094
+            "geometryMs": 1.445709000000008,
+            "visibilityMs": 76.17358300000004
           },
-          "deltaMeanSunlight": 0.021978137431517553,
-          "deltaMeanDli": 0.014328463052706297
+          "deltaMeanSunlight": -0.0049577431841498765,
+          "deltaMeanDli": -0.0032321592428417034
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 91.57903145848884,
-          "meanDli": 54.4155047523399,
-          "seconds": 0.21466404199999997,
+          "receivers": 190,
+          "meanSunlight": 90.87941275013802,
+          "meanDli": 54.00720257154618,
+          "seconds": 0.438232625,
           "timings": {
-            "geometryMs": 0.6631669999999872,
-            "visibilityMs": 183.476623
+            "geometryMs": 0.6072500000000218,
+            "visibilityMs": 355.6129590000004
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -60,39 +60,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 91.54003397464025,
-          "meanDli": 54.39418366975539,
-          "seconds": 0.012526583000000016,
+          "receivers": 190,
+          "meanSunlight": 90.97064667975413,
+          "meanDli": 54.060138740141056,
+          "seconds": 0.02145729200000005,
           "timings": {
-            "geometryMs": 0.68262500000003,
-            "visibilityMs": 4.409874999999886
+            "geometryMs": 1.3095420000000786,
+            "visibilityMs": 5.935914000000253
           },
-          "deltaMeanSunlight": -0.018500584844758805,
-          "deltaMeanDli": -0.010811398060482702
+          "deltaMeanSunlight": -0.0009169367590118327,
+          "deltaMeanDli": -0.0005544093551179685
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 91.60100959592036,
-          "meanDli": 54.429833215392605,
-          "seconds": 0.014644625000000019,
+          "receivers": 190,
+          "meanSunlight": 90.87445500695387,
+          "meanDli": 54.00397041230334,
+          "seconds": 0.021668083000000025,
           "timings": {
-            "geometryMs": 0.6649590000000103,
-            "visibilityMs": 6.059999999999661
+            "geometryMs": 0.5637500000000273,
+            "visibilityMs": 8.588790999999674
           },
-          "deltaMeanSunlight": 0.04247503643534856,
-          "deltaMeanDli": 0.024838147576730307
+          "deltaMeanSunlight": -0.09710860955927103,
+          "deltaMeanDli": -0.05672273719283538
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 91.55853455948501,
-          "meanDli": 54.404995067815875,
-          "seconds": 0.02788429100000002,
+          "receivers": 190,
+          "meanSunlight": 90.97156361651314,
+          "meanDli": 54.060693149496174,
+          "seconds": 0.045835290999999986,
           "timings": {
-            "geometryMs": 0.5171669999999722,
-            "visibilityMs": 12.406588999999826
+            "geometryMs": 0.4872090000000071,
+            "visibilityMs": 15.040580999999747
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -108,39 +108,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 91.1322762435381,
-          "meanDli": 54.1546793146496,
-          "seconds": 0.02190579200000002,
+          "receivers": 95,
+          "meanSunlight": 90.91041054155927,
+          "meanDli": 54.02546366621881,
+          "seconds": 0.052423457999999985,
           "timings": {
-            "geometryMs": 0.49645799999996143,
-            "visibilityMs": 13.656629999999893
+            "geometryMs": 0.9107500000000073,
+            "visibilityMs": 35.64592099999959
           },
-          "deltaMeanSunlight": -0.08501901524488176,
-          "deltaMeanDli": -0.04961819382418753
+          "deltaMeanSunlight": -0.06580381213719022,
+          "deltaMeanDli": -0.039079377928018744
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 91.60100959592036,
-          "meanDli": 54.429833215392605,
-          "seconds": 0.015370790999999996,
+          "receivers": 190,
+          "meanSunlight": 90.87445500695387,
+          "meanDli": 54.00397041230334,
+          "seconds": 0.03051658299999997,
           "timings": {
-            "geometryMs": 0.5009160000000179,
-            "visibilityMs": 6.031791999999655
+            "geometryMs": 0.4829170000000431,
+            "visibilityMs": 14.114752000000294
           },
-          "deltaMeanSunlight": 0.383714337137377,
-          "deltaMeanDli": 0.2255357069188193
+          "deltaMeanSunlight": -0.10175934674259679,
+          "deltaMeanDli": -0.06057263184349182
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 91.21729525878298,
-          "meanDli": 54.204297508473786,
-          "seconds": 0.2000787920000001,
+          "receivers": 361,
+          "meanSunlight": 90.97621435369646,
+          "meanDli": 54.06454304414683,
+          "seconds": 0.19927545799999996,
           "timings": {
-            "geometryMs": 0.5997079999999642,
-            "visibilityMs": 188.15996299999978
+            "geometryMs": 0.6888750000000528,
+            "visibilityMs": 182.35603999999955
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -156,39 +156,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 90.93305852904392,
-          "meanDli": 54.03159249327646,
-          "seconds": 0.369725583,
+          "receivers": 190,
+          "meanSunlight": 88.55121950954945,
+          "meanDli": 52.63215973044164,
+          "seconds": 1.2113554999999998,
           "timings": {
-            "geometryMs": 29.52045399999963,
-            "visibilityMs": 329.69279499999936
+            "geometryMs": 104.23586699999987,
+            "visibilityMs": 1088.9307940000015
           },
-          "deltaMeanSunlight": -0.021794463456899393,
-          "deltaMeanDli": -0.014208718339787652
+          "deltaMeanSunlight": -0.01378759339472424,
+          "deltaMeanDli": -0.008988706306908512
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 90.94736391708135,
-          "meanDli": 54.04091877147397,
-          "seconds": 1.4780850829999999,
+          "receivers": 190,
+          "meanSunlight": 88.56816178228752,
+          "meanDli": 52.64320510358648,
+          "seconds": 2.7038615420000003,
           "timings": {
-            "geometryMs": 27.952581999999666,
-            "visibilityMs": 1427.9922400000014
+            "geometryMs": 29.871003000001565,
+            "visibilityMs": 2630.873498000002
           },
-          "deltaMeanSunlight": -0.007489075419471192,
-          "deltaMeanDli": -0.004882440142282007
+          "deltaMeanSunlight": 0.0031546793433392395,
+          "deltaMeanDli": 0.0020566668379302655
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 90.95485299250082,
-          "meanDli": 54.04580121161625,
-          "seconds": 5.004076708,
+          "receivers": 190,
+          "meanSunlight": 88.56500710294418,
+          "meanDli": 52.64114843674855,
+          "seconds": 10.339501,
           "timings": {
-            "geometryMs": 26.893292000004294,
-            "visibilityMs": 4905.967005000001
+            "geometryMs": 29.617294999996375,
+            "visibilityMs": 10156.169242999998
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -204,39 +204,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 90.82014137570751,
-          "meanDli": 53.9666183111761,
-          "seconds": 1.1905834999999998,
+          "receivers": 190,
+          "meanSunlight": 88.51020646211228,
+          "meanDli": 52.6092894381175,
+          "seconds": 0.10310712500000045,
           "timings": {
-            "geometryMs": 19.63745700000709,
-            "visibilityMs": 1155.8914960000047
+            "geometryMs": 8.564079999992828,
+            "visibilityMs": 56.69524900000033
           },
-          "deltaMeanSunlight": 0.06051590282311281,
-          "deltaMeanDli": 0.035369748657295474
+          "deltaMeanSunlight": -0.024270279104399606,
+          "deltaMeanDli": -0.01428078727700921
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 90.94736391708135,
-          "meanDli": 54.04091877147397,
-          "seconds": 1.1743109160000003,
+          "receivers": 190,
+          "meanSunlight": 88.56816178228752,
+          "meanDli": 52.64320510358648,
+          "seconds": 0.05975274999999965,
           "timings": {
-            "geometryMs": 25.51766900000439,
-            "visibilityMs": 1130.929584999989
+            "geometryMs": 12.457456999994974,
+            "visibilityMs": 8.109290999997029
           },
-          "deltaMeanSunlight": 0.18773844419695251,
-          "deltaMeanDli": 0.10967020895516555
+          "deltaMeanSunlight": 0.03368504107083936,
+          "deltaMeanDli": 0.019634878191972405
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 90.7596254728844,
-          "meanDli": 53.9312485625188,
-          "seconds": 1.3600208750000002,
+          "receivers": 190,
+          "meanSunlight": 88.53447674121668,
+          "meanDli": 52.62357022539451,
+          "seconds": 0.16902058299999953,
           "timings": {
-            "geometryMs": 35.91966800001319,
-            "visibilityMs": 1295.9327589999994
+            "geometryMs": 22.072617000001628,
+            "visibilityMs": 99.41803700001037
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -252,39 +252,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 90.55347571768678,
-          "meanDli": 53.81310090691516,
-          "seconds": 0.3582022919999999,
+          "receivers": 95,
+          "meanSunlight": 88.5491306814141,
+          "meanDli": 52.63498406331229,
+          "seconds": 1.344686208000001,
           "timings": {
-            "geometryMs": 20.93962599999577,
-            "visibilityMs": 326.3500029999868
+            "geometryMs": 25.32462199998008,
+            "visibilityMs": 1295.468630000003
           },
-          "deltaMeanSunlight": 0.05453509921981947,
-          "deltaMeanDli": 0.034258302523326734
+          "deltaMeanSunlight": 0.3937138520264085,
+          "deltaMeanDli": 0.231876544836652
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 90.94736391708135,
-          "meanDli": 54.04091877147397,
-          "seconds": 1.3066041669999995,
+          "receivers": 190,
+          "meanSunlight": 88.56816178228752,
+          "meanDli": 52.64320510358648,
+          "seconds": 0.057187957999998616,
           "timings": {
-            "geometryMs": 22.16316500000721,
-            "visibilityMs": 1266.6588339999962
+            "geometryMs": 10.547286000000895,
+            "visibilityMs": 7.988995999974577
           },
-          "deltaMeanSunlight": 0.44842329861438657,
-          "deltaMeanDli": 0.2620761670821352
+          "deltaMeanSunlight": 0.4127449528998284,
+          "deltaMeanDli": 0.24009758511084556
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 90.49894061846696,
-          "meanDli": 53.77884260439183,
-          "seconds": 4.678946333999998,
+          "receivers": 361,
+          "meanSunlight": 88.15541682938769,
+          "meanDli": 52.403107518475636,
+          "seconds": 5.020883458,
           "timings": {
-            "geometryMs": 23.079835999986244,
-            "visibilityMs": 4611.620626000018
+            "geometryMs": 24.945335999989766,
+            "visibilityMs": 4929.363497999988
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -300,39 +300,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 170,
-          "meanSunlight": 90.94736391708135,
-          "meanDli": 54.04091877147397,
-          "seconds": 1.30698675,
+          "receivers": 190,
+          "meanSunlight": 88.56816178228752,
+          "meanDli": 52.64320510358648,
+          "seconds": 0.0671058750000011,
           "timings": {
-            "geometryMs": 23.33312699999442,
-            "visibilityMs": 1263.139701000022
+            "geometryMs": 10.398209999995743,
+            "visibilityMs": 8.244419000002381
           },
-          "deltaMeanSunlight": -0.0008342265740992616,
-          "deltaMeanDli": -0.0005438670444135596
+          "deltaMeanSunlight": -0.0006877924760146925,
+          "deltaMeanDli": -0.00044840055766570686
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 90.94745014457486,
-          "meanDli": 54.04097498676788,
-          "seconds": 1.7414410839999983,
+          "receivers": 190,
+          "meanSunlight": 88.56894741817521,
+          "meanDli": 52.64371729233879,
+          "seconds": 3.0423712080000005,
           "timings": {
-            "geometryMs": 27.226080000018555,
-            "visibilityMs": 1692.3753289999877
+            "geometryMs": 27.29112599999644,
+            "visibilityMs": 2970.832540999996
           },
-          "deltaMeanSunlight": -0.0007479990805876469,
-          "deltaMeanDli": -0.00048765175050391463
+          "deltaMeanSunlight": 0.00009784341168028732,
+          "deltaMeanDli": 0.00006378819464458729
         },
         {
           "value": 0.5,
-          "receivers": 170,
-          "meanSunlight": 90.94819814365545,
-          "meanDli": 54.04146263851838,
-          "seconds": 1.9874607079999986,
+          "receivers": 190,
+          "meanSunlight": 88.56884957476353,
+          "meanDli": 52.64365350414415,
+          "seconds": 3.1851703339999986,
           "timings": {
-            "geometryMs": 28.43224900001951,
-            "visibilityMs": 1934.3737929999807
+            "geometryMs": 27.335164999982226,
+            "visibilityMs": 3111.6384189999917
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -348,39 +348,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 89.17355455587044,
-          "meanDli": 53.00830205158669,
-          "seconds": 1.0468088749999989,
+          "receivers": 190,
+          "meanSunlight": 88.19115388750994,
+          "meanDli": 52.42733700750265,
+          "seconds": 1.0467089589999996,
           "timings": {
-            "geometryMs": 33.94846099998904,
-            "visibilityMs": 1002.2695029999813
+            "geometryMs": 28.618124999993597,
+            "visibilityMs": 1003.9232879999981
           },
-          "deltaMeanSunlight": 0.013128392789326426,
-          "deltaMeanDli": 0.008558945980233545
+          "deltaMeanSunlight": 0.0066534727444036434,
+          "deltaMeanDli": 0.004337675960471188
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 89.17043573869097,
-          "meanDli": 53.00626876478693,
-          "seconds": 3.877400250000002,
+          "receivers": 190,
+          "meanSunlight": 88.18841689882085,
+          "meanDli": 52.425552650596586,
+          "seconds": 3.888295458000004,
           "timings": {
-            "geometryMs": 31.649589000007836,
-            "visibilityMs": 3811.1284519999826
+            "geometryMs": 28.096203000004607,
+            "visibilityMs": 3813.146216000001
           },
-          "deltaMeanSunlight": 0.010009575609856824,
-          "deltaMeanDli": 0.006525659180475429
+          "deltaMeanSunlight": 0.003916484055309866,
+          "deltaMeanDli": 0.0025533190544066997
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 89.16042616308111,
-          "meanDli": 52.999743105606456,
-          "seconds": 14.833115583,
+          "receivers": 190,
+          "meanSunlight": 88.18450041476554,
+          "meanDli": 52.42299933154218,
+          "seconds": 15.002461166000002,
           "timings": {
-            "geometryMs": 32.323204000025726,
-            "visibilityMs": 14671.242337999982
+            "geometryMs": 30.463541000004625,
+            "visibilityMs": 14777.651243999986
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -396,39 +396,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 89.21219014065161,
-          "meanDli": 53.03064834302121,
-          "seconds": 2.914635333999999,
+          "receivers": 190,
+          "meanSunlight": 88.23646145272915,
+          "meanDli": 52.453556168289055,
+          "seconds": 1.1735328750000045,
           "timings": {
-            "geometryMs": 21.833251000040036,
-            "visibilityMs": 2867.400872999955
+            "geometryMs": 13.125248999989708,
+            "visibilityMs": 1124.9707059999855
           },
-          "deltaMeanSunlight": -0.006123238816826415,
-          "deltaMeanDli": -0.003665392090624664
+          "deltaMeanSunlight": 0.03478265781978962,
+          "deltaMeanDli": 0.02019598816377055
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 89.17043573869097,
-          "meanDli": 53.00626876478693,
-          "seconds": 3.833868957999999,
+          "receivers": 190,
+          "meanSunlight": 88.18841689882085,
+          "meanDli": 52.425552650596586,
+          "seconds": 0.06948395899999742,
           "timings": {
-            "geometryMs": 30.287256000068737,
-            "visibilityMs": 3769.1092499999577
+            "geometryMs": 11.174545000001672,
+            "visibilityMs": 10.842538999961107
           },
-          "deltaMeanSunlight": -0.0478776407774717,
-          "deltaMeanDli": -0.02804497032490616
+          "deltaMeanSunlight": -0.013261896088508252,
+          "deltaMeanDli": -0.0078075295286978985
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 89.21831337946844,
-          "meanDli": 53.03431373511184,
-          "seconds": 5.838146833999999,
+          "receivers": 190,
+          "meanSunlight": 88.20167879490936,
+          "meanDli": 52.433360180125284,
+          "seconds": 1.8301959169999973,
           "timings": {
-            "geometryMs": 52.434571999969194,
-            "visibilityMs": 5729.389751000024
+            "geometryMs": 29.1170060000004,
+            "visibilityMs": 1725.7779980000196
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -444,39 +444,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 89.34903437841888,
-          "meanDli": 53.10870953617921,
-          "seconds": 1.0997045829999987,
+          "receivers": 95,
+          "meanSunlight": 88.7691460960599,
+          "meanDli": 52.76377100982429,
+          "seconds": 2.0402346250000045,
           "timings": {
-            "geometryMs": 30.003291999921203,
-            "visibilityMs": 1053.6302080000023
+            "geometryMs": 31.862209999962943,
+            "visibilityMs": 1977.9023289999386
           },
-          "deltaMeanSunlight": 0.3281804836595654,
-          "deltaMeanDli": 0.19250882819655857
+          "deltaMeanSunlight": 0.7125209479215897,
+          "deltaMeanDli": 0.41540699210732157
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 89.17043573869097,
-          "meanDli": 53.00626876478693,
-          "seconds": 3.8871329590000023,
+          "receivers": 190,
+          "meanSunlight": 88.18841689882085,
+          "meanDli": 52.425552650596586,
+          "seconds": 0.071903916999996,
           "timings": {
-            "geometryMs": 31.21737999995821,
-            "visibilityMs": 3821.4230000000316
+            "geometryMs": 12.123206000011123,
+            "visibilityMs": 12.214576999998826
           },
-          "deltaMeanSunlight": 0.14958184393165652,
-          "deltaMeanDli": 0.09006805680427732
+          "deltaMeanSunlight": 0.13179175068253812,
+          "deltaMeanDli": 0.07718863287961852
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 89.02085389475931,
-          "meanDli": 52.916200707982654,
-          "seconds": 13.991302165999993,
+          "receivers": 361,
+          "meanSunlight": 88.05662514813831,
+          "meanDli": 52.34836401771697,
+          "seconds": 7.345515582999993,
           "timings": {
-            "geometryMs": 31.807461999989755,
-            "visibilityMs": 13857.832578999914
+            "geometryMs": 28.711500999961572,
+            "visibilityMs": 7235.735128999964
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -492,39 +492,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 170,
-          "meanSunlight": 89.17043573869097,
-          "meanDli": 53.00626876478693,
-          "seconds": 3.8283706669999957,
+          "receivers": 190,
+          "meanSunlight": 88.18841689882085,
+          "meanDli": 52.425552650596586,
+          "seconds": 0.06658658400000422,
           "timings": {
-            "geometryMs": 32.248504999952274,
-            "visibilityMs": 3760.1067489999987
+            "geometryMs": 10.83495600000606,
+            "visibilityMs": 10.08433699998568
           },
-          "deltaMeanSunlight": -0.0006191798574093355,
-          "deltaMeanDli": -0.000403669134350082
+          "deltaMeanSunlight": 0.00017498349667732782,
+          "deltaMeanDli": 0.00011407902855609109
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 89.17073878427018,
-          "meanDli": 53.00646633282014,
-          "seconds": 4.541755375000008,
+          "receivers": 190,
+          "meanSunlight": 88.18851018777843,
+          "meanDli": 52.425613469552985,
+          "seconds": 4.610286958000004,
           "timings": {
-            "geometryMs": 34.40928800005349,
-            "visibilityMs": 4468.513167000026
+            "geometryMs": 30.728122999986226,
+            "visibilityMs": 4525.8264069999495
           },
-          "deltaMeanSunlight": -0.00031613427819365825,
-          "deltaMeanDli": -0.00020610110114205327
+          "deltaMeanSunlight": 0.00026827245426375157,
+          "deltaMeanDli": 0.00017489798495518016
         },
         {
           "value": 0.5,
-          "receivers": 170,
-          "meanSunlight": 89.17105491854838,
-          "meanDli": 53.00667243392128,
-          "seconds": 4.551743041000009,
+          "receivers": 190,
+          "meanSunlight": 88.18824191532417,
+          "meanDli": 52.42543857156803,
+          "seconds": 4.654812874999996,
           "timings": {
-            "geometryMs": 34.48362799992901,
-            "visibilityMs": 4477.623629000023
+            "geometryMs": 32.531794000075024,
+            "visibilityMs": 4566.107128999953
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -540,39 +540,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 89.44337034297622,
-          "meanDli": 20.95132288180032,
-          "seconds": 0.01976804199999606,
+          "receivers": 190,
+          "meanSunlight": 89.07080579078337,
+          "meanDli": 20.864323939840244,
+          "seconds": 0.007364541000002646,
           "timings": {
-            "geometryMs": 0.3528749999968568,
-            "visibilityMs": 16.14046399995277
+            "geometryMs": 0.20491700001002755,
+            "visibilityMs": 5.013329999957932
           },
-          "deltaMeanSunlight": 0.010219881104404749,
-          "deltaMeanDli": 0.0027903653902789927
+          "deltaMeanSunlight": -0.05046208002310948,
+          "deltaMeanDli": -0.013777816025491774
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 89.45907362844767,
-          "meanDli": 20.955610397853153,
-          "seconds": 0.05637287500000093,
+          "receivers": 190,
+          "meanSunlight": 89.11906757883234,
+          "meanDli": 20.877501003419386,
+          "seconds": 0.010971625000005588,
           "timings": {
-            "geometryMs": 0.3525000000081491,
-            "visibilityMs": 49.91283600007591
+            "geometryMs": 0.19537499999569263,
+            "visibilityMs": 4.8073289999883855
           },
-          "deltaMeanSunlight": 0.025923166575850587,
-          "deltaMeanDli": 0.007077881443112943
+          "deltaMeanSunlight": -0.002200291974133961,
+          "deltaMeanDli": -0.000600752446349162
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 89.43315046187182,
-          "meanDli": 20.94853251641004,
-          "seconds": 0.2035662500000035,
+          "receivers": 190,
+          "meanSunlight": 89.12126787080648,
+          "meanDli": 20.878101755865735,
+          "seconds": 0.026589749999999183,
           "timings": {
-            "geometryMs": 0.2803330000024289,
-            "visibilityMs": 182.07712300001003
+            "geometryMs": 0.25437500000407454,
+            "visibilityMs": 4.539584999991348
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -588,39 +588,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 89.45693233722636,
-          "meanDli": 20.95468972530316,
-          "seconds": 0.007279707999987295,
+          "receivers": 190,
+          "meanSunlight": 89.07652458378077,
+          "meanDli": 20.867473463942474,
+          "seconds": 0.007658624999996391,
           "timings": {
-            "geometryMs": 0.2504579999949783,
-            "visibilityMs": 3.1481210000056308
+            "geometryMs": 0.2025419999990845,
+            "visibilityMs": 3.3322499999776483
           },
-          "deltaMeanSunlight": 0.012327642885580303,
-          "deltaMeanDli": 0.0024752772187106586
+          "deltaMeanSunlight": 0.01714698221057631,
+          "deltaMeanDli": 0.003526201653244243
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 89.45907362844767,
-          "meanDli": 20.955610397853153,
-          "seconds": 0.010342333000007784,
+          "receivers": 190,
+          "meanSunlight": 89.11906757883234,
+          "meanDli": 20.877501003419386,
+          "seconds": 0.010989457999996375,
           "timings": {
-            "geometryMs": 0.22162499999103602,
-            "visibilityMs": 4.46833000004699
+            "geometryMs": 0.21370800001022872,
+            "visibilityMs": 4.844290999972145
           },
-          "deltaMeanSunlight": 0.014468934106886877,
-          "deltaMeanDli": 0.0033959497687021667
+          "deltaMeanSunlight": 0.05968997726215264,
+          "deltaMeanDli": 0.013553741130156283
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 89.44460469434078,
-          "meanDli": 20.95221444808445,
-          "seconds": 0.02013454100000672,
+          "receivers": 190,
+          "meanSunlight": 89.05937760157019,
+          "meanDli": 20.86394726228923,
+          "seconds": 0.02060966699999699,
           "timings": {
-            "geometryMs": 0.22604100000171456,
-            "visibilityMs": 9.173793000096339
+            "geometryMs": 0.5537500000064028,
+            "visibilityMs": 9.04762300006405
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -636,39 +636,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 89.46143184514555,
-          "meanDli": 20.95608955531523,
-          "seconds": 0.01881045799999265,
+          "receivers": 95,
+          "meanSunlight": 89.35994215923259,
+          "meanDli": 20.93406739285765,
+          "seconds": 0.00796229100000346,
           "timings": {
-            "geometryMs": 0.4435840000078315,
-            "visibilityMs": 13.000081000020145
+            "geometryMs": 0.19737500000337604,
+            "visibilityMs": 2.2590429999836488
           },
-          "deltaMeanSunlight": 0.28396233360078327,
-          "deltaMeanDli": 0.06459590056798703
+          "deltaMeanSunlight": 0.24091128849136112,
+          "deltaMeanDli": 0.054781174094593155
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 89.45907362844767,
-          "meanDli": 20.955610397853153,
-          "seconds": 0.0107927500000078,
+          "receivers": 190,
+          "meanSunlight": 89.11906757883234,
+          "meanDli": 20.877501003419386,
+          "seconds": 0.011025833000006969,
           "timings": {
-            "geometryMs": 0.22391700001026038,
-            "visibilityMs": 4.890335999953095
+            "geometryMs": 0.1804580000025453,
+            "visibilityMs": 4.673001000017393
           },
-          "deltaMeanSunlight": 0.28160411690289777,
-          "deltaMeanDli": 0.06411674310590953
+          "deltaMeanSunlight": 0.000036708091116111063,
+          "deltaMeanDli": -0.0017852153436699325
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 89.17746951154477,
-          "meanDli": 20.891493654747244,
-          "seconds": 0.1889829170000012,
+          "receivers": 361,
+          "meanSunlight": 89.11903087074123,
+          "meanDli": 20.879286218763056,
+          "seconds": 0.015559708999993746,
           "timings": {
-            "geometryMs": 0.25775000000430737,
-            "visibilityMs": 181.63908599998103
+            "geometryMs": 0.21233300000312738,
+            "visibilityMs": 8.493082999950275
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -684,39 +684,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 88.03907959306518,
-          "meanDli": 20.63915752934085,
-          "seconds": 0.18022825000000012,
+          "receivers": 190,
+          "meanSunlight": 91.39539878017396,
+          "meanDli": 21.397838569752768,
+          "seconds": 0.04443008299999929,
           "timings": {
-            "geometryMs": 10.186369000002742,
-            "visibilityMs": 166.72737599990796
+            "geometryMs": 7.619292000090354,
+            "visibilityMs": 28.844415000028675
           },
-          "deltaMeanSunlight": 0.03220978336125313,
-          "deltaMeanDli": 0.008794335648509843
+          "deltaMeanSunlight": 0.009895578695932272,
+          "deltaMeanDli": 0.0027018201127653185
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 88.02736030421812,
-          "meanDli": 20.635957776069397,
-          "seconds": 0.6532175419999985,
+          "receivers": 190,
+          "meanSunlight": 91.38507494097311,
+          "meanDli": 21.39501982036471,
+          "seconds": 0.04300437500000408,
           "timings": {
-            "geometryMs": 11.223956000045291,
-            "visibilityMs": 631.3262519999989
+            "geometryMs": 7.625797000029706,
+            "visibilityMs": 5.106540999986464
           },
-          "deltaMeanSunlight": 0.020490494514191937,
-          "deltaMeanDli": 0.005594582377057122
+          "deltaMeanSunlight": -0.0004282605049183985,
+          "deltaMeanDli": -0.00011692927529338704
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 88.00686980970393,
-          "meanDli": 20.63036319369234,
-          "seconds": 2.496630957999994,
+          "receivers": 190,
+          "meanSunlight": 91.38550320147803,
+          "meanDli": 21.395136749640002,
+          "seconds": 0.4946902090000076,
           "timings": {
-            "geometryMs": 11.351207999963663,
-            "visibilityMs": 2445.8880010000576
+            "geometryMs": 8.037916000030236,
+            "visibilityMs": 374.35558799999126
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -732,39 +732,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 88.01517048043283,
-          "meanDli": 20.63238589946374,
-          "seconds": 0.46733683400000153,
+          "receivers": 190,
+          "meanSunlight": 91.32144860229369,
+          "meanDli": 21.380624557018574,
+          "seconds": 0.02886904200000572,
           "timings": {
-            "geometryMs": 7.534001000007265,
-            "visibilityMs": 452.3617879999947
+            "geometryMs": 5.289462999993702,
+            "visibilityMs": 3.338080999950762
           },
-          "deltaMeanSunlight": -0.0319280429168316,
-          "deltaMeanDli": -0.007713065717172896
+          "deltaMeanSunlight": -0.00647105951662752,
+          "deltaMeanDli": -0.0014991475376788799
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 88.02736030421812,
-          "meanDli": 20.635957776069397,
-          "seconds": 0.3782144169999956,
+          "receivers": 190,
+          "meanSunlight": 91.38507494097311,
+          "meanDli": 21.39501982036471,
+          "seconds": 0.04259937499999069,
           "timings": {
-            "geometryMs": 8.771080999969854,
-            "visibilityMs": 358.48266699994565
+            "geometryMs": 7.993706000022939,
+            "visibilityMs": 4.988461000044481
           },
-          "deltaMeanSunlight": -0.019738219131539836,
-          "deltaMeanDli": -0.0041411891115146204
+          "deltaMeanSunlight": 0.05715527916279939,
+          "deltaMeanDli": 0.012896115808455733
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 88.04709852334966,
-          "meanDli": 20.64009896518091,
-          "seconds": 0.8902451250000013,
+          "receivers": 190,
+          "meanSunlight": 91.32791966181031,
+          "meanDli": 21.382123704556253,
+          "seconds": 0.06845400000001246,
           "timings": {
-            "geometryMs": 18.448997000028612,
-            "visibilityMs": 853.2859560001089
+            "geometryMs": 14.30070499998692,
+            "visibilityMs": 9.735953999945195
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -780,39 +780,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 87.16771622389649,
-          "meanDli": 20.443332916910485,
-          "seconds": 0.1979446670000034,
+          "receivers": 95,
+          "meanSunlight": 91.65986746063406,
+          "meanDli": 21.458511820920094,
+          "seconds": 0.07329312500001106,
           "timings": {
-            "geometryMs": 10.465162999927998,
-            "visibilityMs": 179.94337100004486
+            "geometryMs": 7.659165000106441,
+            "visibilityMs": 48.275082999956794
           },
-          "deltaMeanSunlight": -0.47609097779869103,
-          "deltaMeanDli": -0.1047679531587633
+          "deltaMeanSunlight": 0.0753625131576996,
+          "deltaMeanDli": 0.017154962193774992
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 88.02736030421812,
-          "meanDli": 20.635957776069397,
-          "seconds": 0.6523047920000099,
+          "receivers": 190,
+          "meanSunlight": 91.38507494097311,
+          "meanDli": 21.39501982036471,
+          "seconds": 0.0425625410000066,
           "timings": {
-            "geometryMs": 10.630291000023135,
-            "visibilityMs": 630.759086999984
+            "geometryMs": 7.6055819999746745,
+            "visibilityMs": 4.966833999977098
           },
-          "deltaMeanSunlight": 0.3835531025229386,
-          "deltaMeanDli": 0.08785690600014817
+          "deltaMeanSunlight": -0.19943000650324905,
+          "deltaMeanDli": -0.04633703836161018
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 87.64380720169518,
-          "meanDli": 20.54810087006925,
-          "seconds": 2.3591240000000107,
+          "receivers": 361,
+          "meanSunlight": 91.58450494747636,
+          "meanDli": 21.44135685872632,
+          "seconds": 0.24358337499998742,
           "timings": {
-            "geometryMs": 11.79275100005907,
-            "visibilityMs": 2323.3177439999854
+            "geometryMs": 8.158086000010371,
+            "visibilityMs": 185.55337699998927
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -828,39 +828,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 170,
-          "meanSunlight": 88.02736030421812,
-          "meanDli": 20.635957776069397,
-          "seconds": 0.6617688749999943,
+          "receivers": 190,
+          "meanSunlight": 91.38507494097311,
+          "meanDli": 21.39501982036471,
+          "seconds": 0.04121158299999661,
           "timings": {
-            "geometryMs": 10.76624700006505,
-            "visibilityMs": 640.0870009999635
+            "geometryMs": 7.68803799993475,
+            "visibilityMs": 4.83954299998004
           },
-          "deltaMeanSunlight": 0.00011382182556474163,
-          "deltaMeanDli": 0.000031077121100508975
+          "deltaMeanSunlight": -0.00005961178459301664,
+          "deltaMeanDli": -0.000016275987821501303
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 88.02768997776303,
-          "meanDli": 20.63604778784548,
-          "seconds": 0.7653308329999999,
+          "receivers": 190,
+          "meanSunlight": 91.38516211790608,
+          "meanDli": 21.395043622549306,
+          "seconds": 1.000607415999999,
           "timings": {
-            "geometryMs": 12.071832999936305,
-            "visibilityMs": 741.7780779999739
+            "geometryMs": 12.880544000086957,
+            "visibilityMs": 956.320253999962
           },
-          "deltaMeanSunlight": 0.0004434953704759437,
-          "deltaMeanDli": 0.00012108889718476235
+          "deltaMeanSunlight": 0.000027565148371877513,
+          "deltaMeanDli": 0.000007526196775131666
         },
         {
           "value": 0.5,
-          "receivers": 170,
-          "meanSunlight": 88.02724648239256,
-          "meanDli": 20.635926698948296,
-          "seconds": 1.0277277919999905,
+          "receivers": 190,
+          "meanSunlight": 91.3851345527577,
+          "meanDli": 21.39503609635253,
+          "seconds": 1.3880391660000022,
           "timings": {
-            "geometryMs": 13.792163000020082,
-            "visibilityMs": 1000.4324539999216
+            "geometryMs": 14.40982900004019,
+            "visibilityMs": 1339.9852119998686
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -876,39 +876,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 87.63125590013792,
-          "meanDli": 20.550468761203717,
-          "seconds": 0.9019885829999985,
+          "receivers": 190,
+          "meanSunlight": 88.91716533148364,
+          "meanDli": 20.844817278165085,
+          "seconds": 0.8736827909999992,
           "timings": {
-            "geometryMs": 23.08078499988187,
-            "visibilityMs": 870.7791680000082
+            "geometryMs": 19.368502000084845,
+            "visibilityMs": 843.8194650000805
           },
-          "deltaMeanSunlight": 0.0183471784333733,
-          "deltaMeanDli": 0.005009386233219004
+          "deltaMeanSunlight": 0.03388047946442896,
+          "deltaMeanDli": 0.009250490917210641
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 87.6236865890202,
-          "meanDli": 20.54840208904231,
-          "seconds": 3.353974333999999,
+          "receivers": 190,
+          "meanSunlight": 88.88455618428375,
+          "meanDli": 20.835913902983954,
+          "seconds": 3.3074916250000097,
           "timings": {
-            "geometryMs": 23.150375000041095,
-            "visibilityMs": 3304.7736230000737
+            "geometryMs": 19.646915999925113,
+            "visibilityMs": 3252.400123999978
           },
-          "deltaMeanSunlight": 0.010777867315653111,
-          "deltaMeanDli": 0.0029427140718105704
+          "deltaMeanSunlight": 0.0012713322645367953,
+          "deltaMeanDli": 0.0003471157360799282
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 87.61290872170454,
-          "meanDli": 20.5454593749705,
-          "seconds": 12.914136375000002,
+          "receivers": 190,
+          "meanSunlight": 88.88328485201922,
+          "meanDli": 20.835566787247874,
+          "seconds": 12.588127374999996,
           "timings": {
-            "geometryMs": 23.943338000040967,
-            "visibilityMs": 12791.317379000058
+            "geometryMs": 21.022163999878103,
+            "visibilityMs": 12435.229497000008
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -924,39 +924,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 87.72978427991316,
-          "meanDli": 20.57123994880303,
-          "seconds": 2.4654433750000027,
+          "receivers": 190,
+          "meanSunlight": 88.96795637774551,
+          "meanDli": 20.853827746390706,
+          "seconds": 0.2116166669999948,
           "timings": {
-            "geometryMs": 16.18958500000008,
-            "visibilityMs": 2430.616493999958
+            "geometryMs": 5.687748999960604,
+            "visibilityMs": 178.96462499999325
           },
-          "deltaMeanSunlight": 0.10687632888665632,
-          "deltaMeanDli": 0.023355454573092516
+          "deltaMeanSunlight": 0.10127665142596243,
+          "deltaMeanDli": 0.022205666823445824
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 87.6236865890202,
-          "meanDli": 20.54840208904231,
-          "seconds": 3.3482923340000124,
+          "receivers": 190,
+          "meanSunlight": 88.88455618428375,
+          "meanDli": 20.835913902983954,
+          "seconds": 0.04938862500000687,
           "timings": {
-            "geometryMs": 22.884340000033262,
-            "visibilityMs": 3299.340458999912
+            "geometryMs": 8.089923000065028,
+            "visibilityMs": 6.989210000057938
           },
-          "deltaMeanSunlight": 0.0007786379936902676,
-          "deltaMeanDli": 0.0005175948123721241
+          "deltaMeanSunlight": 0.017876457964206338,
+          "deltaMeanDli": 0.004291823416693319
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 87.6229079510265,
-          "meanDli": 20.547884494229937,
-          "seconds": 4.174559208000006,
+          "receivers": 190,
+          "meanSunlight": 88.86667972631955,
+          "meanDli": 20.83162207956726,
+          "seconds": 0.6562523330000113,
           "timings": {
-            "geometryMs": 36.20712999999523,
-            "visibilityMs": 4100.687841999985
+            "geometryMs": 17.75508400001854,
+            "visibilityMs": 592.0538709999819
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -972,39 +972,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 87.32428318021597,
-          "meanDli": 20.477430018518103,
-          "seconds": 0.9205756660000043,
+          "receivers": 95,
+          "meanSunlight": 88.5653171364973,
+          "meanDli": 20.764437488214586,
+          "seconds": 1.695331416999994,
           "timings": {
-            "geometryMs": 21.799833999946713,
-            "visibilityMs": 887.375410999899
+            "geometryMs": 21.43987300011213,
+            "visibilityMs": 1652.639041999937
           },
-          "deltaMeanSunlight": 0.04363232858955257,
-          "deltaMeanDli": 0.009164744554176707
+          "deltaMeanSunlight": -0.256941862202396,
+          "deltaMeanDli": -0.058100627275464944
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 87.6236865890202,
-          "meanDli": 20.54840208904231,
-          "seconds": 3.458715124999988,
+          "receivers": 190,
+          "meanSunlight": 88.88455618428375,
+          "meanDli": 20.835913902983954,
+          "seconds": 0.04927383299999929,
           "timings": {
-            "geometryMs": 23.618495999937295,
-            "visibilityMs": 3408.789212999909
+            "geometryMs": 7.698871000131476,
+            "visibilityMs": 6.583081000062521
           },
-          "deltaMeanSunlight": 0.3430357373937767,
-          "deltaMeanDli": 0.080136815078383
+          "deltaMeanSunlight": 0.0622971855840575,
+          "deltaMeanDli": 0.013375787493902891
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 87.28065085162642,
-          "meanDli": 20.468265273963926,
-          "seconds": 12.292893207999994,
+          "receivers": 361,
+          "meanSunlight": 88.8222589986997,
+          "meanDli": 20.82253811549005,
+          "seconds": 6.210154834000001,
           "timings": {
-            "geometryMs": 24.95311900007073,
-            "visibilityMs": 12188.573457999984
+            "geometryMs": 22.156670999946073,
+            "visibilityMs": 6126.2067890000035
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1020,39 +1020,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 170,
-          "meanSunlight": 87.6236865890202,
-          "meanDli": 20.54840208904231,
-          "seconds": 3.3541933749999733,
+          "receivers": 190,
+          "meanSunlight": 88.88455618428375,
+          "meanDli": 20.835913902983954,
+          "seconds": 0.04888825000000361,
           "timings": {
-            "geometryMs": 23.577163999987533,
-            "visibilityMs": 3304.3782549999596
+            "geometryMs": 7.919960999977775,
+            "visibilityMs": 6.69021200001589
           },
-          "deltaMeanSunlight": -0.00021080935847805904,
-          "deltaMeanDli": -0.00005755792384221081
+          "deltaMeanSunlight": 0.0006974831831314532,
+          "deltaMeanDli": 0.00019043596644507943
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 87.62377816062289,
-          "meanDli": 20.548427091117034,
-          "seconds": 3.729987041999993,
+          "receivers": 190,
+          "meanSunlight": 88.88419086965172,
+          "meanDli": 20.835814160012823,
+          "seconds": 3.6982315830000005,
           "timings": {
-            "geometryMs": 25.59279200009769,
-            "visibilityMs": 3675.554379999987
+            "geometryMs": 21.12787500003469,
+            "visibilityMs": 3638.7110790000297
           },
-          "deltaMeanSunlight": -0.00011923775578281948,
-          "deltaMeanDli": -0.00003255584911698861
+          "deltaMeanSunlight": 0.0003321685510968564,
+          "deltaMeanDli": 0.00009069299531461184
         },
         {
           "value": 0.5,
-          "receivers": 170,
-          "meanSunlight": 87.62389739837867,
-          "meanDli": 20.54845964696615,
-          "seconds": 3.7354319160000014,
+          "receivers": 190,
+          "meanSunlight": 88.88385870110062,
+          "meanDli": 20.83572346701751,
+          "seconds": 3.6876353329999985,
           "timings": {
-            "geometryMs": 25.19737700006226,
-            "visibilityMs": 3681.612586999836
+            "geometryMs": 21.867831000025035,
+            "visibilityMs": 3626.015915000069
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1068,39 +1068,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 90.60755855496461,
-          "meanDli": 53.70138431053773,
-          "seconds": 0.02254308299999684,
+          "receivers": 190,
+          "meanSunlight": 90.48196982713789,
+          "meanDli": 53.62641703378374,
+          "seconds": 0.012173041999994893,
           "timings": {
-            "geometryMs": 0.18066699997871183,
-            "visibilityMs": 19.379583000059938
+            "geometryMs": 0.28137499999138527,
+            "visibilityMs": 7.439169000004767
           },
-          "deltaMeanSunlight": 0.00572714933178986,
-          "deltaMeanDli": 0.003734744008788482
+          "deltaMeanSunlight": -0.02674896047636821,
+          "deltaMeanDli": -0.0174433237355629
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 90.62385027103649,
-          "meanDli": 53.71200833751275,
-          "seconds": 0.06290479100000812,
+          "receivers": 190,
+          "meanSunlight": 90.51079695074066,
+          "meanDli": 53.64521555306867,
+          "seconds": 0.017469707999989623,
           "timings": {
-            "geometryMs": 0.2825840000004973,
-            "visibilityMs": 53.11387499986449
+            "geometryMs": 0.29062499999417923,
+            "visibilityMs": 7.732871999964118
           },
-          "deltaMeanSunlight": 0.022018865403666155,
-          "deltaMeanDli": 0.014358770983804447
+          "deltaMeanSunlight": 0.0020781631263986355,
+          "deltaMeanDli": 0.0013551955493653622
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 90.60183140563282,
-          "meanDli": 53.697649566528945,
-          "seconds": 0.22064554199998385,
+          "receivers": 190,
+          "meanSunlight": 90.50871878761426,
+          "meanDli": 53.6438603575193,
+          "seconds": 0.04318100000001141,
           "timings": {
-            "geometryMs": 0.24762499998905696,
-            "visibilityMs": 186.01541799976258
+            "geometryMs": 0.2923750000045402,
+            "visibilityMs": 7.408749999958673
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1116,39 +1116,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 90.56948560664416,
-          "meanDli": 53.6804161721249,
-          "seconds": 0.011855709000024944,
+          "receivers": 190,
+          "meanSunlight": 90.5291258358873,
+          "meanDli": 53.655878255814045,
+          "seconds": 0.011868875000000117,
           "timings": {
-            "geometryMs": 0.25129200000083074,
-            "visibilityMs": 4.761500999942655
+            "geometryMs": 0.18141600000672042,
+            "visibilityMs": 5.177412000048207
           },
-          "deltaMeanSunlight": -0.034626650922604085,
-          "deltaMeanDli": -0.02012529361743276
+          "deltaMeanSunlight": 0.020256361890844232,
+          "deltaMeanDli": 0.011776455686501208
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 90.62385027103649,
-          "meanDli": 53.71200833751275,
-          "seconds": 0.022398916999984066,
+          "receivers": 190,
+          "meanSunlight": 90.51079695074066,
+          "meanDli": 53.64521555306867,
+          "seconds": 0.01730808299999626,
           "timings": {
-            "geometryMs": 0.3986250000016298,
-            "visibilityMs": 10.710636000294471
+            "geometryMs": 0.1764160000020638,
+            "visibilityMs": 7.635126000008313
           },
-          "deltaMeanSunlight": 0.019738013469719817,
-          "deltaMeanDli": 0.011466871770416276
+          "deltaMeanSunlight": 0.0019274767441999074,
+          "deltaMeanDli": 0.0011137529411229252
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 90.60411225756677,
-          "meanDli": 53.70054146574233,
-          "seconds": 0.033619166000018595,
+          "receivers": 190,
+          "meanSunlight": 90.50886947399646,
+          "meanDli": 53.644101800127544,
+          "seconds": 0.0339295839999977,
           "timings": {
-            "geometryMs": 0.3297080000047572,
-            "visibilityMs": 14.84175000002142
+            "geometryMs": 0.27245799999218434,
+            "visibilityMs": 14.997202999875299
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1164,39 +1164,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 90.08708958688369,
-          "meanDli": 53.398309525310054,
-          "seconds": 0.02347333300000173,
+          "receivers": 95,
+          "meanSunlight": 90.50104186433346,
+          "meanDli": 53.64027607829499,
+          "seconds": 0.013348583999992116,
           "timings": {
-            "geometryMs": 0.24120799999218434,
-            "visibilityMs": 14.479833999823313
+            "geometryMs": 0.18012499999895226,
+            "visibilityMs": 3.8155369999294635
           },
-          "deltaMeanSunlight": -0.36050595866640833,
-          "deltaMeanDli": -0.20974521855072936
+          "deltaMeanSunlight": -0.07010262317629667,
+          "deltaMeanDli": -0.04129653306438286
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 90.62385027103649,
-          "meanDli": 53.71200833751275,
-          "seconds": 0.01702820800000336,
+          "receivers": 190,
+          "meanSunlight": 90.51079695074066,
+          "meanDli": 53.64521555306867,
+          "seconds": 0.017527625000002444,
           "timings": {
-            "geometryMs": 0.32474999999976717,
-            "visibilityMs": 7.31366299992078
+            "geometryMs": 0.26137500000186265,
+            "visibilityMs": 7.619876000011573
           },
-          "deltaMeanSunlight": 0.17625472548638754,
-          "deltaMeanDli": 0.10395359365196555
+          "deltaMeanSunlight": -0.06034753676910043,
+          "deltaMeanDli": -0.03635705829070446
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 90.4475955455501,
-          "meanDli": 53.608054743860784,
-          "seconds": 0.20219329100000322,
+          "receivers": 361,
+          "meanSunlight": 90.57114448750976,
+          "meanDli": 53.68157261135937,
+          "seconds": 0.024423999999999068,
           "timings": {
-            "geometryMs": 0.2594579999858979,
-            "visibilityMs": 191.5867029997171
+            "geometryMs": 0.24433300000964664,
+            "visibilityMs": 14.091094999937923
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1212,39 +1212,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 90.45033725406951,
-          "meanDli": 53.6070845571949,
-          "seconds": 0.5215140409999877,
+          "receivers": 190,
+          "meanSunlight": 88.32450361822005,
+          "meanDli": 52.361359579990754,
+          "seconds": 0.2125322920000035,
           "timings": {
-            "geometryMs": 30.60171000016271,
-            "visibilityMs": 483.33649799993145
+            "geometryMs": 16.05591499998991,
+            "visibilityMs": 185.15292000005138
           },
-          "deltaMeanSunlight": -0.010326627357287066,
-          "deltaMeanDli": -0.006734119789612691
+          "deltaMeanSunlight": -0.017975013421761332,
+          "deltaMeanDli": -0.011721725730033938
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 90.4723707445557,
-          "meanDli": 53.621452865373634,
-          "seconds": 1.9017314160000243,
+          "receivers": 190,
+          "meanSunlight": 88.34437936026576,
+          "meanDli": 52.3743207940647,
+          "seconds": 0.06171091599999636,
           "timings": {
-            "geometryMs": 29.439582999999402,
-            "visibilityMs": 1847.7238299997698
+            "geometryMs": 11.93207500000426,
+            "visibilityMs": 9.800752999944962
           },
-          "deltaMeanSunlight": 0.01170686312890723,
-          "deltaMeanDli": 0.00763418838911889
+          "deltaMeanSunlight": 0.0019007286239514087,
+          "deltaMeanDli": 0.0012394883439128535
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 90.4606638814268,
-          "meanDli": 53.613818676984515,
-          "seconds": 7.32181362500001,
+          "receivers": 190,
+          "meanSunlight": 88.34247863164181,
+          "meanDli": 52.37308130572079,
+          "seconds": 2.8045823340000062,
           "timings": {
-            "geometryMs": 31.345919999846956,
-            "visibilityMs": 7198.241120999941
+            "geometryMs": 16.454954000015277,
+            "visibilityMs": 2634.441157000081
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1260,39 +1260,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 90.39595909236405,
-          "meanDli": 53.57700052275776,
-          "seconds": 1.4936864999999817,
+          "receivers": 190,
+          "meanSunlight": 88.26784898368852,
+          "meanDli": 52.32984014169442,
+          "seconds": 0.048709249999999885,
           "timings": {
-            "geometryMs": 20.99966900004074,
-            "visibilityMs": 1453.4720840001537
+            "geometryMs": 9.580836999986786,
+            "visibilityMs": 6.58320900000399
           },
-          "deltaMeanSunlight": -0.08427246011561351,
-          "deltaMeanDli": -0.04901183906247297
+          "deltaMeanSunlight": -0.03014614193352827,
+          "deltaMeanDli": -0.01752281261251909
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 90.4723707445557,
-          "meanDli": 53.621452865373634,
-          "seconds": 1.7572746249999909,
+          "receivers": 190,
+          "meanSunlight": 88.34437936026576,
+          "meanDli": 52.3743207940647,
+          "seconds": 0.06285095799999545,
           "timings": {
-            "geometryMs": 27.00587500014808,
-            "visibilityMs": 1705.477375999937
+            "geometryMs": 13.391419999927166,
+            "visibilityMs": 9.62575400005153
           },
-          "deltaMeanSunlight": -0.007860807923961488,
-          "deltaMeanDli": -0.004559496446596256
+          "deltaMeanSunlight": 0.04638423464371044,
+          "deltaMeanDli": 0.026957839757763224
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 90.48023155247967,
-          "meanDli": 53.62601236182023,
-          "seconds": 1.8783745829999972,
+          "receivers": 190,
+          "meanSunlight": 88.29799512562205,
+          "meanDli": 52.34736295430694,
+          "seconds": 0.09571587499999441,
           "timings": {
-            "geometryMs": 45.96850199968321,
-            "visibilityMs": 1797.2089159995085
+            "geometryMs": 25.08945500003756,
+            "visibilityMs": 19.626577000075486
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1308,39 +1308,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 89.94615206633256,
-          "meanDli": 53.31510905923225,
-          "seconds": 0.5261751250000088,
+          "receivers": 95,
+          "meanSunlight": 87.51714682787315,
+          "meanDli": 51.89639784989587,
+          "seconds": 0.38255066599999554,
           "timings": {
-            "geometryMs": 27.724752999813063,
-            "visibilityMs": 484.5812469999364
+            "geometryMs": 15.91020599998592,
+            "visibilityMs": 341.09411499988346
           },
-          "deltaMeanSunlight": -0.3923376456764913,
-          "deltaMeanDli": -0.22689165468135286
+          "deltaMeanSunlight": -0.32751000037849565,
+          "deltaMeanDli": -0.18888721068503855
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 90.4723707445557,
-          "meanDli": 53.621452865373634,
-          "seconds": 1.9119474169999884,
+          "receivers": 190,
+          "meanSunlight": 88.34437936026576,
+          "meanDli": 52.3743207940647,
+          "seconds": 0.06254520799999591,
           "timings": {
-            "geometryMs": 29.279706000350416,
-            "visibilityMs": 1857.6095470002037
+            "geometryMs": 13.063707999972394,
+            "visibilityMs": 9.669132000009995
           },
-          "deltaMeanSunlight": 0.13388103254665396,
-          "deltaMeanDli": 0.07945215146003193
+          "deltaMeanSunlight": 0.4997225320141183,
+          "deltaMeanDli": 0.28903573348379297
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 90.33848971200905,
-          "meanDli": 53.5420007139136,
-          "seconds": 7.001126582999976,
+          "receivers": 361,
+          "meanSunlight": 87.84465682825164,
+          "meanDli": 52.08528506058091,
+          "seconds": 1.3879537910000073,
           "timings": {
-            "geometryMs": 30.09729399997741,
-            "visibilityMs": 6906.3383369999065
+            "geometryMs": 17.036042999956408,
+            "visibilityMs": 1301.9021700000158
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1356,39 +1356,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 170,
-          "meanSunlight": 90.4723707445557,
-          "meanDli": 53.621452865373634,
-          "seconds": 1.9141324169999863,
+          "receivers": 190,
+          "meanSunlight": 88.34437936026576,
+          "meanDli": 52.3743207940647,
+          "seconds": 0.06960529200000747,
           "timings": {
-            "geometryMs": 28.695839000312844,
-            "visibilityMs": 1860.6820430000662
+            "geometryMs": 14.239713000002666,
+            "visibilityMs": 11.734421999935876
           },
-          "deltaMeanSunlight": 0.00006752367286821936,
-          "deltaMeanDli": 0.00004403301153388384
+          "deltaMeanSunlight": -0.0006098962143425979,
+          "deltaMeanDli": -0.00039772076824107216
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 90.47245942676409,
-          "meanDli": 53.62151069612458,
-          "seconds": 2.7382541250000068,
+          "receivers": 190,
+          "meanSunlight": 88.34460178424804,
+          "meanDli": 52.37446583945934,
+          "seconds": 2.2781657500000003,
           "timings": {
-            "geometryMs": 34.528959999996005,
-            "visibilityMs": 2672.0356310001516
+            "geometryMs": 23.398954999880516,
+            "visibilityMs": 2206.13970900001
           },
-          "deltaMeanSunlight": 0.00015620588125386803,
-          "deltaMeanDli": 0.0001018637624810026
+          "deltaMeanSunlight": -0.0003874722320631463,
+          "deltaMeanDli": -0.0002526753736020737
         },
         {
           "value": 0.5,
-          "receivers": 170,
-          "meanSunlight": 90.47230322088284,
-          "meanDli": 53.6214088323621,
-          "seconds": 3.3774759170000035,
+          "receivers": 190,
+          "meanSunlight": 88.3449892564801,
+          "meanDli": 52.37471851483294,
+          "seconds": 3.0839626250000003,
           "timings": {
-            "geometryMs": 37.95395799976541,
-            "visibilityMs": 3301.7967879999196
+            "geometryMs": 27.202999999935855,
+            "visibilityMs": 3004.6440389999625
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1404,39 +1404,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 88.58853688133567,
-          "meanDli": 52.52966052855291,
-          "seconds": 1.5417381250000035,
+          "receivers": 190,
+          "meanSunlight": 87.61630323384675,
+          "meanDli": 51.95672946997625,
+          "seconds": 1.512718166000006,
           "timings": {
-            "geometryMs": 41.802588999969885,
-            "visibilityMs": 1486.2563770000415
+            "geometryMs": 35.05912499997066,
+            "visibilityMs": 1459.246453999891
           },
-          "deltaMeanSunlight": 0.018829778592206026,
-          "deltaMeanDli": 0.012279128534757433
+          "deltaMeanSunlight": 0.019455202453812603,
+          "deltaMeanDli": 0.012686975071140694
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 88.58085430008298,
-          "meanDli": 52.52465062351241,
-          "seconds": 5.7764269579999965,
+          "receivers": 190,
+          "meanSunlight": 87.60020623117359,
+          "meanDli": 51.94623241798616,
+          "seconds": 5.735968290999997,
           "timings": {
-            "geometryMs": 41.565000999573385,
-            "visibilityMs": 5687.640335999924
+            "geometryMs": 36.424279999991995,
+            "visibilityMs": 5635.952296000061
           },
-          "deltaMeanSunlight": 0.011147197339511195,
-          "deltaMeanDli": 0.007269223494255073
+          "deltaMeanSunlight": 0.003358199780649329,
+          "deltaMeanDli": 0.0021899230810475956
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 88.56970710274346,
-          "meanDli": 52.51738140001815,
-          "seconds": 22.258000583000015,
+          "receivers": 190,
+          "meanSunlight": 87.59684803139294,
+          "meanDli": 51.94404249490511,
+          "seconds": 21.990923500000005,
           "timings": {
-            "geometryMs": 41.89982800022699,
-            "visibilityMs": 22034.339789000078
+            "geometryMs": 37.660536000010325,
+            "visibilityMs": 21711.198422000016
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1452,39 +1452,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 88.6810101119048,
-          "meanDli": 52.58289524441413,
-          "seconds": 3.908639166000008,
+          "receivers": 190,
+          "meanSunlight": 87.65611589809926,
+          "meanDli": 51.97863280871046,
+          "seconds": 1.4296075839999831,
           "timings": {
-            "geometryMs": 28.529499999975087,
-            "visibilityMs": 3847.0747910001082
+            "geometryMs": 15.678002999979071,
+            "visibilityMs": 1368.6294569999445
           },
-          "deltaMeanSunlight": 0.023800243846110902,
-          "deltaMeanDli": 0.013819869743812774
+          "deltaMeanSunlight": 0.07125506934771408,
+          "deltaMeanDli": 0.041334921085876886
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 88.58085430008298,
-          "meanDli": 52.52465062351241,
-          "seconds": 5.670012374999991,
+          "receivers": 190,
+          "meanSunlight": 87.60020623117359,
+          "meanDli": 51.94623241798616,
+          "seconds": 0.08739741700000013,
           "timings": {
-            "geometryMs": 40.23353400014457,
-            "visibilityMs": 5582.014955000108
+            "geometryMs": 13.262332999933278,
+            "visibilityMs": 12.552156999823637
           },
-          "deltaMeanSunlight": -0.07635556797571041,
-          "deltaMeanDli": -0.04442475115791211
+          "deltaMeanSunlight": 0.015345402422042298,
+          "deltaMeanDli": 0.008934530361578652
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 88.65720986805869,
-          "meanDli": 52.56907537467032,
-          "seconds": 7.820958624999999,
+          "receivers": 190,
+          "meanSunlight": 87.58486082875154,
+          "meanDli": 51.93729788762458,
+          "seconds": 1.3155012920000009,
           "timings": {
-            "geometryMs": 64.23391399995307,
-            "visibilityMs": 7685.334665999835
+            "geometryMs": 31.99741099984385,
+            "visibilityMs": 1190.706794000027
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1500,39 +1500,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 88.68917612246945,
-          "meanDli": 52.585047076934046,
-          "seconds": 1.595091625000001,
+          "receivers": 95,
+          "meanSunlight": 87.27225955023773,
+          "meanDli": 51.75426051489312,
+          "seconds": 2.9157026250000055,
           "timings": {
-            "geometryMs": 40.74004399991827,
-            "visibilityMs": 1534.0779200003017
+            "geometryMs": 39.311490999913076,
+            "visibilityMs": 2838.260962999804
           },
-          "deltaMeanSunlight": 0.1978334391263843,
-          "deltaMeanDli": 0.11577310301682786
+          "deltaMeanSunlight": -0.3326392498853181,
+          "deltaMeanDli": -0.19470513684817092
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 88.58085430008298,
-          "meanDli": 52.52465062351241,
-          "seconds": 5.790889207999979,
+          "receivers": 190,
+          "meanSunlight": 87.60020623117359,
+          "meanDli": 51.94623241798616,
+          "seconds": 0.08776070899999468,
           "timings": {
-            "geometryMs": 40.5185829999682,
-            "visibilityMs": 5703.223161000002
+            "geometryMs": 13.26992299995618,
+            "visibilityMs": 12.904209000145784
           },
-          "deltaMeanSunlight": 0.08951161673991237,
-          "deltaMeanDli": 0.055376649595189065
+          "deltaMeanSunlight": -0.004692568949465681,
+          "deltaMeanDli": -0.0027332337551300157
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 88.49134268334306,
-          "meanDli": 52.46927397391722,
-          "seconds": 20.686913791999977,
+          "receivers": 361,
+          "meanSunlight": 87.60489880012305,
+          "meanDli": 51.94896565174129,
+          "seconds": 10.86025900000002,
           "timings": {
-            "geometryMs": 41.50829700010945,
-            "visibilityMs": 20505.62290999992
+            "geometryMs": 36.71928700036369,
+            "visibilityMs": 10712.433331999986
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1548,39 +1548,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 170,
-          "meanSunlight": 88.58085430008298,
-          "meanDli": 52.52465062351241,
-          "seconds": 5.700129749999993,
+          "receivers": 190,
+          "meanSunlight": 87.60020623117359,
+          "meanDli": 51.94623241798616,
+          "seconds": 0.09101445899999817,
           "timings": {
-            "geometryMs": 40.553420000185724,
-            "visibilityMs": 5612.938254000415
+            "geometryMs": 15.584876999841072,
+            "visibilityMs": 12.870411999814678
           },
-          "deltaMeanSunlight": -0.00037555745186068634,
-          "deltaMeanDli": -0.00024490560002021766
+          "deltaMeanSunlight": 0.00007788291182464491,
+          "deltaMeanDli": 0.00005078839774341759
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 88.5815955687563,
-          "meanDli": 52.525134013865326,
-          "seconds": 5.855074874999991,
+          "receivers": 190,
+          "meanSunlight": 87.60027594823083,
+          "meanDli": 51.946277881330424,
+          "seconds": 5.925581207999989,
           "timings": {
-            "geometryMs": 42.1696219999576,
-            "visibilityMs": 5764.716465000005
+            "geometryMs": 37.23370399986743,
+            "visibilityMs": 5821.892085000058
           },
-          "deltaMeanSunlight": 0.0003657112214625613,
-          "deltaMeanDli": 0.0002384847528986711
+          "deltaMeanSunlight": 0.00014759996906832384,
+          "deltaMeanDli": 0.0000962517420077802
         },
         {
           "value": 0.5,
-          "receivers": 170,
-          "meanSunlight": 88.58122985753484,
-          "meanDli": 52.52489552911243,
-          "seconds": 5.84464837499999,
+          "receivers": 190,
+          "meanSunlight": 87.60012834826176,
+          "meanDli": 51.946181629588416,
+          "seconds": 5.924510875000007,
           "timings": {
-            "geometryMs": 41.390048999805,
-            "visibilityMs": 5756.282668000844
+            "geometryMs": 36.225156000145944,
+            "visibilityMs": 5822.109163999878
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1596,39 +1596,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 91.14834150653033,
-          "meanDli": 6.364032125088979,
-          "seconds": 0.017669916999991982,
+          "receivers": 190,
+          "meanSunlight": 90.8451468216298,
+          "meanDli": 6.341923689284834,
+          "seconds": 0.01828837499997462,
           "timings": {
-            "geometryMs": 0.307083000021521,
-            "visibilityMs": 14.431210000126157
+            "geometryMs": 0.35262499999953434,
+            "visibilityMs": 15.027459999895655
           },
-          "deltaMeanSunlight": 0.04333166621087514,
-          "deltaMeanDli": 0.0037376609673733796
+          "deltaMeanSunlight": -0.07915791653404369,
+          "deltaMeanDli": -0.0068279270216695664
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 91.14155849448194,
-          "meanDli": 6.363447042594093,
-          "seconds": 0.053227624999999536,
+          "receivers": 190,
+          "meanSunlight": 90.90937119673924,
+          "meanDli": 6.347463493330476,
+          "seconds": 0.05435437499999534,
           "timings": {
-            "geometryMs": 0.41899999999441206,
-            "visibilityMs": 48.40128900005948
+            "geometryMs": 0.25541700000758283,
+            "visibilityMs": 49.557334000070114
           },
-          "deltaMeanSunlight": 0.03654865416248754,
-          "deltaMeanDli": 0.0031525784724877326
+          "deltaMeanSunlight": -0.014933541424596797,
+          "deltaMeanDli": -0.0012881229760273172
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 91.10500984031945,
-          "meanDli": 6.360294464121606,
-          "seconds": 0.19603966700000455,
+          "receivers": 190,
+          "meanSunlight": 90.92430473816384,
+          "meanDli": 6.348751616306504,
+          "seconds": 0.19941737499999,
           "timings": {
-            "geometryMs": 0.28595900000073016,
-            "visibilityMs": 179.80541800009087
+            "geometryMs": 0.3744170000136364,
+            "visibilityMs": 182.75637700001244
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1644,39 +1644,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 90.96010957778559,
-          "meanDli": 6.35234089561858,
-          "seconds": 0.0053592920000082814,
+          "receivers": 190,
+          "meanSunlight": 90.81746076682263,
+          "meanDli": 6.341840954364591,
+          "seconds": 0.006044541000010213,
           "timings": {
-            "geometryMs": 0.2664160000276752,
-            "visibilityMs": 1.8387929997988977
+            "geometryMs": 0.24670899999910034,
+            "visibilityMs": 2.2725429998827167
           },
-          "deltaMeanSunlight": -0.049660541486147736,
-          "deltaMeanDli": -0.0030340443749823365
+          "deltaMeanSunlight": -0.04239226010318475,
+          "deltaMeanDli": -0.002589139476625313
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 91.14155849448194,
-          "meanDli": 6.363447042594093,
-          "seconds": 0.007596625000005588,
+          "receivers": 190,
+          "meanSunlight": 90.90937119673924,
+          "meanDli": 6.347463493330476,
+          "seconds": 0.008161374999996042,
           "timings": {
-            "geometryMs": 0.22129100002348423,
-            "visibilityMs": 3.1533350002137013
+            "geometryMs": 0.27508300001500174,
+            "visibilityMs": 2.9434179999516346
           },
-          "deltaMeanSunlight": 0.13178837521020625,
-          "deltaMeanDli": 0.00807210260053104
+          "deltaMeanSunlight": 0.049518169813424606,
+          "deltaMeanDli": 0.003033399489259736
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 91.00977011927174,
-          "meanDli": 6.355374939993562,
-          "seconds": 0.01409212500002468,
+          "receivers": 190,
+          "meanSunlight": 90.85985302692582,
+          "meanDli": 6.344430093841217,
+          "seconds": 0.01430808300001081,
           "timings": {
-            "geometryMs": 0.2908329999772832,
-            "visibilityMs": 5.777498000126798
+            "geometryMs": 0.21045799998682924,
+            "visibilityMs": 6.07416700021713
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1692,39 +1692,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 91.0029501208928,
-          "meanDli": 6.355807698019472,
-          "seconds": 0.01719933299999684,
+          "receivers": 95,
+          "meanSunlight": 91.12806491499619,
+          "meanDli": 6.363821489566491,
+          "seconds": 0.029234416999999666,
           "timings": {
-            "geometryMs": 0.23662500001955777,
-            "visibilityMs": 13.03349800023716
+            "geometryMs": 0.22487499998533167,
+            "visibilityMs": 24.69337800005451
           },
-          "deltaMeanSunlight": 0.14389350740505336,
-          "deltaMeanDli": 0.010175194321933034
+          "deltaMeanSunlight": 0.21576129179641157,
+          "deltaMeanDli": 0.01421126568464004
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 91.14155849448194,
-          "meanDli": 6.363447042594093,
-          "seconds": 0.007002082999970298,
+          "receivers": 190,
+          "meanSunlight": 90.90937119673924,
+          "meanDli": 6.347463493330476,
+          "seconds": 0.007698374999978114,
           "timings": {
-            "geometryMs": 0.23704200005158782,
-            "visibilityMs": 2.703915999853052
+            "geometryMs": 0.2227079999865964,
+            "visibilityMs": 2.836168000125326
           },
-          "deltaMeanSunlight": 0.2825018809941895,
-          "deltaMeanDli": 0.017814538896554488
+          "deltaMeanSunlight": -0.002932426460532156,
+          "deltaMeanDli": -0.0021467305513747093
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 90.85905661348775,
-          "meanDli": 6.345632503697539,
-          "seconds": 0.18007787499995903,
+          "receivers": 361,
+          "meanSunlight": 90.91230362319978,
+          "meanDli": 6.349610223881851,
+          "seconds": 0.09724995899997885,
           "timings": {
-            "geometryMs": 0.177291999978479,
-            "visibilityMs": 174.4175409997697
+            "geometryMs": 0.24020800000289455,
+            "visibilityMs": 91.73020800011
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1740,39 +1740,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 90.07763143178329,
-          "meanDli": 6.296658868620926,
-          "seconds": 0.22664874999999302,
+          "receivers": 190,
+          "meanSunlight": 96.47905483290003,
+          "meanDli": 6.703508343451286,
+          "seconds": 0.3811157499999972,
           "timings": {
-            "geometryMs": 12.254872999794316,
-            "visibilityMs": 211.09308600000804
+            "geometryMs": 12.220088999922154,
+            "visibilityMs": 362.41925500010257
           },
-          "deltaMeanSunlight": 0.008821470264805953,
-          "deltaMeanDli": 0.0007609138527833181
+          "deltaMeanSunlight": 0.0176049414197621,
+          "deltaMeanDli": 0.0015185500136460917
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 90.06949608642043,
-          "meanDli": 6.295957137866565,
-          "seconds": 0.8322747499999823,
+          "receivers": 190,
+          "meanSunlight": 96.45808714931074,
+          "meanDli": 6.701699733275189,
+          "seconds": 0.11576524999999674,
           "timings": {
-            "geometryMs": 12.029292000399437,
-            "visibilityMs": 809.7148330002092
+            "geometryMs": 6.026711999962572,
+            "visibilityMs": 89.66983200004324
           },
-          "deltaMeanSunlight": 0.0006861249019465276,
-          "deltaMeanDli": 0.00005918309842201097
+          "deltaMeanSunlight": -0.0033627421695285875,
+          "deltaMeanDli": -0.0002900601624515886
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 90.06880996151848,
-          "meanDli": 6.295897954768143,
-          "seconds": 3.241815332999977,
+          "receivers": 190,
+          "meanSunlight": 96.46144989148027,
+          "meanDli": 6.70198979343764,
+          "seconds": 5.484332999999984,
           "timings": {
-            "geometryMs": 13.183956999797374,
-            "visibilityMs": 3189.6380850000423
+            "geometryMs": 12.56612900015898,
+            "visibilityMs": 5394.9742910000205
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1788,39 +1788,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 90.02489352641072,
-          "meanDli": 6.293225926676884,
-          "seconds": 0.8850894579999731,
+          "receivers": 190,
+          "meanSunlight": 96.44930347467081,
+          "meanDli": 6.701156861326298,
+          "seconds": 0.024248749999998837,
           "timings": {
-            "geometryMs": 10.487628000031691,
-            "visibilityMs": 864.0610369997448
+            "geometryMs": 5.565582000068389,
+            "visibilityMs": 1.8440389999886975
           },
-          "deltaMeanSunlight": 0.017338237281549596,
-          "deltaMeanDli": 0.0010622326298905804
+          "deltaMeanSunlight": 0.008000064217256408,
+          "deltaMeanDli": 0.00048677661753426804
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 90.06949608642043,
-          "meanDli": 6.295957137866565,
-          "seconds": 0.6788814580000472,
+          "receivers": 190,
+          "meanSunlight": 96.45808714931074,
+          "meanDli": 6.701699733275189,
+          "seconds": 0.027862999999983002,
           "timings": {
-            "geometryMs": 11.499829999927897,
-            "visibilityMs": 656.2713709997479
+            "geometryMs": 6.006998999859206,
+            "visibilityMs": 1.7074209999409504
           },
-          "deltaMeanSunlight": 0.0619407972912569,
-          "deltaMeanDli": 0.0037934438195712517
+          "deltaMeanSunlight": 0.016783738857185426,
+          "deltaMeanDli": 0.0010296485664245125
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 90.00755528912917,
-          "meanDli": 6.292163694046994,
-          "seconds": 0.4038942500000121,
+          "receivers": 190,
+          "meanSunlight": 96.44130341045356,
+          "meanDli": 6.700670084708764,
+          "seconds": 0.048252624999993714,
           "timings": {
-            "geometryMs": 17.516208000073675,
-            "visibilityMs": 370.36995500017656
+            "geometryMs": 10.132250999915414,
+            "visibilityMs": 3.3415839999506716
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1836,39 +1836,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 90.30360263996074,
-          "meanDli": 6.31192451021103,
-          "seconds": 0.23832829099998343,
+          "receivers": 95,
+          "meanSunlight": 96.39993924395903,
+          "meanDli": 6.699710042748851,
+          "seconds": 0.71043299999999,
           "timings": {
-            "geometryMs": 13.09278499998618,
-            "visibilityMs": 218.92233199998736
+            "geometryMs": 12.543330000014976,
+            "visibilityMs": 684.7282510001387
           },
-          "deltaMeanSunlight": 0.5931872870994397,
-          "deltaMeanDli": 0.03843550726588418
+          "deltaMeanSunlight": -0.12065789014933159,
+          "deltaMeanDli": -0.006987448419367048
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 90.06949608642043,
-          "meanDli": 6.295957137866565,
-          "seconds": 0.8532868749999907,
+          "receivers": 190,
+          "meanSunlight": 96.45808714931074,
+          "meanDli": 6.701699733275189,
+          "seconds": 0.02740891600001487,
           "timings": {
-            "geometryMs": 12.778621999721508,
-            "visibilityMs": 829.5615820001112
+            "geometryMs": 5.538254000013694,
+            "visibilityMs": 1.7212079999153502
           },
-          "deltaMeanSunlight": 0.35908073355912506,
-          "deltaMeanDli": 0.02246813492141886
+          "deltaMeanSunlight": -0.06250998479761449,
+          "deltaMeanDli": -0.004997757893029586
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 89.7104153528613,
-          "meanDli": 6.273489002945146,
-          "seconds": 3.106925083999988,
+          "receivers": 361,
+          "meanSunlight": 96.52059713410836,
+          "meanDli": 6.706697491168218,
+          "seconds": 2.649987625000009,
           "timings": {
-            "geometryMs": 13.338834999944083,
-            "visibilityMs": 3064.863582999562
+            "geometryMs": 12.992123999953037,
+            "visibilityMs": 2601.9413720001176
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1884,39 +1884,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 170,
-          "meanSunlight": 90.06949608642043,
-          "meanDli": 6.295957137866565,
-          "seconds": 0.8585184579999768,
+          "receivers": 190,
+          "meanSunlight": 96.45808714931074,
+          "meanDli": 6.701699733275189,
+          "seconds": 0.027318666999985,
           "timings": {
-            "geometryMs": 13.510165999818128,
-            "visibilityMs": 834.2431679997826
+            "geometryMs": 5.622545999940485,
+            "visibilityMs": 1.748500999994576
           },
-          "deltaMeanSunlight": 0.001045397493442124,
-          "deltaMeanDli": 0.00009017288621748776
+          "deltaMeanSunlight": 0.001075824308884421,
+          "deltaMeanDli": 0.00009279741294676569
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 90.06690323717467,
-          "meanDli": 6.295733486383303,
-          "seconds": 1.0795855000000447,
+          "receivers": 190,
+          "meanSunlight": 96.45695551714678,
+          "meanDli": 6.701602122042246,
+          "seconds": 1.4552977090000059,
           "timings": {
-            "geometryMs": 14.091252999962308,
-            "visibilityMs": 1052.709250000189
+            "geometryMs": 13.018584000004921,
+            "visibilityMs": 1420.697586999915
           },
-          "deltaMeanSunlight": -0.0015474517523159648,
-          "deltaMeanDli": -0.00013347859704460063
+          "deltaMeanSunlight": -0.00005580785507675046,
+          "deltaMeanDli": -0.000004813819995952429
         },
         {
           "value": 0.5,
-          "receivers": 170,
-          "meanSunlight": 90.06845068892699,
-          "meanDli": 6.295866964980347,
-          "seconds": 1.0354246660000062,
+          "receivers": 190,
+          "meanSunlight": 96.45701132500186,
+          "meanDli": 6.701606935862242,
+          "seconds": 1.2141432909999859,
           "timings": {
-            "geometryMs": 14.257583999889903,
-            "visibilityMs": 1008.3059139996767
+            "geometryMs": 11.281243999867002,
+            "visibilityMs": 1180.512584999873
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1932,39 +1932,39 @@
       "rows": [
         {
           "value": 145,
-          "receivers": 170,
-          "meanSunlight": 89.69557650485758,
-          "meanDli": 6.2798052069936166,
-          "seconds": 0.7125137090000208,
+          "receivers": 190,
+          "meanSunlight": 97.2392709425524,
+          "meanDli": 6.7536163891833265,
+          "seconds": 0.6679616669999959,
           "timings": {
-            "geometryMs": 19.15637899999274,
-            "visibilityMs": 686.7987990003312
+            "geometryMs": 14.357995999918785,
+            "visibilityMs": 645.7437850000279
           },
-          "deltaMeanSunlight": 0.051085034083897085,
-          "deltaMeanDli": 0.004406443476753452
+          "deltaMeanSunlight": 0.053663804335158716,
+          "deltaMeanDli": 0.0046288805434517855
         },
         {
           "value": 577,
-          "receivers": 170,
-          "meanSunlight": 89.65515718425897,
-          "meanDli": 6.276318756318159,
-          "seconds": 2.6000310000000173,
+          "receivers": 190,
+          "meanSunlight": 97.19277993197063,
+          "meanDli": 6.7496062125475795,
+          "seconds": 2.531317833000008,
           "timings": {
-            "geometryMs": 17.30046000034781,
-            "visibilityMs": 2562.581998999871
+            "geometryMs": 14.912293999979738,
+            "visibilityMs": 2489.481083999912
           },
-          "deltaMeanSunlight": 0.010665713485281003,
-          "deltaMeanDli": 0.0009199928012959546
+          "deltaMeanSunlight": 0.007172793753397855,
+          "deltaMeanDli": 0.0006187039077047984
         },
         {
           "value": 2305,
-          "receivers": 170,
-          "meanSunlight": 89.64449147077369,
-          "meanDli": 6.275398763516863,
-          "seconds": 10.00770658300002,
+          "receivers": 190,
+          "meanSunlight": 97.18560713821724,
+          "meanDli": 6.748987508639875,
+          "seconds": 9.643827707999996,
           "timings": {
-            "geometryMs": 17.481956999748945,
-            "visibilityMs": 9915.298836999806
+            "geometryMs": 15.732956000021659,
+            "visibilityMs": 9525.293160999863
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -1980,39 +1980,39 @@
       "rows": [
         {
           "value": 15,
-          "receivers": 170,
-          "meanSunlight": 89.77840390466156,
-          "meanDli": 6.283874102221978,
-          "seconds": 1.7391642920000012,
+          "receivers": 190,
+          "meanSunlight": 97.13653287382296,
+          "meanDli": 6.746147231500648,
+          "seconds": 0.1418272500000021,
           "timings": {
-            "geometryMs": 11.912706999573857,
-            "visibilityMs": 1712.7720859998954
+            "geometryMs": 4.379580999986501,
+            "visibilityMs": 118.01696100004483
           },
-          "deltaMeanSunlight": 0.14151086298019777,
-          "deltaMeanDli": 0.008661081124579972
+          "deltaMeanSunlight": -0.01726080991966228,
+          "deltaMeanDli": -0.001046715627963657
         },
         {
           "value": 10,
-          "receivers": 170,
-          "meanSunlight": 89.65515718425897,
-          "meanDli": 6.276318756318159,
-          "seconds": 2.5868511249999866,
+          "receivers": 190,
+          "meanSunlight": 97.19277993197063,
+          "meanDli": 6.7496062125475795,
+          "seconds": 0.03405741599999601,
           "timings": {
-            "geometryMs": 16.859165000612848,
-            "visibilityMs": 2550.2073310000706
+            "geometryMs": 5.2883769999898504,
+            "visibilityMs": 2.426416999922367
           },
-          "deltaMeanSunlight": 0.01826414257760689,
-          "deltaMeanDli": 0.0011057352207606286
+          "deltaMeanSunlight": 0.038986248228013665,
+          "deltaMeanDli": 0.002412265418968218
         },
         {
           "value": 5,
-          "receivers": 170,
-          "meanSunlight": 89.63689304168136,
-          "meanDli": 6.275213021097398,
-          "seconds": 2.975182541999966,
+          "receivers": 190,
+          "meanSunlight": 97.15379368374262,
+          "meanDli": 6.747193947128611,
+          "seconds": 0.2935637500000012,
           "timings": {
-            "geometryMs": 25.200794000120368,
-            "visibilityMs": 2923.8401249998133
+            "geometryMs": 11.324376000149641,
+            "visibilityMs": 249.61033399999724
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -2028,39 +2028,39 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 45,
-          "meanSunlight": 89.15151315810601,
-          "meanDli": 6.24212750406354,
-          "seconds": 0.7050925419999985,
+          "receivers": 95,
+          "meanSunlight": 97.17354853502758,
+          "meanDli": 6.748039436770942,
+          "seconds": 1.29644200000001,
           "timings": {
-            "geometryMs": 16.448131000099238,
-            "visibilityMs": 679.9773339999374
+            "geometryMs": 16.54799800014007,
+            "visibilityMs": 1263.4302510000707
           },
-          "deltaMeanSunlight": -0.4466446048085402,
-          "deltaMeanDli": -0.027914921459744058
+          "deltaMeanSunlight": -0.02123294771286055,
+          "deltaMeanDli": -0.0019087254367979867
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 89.65515718425897,
-          "meanDli": 6.276318756318159,
-          "seconds": 2.5852137910000166,
+          "receivers": 190,
+          "meanSunlight": 97.19277993197063,
+          "meanDli": 6.7496062125475795,
+          "seconds": 0.03413745800001197,
           "timings": {
-            "geometryMs": 17.133541000192054,
-            "visibilityMs": 2547.5323279998847
+            "geometryMs": 5.662459999875864,
+            "visibilityMs": 2.154207000101451
           },
-          "deltaMeanSunlight": 0.056999421344414714,
-          "deltaMeanDli": 0.006276330794874774
+          "deltaMeanSunlight": -0.002001550769804794,
+          "deltaMeanDli": -0.00034194966016087847
         },
         {
           "value": 0.5,
-          "receivers": 627,
-          "meanSunlight": 89.59815776291455,
-          "meanDli": 6.270042425523284,
-          "seconds": 9.437987250000006,
+          "receivers": 361,
+          "meanSunlight": 97.19478148274044,
+          "meanDli": 6.74994816220774,
+          "seconds": 4.727852249999996,
           "timings": {
-            "geometryMs": 18.371168999641668,
-            "visibilityMs": 9359.56495999964
+            "geometryMs": 16.015958999923896,
+            "visibilityMs": 4664.424745000113
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0
@@ -2076,39 +2076,1095 @@
       "rows": [
         {
           "value": 2,
-          "receivers": 170,
-          "meanSunlight": 89.65515718425897,
-          "meanDli": 6.276318756318159,
-          "seconds": 2.5692011250000215,
+          "receivers": 190,
+          "meanSunlight": 97.19277993197063,
+          "meanDli": 6.7496062125475795,
+          "seconds": 0.041084249999985334,
           "timings": {
-            "geometryMs": 16.992328999913298,
-            "visibilityMs": 2532.622457000136
+            "geometryMs": 9.276123999938136,
+            "visibilityMs": 3.1054130000120495
           },
-          "deltaMeanSunlight": 0.0000017883479159763738,
-          "deltaMeanDli": 1.5425759603004963e-7
+          "deltaMeanSunlight": 0.0009453241072492347,
+          "deltaMeanDli": 0.00008154085275435818
         },
         {
           "value": 1,
-          "receivers": 170,
-          "meanSunlight": 89.6553263238058,
-          "meanDli": 6.276333345793649,
-          "seconds": 2.572652665999951,
+          "receivers": 190,
+          "meanSunlight": 97.19195141060732,
+          "meanDli": 6.749534746752974,
+          "seconds": 2.543115334000002,
           "timings": {
-            "geometryMs": 17.487709000473842,
-            "visibilityMs": 2535.3514960000175
+            "geometryMs": 16.026621999801137,
+            "visibilityMs": 2499.064663999947
           },
-          "deltaMeanSunlight": 0.00017092789474304482,
-          "deltaMeanDli": 0.00001474373308596455
+          "deltaMeanSunlight": 0.00011680274393199852,
+          "deltaMeanDli": 0.00001007505814865084
         },
         {
           "value": 0.5,
-          "receivers": 170,
-          "meanSunlight": 89.65515539591105,
-          "meanDli": 6.276318602060563,
-          "seconds": 2.5558710829999765,
+          "receivers": 190,
+          "meanSunlight": 97.19183460786338,
+          "meanDli": 6.749524671694825,
+          "seconds": 2.5364070840000057,
           "timings": {
-            "geometryMs": 18.051036000135355,
-            "visibilityMs": 2518.137330999947
+            "geometryMs": 15.253625999903306,
+            "visibilityMs": 2493.5487949999515
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "fixed",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 190,
+          "meanSunlight": 96.16347109696869,
+          "meanDli": 21.089322601340854,
+          "seconds": 0.006344624999997905,
+          "timings": {
+            "geometryMs": 0.15154200000688434,
+            "visibilityMs": 4.200748000119347
+          },
+          "deltaMeanSunlight": -0.03542398326517571,
+          "deltaMeanDli": -0.009126623631075859
+        },
+        {
+          "value": 577,
+          "receivers": 190,
+          "meanSunlight": 96.18628890208318,
+          "meanDli": 21.095201373296238,
+          "seconds": 0.01061866700000246,
+          "timings": {
+            "geometryMs": 0.2217499999969732,
+            "visibilityMs": 4.313915000006091
+          },
+          "deltaMeanSunlight": -0.012606178150690539,
+          "deltaMeanDli": -0.0032478516756917486
+        },
+        {
+          "value": 2305,
+          "receivers": 190,
+          "meanSunlight": 96.19889508023387,
+          "meanDli": 21.09844922497193,
+          "seconds": 0.026319290999992518,
+          "timings": {
+            "geometryMs": 0.1813339999935124,
+            "visibilityMs": 4.167877000028966
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "fixed",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 190,
+          "meanSunlight": 96.01874891196266,
+          "meanDli": 21.060293556304416,
+          "seconds": 0.007519082999991952,
+          "timings": {
+            "geometryMs": 0.20633300000918098,
+            "visibilityMs": 2.7969529998954386
+          },
+          "deltaMeanSunlight": -0.08542472316335648,
+          "deltaMeanDli": -0.017899696367312146
+        },
+        {
+          "value": 10,
+          "receivers": 190,
+          "meanSunlight": 96.18628890208318,
+          "meanDli": 21.095201373296238,
+          "seconds": 0.01046899999998277,
+          "timings": {
+            "geometryMs": 0.16870800001197495,
+            "visibilityMs": 4.411129000160145
+          },
+          "deltaMeanSunlight": 0.08211526695716032,
+          "deltaMeanDli": 0.01700812062451007
+        },
+        {
+          "value": 5,
+          "receivers": 190,
+          "meanSunlight": 96.10417363512602,
+          "meanDli": 21.078193252671728,
+          "seconds": 0.020081999999994878,
+          "timings": {
+            "geometryMs": 0.2167499999923166,
+            "visibilityMs": 8.443289999995613
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "fixed",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 95,
+          "meanSunlight": 96.44080814029334,
+          "meanDli": 21.151247280519723,
+          "seconds": 0.008102291999995941,
+          "timings": {
+            "geometryMs": 0.19066699998802505,
+            "visibilityMs": 2.18250300019281
+          },
+          "deltaMeanSunlight": 0.2039395318448669,
+          "deltaMeanDli": 0.043003652414288496
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 96.18628890208318,
+          "meanDli": 21.095201373296238,
+          "seconds": 0.010485124999977415,
+          "timings": {
+            "geometryMs": 0.186959000013303,
+            "visibilityMs": 4.207501000055345
+          },
+          "deltaMeanSunlight": -0.05057970636529774,
+          "deltaMeanDli": -0.013042254809196407
+        },
+        {
+          "value": 0.5,
+          "receivers": 361,
+          "meanSunlight": 96.23686860844848,
+          "meanDli": 21.108243628105434,
+          "seconds": 0.014663500000024214,
+          "timings": {
+            "geometryMs": 0.1718330000003334,
+            "visibilityMs": 8.099625999981072
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 190,
+          "meanSunlight": 87.48488502509348,
+          "meanDli": 19.2489231865604,
+          "seconds": 0.19452670899999794,
+          "timings": {
+            "geometryMs": 8.330419999954756,
+            "visibilityMs": 181.94562399986899
+          },
+          "deltaMeanSunlight": -0.05486648640999192,
+          "deltaMeanDli": -0.014135783874852592
+        },
+        {
+          "value": 577,
+          "receivers": 190,
+          "meanSunlight": 87.5427678399147,
+          "meanDli": 19.263836096315,
+          "seconds": 0.7031420830000134,
+          "timings": {
+            "geometryMs": 9.478289999911794,
+            "visibilityMs": 679.5652509999054
+          },
+          "deltaMeanSunlight": 0.003016328411234781,
+          "deltaMeanDli": 0.0007771258797468761
+        },
+        {
+          "value": 2305,
+          "receivers": 190,
+          "meanSunlight": 87.53975151150347,
+          "meanDli": 19.263058970435253,
+          "seconds": 2.7008881669999973,
+          "timings": {
+            "geometryMs": 9.23620699995081,
+            "visibilityMs": 2638.463660000125
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 190,
+          "meanSunlight": 87.442342045973,
+          "meanDli": 19.242486578607167,
+          "seconds": 0.1555966250000056,
+          "timings": {
+            "geometryMs": 4.313044000067748,
+            "visibilityMs": 142.1225399999239
+          },
+          "deltaMeanSunlight": -0.01964008169743181,
+          "deltaMeanDli": -0.004132659398241145
+        },
+        {
+          "value": 10,
+          "receivers": 190,
+          "meanSunlight": 87.5427678399147,
+          "meanDli": 19.263836096315,
+          "seconds": 0.02496916599999531,
+          "timings": {
+            "geometryMs": 5.519667999993544,
+            "visibilityMs": 5.893171999952756
+          },
+          "deltaMeanSunlight": 0.08078571224426412,
+          "deltaMeanDli": 0.017216858309591743
+        },
+        {
+          "value": 5,
+          "receivers": 190,
+          "meanSunlight": 87.46198212767044,
+          "meanDli": 19.246619238005408,
+          "seconds": 0.41264816700000667,
+          "timings": {
+            "geometryMs": 13.31533700003638,
+            "visibilityMs": 375.64271000001463
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 95,
+          "meanSunlight": 87.82021939741047,
+          "meanDli": 19.325196759223495,
+          "seconds": 0.354687957999995,
+          "timings": {
+            "geometryMs": 9.5972489999549,
+            "visibilityMs": 334.96753799988073
+          },
+          "deltaMeanSunlight": 0.26947213491583,
+          "deltaMeanDli": 0.05816753214156023
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 87.5427678399147,
+          "meanDli": 19.263836096315,
+          "seconds": 0.024677542000019457,
+          "timings": {
+            "geometryMs": 5.370957999955863,
+            "visibilityMs": 5.868249000021024
+          },
+          "deltaMeanSunlight": -0.007979422579936113,
+          "deltaMeanDli": -0.0031931307669346154
+        },
+        {
+          "value": 0.5,
+          "receivers": 361,
+          "meanSunlight": 87.55074726249464,
+          "meanDli": 19.267029227081935,
+          "seconds": 1.311525874999992,
+          "timings": {
+            "geometryMs": 9.029755999945337,
+            "visibilityMs": 1280.964123999991
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "single-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 190,
+          "meanSunlight": 87.5427678399147,
+          "meanDli": 19.263836096315,
+          "seconds": 0.03325883399997838,
+          "timings": {
+            "geometryMs": 9.28182999996352,
+            "visibilityMs": 8.286044000124093
+          },
+          "deltaMeanSunlight": 0.0005904831215133299,
+          "deltaMeanDli": 0.00015213188114771015
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 87.54245168026672,
+          "meanDli": 19.263754641045168,
+          "seconds": 0.812653707999998,
+          "timings": {
+            "geometryMs": 9.286711000051582,
+            "visibilityMs": 788.3564559999213
+          },
+          "deltaMeanSunlight": 0.0002743234735333999,
+          "deltaMeanDli": 0.00007067661131543446
+        },
+        {
+          "value": 0.5,
+          "receivers": 190,
+          "meanSunlight": 87.54217735679319,
+          "meanDli": 19.263683964433852,
+          "seconds": 0.9137653330000176,
+          "timings": {
+            "geometryMs": 9.611000999808311,
+            "visibilityMs": 887.9727509999066
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 190,
+          "meanSunlight": 87.43992519708134,
+          "meanDli": 19.245861132960208,
+          "seconds": 0.9133259170000092,
+          "timings": {
+            "geometryMs": 20.48442200027057,
+            "visibilityMs": 882.2656260000658
+          },
+          "deltaMeanSunlight": -0.00851856819180341,
+          "deltaMeanDli": -0.0021947211633914776
+        },
+        {
+          "value": 577,
+          "receivers": 190,
+          "meanSunlight": 87.4498694238574,
+          "meanDli": 19.24842316034164,
+          "seconds": 3.4352337080000144,
+          "timings": {
+            "geometryMs": 20.493504000187386,
+            "visibilityMs": 3377.657582000247
+          },
+          "deltaMeanSunlight": 0.0014256585842531422,
+          "deltaMeanDli": 0.0003673062180418185
+        },
+        {
+          "value": 2305,
+          "receivers": 190,
+          "meanSunlight": 87.44844376527314,
+          "meanDli": 19.2480558541236,
+          "seconds": 13.083111750000011,
+          "timings": {
+            "geometryMs": 20.204284000297775,
+            "visibilityMs": 12924.940205000079
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 190,
+          "meanSunlight": 87.47395751021189,
+          "meanDli": 19.25314508311601,
+          "seconds": 0.3262338329999766,
+          "timings": {
+            "geometryMs": 6.184503999975277,
+            "visibilityMs": 294.73408300004667
+          },
+          "deltaMeanSunlight": 0.057939259009359034,
+          "deltaMeanDli": 0.012121958329391447
+        },
+        {
+          "value": 10,
+          "receivers": 190,
+          "meanSunlight": 87.4498694238574,
+          "meanDli": 19.24842316034164,
+          "seconds": 0.050735458000010114,
+          "timings": {
+            "geometryMs": 7.892539000109537,
+            "visibilityMs": 7.197790000063833
+          },
+          "deltaMeanSunlight": 0.03385117265486315,
+          "deltaMeanDli": 0.007400035555022555
+        },
+        {
+          "value": 5,
+          "receivers": 190,
+          "meanSunlight": 87.41601825120253,
+          "meanDli": 19.24102312478662,
+          "seconds": 0.3104690840000112,
+          "timings": {
+            "geometryMs": 17.749454999808222,
+            "visibilityMs": 246.7867589998641
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 95,
+          "meanSunlight": 87.28727749786825,
+          "meanDli": 19.213638926871898,
+          "seconds": 1.734114291999984,
+          "timings": {
+            "geometryMs": 21.187372000102187,
+            "visibilityMs": 1690.6765769999474
+          },
+          "deltaMeanSunlight": -0.1604701426994808,
+          "deltaMeanDli": -0.034660269384275466
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 87.4498694238574,
+          "meanDli": 19.24842316034164,
+          "seconds": 0.05065816600000835,
+          "timings": {
+            "geometryMs": 7.6405420001538005,
+            "visibilityMs": 7.650001999980304
+          },
+          "deltaMeanSunlight": 0.0021217832896667232,
+          "deltaMeanDli": 0.00012396408546777593
+        },
+        {
+          "value": 0.5,
+          "receivers": 361,
+          "meanSunlight": 87.44774764056773,
+          "meanDli": 19.248299196256173,
+          "seconds": 6.425937082999997,
+          "timings": {
+            "geometryMs": 20.02942099989741,
+            "visibilityMs": 6342.684426999884
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-06-21",
+      "type": "dual-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 190,
+          "meanSunlight": 87.4498694238574,
+          "meanDli": 19.24842316034164,
+          "seconds": 0.058341124999977186,
+          "timings": {
+            "geometryMs": 12.825129000091692,
+            "visibilityMs": 8.650542000017595
+          },
+          "deltaMeanSunlight": -0.00011595528100372121,
+          "deltaMeanDli": -0.000029874681274577597
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 87.45035835891548,
+          "meanDli": 19.248549129412453,
+          "seconds": 3.714293250000017,
+          "timings": {
+            "geometryMs": 20.939121000032173,
+            "visibilityMs": 3654.842297000083
+          },
+          "deltaMeanSunlight": 0.00037297977708306007,
+          "deltaMeanDli": 0.00009609438953717131
+        },
+        {
+          "value": 0.5,
+          "receivers": 190,
+          "meanSunlight": 87.4499853791384,
+          "meanDli": 19.248453035022916,
+          "seconds": 3.727697374999989,
+          "timings": {
+            "geometryMs": 20.46212099978584,
+            "visibilityMs": 3668.1015749999206
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "fixed",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 190,
+          "meanSunlight": 90.94358012599598,
+          "meanDli": 54.25591095017702,
+          "seconds": 0.009403458000015234,
+          "timings": {
+            "geometryMs": 0.19500000000698492,
+            "visibilityMs": 6.477170000056503
+          },
+          "deltaMeanSunlight": -0.021386869339835357,
+          "deltaMeanDli": -0.013995257498493174
+        },
+        {
+          "value": 577,
+          "receivers": 190,
+          "meanSunlight": 90.96115754518414,
+          "meanDli": 54.267413358677686,
+          "seconds": 0.014877500000002328,
+          "timings": {
+            "geometryMs": 0.20341600000392646,
+            "visibilityMs": 6.7596660002018325
+          },
+          "deltaMeanSunlight": -0.0038094501516781065,
+          "deltaMeanDli": -0.0024928489978250923
+        },
+        {
+          "value": 2305,
+          "receivers": 190,
+          "meanSunlight": 90.96496699533581,
+          "meanDli": 54.26990620767551,
+          "seconds": 0.03588837500000955,
+          "timings": {
+            "geometryMs": 0.1980420000036247,
+            "visibilityMs": 6.677541000011843
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "fixed",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 190,
+          "meanSunlight": 90.92072294060858,
+          "meanDli": 54.24365173700901,
+          "seconds": 0.010230624999996508,
+          "timings": {
+            "geometryMs": 0.1647919999959413,
+            "visibilityMs": 4.561254000029294
+          },
+          "deltaMeanSunlight": -0.02199873025800514,
+          "deltaMeanDli": -0.012900699854249353
+        },
+        {
+          "value": 10,
+          "receivers": 190,
+          "meanSunlight": 90.96115754518414,
+          "meanDli": 54.267413358677686,
+          "seconds": 0.015043625000020256,
+          "timings": {
+            "geometryMs": 0.2474999999976717,
+            "visibilityMs": 6.8778759998385794
+          },
+          "deltaMeanSunlight": 0.018435874317546563,
+          "deltaMeanDli": 0.01086092181442666
+        },
+        {
+          "value": 5,
+          "receivers": 190,
+          "meanSunlight": 90.94272167086659,
+          "meanDli": 54.25655243686326,
+          "seconds": 0.029193541999993612,
+          "timings": {
+            "geometryMs": 0.1911660000041593,
+            "visibilityMs": 13.232533999864245
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "fixed",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 95,
+          "meanSunlight": 90.86868965643343,
+          "meanDli": 54.213700011832465,
+          "seconds": 0.014512208000000101,
+          "timings": {
+            "geometryMs": 0.29191699999501,
+            "visibilityMs": 4.85849800001597
+          },
+          "deltaMeanSunlight": -0.09119399586828081,
+          "deltaMeanDli": -0.054115929309894284
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 90.96115754518414,
+          "meanDli": 54.267413358677686,
+          "seconds": 0.015289749999996275,
+          "timings": {
+            "geometryMs": 0.25224999999045394,
+            "visibilityMs": 6.981664999912027
+          },
+          "deltaMeanSunlight": 0.0012738928824234108,
+          "deltaMeanDli": -0.0004025824646731735
+        },
+        {
+          "value": 0.5,
+          "receivers": 361,
+          "meanSunlight": 90.95988365230171,
+          "meanDli": 54.26781594114236,
+          "seconds": 0.021572375000017928,
+          "timings": {
+            "geometryMs": 0.25516699999570847,
+            "visibilityMs": 12.804371000180254
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 190,
+          "meanSunlight": 90.28003323204015,
+          "meanDli": 53.859755898481446,
+          "seconds": 0.37119116599997504,
+          "timings": {
+            "geometryMs": 17.991165999963414,
+            "visibilityMs": 345.5098750000179
+          },
+          "deltaMeanSunlight": -0.033554832047713035,
+          "deltaMeanDli": -0.021957796036772947
+        },
+        {
+          "value": 577,
+          "receivers": 190,
+          "meanSunlight": 90.31108059174909,
+          "meanDli": 53.880072840941466,
+          "seconds": 1.26837391699999,
+          "timings": {
+            "geometryMs": 17.744879000005312,
+            "visibilityMs": 1224.4632070000225
+          },
+          "deltaMeanSunlight": -0.002507472338777461,
+          "deltaMeanDli": -0.0016408535767524768
+        },
+        {
+          "value": 2305,
+          "receivers": 190,
+          "meanSunlight": 90.31358806408787,
+          "meanDli": 53.88171369451822,
+          "seconds": 5.159952833000018,
+          "timings": {
+            "geometryMs": 17.680504999763798,
+            "visibilityMs": 5046.301832999918
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 190,
+          "meanSunlight": 90.31417948550293,
+          "meanDli": 53.881849642389156,
+          "seconds": 0.13853095800001755,
+          "timings": {
+            "geometryMs": 8.375665999948978,
+            "visibilityMs": 113.70854099997086
+          },
+          "deltaMeanSunlight": 0.018972510248403296,
+          "deltaMeanDli": 0.011134461953439256
+        },
+        {
+          "value": 10,
+          "receivers": 190,
+          "meanSunlight": 90.31108059174909,
+          "meanDli": 53.880072840941466,
+          "seconds": 0.04391641700000037,
+          "timings": {
+            "geometryMs": 11.880288999993354,
+            "visibilityMs": 6.933039000083227
+          },
+          "deltaMeanSunlight": 0.015873616494559428,
+          "deltaMeanDli": 0.009357660505749266
+        },
+        {
+          "value": 5,
+          "receivers": 190,
+          "meanSunlight": 90.29520697525453,
+          "meanDli": 53.87071518043572,
+          "seconds": 0.1174709589999984,
+          "timings": {
+            "geometryMs": 25.44412300005206,
+            "visibilityMs": 58.35895099985646
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 95,
+          "meanSunlight": 90.31079096639444,
+          "meanDli": 53.88186467037737,
+          "seconds": 0.6808958749999874,
+          "timings": {
+            "geometryMs": 19.133910999982618,
+            "visibilityMs": 644.4214980000106
+          },
+          "deltaMeanSunlight": -0.02961729106760913,
+          "deltaMeanDli": -0.016546809144216468
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 90.31108059174909,
+          "meanDli": 53.880072840941466,
+          "seconds": 0.04454970800003503,
+          "timings": {
+            "geometryMs": 12.459630000201287,
+            "visibilityMs": 6.848919000098249
+          },
+          "deltaMeanSunlight": -0.02932766571295531,
+          "deltaMeanDli": -0.018338638580118527
+        },
+        {
+          "value": 0.5,
+          "receivers": 361,
+          "meanSunlight": 90.34040825746204,
+          "meanDli": 53.898411479521585,
+          "seconds": 2.520511832999997,
+          "timings": {
+            "geometryMs": 18.08429099980276,
+            "visibilityMs": 2459.8159599998617
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "single-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 190,
+          "meanSunlight": 90.31108059174909,
+          "meanDli": 53.880072840941466,
+          "seconds": 0.043475666999991516,
+          "timings": {
+            "geometryMs": 11.252626999630593,
+            "visibilityMs": 7.108083999773953
+          },
+          "deltaMeanSunlight": 0.000046501619820560336,
+          "deltaMeanDli": 0.00003042998651636708
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 90.31062019301976,
+          "meanDli": 53.87977156268205,
+          "seconds": 1.8052135000000127,
+          "timings": {
+            "geometryMs": 21.421953000302892,
+            "visibilityMs": 1751.747417000588
+          },
+          "deltaMeanSunlight": -0.0004138971095102306,
+          "deltaMeanDli": -0.00027084827289769464
+        },
+        {
+          "value": 0.5,
+          "receivers": 190,
+          "meanSunlight": 90.31103409012927,
+          "meanDli": 53.88004241095495,
+          "seconds": 2.3574495420000168,
+          "timings": {
+            "geometryMs": 23.236993000435177,
+            "visibilityMs": 2294.788745999802
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "patches",
+      "reference": 2305,
+      "rows": [
+        {
+          "value": 145,
+          "receivers": 190,
+          "meanSunlight": 89.23066900457788,
+          "meanDli": 53.247499391366865,
+          "seconds": 1.0662414589999825,
+          "timings": {
+            "geometryMs": 25.839630000060424,
+            "visibilityMs": 1026.6046729996451
+          },
+          "deltaMeanSunlight": -0.015980220753775143,
+          "deltaMeanDli": -0.010457224981358593
+        },
+        {
+          "value": 577,
+          "receivers": 190,
+          "meanSunlight": 89.24922281914107,
+          "meanDli": 53.25964073885751,
+          "seconds": 3.939239208000014,
+          "timings": {
+            "geometryMs": 26.40646299958462,
+            "visibilityMs": 3865.149618999858
+          },
+          "deltaMeanSunlight": 0.0025735938094157973,
+          "deltaMeanDli": 0.0016841225092889545
+        },
+        {
+          "value": 2305,
+          "receivers": 190,
+          "meanSunlight": 89.24664922533165,
+          "meanDli": 53.257956616348224,
+          "seconds": 15.090190708999987,
+          "timings": {
+            "geometryMs": 28.71628900046926,
+            "visibilityMs": 14881.520079999638
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "interval",
+      "reference": 5,
+      "rows": [
+        {
+          "value": 15,
+          "receivers": 190,
+          "meanSunlight": 89.34088780264769,
+          "meanDli": 53.31330269789253,
+          "seconds": 1.1328494170000194,
+          "timings": {
+            "geometryMs": 12.420541000377852,
+            "visibilityMs": 1084.171581000206
+          },
+          "deltaMeanSunlight": 0.08680097508931794,
+          "deltaMeanDli": 0.05087551499847365
+        },
+        {
+          "value": 10,
+          "receivers": 190,
+          "meanSunlight": 89.24922281914107,
+          "meanDli": 53.25964073885751,
+          "seconds": 0.06618262499995763,
+          "timings": {
+            "geometryMs": 10.79366099985782,
+            "visibilityMs": 8.919171999848913
+          },
+          "deltaMeanSunlight": -0.00486400841730017,
+          "deltaMeanDli": -0.0027864440365448218
+        },
+        {
+          "value": 5,
+          "receivers": 190,
+          "meanSunlight": 89.25408682755837,
+          "meanDli": 53.26242718289406,
+          "seconds": 1.5602633750000388,
+          "timings": {
+            "geometryMs": 29.14307799958624,
+            "visibilityMs": 1459.7299199997215
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "resolution",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 95,
+          "meanSunlight": 89.56085260391372,
+          "meanDli": 53.441713591666264,
+          "seconds": 2.019283958999964,
+          "timings": {
+            "geometryMs": 28.867040999874007,
+            "visibilityMs": 1961.3116610005382
+          },
+          "deltaMeanSunlight": 0.45871276776837533,
+          "deltaMeanDli": 0.2680903173146376
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 89.24922281914107,
+          "meanDli": 53.25964073885751,
+          "seconds": 0.06968604199995752,
+          "timings": {
+            "geometryMs": 11.644958000164479,
+            "visibilityMs": 10.862671000126284
+          },
+          "deltaMeanSunlight": 0.14708298299572675,
+          "deltaMeanDli": 0.08601746450588621
+        },
+        {
+          "value": 0.5,
+          "receivers": 361,
+          "meanSunlight": 89.10213983614534,
+          "meanDli": 53.17362327435163,
+          "seconds": 7.381057665999979,
+          "timings": {
+            "geometryMs": 27.175003999553155,
+            "visibilityMs": 7271.611042000004
+          },
+          "deltaMeanSunlight": 0,
+          "deltaMeanDli": 0
+        }
+      ]
+    },
+    {
+      "site": "Sydney",
+      "date": "2026-12-21",
+      "type": "dual-axis",
+      "parameter": "poseBin",
+      "reference": 0.5,
+      "rows": [
+        {
+          "value": 2,
+          "receivers": 190,
+          "meanSunlight": 89.24922281914107,
+          "meanDli": 53.25964073885751,
+          "seconds": 0.06605608299997402,
+          "timings": {
+            "geometryMs": 10.944746999593917,
+            "visibilityMs": 8.94466400006786
+          },
+          "deltaMeanSunlight": -0.00020975938221567958,
+          "deltaMeanDli": -0.00013726350125153886
+        },
+        {
+          "value": 1,
+          "receivers": 190,
+          "meanSunlight": 89.24986780961011,
+          "meanDli": 53.260062811277464,
+          "seconds": 4.532817792000016,
+          "timings": {
+            "geometryMs": 28.764044000243302,
+            "visibilityMs": 4449.948417000414
+          },
+          "deltaMeanSunlight": 0.00043523108682563816,
+          "deltaMeanDli": 0.00028480891869975267
+        },
+        {
+          "value": 0.5,
+          "receivers": 190,
+          "meanSunlight": 89.24943257852328,
+          "meanDli": 53.259778002358765,
+          "seconds": 4.545316708000027,
+          "timings": {
+            "geometryMs": 29.684244999603834,
+            "visibilityMs": 4461.18078900018
           },
           "deltaMeanSunlight": 0,
           "deltaMeanDli": 0

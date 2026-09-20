@@ -1,0 +1,3351 @@
+{
+  "createdAt": "2026-09-20T17:27:01.730Z",
+  "version": "0.5.0",
+  "modelRevision": "solar-noaa-perez-gap-v2",
+  "scope": "Independent pvlib NREL SPA sun and tracker equations; Radiance gendaylit Perez distributions and finite-array daily integration using the same triangulated geometry and specified sun/poses. Synthetic data; not measured field accuracy. PAR partition and source substep timing are shared with the application; the Radiance comparison isolates sky distribution and occlusion, not an independent PAR conversion model. Diffuse comparisons use identical quadrature and DHI normalization; direct shadows use the application sun separately compared with SPA.",
+  "solar": [
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.5670589143463328,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.5668315950373852,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.5666115080141916,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.5664113891934325,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.5662425064136061,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.5661137528252204,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.5660314353497868,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.565998708982565,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.5660152148850105,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.5660774546132696,
+      "trackerDifferenceDegrees": 4.263256414560601e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.5661788380211666,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.5663099229066143,
+      "trackerDifferenceDegrees": 1.7763568394002505e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.5664593679876009,
+      "trackerDifferenceDegrees": 1.9539925233402755e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.5666144969761743,
+      "trackerDifferenceDegrees": 1.2434497875801753e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.5667619727397503,
+      "trackerDifferenceDegrees": 1.7763568394002505e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.5668890594665527,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.5669843452463899,
+      "trackerDifferenceDegrees": 7.815970093361102e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.5670383853875375,
+      "trackerDifferenceDegrees": 4.973799150320701e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.5670447462168102,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.5670003064448415,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.5669053166227075,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.5667637294710217,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.5665827282861107,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-03-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.566372016056328,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.12718542983141423,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.12774666638649088,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.12828270484225746,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.12875879669158324,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.12914442313658586,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.12941579826174265,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.12955657337973642,
+      "trackerDifferenceDegrees": 2.842170943040401e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.1295593835176053,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.1294268019649241,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.12917027927194424,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.1288098376961342,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.12837317419054592,
+      "trackerDifferenceDegrees": 3.552713678800501e-15
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.1278928926401726,
+      "trackerDifferenceDegrees": 6.217248937900877e-15
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.12740472112989873,
+      "trackerDifferenceDegrees": 1.0658141036401503e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.12694549863220872,
+      "trackerDifferenceDegrees": 1.0658141036401503e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.12654971454539732,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.1262475466664382,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.12606318016292675,
+      "trackerDifferenceDegrees": 2.1316282072803006e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.12601222041100907,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.126101050370815,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.12632685551492578,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.1266769631727859,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.12713021931827886,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-06-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.12765894032589942,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.0863653348181082,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.0870776660504124,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.08778497073542162,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.08845022800297868,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.08903957697031976,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.08952510285928349,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.0898858569872334,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.09010968535520547,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.09019444554249657,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.09014723538513936,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.08998432095150018,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.08973047412465261,
+      "trackerDifferenceDegrees": 2.4868995751603507e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.08941643092600308,
+      "trackerDifferenceDegrees": 1.5987211554602254e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.08907728113294214,
+      "trackerDifferenceDegrees": 2.4868995751603507e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.08875055340727576,
+      "trackerDifferenceDegrees": 4.263256414560601e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.08847279835407085,
+      "trackerDifferenceDegrees": 5.684341886080802e-14
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.08827751354162255,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.08819324245129945,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.08824064249757854,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.08843140594033015,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.08876779606941101,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.08924154412685457,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.08983483937146677,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "date": "2026-12-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.09052203707443267,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.29351615821616334,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.2931954354654677,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.2928930864042529,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.2926261774300056,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.2924089873816809,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.2922526062099755,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.2921639989612357,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.29214534283659377,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.2921943995567764,
+      "trackerDifferenceDegrees": 2.842170943040401e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.29230441096081117,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.29246426634688144,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.29265969542465536,
+      "trackerDifferenceDegrees": 3.552713678800501e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.29287392851727045,
+      "trackerDifferenceDegrees": 1.9984014443252818e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.2930885465580625,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.2932852200200147,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.29344673412249617,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.2935579624119514,
+      "trackerDifferenceDegrees": 2.1316282072803006e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.2936074702992457,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.2935881116990898,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.2934973137061859,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.2933377675088684,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.2931169713536926,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.2928464104919904,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-03-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.2925411991963527,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.09204936658034343,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.09258304457707384,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.09307323815036127,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.09348801405318365,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.09380107280745245,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.09399261017654678,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.09405108399536621,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.09397444760489304,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.09376940515884158,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.09345144062288309,
+      "trackerDifferenceDegrees": 2.1316282072803006e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.09304424709574255,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.09257725702359768,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.09208409898398932,
+      "trackerDifferenceDegrees": 1.3322676295501878e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.09160074768518404,
+      "trackerDifferenceDegrees": 3.197442310920451e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.09116213681447455,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.09080016594832553,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.09054189478527287,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.09040674230564208,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.09040556482559906,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.09054035949108406,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.09080327166409848,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.09117764280875822,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.0916396660015852,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-06-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.09215919256003834,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.015371418828524955,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.0154385655436756,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.0155878829357701,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.015792935499672384,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.01602232909832744,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.016244197989147138,
+      "trackerDifferenceDegrees": 2.842170943040401e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.016430336562295624,
+      "trackerDifferenceDegrees": 2.1316282072803006e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.016559078568022835,
+      "trackerDifferenceDegrees": 2.1316282072803006e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.016616179589353477,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.01659508628134379,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.016496366804146224,
+      "trackerDifferenceDegrees": 3.552713678800501e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.016326045434327863,
+      "trackerDifferenceDegrees": 5.329070518200751e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.016094409498013607,
+      "trackerDifferenceDegrees": 3.9968028886505635e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.015814976383124287,
+      "trackerDifferenceDegrees": 5.329070518200751e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.015503320710513852,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.015176986181334314,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.01485579492472446,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.014561703450951622,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.014318754462242204,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.014152037625341169,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.014084673860749367,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.014134148124723975,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.014308459948241531,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "date": "2026-12-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.01460267992459582,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.43529735163289024,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.43509780992860264,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.4349015236910648,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.4347193288177987,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.4345608181814644,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.4344341086247768,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.4343451178840038,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.43429699003744365,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.4342903004977642,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.4343228240390994,
+      "trackerDifferenceDegrees": 3.552713678800501e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.43438948062261956,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.43448305837193246,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.4345944827932036,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.43471321129641777,
+      "trackerDifferenceDegrees": 1.2434497875801753e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.43482833847623126,
+      "trackerDifferenceDegrees": 1.7763568394002505e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.43492913955056894,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.43500561763578505,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.4350496102830454,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.43505517845471847,
+      "trackerDifferenceDegrees": 2.842170943040401e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.4350188366279812,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.4349402095171043,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.43482185553251407,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.43466887944837884,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-03-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.4344889534530532,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.11061842190712226,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.11103701385471379,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.11144200877339012,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.11180772098401887,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.11211168052022699,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.11233525192137428,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.11246534149993141,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.11249572533572123,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.11242658192927142,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.11226493277975869,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.11202462729101641,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.11172451680525364,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.11138762563960011,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.11104002304797543,
+      "trackerDifferenceDegrees": 1.3322676295501878e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.1107081382128601,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.11041737145740325,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.11019077243491919,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.11004653345713356,
+      "trackerDifferenceDegrees": 4.973799150320701e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.10999716762350378,
+      "trackerDifferenceDegrees": 2.1316282072803006e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.11004908205013368,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.11020125921464706,
+      "trackerDifferenceDegrees": 2.842170943040401e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.1104457933850033,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.11076891456839742,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-06-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.11115107753462473,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.05029445658854616,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.05079785601604158,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.0513136516251226,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.05181501792111561,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.0522767782795006,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.05267640970321003,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.052996036308550445,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.053224064434013375,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.05335509361182078,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.053390640477527326,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.053339393714602994,
+      "trackerDifferenceDegrees": 4.263256414560601e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.0532157536642533,
+      "trackerDifferenceDegrees": 4.263256414560601e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.05303926174676003,
+      "trackerDifferenceDegrees": 3.907985046680551e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.05283372067689788,
+      "trackerDifferenceDegrees": 3.552713678800501e-14
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.05262478035956625,
+      "trackerDifferenceDegrees": 1.8474111129762605e-13
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.052438658352037364,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.05230080031209932,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.052233286454461965,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.052253672379625124,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.05237410578728791,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.05259950591317557,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.05292752828675142,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.05334907198710172,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 51.97,
+        "longitude": 5.67,
+        "utcOffset": 1
+      },
+      "date": "2026-12-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.05384802833965361,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.35902072528951545,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.35872054970857115,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.3584354121634396,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.35818172797603154,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.35797363799279475,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.357821892412825,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.35773363170878186,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.35771173900091346,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.357754452319668,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.3578559211366704,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.35800634382813257,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.35819235565419827,
+      "trackerDifferenceDegrees": 3.552713678800501e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.3583983159940188,
+      "trackerDifferenceDegrees": 4.440892098500626e-16
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.35860710688141406,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.3588010583683618,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.35896361600514953,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.3590802961659432,
+      "trackerDifferenceDegrees": 2.4868995751603507e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.3591395202274559,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.35913391919653365,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.3590606670234262,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.35892146859530916,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.3587228743893878,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.3584755554286979,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-03-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.35819328064789996,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.10098038737903882,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.10155701216018952,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.10209251782293113,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.10255225673785565,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.10290681671345725,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.1031344362567568,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.103221561186722,
+      "trackerDifferenceDegrees": 2.842170943040401e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.1031642106669654,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.10296870669793218,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.10265038575188848,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.10223303870712953,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.10174777637811507,
+      "trackerDifferenceDegrees": 4.085620730620576e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.10123003134145202,
+      "trackerDifferenceDegrees": 3.708144902248023e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.10071758433491346,
+      "trackerDifferenceDegrees": 1.7763568394002505e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.10024839131686321,
+      "trackerDifferenceDegrees": 1.7763568394002505e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.09985703945798026,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.09957275450733304,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.0994177804398436,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.09940492316476544,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.09953711862168273,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.09980770865435597,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.10020007877484852,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.10068931670316655,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-06-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.1012444341614592,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 0,
+      "angularDifferenceDegrees": 0.02996801289970931,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 60,
+      "angularDifferenceDegrees": 0.03051899548425996,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 120,
+      "angularDifferenceDegrees": 0.031089323595877554,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 180,
+      "angularDifferenceDegrees": 0.03164137627104481,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 240,
+      "angularDifferenceDegrees": 0.03213951399635855,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 300,
+      "angularDifferenceDegrees": 0.032553345185762375,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 360,
+      "angularDifferenceDegrees": 0.032859227413616666,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 420,
+      "angularDifferenceDegrees": 0.03304213482497733,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 480,
+      "angularDifferenceDegrees": 0.03309678075586745,
+      "trackerDifferenceDegrees": 2.1316282072803006e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 540,
+      "angularDifferenceDegrees": 0.03302686662732863,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 600,
+      "angularDifferenceDegrees": 0.03284485857758938,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 660,
+      "angularDifferenceDegrees": 0.03257126031579325,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 720,
+      "angularDifferenceDegrees": 0.03223237955246062,
+      "trackerDifferenceDegrees": 3.419486915845482e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 780,
+      "angularDifferenceDegrees": 0.03185900133748946,
+      "trackerDifferenceDegrees": 1.0658141036401503e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 840,
+      "angularDifferenceDegrees": 0.031484931674197504,
+      "trackerDifferenceDegrees": 1.4210854715202004e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 900,
+      "angularDifferenceDegrees": 0.031144310154661164,
+      "trackerDifferenceDegrees": 2.842170943040401e-14
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 960,
+      "angularDifferenceDegrees": 0.030870006144173484,
+      "trackerDifferenceDegrees": 7.105427357601002e-15
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 1020,
+      "angularDifferenceDegrees": 0.030691941637233044,
+      "trackerDifferenceDegrees": 0
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 1080,
+      "angularDifferenceDegrees": 0.030634206178458353,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 1140,
+      "angularDifferenceDegrees": 0.030713377999476998,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 1200,
+      "angularDifferenceDegrees": 0.030937154859971918,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 1260,
+      "angularDifferenceDegrees": 0.03130238663331002,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 1320,
+      "angularDifferenceDegrees": 0.03179519721283625,
+      "trackerDifferenceDegrees": null
+    },
+    {
+      "site": {
+        "latitude": 27.7,
+        "longitude": 85.3,
+        "utcOffset": 5.75
+      },
+      "date": "2026-12-21",
+      "minute": 1380,
+      "angularDifferenceDegrees": 0.03239219838139798,
+      "trackerDifferenceDegrees": null
+    }
+  ],
+  "sky": [
+    {
+      "altitude": 5,
+      "dni": 0,
+      "dhi": 100,
+      "compared": true,
+      "normalizedL1Difference": 0.01649793601806403,
+      "maxPatchDifference": 0.13718870800504224
+    },
+    {
+      "altitude": 5,
+      "dni": 300,
+      "dhi": 200,
+      "compared": true,
+      "normalizedL1Difference": 0.012360844477843807,
+      "maxPatchDifference": 0.20136933657541034
+    },
+    {
+      "altitude": 5,
+      "dni": 800,
+      "dhi": 100,
+      "compared": false,
+      "reason": "Radiance rejected the Perez parameter range (error sky)."
+    },
+    {
+      "altitude": 20,
+      "dni": 0,
+      "dhi": 100,
+      "compared": true,
+      "normalizedL1Difference": 0.009834297301679456,
+      "maxPatchDifference": 0.01672278169512187
+    },
+    {
+      "altitude": 20,
+      "dni": 300,
+      "dhi": 200,
+      "compared": true,
+      "normalizedL1Difference": 0.010236233937317905,
+      "maxPatchDifference": 0.09936931129312754
+    },
+    {
+      "altitude": 20,
+      "dni": 800,
+      "dhi": 100,
+      "compared": true,
+      "normalizedL1Difference": 0.012429009237802017,
+      "maxPatchDifference": 0.07157971390981233
+    },
+    {
+      "altitude": 45,
+      "dni": 0,
+      "dhi": 100,
+      "compared": true,
+      "normalizedL1Difference": 0.004859055060651486,
+      "maxPatchDifference": 0.008193050082876574
+    },
+    {
+      "altitude": 45,
+      "dni": 300,
+      "dhi": 200,
+      "compared": true,
+      "normalizedL1Difference": 0.005564572840796363,
+      "maxPatchDifference": 0.04996353294528966
+    },
+    {
+      "altitude": 45,
+      "dni": 800,
+      "dhi": 100,
+      "compared": true,
+      "normalizedL1Difference": 0.005858231204279363,
+      "maxPatchDifference": 0.03304184507294572
+    },
+    {
+      "altitude": 75,
+      "dni": 0,
+      "dhi": 100,
+      "compared": true,
+      "normalizedL1Difference": 0.004400258063343518,
+      "maxPatchDifference": 0.007355675084622398
+    },
+    {
+      "altitude": 75,
+      "dni": 300,
+      "dhi": 200,
+      "compared": true,
+      "normalizedL1Difference": 0.0014172583075606677,
+      "maxPatchDifference": 0.007829285242065609
+    },
+    {
+      "altitude": 75,
+      "dni": 800,
+      "dhi": 100,
+      "compared": true,
+      "normalizedL1Difference": 0.0061763677510119075,
+      "maxPatchDifference": 0.013720443722542885
+    }
+  ],
+  "daily": [
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "type": "fixed",
+      "receivers": 8,
+      "maxWhDifference": 0.35232623968931875,
+      "maxDliDifference": 0.003178962061596735,
+      "maxSunlightDifferencePercentagePoints": 0.004877935078175651
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "type": "single-axis",
+      "receivers": 8,
+      "maxWhDifference": 0.645488526133704,
+      "maxDliDifference": 0.005824100803565102,
+      "maxSunlightDifferencePercentagePoints": 0.00893674886935465
+    },
+    {
+      "site": {
+        "latitude": 32.22,
+        "longitude": -110.97,
+        "utcOffset": -7
+      },
+      "type": "dual-axis",
+      "receivers": 8,
+      "maxWhDifference": 0.4205274580931473,
+      "maxDliDifference": 0.003794326633951073,
+      "maxSunlightDifferencePercentagePoints": 0.005822176744421435
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "type": "fixed",
+      "receivers": 8,
+      "maxWhDifference": 0.3276194653149105,
+      "maxDliDifference": 0.0031579460475761323,
+      "maxSunlightDifferencePercentagePoints": 0.012271268757598609
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "type": "single-axis",
+      "receivers": 8,
+      "maxWhDifference": 0.4146464598500188,
+      "maxDliDifference": 0.003996805097424172,
+      "maxSunlightDifferencePercentagePoints": 0.015530939662927372
+    },
+    {
+      "site": {
+        "latitude": -33.87,
+        "longitude": 151.21,
+        "utcOffset": 10
+      },
+      "type": "dual-axis",
+      "receivers": 8,
+      "maxWhDifference": 0.4029287452267454,
+      "maxDliDifference": 0.003883857258582424,
+      "maxSunlightDifferencePercentagePoints": 0.015092042586928488
+    }
+  ],
+  "pvlib": "0.13.0",
+  "maxSunAngularDifferenceDegrees": 0.5670589143463328,
+  "maxTrackerDifferenceDegrees": 1.8474111129762605e-13,
+  "completed": true
+}

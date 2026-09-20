@@ -8,7 +8,7 @@ import { unresolvedCrops } from '../domain/crop-catalog.js';
 import { verifyWeatherRecord } from '../irradiance/weather-record.js';
 import { sampleWeather } from '../irradiance/solar.js';
 import { csv, exportCsv, methodsRows, reportHtml } from '../report/export.js';
-import { figureSvg } from '../report/figures.js';
+import { figureSvg, createFigureContext } from '../report/figures.js';
 import { provenanceRecord } from '../report/provenance.js';
 import { validateResult } from './results.js';
 import { writeZip, readZip, MAX_ARCHIVE } from './zip.js';
@@ -97,6 +97,14 @@ export async function projectDocument(study, result) {
   };
 }
 export async function buildProjectPackage(study, result, onProgress = () => {}) {
+  const context = createFigureContext();
+  try {
+    return await makeProjectPackage(study, result, onProgress, context);
+  } finally {
+    context.dispose();
+  }
+}
+async function makeProjectPackage(study, result, onProgress, context) {
   onProgress('Validating project and saved light results');
   const project = await projectDocument(study, result),
     s = project.study,
@@ -199,7 +207,7 @@ export async function buildProjectPackage(study, result, onProgress = () => {}) 
   if (s.weather.sourceText !== undefined)
     add('weather/source.txt', s.weather.sourceText, 'text/plain');
   onProgress('Preparing the standalone methods report');
-  add('report.html', reportHtml(s, r), 'text/html');
+  add('report.html', reportHtml(s, r, context), 'text/html');
   const figures = [
     ['plan', 'none', 'plan'],
     ['profile', 'none', 'profile'],
@@ -213,12 +221,17 @@ export async function buildProjectPackage(study, result, onProgress = () => {}) 
   ];
   for (const [view, metric, name] of figures) {
     onProgress('Preparing ' + name + ' figure');
-    add(`figures/${name}.svg`, figureSvg(s, r, view, metric, 'report', true), 'image/svg+xml');
+    add(
+      `figures/${name}.svg`,
+      figureSvg(s, r, view, metric, 'report', true, { context }),
+      'image/svg+xml',
+    );
   }
   if (s.controlField.initialized) {
     add(
       'figures/control-layout.svg',
       figureSvg(fieldStudy(s, true), controlResult(r), 'plan', r ? 'dli' : 'none', 'report', true, {
+        context,
         control: true,
         layers: designLayers,
       }),

@@ -5,9 +5,16 @@ self.onmessage = async ({ data }) => {
     return;
   }
   try {
+    let lastProgress = 0;
     const result = await calculateStudy(
       data.study,
-      (progress) => self.postMessage({ type: 'progress', ...progress }),
+      (progress) => {
+        const now = performance.now();
+        if (now - lastProgress >= 100 || progress.progress === 1) {
+          lastProgress = now;
+          self.postMessage({ type: 'progress', ...progress });
+        }
+      },
       {
         checkpoint: data.checkpoint,
         onCheckpoint: (checkpoint) => self.postMessage({ type: 'checkpoint', checkpoint }),

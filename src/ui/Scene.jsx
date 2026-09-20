@@ -1,3 +1,4 @@
+import { batchHardware } from './hardware-display.js';
 import { rowHeight, maxRows, rowEdge } from '../domain/receiver-grid.js';
 import { dliLabel } from '../domain/period.js';
 import React, { useEffect, useRef, useState } from 'react';
@@ -11,6 +12,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {
   buildGeometry,
+  createModuleMaterial,
   disposeGroup,
   axes,
   receiverGridSpec,
@@ -33,7 +35,17 @@ import {
   moveFieldGroup,
 } from '../experiment/field-editing.js';
 
-export default function Scene({
+export default function Scene(props) {
+  if (receiverGridSpec(props.study).exceeded)
+    return (
+      <div role="status" className="scene-fallback">
+        This grid exceeds 20,000 receivers. Reduce the array dimensions or increase grid spacing to
+        restore the drawing. Your inputs remain editable.
+      </div>
+    );
+  return <SceneView {...props} />;
+}
+function SceneView({
   study,
   layers = designLayers,
   panelOpacity = 1,
@@ -87,6 +99,7 @@ export default function Scene({
     onSelect,
     onEditItem,
   };
+  const materialKey = JSON.stringify([study.module, study.table.orientation]);
   const structureKey = JSON.stringify([
     study.module.length,
     study.module.width,
@@ -140,6 +153,16 @@ export default function Scene({
       'aria-label',
       'Field drawing. Arrow keys inspect receiver cells. Enter places an item when placement is enabled.',
     );
+    const contextLost = (e) => {
+      e.preventDefault();
+      setFailed(true);
+    };
+    const contextRestored = () => {
+      setFailed(false);
+      runtime.current?.draw();
+    };
+    canvas.addEventListener('webglcontextlost', contextLost);
+    canvas.addEventListener('webglcontextrestored', contextRestored);
     host.current.appendChild(canvas);
     const camera = new THREE.OrthographicCamera();
     const controls = new OrbitControls(camera, canvas);
@@ -372,6 +395,8 @@ export default function Scene({
       if (rt.group) disposeGroup(rt.group);
       if (rt.overlay) disposeOverlay(rt.overlay);
       renderer.dispose();
+      canvas.removeEventListener('webglcontextlost', contextLost);
+      canvas.removeEventListener('webglcontextrestored', contextRestored);
       canvas.remove();
       runtime.current = null;
     };
@@ -388,9 +413,11 @@ export default function Scene({
         disposeGroup(rt.group);
       }
       const group = buildGeometry(study, scopeKey);
-      decorate(group);
-      rt.group = group;
       rt.hardwarePoints = hardwarePoints(group);
+      batchHardware(group, rt.hardwarePoints);
+      if (!group.userData.instanced) decorate(group, study);
+      rt.group = group;
+      rt.materialKey = materialKey;
       scene.add(group);
       rt.structureKey = structureKey;
     }
@@ -619,6 +646,34 @@ export default function Scene({
       rt.draw();
     }
   }, [layers, panelOpacity]);
+  useEffect(() => {
+    const rt = runtime.current;
+    if (!rt?.group || rt.materialKey === materialKey) return;
+    const material = createModuleMaterial(study, scopeKey),
+      old = new Set();
+    rt.group.traverse((o) => {
+      if (o.userData.kind === 'module') {
+        old.add(o.material);
+        o.material = material;
+      }
+    });
+    old.forEach((m) => {
+      m.map?.dispose();
+      m.dispose();
+    });
+    if (!rt.group.userData.instanced) {
+      for (const o of rt.group.children)
+        for (const child of [...o.children]) {
+          child.geometry?.dispose();
+          child.material?.dispose();
+          o.remove(child);
+        }
+      decorate(rt.group, study);
+    }
+    rt.materialKey = materialKey;
+    applyDisplayLayers(rt.group, rt.overlay, layers, panelOpacity);
+    rt.draw();
+  }, [materialKey]);
   // Updating a callout or non-spatial field does not rebuild thousands of map cells.
   useEffect(() => {
     const rt = runtime.current;
@@ -932,7 +987,7 @@ export default function Scene({
   );
 }
 
-function decorate(group) {
+function decorate(group, study) {
   group.traverse((o) => {
     if (!o.isMesh) return;
     const edge = new THREE.LineSegments(
@@ -947,16 +1002,20 @@ function decorate(group) {
     if (o.userData.kind === 'module') {
       const { width, height, depth } = o.geometry.parameters;
       const points = [];
-      for (let i = 1; i < 6; i++) {
+      const columns =
+        study.table.orientation === 'portrait' ? study.module.cellColumns : study.module.cellRows;
+      const rows =
+        study.table.orientation === 'portrait' ? study.module.cellRows : study.module.cellColumns;
+      for (let i = 1; i < columns; i++) {
         points.push(
-          new THREE.Vector3(-width / 2 + (i * width) / 6, -height / 2, depth / 2 + 0.001),
-          new THREE.Vector3(-width / 2 + (i * width) / 6, height / 2, depth / 2 + 0.001),
+          new THREE.Vector3(-width / 2 + (i * width) / columns, -height / 2, depth / 2 + 0.001),
+          new THREE.Vector3(-width / 2 + (i * width) / columns, height / 2, depth / 2 + 0.001),
         );
       }
-      for (let i = 1; i < 12; i++) {
+      for (let i = 1; i < rows; i++) {
         points.push(
-          new THREE.Vector3(-width / 2, -height / 2 + (i * height) / 12, depth / 2 + 0.001),
-          new THREE.Vector3(width / 2, -height / 2 + (i * height) / 12, depth / 2 + 0.001),
+          new THREE.Vector3(-width / 2, -height / 2 + (i * height) / rows, depth / 2 + 0.001),
+          new THREE.Vector3(width / 2, -height / 2 + (i * height) / rows, depth / 2 + 0.001),
         );
       }
       o.add(

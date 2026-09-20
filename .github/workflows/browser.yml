@@ -1,0 +1,43 @@
+name: Browser regression checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      hardware_gpu:
+        description: Run parity on a configured aed-webgpu self-hosted runner
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-traces
+          path: test-results
+  gpu:
+    if: github.event_name == 'workflow_dispatch' && inputs.hardware_gpu
+    runs-on: [self-hosted, aed-webgpu]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npm run test:browser -- --project=chromium
+        env:
+          AED_GPU_REQUIRED: '1'

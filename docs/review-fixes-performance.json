@@ -1,0 +1,51 @@
+{
+  "createdAt": "2026-09-20T17:34:06.017Z",
+  "version": "0.5.0",
+  "node": "v23.11.0",
+  "scope": "One local synthetic run; parsing and crop microbenchmarks, bounded full-size geometry construction/instancing, small CPU annual cold/warm fixtures. Not browser frame rates or universal throughput.",
+  "baselineCommit": "e549b7a",
+  "baselineParseMs": 2105.1592499999997,
+  "baselineCropMs": 161.04591699999992,
+  "baselineScope": "Original parser and plotStats functions on the identical fixture and current shared helper modules; single-run comparison.",
+  "parseBytes": 237189,
+  "parseMs": 29.715167000000008,
+  "cropMs": 1.5069159999998192,
+  "warmCropMs": 0.13208299999996598,
+  "originalMeshes": 49440,
+  "instancedDrawObjects": 3,
+  "drawBuildMs": 1212.417875,
+  "periods": [
+    {
+      "type": "fixed",
+      "warm": false,
+      "days": 366,
+      "cells": 18,
+      "seconds": 0.6959899579999996,
+      "cachedTiles": 365
+    },
+    {
+      "type": "fixed",
+      "warm": true,
+      "days": 366,
+      "cells": 18,
+      "seconds": 0.640112083,
+      "cachedTiles": 366
+    },
+    {
+      "type": "single-axis",
+      "warm": false,
+      "days": 366,
+      "cells": 18,
+      "seconds": 2.9741378749999994,
+      "cachedTiles": 13247
+    },
+    {
+      "type": "single-axis",
+      "warm": true,
+      "days": 366,
+      "cells": 18,
+      "seconds": 2.7559577499999994,
+      "cachedTiles": 13308
+    }
+  ]
+}

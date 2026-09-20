@@ -4,12 +4,13 @@ import { cellSamplingDescription } from '../domain/receiver-grid.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import { cropCatalogVersion, cropCatalogSource } from '../domain/crop-catalog.js';
 import { landUseSettings, landUseDefinition } from '../domain/land-use.js';
-import { VERSION, cropSpacing, dimensions } from '../domain/study.js';
+import { VERSION, MODEL_REVISION, cropSpacing, dimensions } from '../domain/study.js';
 export function provenanceRecord(s, r, { control = false } = {}) {
   return {
     crop_catalog: `${cropCatalogVersion}; ${cropCatalogSource}; species-level identities with taxon URLs per crop bed`,
     software: `Agrivoltaic Experiment Designer ${r?.version || VERSION}`,
     schemaVersion: s.schemaVersion,
+    numericalModelRevision: r?.modelRevision || MODEL_REVISION,
     racking: s.racking.type,
     orientation: control
       ? `Matching field layout; row bearing ${rackingOrientation(s).rowAzimuth}° clockwise from north. No modules.`

@@ -51,35 +51,7 @@ export function getPose(s, sun = null, quantize = false) {
   }
   return { tilt, yaw, key: `${tilt.toFixed(4)}:${yaw.toFixed(4)}` };
 }
-export function buildGeometry(s, scope = 'array', pose = getPose(s), { textures = true } = {}) {
-  const d = dimensions(s),
-    { u, v } = axes(s),
-    up = new THREE.Vector3(0, 0, 1);
-  const group = new THREE.Group();
-  const rowCount =
-    scope === 'pair'
-      ? 2
-      : ['array', 'environment', 'irradiance', 'sensors', 'crops', 'report'].includes(scope)
-        ? s.array.rows
-        : 1;
-  const simple = scope === 'module' || scope === 'racking';
-  const high = simple ? 1 : s.table.high,
-    wide = simple ? 1 : s.table.wide,
-    tables = simple ? 1 : s.row.tables;
-  const width = high * d.cross + (high - 1) * s.module.gap,
-    tableLength = wide * d.along + (wide - 1) * s.module.gap,
-    rowLength = tables * tableLength + (tables - 1) * s.row.tableGap,
-    stagger = rowCount > 1 ? d.stagger : 0,
-    length = rowLength + stagger;
-  const yaw = rad(pose.yaw),
-    pu = u.clone().multiplyScalar(Math.cos(yaw)).addScaledVector(v, Math.sin(yaw)),
-    pv = v.clone().multiplyScalar(Math.cos(yaw)).addScaledVector(u, -Math.sin(yaw));
-  const cv = pv
-      .clone()
-      .multiplyScalar(Math.cos(rad(pose.tilt)))
-      .addScaledVector(up, Math.sin(rad(pose.tilt))),
-    normal = new THREE.Vector3().crossVectors(pu, cv).normalize();
-  const rotation = new THREE.Matrix4().makeBasis(pu, cv, normal);
+export function createModuleMaterial(s, scope, textures = true) {
   const moduleMaterial = new THREE.MeshStandardMaterial({
     color: 0x315f69,
     metalness: 0.3,
@@ -115,13 +87,48 @@ export function buildGeometry(s, scope = 'array', pose = getPose(s), { textures 
     moduleMaterial.map = texture;
     moduleMaterial.color.set(0xffffff);
   }
+  return moduleMaterial;
+}
+export function buildGeometry(s, scope = 'array', pose = getPose(s), { textures = true } = {}) {
+  const d = dimensions(s),
+    { u, v } = axes(s),
+    up = new THREE.Vector3(0, 0, 1);
+  const group = new THREE.Group();
+  const rowCount =
+    scope === 'pair'
+      ? 2
+      : ['array', 'environment', 'irradiance', 'sensors', 'crops', 'report'].includes(scope)
+        ? s.array.rows
+        : 1;
+  const simple = scope === 'module' || scope === 'racking';
+  const high = simple ? 1 : s.table.high,
+    wide = simple ? 1 : s.table.wide,
+    tables = simple ? 1 : s.row.tables;
+  const width = high * d.cross + (high - 1) * s.module.gap,
+    tableLength = wide * d.along + (wide - 1) * s.module.gap,
+    rowLength = tables * tableLength + (tables - 1) * s.row.tableGap,
+    stagger = rowCount > 1 ? d.stagger : 0,
+    length = rowLength + stagger;
+  const yaw = rad(pose.yaw),
+    pu = u.clone().multiplyScalar(Math.cos(yaw)).addScaledVector(v, Math.sin(yaw)),
+    pv = v.clone().multiplyScalar(Math.cos(yaw)).addScaledVector(u, -Math.sin(yaw));
+  const cv = pv
+      .clone()
+      .multiplyScalar(Math.cos(rad(pose.tilt)))
+      .addScaledVector(up, Math.sin(rad(pose.tilt))),
+    normal = new THREE.Vector3().crossVectors(pu, cv).normalize();
+  const rotation = new THREE.Matrix4().makeBasis(pu, cv, normal);
+  const moduleMaterial = createModuleMaterial(s, scope, textures);
   const steelMaterial = new THREE.MeshStandardMaterial({
     color: 0x87968f,
     metalness: 0.5,
     roughness: 0.5,
   });
+  const geometries = new Map();
   function box(size, position, rot, kind) {
-    const g = new THREE.BoxGeometry(...size),
+    const key = size.join(':');
+    if (!geometries.has(key)) geometries.set(key, new THREE.BoxGeometry(...size));
+    const g = geometries.get(key),
       mesh = new THREE.Mesh(g, kind === 'module' ? moduleMaterial : steelMaterial);
     if (rot) mesh.setRotationFromMatrix(rot);
     mesh.position.copy(position);
@@ -231,11 +238,14 @@ export function simulationGeometry(group) {
   return result;
 }
 export function disposeGroup(group) {
-  const mats = new Set();
+  const mats = new Set(),
+    geometries = new Set();
   group.traverse((o) => {
-    o.geometry?.dispose();
+    if (o.geometry) geometries.add(o.geometry);
+    if (o.isInstancedMesh) o.dispose();
     if (o.material) mats.add(o.material);
   });
+  geometries.forEach((g) => g.dispose());
   mats.forEach((m) => {
     m.map?.dispose();
     m.dispose();
@@ -248,6 +258,8 @@ export function receiverGridSpec(s) {
 export function receiverGrid(s) {
   const grid = receiverGridSpec(s),
     { nx, ny, dx, dy } = grid;
+  if (grid.exceeded)
+    throw Error('This grid exceeds 20,000 receivers. Reduce dimensions or increase spacing.');
   const points = [];
   for (let j = 0; j < ny; j++)
     for (let i = 0; i < nx; i++) {

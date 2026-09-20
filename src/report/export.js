@@ -20,18 +20,9 @@ import {
 } from '../domain/crop-catalog.js';
 import { provenanceRecord } from './provenance.js';
 import { dimensions, cropSpacing, VERSION } from '../domain/study.js';
-import { figureSvg, escapeXml as e } from './figures.js';
+import { figureSvg, createFigureContext, escapeXml as e } from './figures.js';
 import { plotStats, rowRelative, nearestCell } from '../experiment/layout.js';
-export function download(content, name, type = 'text/plain') {
-  const url = URL.createObjectURL(
-      content instanceof Blob ? content : new Blob([content], { type }),
-    ),
-    a = document.createElement('a');
-  a.href = url;
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
+export { download } from './download.js';
 function botanicalLabel(crop) {
   if (!crop.botanicalName) return 'Catalog selection required';
   const authorship = crop.scientificName.startsWith(crop.botanicalName)
@@ -47,7 +38,7 @@ export function csv(rows) {
           (v) =>
             '"' +
             String(v ?? '')
-              .replace(/^(?=[=+@\t\r])/, "'")
+              .replace(typeof v === 'number' ? /$^/ : /^(?=\s*[=+@-]|[\t\r])/, "'")
               .replaceAll('"', '""') +
             '"',
         )
@@ -356,7 +347,7 @@ function pairedTable(rows) {
     )
     .join('')}</tbody></table>`;
 }
-function controlReport(study, result) {
+function controlReport(study, result, context) {
   if (!study.controlField?.initialized) return '<h2>Control field</h2><p>Not initialized.</p>';
   const s = fieldStudy(study, true),
     r = controlResult(result),
@@ -395,9 +386,17 @@ function controlReport(study, result) {
       c.grid ? `${c.grid.column + 1} / ${c.grid.row + 1}; ${c.grid.columns} × ${c.grid.rows}` : '—',
       `${r ? `Mean / median / min / max ${r.openDli.toFixed(3)}; SD 0; sunlight 100%` : 'Not calculated'}; ${c.notes}`,
     ]),
-  )}</section><figure>${figureSvg(s, r, 'plan', r ? 'dli' : 'none', 'array', true, { control: true, compact: true, callouts: false, layers: controlLayers(designLayers) })}<figcaption>Control field layout, with uniform full-sun light when calculated. Ground grid at z = 0; sensor installation heights/depths are recorded in the table.</figcaption></figure>`;
+  )}</section><figure>${figureSvg(s, r, 'plan', r ? 'dli' : 'none', 'array', true, { context, control: true, compact: true, callouts: false, layers: controlLayers(designLayers) })}<figcaption>Control field layout, with uniform full-sun light when calculated. Ground grid at z = 0; sensor installation heights/depths are recorded in the table.</figcaption></figure>`;
 }
-export function reportHtml(s, r) {
+export function reportHtml(s, r, sharedContext) {
+  const context = sharedContext || createFigureContext();
+  try {
+    return makeReportHtml(s, r, context);
+  } finally {
+    if (!sharedContext) context.dispose();
+  }
+}
+function makeReportHtml(s, r, context) {
   const publication = publicationTables(s, r);
   const crops = s.crops.map(normalizeCropIdentity);
   const figs = [
@@ -418,7 +417,7 @@ table{width:100%;border-collapse:collapse;margin:5px 0 12px;font-size:11px;table
 svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{font-size:11px;color:#455d51;overflow-wrap:anywhere}.appendix{border-top:2px solid #37564b;margin-top:22px}.methods-notes{columns:2;column-gap:26px}.methods-notes p{break-inside:avoid;overflow-wrap:anywhere;font-size:11px;line-height:1.4}.methods-notes strong{display:block;margin-bottom:2px}button{padding:10px 18px;background:#183d38;color:white;border:0;cursor:pointer}.note{border-left:3px solid #af873e;padding:7px 10px;background:#fff8e7;font-size:11px}.empty{color:#60736a;font-style:italic}.table-scroll{overflow-x:auto}
 @page{size:A4 landscape;margin:12mm}@media(max-width:650px){.methods-notes{columns:1}.parameters{min-width:610px}body{padding:0 12px}}
 @media print{body{margin:0;padding:0;max-width:none;font-size:9pt}h1{font-size:17pt;margin-top:0}h2{font-size:10pt;margin:3mm 0 1mm}table{font-size:8pt;margin:1mm 0 3mm}td,th{padding:1.1mm 1.5mm}button{display:none}.note{font-size:8pt;padding:2mm 3mm}.report-meta{font-size:8pt}.table-scroll{overflow:visible}.parameters{min-width:0}.appendix{break-before:page;border-top:0}.methods-notes p{font-size:8pt}figure{break-before:page;margin:0}figure svg{max-height:165mm;max-width:100%;width:auto;display:block;margin:auto}figcaption{font-size:8pt}thead{display:table-header-group}tr{break-inside:avoid}a{color:inherit;text-decoration:none}}
-</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(periodLabel(s))} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: CPU occlusion matched Radiance on 51,100 rays; independent sky, daily-energy, GPU and field validation remain pending. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / C / B identify the ground zones. S is the signed PV-edge setback; negative values place crops beneath panels. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Agrivoltaic physical field instruments</h2>${table(
+</style></head><body><button onclick="window.print()">Print / save PDF</button><h1>${e(s.metadata.title)}</h1><p class="report-meta">${e(s.metadata.investigator || 'Investigator not specified')} · ${e(periodLabel(s))} · Agrivoltaic experimental design · SI units</p><p class="note">Development model: automated source, ray and CPU/GPU checks cover the documented fixtures; independent field validation and broader device coverage remain required. See versioned validation records. ${r ? r.warnings.map(e).join(' ') : 'Irradiance has not been calculated.'}</p>${publication.sections.map((section) => `<section><h2>${e(section.title)}</h2><div class="table-scroll">${pairedTable(section.rows)}</div></section>`).join('')}<p class="report-meta">U / C / B identify the ground zones. S is the signed PV-edge setback; negative values place crops beneath panels. R is the separate numerical receiver buffer. Full definitions and reproducibility records follow in the appendix.</p><h2>Agrivoltaic physical field instruments</h2>${table(
     [
       'ID / type',
       'E / N / Z (m)',
@@ -478,7 +477,7 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
           ]),
         )}`
       : ''
-  }${controlReport(s, r)}<section class="appendix"><h2>Methods, assumptions and provenance</h2><div class="methods-notes">${publication.notes.map(([key, value]) => `<p><strong>${e(key)}</strong>${e(value)}</p>`).join('')}</div></section>${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric, 'array', true, { compact: true, callouts: false })}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p></body></html>`;
+  }${controlReport(s, r, context)}<section class="appendix"><h2>Methods, assumptions and provenance</h2><div class="methods-notes">${publication.notes.map(([key, value]) => `<p><strong>${e(key)}</strong>${e(value)}</p>`).join('')}</div></section>${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric, 'array', true, { context, compact: true, callouts: false })}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p></body></html>`;
 }
 export function exportCsv(study, result) {
   const rows = [

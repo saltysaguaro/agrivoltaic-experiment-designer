@@ -2,6 +2,7 @@ import { Vector3 } from 'three';
 import { ConvexHull } from 'three/addons/math/ConvexHull.js';
 import { fitOrthographic } from './camera.js';
 export function hardwarePoints(group) {
+  if (group.userData.hardwarePoints) return group.userData.hardwarePoints;
   // Project the true hardware hull. Even an array-aligned bounding box invents
   // empty corners above a tilted panel and can force dimensions below the ground.
   if (group.userData.scope === 'module') {

@@ -9,6 +9,7 @@ import { act } from 'react';
 import { defaultStudy } from '../src/domain/study.js';
 import { projectDocument, readProject } from '../src/project/package.js';
 import { sampleWeather } from '../src/irradiance/solar.js';
+import { parseWeather } from '../src/irradiance/weather.js';
 import { weatherRecord } from '../src/irradiance/weather-record.js';
 import { calculateDay } from '../src/irradiance/engine.js';
 // Component integration test in a simulated DOM. Does not open/control a browser.
@@ -83,6 +84,19 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       this.terminated = true;
     }
     postMessage(data) {
+      if (data.file) {
+        data.file
+          .text()
+          .then((text) => parseWeather(text, data.file.name, data.study))
+          .then((value) => {
+            if (!this.terminated) this.onmessage?.({ data: { type: 'complete', value } });
+          })
+          .catch((error) => {
+            if (!this.terminated)
+              this.onmessage?.({ data: { type: 'error', message: error.message } });
+          });
+        return;
+      }
       if (data.type === 'import') {
         readProject(data.bytes, data.name)
           .then((value) => {
@@ -132,6 +146,11 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
   };
   const step = (name) =>
     [...document.querySelectorAll('.step-toggle')].find((b) => b.textContent.includes(name));
+  let application;
+  const savedStudy = async () => {
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 350)));
+    return JSON.parse(localStorage.getItem('aed-study-v1'));
+  };
   try {
     await build({
       entryPoints: ['src/main.jsx'],
@@ -144,14 +163,14 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       logLevel: 'silent',
     });
     await act(async () => {
-      await import(pathToFileURL(file).href + '?test=' + Date.now());
+      application = await import(pathToFileURL(file).href + '?test=' + Date.now());
     });
     assert.match(document.querySelector('.brand').textContent, /Agrivoltaic Experiment Designer/);
     assert.equal(document.querySelector('.brand svg'), null);
-    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).experimentSensors, []);
-    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).crops, []);
-    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).analysis, study.analysis);
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).browserGridDefaultsVersion, 1);
+    assert.deepEqual((await savedStudy()).experimentSensors, []);
+    assert.deepEqual((await savedStudy()).crops, []);
+    assert.deepEqual((await savedStudy()).analysis, study.analysis);
+    assert.equal((await savedStudy()).browserGridDefaultsVersion, 1);
     assert.equal(localStorage.getItem('fieldwork-study-v1'), null);
     assert.match(document.body.textContent, /Layout is session-only/);
     const help = document.querySelector('button[aria-label="About Length"]');
@@ -169,7 +188,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       rack.value = 'single-axis';
       rack.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
     });
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).array.azimuth, 90);
+    assert.equal((await savedStudy()).array.azimuth, 90);
     assert.match(
       document.querySelector('.control-content').textContent,
       /panels track east–west around a north–south axis/,
@@ -183,16 +202,16 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       );
       bearing.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
     });
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).array.azimuth, 180);
+    assert.equal((await savedStudy()).array.azimuth, 180);
     await click(step('Racking'));
     await click(byText('Apply default orientation'));
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).array.azimuth, 90);
+    assert.equal((await savedStudy()).array.azimuth, 90);
     await act(async () => {
       const selection = document.querySelector('select');
       selection.value = 'dual-axis';
       selection.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
     });
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).array.azimuth, 90);
+    assert.equal((await savedStudy()).array.azimuth, 90);
     assert.equal(document.querySelector('[role="alert"]'), null);
     await click(step('PV table & row'));
     const orientation = document.querySelector('select');
@@ -200,7 +219,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       orientation.value = 'portrait';
       orientation.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
     });
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).row.tableGap, 1.43);
+    assert.equal((await savedStudy()).row.tableGap, 1.43);
     assert.equal(document.querySelector('[role="alert"]'), null);
     assert.match(document.querySelector('.control-content').textContent, /1–20 tables/);
     await click(step('Full array'));
@@ -227,7 +246,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
         new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
       ),
     );
-    const selectedSite = JSON.parse(localStorage.getItem('aed-study-v1')).site;
+    const selectedSite = (await savedStudy()).site;
     assert.equal(selectedSite.latitude, 32.2226);
     assert.equal(selectedSite.longitude, -110.9747);
     assert.equal(selectedSite.address, 'Tucson, Arizona, United States');
@@ -275,7 +294,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
         );
         sampleInput.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
       });
-      assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.samplesPerCell, count);
+      assert.equal((await savedStudy()).analysis.samplesPerCell, count);
       assert.equal(byText('Relative sunlight').disabled, count !== 1);
       assert.equal(calculations, 1, 'Sampling edits invalidate results without starting a solve');
     }
@@ -294,11 +313,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       );
       reservation.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
     });
-    assert.equal(
-      JSON.parse(localStorage.getItem('aed-study-v1')).landUse.underPanelWidth,
-      2,
-      'Typing updates before blur',
-    );
+    assert.equal((await savedStudy()).landUse.underPanelWidth, 2, 'Typing updates before blur');
     const setback = document.querySelector('[data-annotation="rowPair.cropSetback"] input');
     const cropWidth = document.querySelector('[data-annotation="rowPair.croppingWidth"] input');
     const beforeArrow = Number(setback.value);
@@ -307,7 +322,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
         new dom.window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }),
       ),
     );
-    const linked = JSON.parse(localStorage.getItem('aed-study-v1'));
+    const linked = await savedStudy();
     assert.ok(Math.abs(linked.rowPair.cropSetback - beforeArrow - 0.1) < 1e-6);
     assert.ok(
       Math.abs(linked.landUse.underPanelWidth + Number(cropWidth.value) - linked.rowPair.pitch) <
@@ -322,7 +337,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       reservation.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
     });
     await act(async () => reservation.blur());
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).landUse.underPanelWidth, 2);
+    assert.equal((await savedStudy()).landUse.underPanelWidth, 2);
     assert.match(document.querySelector('.annotation-cards').textContent, /2 m/);
     await click(step('Irradiance'));
     assert.equal(calculations, 1, 'Changing reserved ground does not repeat the solve');
@@ -354,7 +369,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await click(byText('Add at array centre'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     await click(byText('Add at array centre'));
-    let saved = JSON.parse(localStorage.getItem('aed-study-v1'));
+    let saved = await savedStudy();
     assert.equal(saved.experimentSensors.length, 0, 'New sensors never enter autosave');
     assert.equal(
       document.querySelectorAll('select[aria-label="Select field item"] option[value^="sensor:"]')
@@ -371,7 +386,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       fieldValue('experimentSensors.1.grid.row'),
     );
     await click(byText('Add crop plot'));
-    saved = JSON.parse(localStorage.getItem('aed-study-v1'));
+    saved = await savedStudy();
     assert.equal(saved.crops.length, 0, 'New beds never enter autosave');
     assert.match(
       document.querySelector('select[aria-label="Select field item"]').textContent,
@@ -516,14 +531,11 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(document.querySelector('.field-tools'), null);
     assert.equal(document.querySelector('.compact-sidebar'), null);
     await click(byText('Apply coarse preview settings'));
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.resolution, 3);
+    assert.equal((await savedStudy()).analysis.resolution, 3);
     await click(byText('Apply standard settings'));
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.resolution, 1);
-    assert.equal(
-      JSON.parse(localStorage.getItem('aed-study-v1')).analysis.gridAlignment,
-      'row-centres',
-    );
-    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).analysis.cellsPerRow, 9);
+    assert.equal((await savedStudy()).analysis.resolution, 1);
+    assert.equal((await savedStudy()).analysis.gridAlignment, 'row-centres');
+    assert.equal((await savedStudy()).analysis.cellsPerRow, 9);
     assert.match(document.querySelector('.control-content').textContent, /Current grid:/);
     // Restore the original numerical inputs without running another calculation.
     await act(async () => {
@@ -544,7 +556,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 9);
     assert.equal(calculations, 1);
     // Import is previewed before changing storage and restores a matching result without downloading weather.
-    const incoming = JSON.parse(localStorage.getItem('aed-study-v1'));
+    const incoming = await savedStudy();
     incoming.experimentSensors = study.experimentSensors;
     incoming.crops = study.crops;
     incoming.metadata.title = 'Shared supplemental project';
@@ -587,16 +599,13 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       ),
     );
     await act(async () => new Promise((r) => setTimeout(r, 700)));
-    assert.equal(
-      JSON.parse(localStorage.getItem('aed-study-v1')).metadata.title,
-      incoming.metadata.title,
-    );
+    assert.equal((await savedStudy()).metadata.title, incoming.metadata.title);
     assert.equal(localStorage.getItem('aed-weather-pinned'), 'true');
     assert.equal(byText('Relative sunlight').disabled, false);
     assert.match(document.body.textContent, /Using the imported weather snapshot/);
     assert.equal(calculations, 1, 'Opening a package restores results without recalculation');
-    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).experimentSensors, []);
-    assert.deepEqual(JSON.parse(localStorage.getItem('aed-study-v1')).crops, []);
+    assert.deepEqual((await savedStudy()).experimentSensors, []);
+    assert.deepEqual((await savedStudy()).crops, []);
     await click(step('Agrivoltaic'));
     assert.match(
       document.querySelector('select[aria-label="Select field item"]').textContent,
@@ -637,7 +646,88 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await click(byText('Refresh site weather'));
     assert.equal(weatherCalls, 2);
     await chooseSource('sample');
+    // Deferred weather reads exercise the actual App import lifecycle.
+    const csvWeather =
+      'timestamp,GHI,DNI,DHI\n' +
+      Array.from({ length: 24 }, (_, h) => `${h}:00,100,0,100`).join('\n');
+    const beginWeather = async (name) => {
+      await click(step('Site & weather'));
+      let resolve;
+      const file = {
+        name,
+        size: csvWeather.length,
+        text: () =>
+          new Promise((r) => {
+            resolve = r;
+          }),
+      };
+      const input = document.querySelector('input[accept=".csv,.epw"]');
+      Object.defineProperty(input, 'files', { configurable: true, value: [file] });
+      await act(async () => input.dispatchEvent(new dom.window.Event('change', { bubbles: true })));
+      return async () =>
+        act(async () => {
+          resolve(csvWeather);
+          await new Promise((r) => setTimeout(r, 30));
+        });
+    };
+    const setNumber = async (selector, value) => {
+      const input = document.querySelector(selector);
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+          input,
+          String(value),
+        );
+        input.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+      });
+      await act(async () =>
+        input.dispatchEvent(new dom.window.FocusEvent('focusout', { bubbles: true })),
+      );
+    };
+    const finishFirst = await beginWeather('deferred.csv');
+    await click(step('Module'));
+    await setNumber('[data-annotation="module.width"] input', 1.5);
+    await finishFirst();
+    let uploaded = await savedStudy();
+    assert.equal(
+      uploaded.module.width,
+      1.5,
+      'Finishing an upload preserves concurrent geometry edits',
+    );
+    assert.equal(uploaded.weather.name, 'deferred.csv');
+    const finishOld = await beginWeather('obsolete.csv');
+    const finishNew = await beginWeather('newest.csv');
+    await finishNew();
+    await finishOld();
+    assert.equal((await savedStudy()).weather.name, 'newest.csv');
+    const finishStale = await beginWeather('wrong-date.csv');
+    const dateInput = document.querySelector('[data-annotation="analysis.date"] input');
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+        dateInput,
+        '2026-06-22',
+      );
+      dateInput.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    });
+    await act(async () =>
+      dateInput.dispatchEvent(new dom.window.FocusEvent('focusout', { bubbles: true })),
+    );
+    await finishStale();
+    uploaded = await savedStudy();
+    assert.equal(uploaded.analysis.date, '2026-06-22');
+    assert.notEqual(uploaded.weather.name, 'wrong-date.csv');
+    const finishPreviousProject = await beginWeather('previous-project.csv');
+    await chooseImport();
+    await click(
+      [...document.querySelectorAll('.project-dialog button')].find(
+        (b) => b.textContent === 'Open project',
+      ),
+    );
+    await finishPreviousProject();
+    uploaded = await savedStudy();
+    assert.equal(uploaded.metadata.title, incoming.metadata.title);
+    assert.notEqual(uploaded.weather.name, 'previous-project.csv');
   } finally {
+    await act(async () => application?.applicationRoot.unmount());
     await fs.rm(file, { force: true });
     console.error = originalError;
     globalThis.Worker = oldWorker;

@@ -9,6 +9,11 @@ import {
 } from './experiment/control-field.js';
 import { isPeriod, periodLabel, periodKeys, hasWeather, dliLabel } from './domain/period.js';
 import { projectJob } from './project/client.js';
+import {
+  persistedBrowserRecord,
+  readWeatherSnapshot,
+  pruneWeatherSnapshots,
+} from './project/weather-storage.js';
 import { browserStudyRecord, restoreBrowserStudy } from './project/browser-study.js';
 import { MAX_ARCHIVE } from './project/zip.js';
 import ProjectImportDialog from './ui/ProjectImportDialog.jsx';
@@ -48,11 +53,16 @@ import {
   updateStudyInput,
   validationMessage,
 } from './domain/study.js';
-import { parseWeather, weatherTemplate, periodWeatherTemplate } from './irradiance/weather.js';
+import { MAX_WEATHER_BYTES, weatherTemplate, periodWeatherTemplate } from './irradiance/weather.js';
+import {
+  weatherImportJob,
+  weatherImportContext,
+  applyWeatherImport,
+} from './irradiance/import-client.js';
 import { downloadWeather, weatherRequestKey } from './irradiance/weather-service.js';
 import { normalizeLayout, cellAt } from './experiment/grid-layout.js';
 import { percentileSensors } from './experiment/layout.js';
-import { download, reportHtml, exportCsv, methodsRows, csv, pngFigure } from './report/export.js';
+import { download } from './report/download.js';
 import { figureSvg } from './report/figures.js';
 import Controls from './ui/Controls.jsx';
 import Scene from './ui/Scene.jsx';
@@ -87,6 +97,7 @@ function load() {
     original = localStorage.getItem('aed-study-v1') || localStorage.getItem('fieldwork-study-v1');
     return {
       study: original ? restoreBrowserStudy(JSON.parse(original)) : defaultStudy(),
+      weatherRef: original ? JSON.parse(original).browserWeatherRef : null,
     };
   } catch (error) {
     return {
@@ -103,6 +114,8 @@ function App() {
   const [projectStatus, setProjectStatus] = useState(''),
     [pendingProject, setPendingProject] = useState(null);
   const projectTask = useRef(null);
+  const weatherImportTask = useRef(null),
+    projectImportToken = useRef(0);
   const [weatherPinned, setWeatherPinned] = useState(() => {
     try {
       return localStorage.getItem('aed-weather-pinned') === 'true';
@@ -110,6 +123,8 @@ function App() {
       return false;
     }
   });
+  const [restoringWeather, setRestoringWeather] = useState(Boolean(initial.weatherRef));
+  const [savedLayoutKey, setSavedLayoutKey] = useState(null);
   const [recovery, setRecovery] = useState(initial.original || null);
   const [s, setRawStudy] = useState(() => normalizeLayout(initial.study)),
     [step, setStep] = useState(() => navigation().step),
@@ -332,8 +347,9 @@ function App() {
     importRef = useRef(),
     latest = useRef(s);
   latest.current = s;
+  const currentAnalysisKey = useMemo(() => analysisKey(s), [s]);
   const d = dimensions(s),
-    validResult = result?.key === analysisKey(s) ? result : null,
+    validResult = result?.key === currentAnalysisKey ? result : null,
     issues = designIssues(s),
     scope = steps[step][2];
   const fieldWorkspace = step === 7 || step === 8;
@@ -377,18 +393,87 @@ function App() {
   }, [step]);
 
   useEffect(() => {
+    if (!initial.weatherRef) return;
+    let cancelled = false;
+    const context = weatherImportContext(initial.study);
+    readWeatherSnapshot(initial.weatherRef)
+      .then((data) => {
+        if (!data)
+          throw Error(
+            'The retained weather snapshot is unavailable. Download or upload weather again.',
+          );
+        if (!cancelled)
+          setStudy((current) =>
+            weatherImportContext(current) === context
+              ? { ...current, weather: { ...current.weather, ...data } }
+              : current,
+          );
+      })
+      .catch((error) => {
+        if (!cancelled) setNotice(error.message);
+      })
+      .finally(() => {
+        if (!cancelled) setRestoringWeather(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  useEffect(() => {
     if (recovery) {
       setSaveStatus('Original study retained · repair required');
       return;
     }
-    try {
-      localStorage.setItem('aed-study-v1', JSON.stringify(browserStudyRecord(s)));
-      localStorage.removeItem('fieldwork-study-v1');
-      setSaveStatus('Layout is session-only · export to save');
-    } catch {
-      setSaveStatus('Device storage unavailable · export a project package to save');
-    }
-  }, [s, recovery]);
+    if (restoringWeather) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        let record;
+        try {
+          record = await persistedBrowserRecord(s);
+        } catch {
+          record = browserStudyRecord(s);
+        }
+        if (cancelled) return;
+        localStorage.setItem('aed-study-v1', JSON.stringify(record));
+        localStorage.removeItem('fieldwork-study-v1');
+        if (record.browserWeatherRef) void pruneWeatherSnapshots(record.browserWeatherRef);
+        setSaveStatus('Layout is session-only · export to save');
+      } catch {
+        if (!cancelled)
+          setSaveStatus('Device storage unavailable · export a project package to save');
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [s, recovery, restoringWeather]);
+  const fieldKey = useMemo(
+    () =>
+      JSON.stringify([
+        s.experimentSensors,
+        s.crops,
+        s.controlField.experimentSensors,
+        s.controlField.crops,
+      ]),
+    [s],
+  );
+  const hasLayout =
+    s.experimentSensors.length ||
+    s.crops.length ||
+    s.controlField.experimentSensors.length ||
+    s.controlField.crops.length;
+  const unsavedLayout = savedLayoutKey === null ? Boolean(hasLayout) : savedLayoutKey !== fieldKey;
+  useEffect(() => {
+    if (!unsavedLayout) return;
+    const warn = (event) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [unsavedLayout]);
   useEffect(() => {
     try {
       sessionStorage.setItem('aed-navigation', JSON.stringify({ version: 3, step, view }));
@@ -404,6 +489,7 @@ function App() {
     if (
       step >= 5 &&
       !weatherPinned &&
+      !restoringWeather &&
       s.weather.mode === 'automatic' &&
       (!hasWeather(s) || s.weather.requestKey !== requestKey)
     ) {
@@ -412,7 +498,7 @@ function App() {
       }, 650);
       return () => clearTimeout(timer);
     }
-  }, [step >= 5, requestKey, s.weather.mode, weatherPinned]);
+  }, [step >= 5, requestKey, s.weather.mode, weatherPinned, restoringWeather]);
   useEffect(() => {
     // Load worker-only dependencies before a user starts their first calculation.
     let warmup;
@@ -424,6 +510,7 @@ function App() {
     } catch {}
     return () => {
       projectTask.current?.cancel();
+      weatherImportTask.current?.cancel();
       warmup?.terminate();
       worker.current?.terminate();
       weatherFlight.current?.controller.abort();
@@ -706,25 +793,43 @@ function App() {
       }
     }
   }
+  const importContext = weatherImportContext(s);
+  useEffect(() => {
+    const task = weatherImportTask.current;
+    if (task && task.context !== importContext) {
+      task.cancel();
+      weatherImportTask.current = null;
+    }
+  }, [importContext]);
   async function uploadWeather(file) {
+    weatherImportTask.current?.cancel();
+    let job;
     try {
-      const parsed = await parseWeather(await file.text(), file.name, s);
-      const next = studySchema.parse({
-        ...s,
-        weather: { ...parsed.weather, mode: 'upload' },
-        site: parsed.site
-          ? { ...s.site, ...parsed.site, address: '', utcOffsetApproximate: false }
-          : s.site,
-      });
+      if (file.size > MAX_WEATHER_BYTES) throw Error('Weather files must be no larger than 25 MB.');
+      const snapshot = latest.current,
+        context = weatherImportContext(snapshot);
+      job = weatherImportJob(file, snapshot);
+      job.context = context;
+      weatherImportTask.current = job;
+      setNotice('Reading weather file…');
+      const parsed = await job.promise;
+      if (weatherImportTask.current !== job || weatherImportContext(latest.current) !== context)
+        return;
+      weatherImportTask.current = null;
       weatherFlight.current?.controller.abort();
       setWeatherStatus({ state: 'idle', message: '' });
       setWeatherPinned(false);
-      setStudy(next);
+      setStudy((current) =>
+        weatherImportContext(current) === context ? applyWeatherImport(current, parsed) : current,
+      );
       setNotice(
         `Loaded ${parsed.weather.days?.length ? `${parsed.weather.days.length} days of` : parsed.weather.rows.length} weather intervals. ${parsed.site ? 'Site metadata imported.' : ''}`,
       );
     } catch (e) {
-      setNotice(e.message);
+      if (e.name !== 'AbortError' && (!job || weatherImportTask.current === job))
+        setNotice(e.message);
+    } finally {
+      if (weatherImportTask.current === job) weatherImportTask.current = null;
     }
   }
   async function processProject(type, payload) {
@@ -743,17 +848,26 @@ function App() {
     }
   }
   async function importStudy(file) {
+    const token = ++projectImportToken.current;
+    projectTask.current?.cancel();
+    weatherImportTask.current?.cancel();
+    weatherImportTask.current = null;
     try {
       if (file.size > MAX_ARCHIVE) throw Error('Project files must be smaller than 128 MiB.');
       const bytes = new Uint8Array(await file.arrayBuffer());
+      if (token !== projectImportToken.current) return;
       const project = await processProject('import', { bytes, name: file.name });
-      setPendingProject(project);
+      if (token === projectImportToken.current) setPendingProject(project);
     } catch (error) {
-      if (error.name !== 'AbortError') setNotice('Could not open project: ' + error.message);
+      if (token === projectImportToken.current && error.name !== 'AbortError')
+        setNotice('Could not open project: ' + error.message);
     }
   }
   function openPreparedProject() {
     if (!pendingProject) return;
+    projectImportToken.current++;
+    weatherImportTask.current?.cancel();
+    weatherImportTask.current = null;
     runToken.current++;
     worker.current?.terminate();
     weatherFlight.current?.controller.abort();
@@ -762,6 +876,15 @@ function App() {
     setProgress(null);
     setRecovery(null);
     setStudy(pendingProject.study);
+    const loaded = pendingProject.study;
+    setSavedLayoutKey(
+      JSON.stringify([
+        loaded.experimentSensors,
+        loaded.crops,
+        loaded.controlField.experimentSensors,
+        loaded.controlField.crops,
+      ]),
+    );
     setResult(pendingProject.result);
     setWeatherPinned(hasWeather(pendingProject.study));
     setWeatherStatus({ state: 'idle', message: '' });
@@ -860,11 +983,13 @@ function App() {
     selectFieldItem({ kind: 'crop', id });
   }
   async function saveStudy(jsonOnly = false) {
+    const exportedLayout = fieldKey;
     try {
       const value = await processProject(jsonOnly ? 'json' : 'export', {
         study: s,
         result: validResult,
       });
+      setSavedLayoutKey(exportedLayout);
       if (jsonOnly)
         download(JSON.stringify(value.document, null, 2), 'project.json', 'application/json');
       else
@@ -884,6 +1009,7 @@ function App() {
   }
   async function exportFigure(format) {
     try {
+      const { pngFigure } = await import('./report/export.js');
       const svg = figureSvg(activeStudy, activeResult, view, metric, scope, grid, {
         control: step === 8,
         layers,
@@ -899,13 +1025,28 @@ function App() {
       setNotice('Figure export failed: ' + e.message);
     }
   }
-  function report() {
+  async function report() {
     try {
+      const { reportHtml } = await import('./report/export.js');
       const html = reportHtml(s, validResult);
       download(html, 'agrivoltaic-methods.html', 'text/html');
       setNotice('Methods report downloaded. Open it to print or save as PDF.');
     } catch (error) {
       setNotice('Methods report export failed: ' + error.message);
+    }
+  }
+  async function exportTable(methods = false) {
+    try {
+      const { csv, methodsRows, exportCsv } = await import('./report/export.js');
+      download(
+        methods
+          ? csv([['Parameter', 'Value'], ...methodsRows(s, validResult)])
+          : exportCsv(s, validResult),
+        `agrivoltaic-${methods ? 'methods' : 'data'}.csv`,
+        'text/csv',
+      );
+    } catch (error) {
+      setNotice('CSV export failed: ' + error.message);
     }
   }
   const mean = activeResult?.meanDli;
@@ -926,7 +1067,7 @@ function App() {
           )}
           <span className="local-status">
             <i />
-            {saveStatus}
+            {unsavedLayout ? 'Unsaved field layout · export to keep changes' : saveStatus}
           </span>
           <button
             className="icon-button"
@@ -1038,7 +1179,7 @@ function App() {
                 </button>
                 {i === step && !compactSidebar && (
                   <Controls
-                    canResume={resumeKey === analysisKey(s)}
+                    canResume={resumeKey === currentAnalysisKey}
                     onInspect={(value) => setInspection({ ...value, step })}
                     step={step}
                     s={activeStudy}
@@ -1561,24 +1702,10 @@ function App() {
                 <button className="secondary" onClick={report}>
                   <FileText size={16} /> Printable methods report
                 </button>
-                <button
-                  className="secondary"
-                  onClick={() =>
-                    download(exportCsv(s, validResult), 'agrivoltaic-data.csv', 'text/csv')
-                  }
-                >
+                <button className="secondary" onClick={() => exportTable()}>
                   Data CSV
                 </button>
-                <button
-                  className="secondary"
-                  onClick={() =>
-                    download(
-                      csv([['Parameter', 'Value'], ...methodsRows(s, validResult)]),
-                      'agrivoltaic-methods.csv',
-                      'text/csv',
-                    )
-                  }
-                >
+                <button className="secondary" onClick={() => exportTable(true)}>
                   Methods CSV
                 </button>
                 <button className="secondary" onClick={() => exportFigure('svg')}>
@@ -1641,4 +1768,5 @@ function App() {
     </div>
   );
 }
-createRoot(document.getElementById('root')).render(<App />);
+export const applicationRoot = createRoot(document.getElementById('root'));
+applicationRoot.render(<App />);

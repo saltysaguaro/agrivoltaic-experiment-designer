@@ -5,7 +5,8 @@ import { moduleOptics } from './optics.js';
 import { analysisPeriod, periodKeys } from './period.js';
 import { normalizeCropIdentity } from './crop-catalog.js';
 import { validateWeatherRows } from '../irradiance/weather-validation.js';
-export const VERSION = '0.4.1';
+export const VERSION = '0.5.0';
+export const MODEL_REVISION = 'solar-noaa-perez-gap-v2';
 const num = (min, max) => z.number().finite().min(min).max(max),
   count = (min, max) => num(min, max).int();
 const text = z.string().max(500);
@@ -309,17 +310,18 @@ export function analysisKey(s) {
   };
   return JSON.stringify([
     VERSION,
-    s.module,
+    MODEL_REVISION,
+    { ...s.module, power: undefined },
     s.racking,
     s.table,
     s.row,
     { pitch: s.rowPair.pitch },
     s.array,
-    s.site,
+    { latitude: s.site.latitude, longitude: s.site.longitude, utcOffset: s.site.utcOffset },
     s.analysis.gridAlignment === 'row-centres'
       ? analysis
       : { ...analysis, gridAlignment: undefined, cellsPerRow: undefined },
-    { ...s.weather, sourceText: undefined },
+    { ...s.weather, sourceText: undefined, name: undefined },
   ]);
 }
 export async function sha256(text) {

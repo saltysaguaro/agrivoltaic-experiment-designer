@@ -10,7 +10,7 @@ import {
   getPose,
   localToWorld,
 } from '../domain/geometry.js';
-import { analysisKey, sha256, VERSION, designIssues } from '../domain/study.js';
+import { analysisKey, sha256, VERSION, MODEL_REVISION, designIssues } from '../domain/study.js';
 import { solarPosition, sampleWeather, spitters } from './solar.js';
 import { skyPatches, perezWeights } from './sky.js';
 import { CpuBvhIrradianceEngine } from './cpu.js';
@@ -115,11 +115,35 @@ export function integrateSources(s, { allowZero = false } = {}) {
     warnings.push('Low mean solar elevation: the default broadband-to-PAR fraction is uncertain.');
   return { steps, patches, open, openDli, measured, warnings };
 }
+export const VISIBILITY_TILE_BYTES = 2 * 1024 * 1024;
+export function createEngineSession() {
+  return {
+    engine: null,
+    geometry: null,
+    pose: null,
+    identity: null,
+    poses: new Map(),
+    bytes: 0,
+    dispose() {
+      this.engine?.dispose();
+      const geometries = new Set([
+        this.geometry,
+        ...[...this.poses.values()].map((p) => p.geometry),
+      ]);
+      geometries.forEach((g) => g?.dispose());
+      this.engine = this.geometry = this.pose = this.identity = null;
+      this.poses.clear();
+      this.bytes = 0;
+      this.fellBack = false;
+    },
+  };
+}
 export async function calculateDay(
   s,
   onProgress = () => {},
   {
     createGpu = () => WebGpuIrradianceEngine.create(),
+    session: sharedSession,
     diffusePoseStep = 2,
     allowZero = false,
     cache = { get: getCached, put: putCached },
@@ -158,39 +182,66 @@ export async function calculateDay(
       )
     : null;
   if (s.module.bifacial) warnings.push(opticalAssumptions(s));
-  let engine, backend;
-  try {
-    if (s.analysis.backend === 'cpu') throw Error('CPU selected');
-    engine = await createGpu();
-  } catch (e) {
-    if (s.analysis.backend === 'gpu')
-      warnings.push(`WebGPU unavailable (${e.message}); used CPU reference.`);
-    engine = new CpuBvhIrradianceEngine();
+  const session = sharedSession || createEngineSession();
+  let engine = session.engine,
+    backend;
+  if (!engine) {
+    try {
+      if (s.analysis.backend === 'cpu') throw Error('CPU selected');
+      engine = await createGpu();
+    } catch (e) {
+      if (s.analysis.backend === 'gpu')
+        warnings.push(`WebGPU unavailable (${e.message}); used CPU reference.`);
+      engine = new CpuBvhIrradianceEngine();
+    }
+    session.engine = engine;
   }
-  backend = engine.name;
+  backend = session.fellBack ? 'WebGPU + CPU fallback' : engine.name;
   async function fallback(error) {
     if (engine.name === 'CPU MeshBVH') throw error;
     engine.dispose();
     warnings.push(`GPU execution failed; CPU fallback used: ${error.message}`);
-    engine = new CpuBvhIrradianceEngine();
+    engine = session.engine = new CpuBvhIrradianceEngine();
+    session.fellBack = true;
     backend = 'WebGPU + CPU fallback';
-    await engine.initializeGeometry(currentGeometry);
+    await engine.initializeGeometry(session.geometry);
   }
   const timings = { geometryMs: 0, visibilityMs: 0 };
-  let currentGeometry = null,
-    currentPose = null;
   async function initialize(pose) {
-    if (currentPose === pose.key) return;
+    if (session.pose === pose.key) return;
     const started = performance.now();
-    currentPose = pose.key;
-    if (currentGeometry) currentGeometry.dispose();
-    const group = buildGeometry(s, 'array', pose, { textures: false });
-    currentGeometry = simulationGeometry(group);
-    disposeGroup(group);
+    let entry = session.poses.get(pose.key);
+    if (entry) {
+      session.poses.delete(pose.key);
+      session.poses.set(pose.key, entry);
+    } else {
+      const group = buildGeometry(s, 'array', pose, { textures: false });
+      const geometry = simulationGeometry(group);
+      disposeGroup(group);
+      const bytes =
+        Object.values(geometry?.attributes || {}).reduce(
+          (n, a) => n + a.array.byteLength,
+          geometry?.index?.array.byteLength || 0,
+        ) +
+        (geometry?.userData.moduleBvh?.boxes?.byteLength || 0) +
+        (geometry?.userData.moduleBvh?.nodes?.byteLength || 0);
+      entry = { geometry, bytes };
+      session.poses.set(pose.key, entry);
+      session.bytes += bytes;
+    }
+    session.geometry = entry.geometry;
+    session.pose = pose.key;
     try {
-      await engine.initializeGeometry(currentGeometry);
+      await engine.initializeGeometry(session.geometry);
     } catch (error) {
       await fallback(error);
+    }
+    while (session.poses.size > 1 && (session.poses.size > 8 || session.bytes > 32 * 1024 * 1024)) {
+      const key = session.poses.keys().next().value,
+        old = session.poses.get(key);
+      old.geometry?.dispose();
+      session.bytes -= old.bytes;
+      session.poses.delete(key);
     }
     timings.geometryMs += performance.now() - started;
   }
@@ -207,7 +258,7 @@ export async function calculateDay(
   }
   const geometryHash = await sha256(
     JSON.stringify([
-      VERSION,
+      MODEL_REVISION,
       diffusePoseStep,
       s.module,
       s.racking,
@@ -224,6 +275,13 @@ export async function calculateDay(
         : []),
     ]),
   );
+  if (session.identity && session.identity !== geometryHash) {
+    session.poses.forEach((p) => p.geometry?.dispose());
+    session.poses.clear();
+    session.geometry = session.pose = null;
+    session.bytes = 0;
+  }
+  session.identity = geometryHash;
   let cached = 0;
   try {
     const groups = new Map();
@@ -255,34 +313,35 @@ export async function calculateDay(
           source.steps.filter((v) => v.direct || v.parDirect).length);
     for (const group of groups.values()) {
       for (const [sample, points] of sampleBatches.entries()) {
-        const suffix = samplesPerCell > 1 ? `:sample-${sample}` : '';
-        const key = `${geometryHash}:${engine.name}:${group.pose.key}${suffix}`,
-          existing = await cache.get(key).catch(() => null);
-        let bits = existing;
-        if (bits) cached++;
-        else {
-          await initialize(group.pose);
-          bits = await visibility(
-            points,
-            source.patches.map((p) => p.direction),
-          );
-          // The backend may change after a failed GPU dispatch. Do not label CPU
-          // visibility as GPU data in a later run.
-          await cache
-            .put(`${geometryHash}:${engine.name}:${group.pose.key}${suffix}`, bits)
-            .catch(() => {});
+        const directions = source.patches.map((p) => p.direction),
+          words = Math.ceil(directions.length / 32),
+          bytesPerPoint = transmitting ? directions.length * 2 : words * 4,
+          tileSize = Math.max(1, Math.floor(VISIBILITY_TILE_BYTES / bytesPerPoint));
+        for (let start = 0; start < points.length; start += tileSize) {
+          const tile = points.slice(start, start + tileSize),
+            suffix =
+              `:tile-${start}-${tile.length}` + (samplesPerCell > 1 ? `:sample-${sample}` : ''),
+            key = `${geometryHash}:${engine.name}:${group.pose.key}${suffix}`;
+          let bits = await cache.get(key).catch(() => null);
+          if (bits) cached++;
+          else {
+            await initialize(group.pose);
+            bits = await visibility(tile, directions);
+            await cache
+              .put(`${geometryHash}:${engine.name}:${group.pose.key}${suffix}`, bits)
+              .catch(() => {});
+          }
+          for (let i = 0; i < tile.length; i++)
+            for (let j = 0; j < directions.length; j++)
+              if (transmitting) {
+                const n = bits[i * directions.length + j];
+                energy[start + i] += (group.sky[j] * weights[0][n]) / samplesPerCell;
+                dli[start + i] += (group.par[j] * weights[1][n]) / samplesPerCell;
+              } else if (bits[i * words + (j >>> 5)] & (1 << (j & 31))) {
+                energy[start + i] += group.sky[j] / samplesPerCell;
+                dli[start + i] += group.par[j] / samplesPerCell;
+              }
         }
-        const words = Math.ceil(source.patches.length / 32);
-        for (let i = 0; i < grid.points.length; i++)
-          for (let j = 0; j < source.patches.length; j++)
-            if (transmitting) {
-              const n = bits[i * source.patches.length + j];
-              energy[i] += (group.sky[j] * weights[0][n]) / samplesPerCell;
-              dli[i] += (group.par[j] * weights[1][n]) / samplesPerCell;
-            } else if (bits[i * words + (j >>> 5)] & (1 << (j & 31))) {
-              energy[i] += group.sky[j] / samplesPerCell;
-              dli[i] += group.par[j] / samplesPerCell;
-            }
         done += source.patches.length;
         onProgress({
           progress: done / total,
@@ -333,6 +392,7 @@ export async function calculateDay(
       estimated: !source.measured,
       backend,
       version: VERSION,
+      modelRevision: MODEL_REVISION,
       createdAt: new Date().toISOString(),
       seconds: (performance.now() - start) / 1000,
       cached,
@@ -343,7 +403,6 @@ export async function calculateDay(
       meanDli: gridMean(cells, grid, 'dli'),
     };
   } finally {
-    engine.dispose();
-    currentGeometry?.dispose();
+    if (!sharedSession) session.dispose();
   }
 }

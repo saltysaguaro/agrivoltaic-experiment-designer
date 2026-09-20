@@ -1,3 +1,4 @@
+export const MAX_RECEIVERS = 20000;
 // Pure grid math shared by solver geometry, field editing, hit testing and exports.
 // x is along PV rows; y is across row centre lines. Bounds retain the exact footprint.
 export function cellSampleOffsets(count = 1) {
@@ -32,7 +33,16 @@ export function receiverSpec(study, dimensions) {
     height = d.footprintY;
   if (s.analysis.gridAlignment !== 'row-centres') {
     const ny = Math.ceil(height / s.analysis.resolution);
-    return { nx, ny, dx: width / nx, dy: height / ny, width, height, azimuth: s.array.azimuth };
+    return {
+      nx,
+      ny,
+      dx: width / nx,
+      dy: height / ny,
+      width,
+      height,
+      azimuth: s.array.azimuth,
+      ...(!(nx * ny <= MAX_RECEIVERS) ? { exceeded: true } : {}),
+    };
   }
   const centres = Array.from(
     { length: s.array.rows },
@@ -41,17 +51,29 @@ export function receiverSpec(study, dimensions) {
   const count = s.analysis.cellsPerRow ?? 9,
     spacing = s.rowPair.pitch / count;
   const anchors = [-height / 2, ...centres, height / 2];
-  const yEdges = [anchors[0]];
-  for (let i = 0; i < anchors.length - 1; i++) {
-    const start = anchors[i],
-      end = anchors[i + 1];
-    const n =
+  const segments = anchors.slice(0, -1).map((start, i) => ({
+    start,
+    end: anchors[i + 1],
+    n:
       i === 0 || i === anchors.length - 2
-        ? Math.max(1, Math.ceil((end - start) / spacing - 1e-10))
-        : count;
+        ? Math.max(1, Math.ceil((anchors[i + 1] - start) / spacing - 1e-10))
+        : count,
+  }));
+  const ny = segments.reduce((n, segment) => n + segment.n, 0);
+  if (!(nx * ny <= MAX_RECEIVERS))
+    return {
+      nx,
+      ny,
+      dx: width / nx,
+      dy: height / ny,
+      width,
+      height,
+      azimuth: s.array.azimuth,
+      exceeded: true,
+    };
+  const yEdges = [anchors[0]];
+  for (const { start, end, n } of segments)
     for (let j = 1; j <= n; j++) yEdges.push(start + ((end - start) * j) / n);
-  }
-  const ny = yEdges.length - 1;
   return {
     nx,
     ny,
@@ -98,10 +120,15 @@ export function maxRows(g, row, limit = 100) {
   );
 }
 export function gridSpacingLabel(g, digits = 3) {
+  if (g.exceeded) return 'Grid exceeds 20,000 receivers; reduce dimensions or increase spacing';
   if (!g.yEdges) return `${g.dx.toFixed(digits)} × ${g.dy.toFixed(digits)} m`;
-  const sizes = Array.from({ length: g.ny }, (_, i) => rowHeight(g, i));
-  const min = Math.min(...sizes),
-    max = Math.max(...sizes);
+  let min = Infinity,
+    max = -Infinity;
+  for (let i = 0; i < g.ny; i++) {
+    const size = rowHeight(g, i);
+    min = Math.min(min, size);
+    max = Math.max(max, size);
+  }
   return `${g.dx.toFixed(digits)} m along rows × ${min.toFixed(digits) === max.toFixed(digits) ? min.toFixed(digits) : `${min.toFixed(digits)}–${max.toFixed(digits)}`} m across rows`;
 }
 export function gridMean(cells, g, key) {

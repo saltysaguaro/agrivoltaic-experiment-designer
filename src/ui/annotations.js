@@ -65,7 +65,9 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
   const surface = (x, y, row = cy) => p(x, row + y * Math.cos(tilt), h + y * Math.sin(tilt));
   const projectedEdge =
     (g.width * Math.cos(tilt) + s.module.thickness * Math.abs(Math.sin(tilt))) / 2;
-  const first = group.children.find((o) => o.userData.kind === 'module');
+  const first = (group.userData.references || group.children).find(
+    (o) => o.userData.kind === 'module',
+  );
   const modulePoint = (x, y, z) => new Vector3(x, y, z).applyMatrix4(first.matrixWorld);
   const ids = focus
     ? [focus.id]
@@ -129,7 +131,9 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
           'This view has no adjacent modules within a table. The module gap is shown when the table contains multiple modules.';
     } else if (id === 'racking.height') dimension(p(0, cy), p(0, cy, h));
     else if (id === 'racking.postSize') {
-      const post = group.children.find((o) => o.userData.kind === 'post');
+      const post = (group.userData.references || group.children).find(
+        (o) => o.userData.kind === 'post',
+      );
       if (post)
         dimension(
           post.position.clone().add(new Vector3(-s.racking.postSize / 2, 0, 0)),

@@ -1,5 +1,5 @@
 import { cellLocal, gridMean } from '../domain/receiver-grid.js';
-import { resultWeatherHash } from '../irradiance/period-engine.js';
+import { resultWeatherHash, sourceReferences } from '../irradiance/period-engine.js';
 import { isPeriod, analysisPeriod, periodDates } from '../domain/period.js';
 import { analysisKey, sha256 } from '../domain/study.js';
 import { receiverGridSpec, localToWorld } from '../domain/geometry.js';
@@ -17,6 +17,15 @@ export async function validateResult(s, r) {
   const weatherHash = await resultWeatherHash(s);
   if (r.weatherInputHash !== weatherHash || (s.weather.hash && r.weatherHash !== s.weather.hash))
     throw Error('Saved light results do not match the retained weather.');
+  const references = sourceReferences(s);
+  const sourceWh = references.reduce((n, d) => n + d.openWh, 0),
+    sourceDli = references.reduce((n, d) => n + d.openDli, 0) / references.length;
+  if (
+    !close(r.openWh, sourceWh) ||
+    !close(r.openDli, sourceDli) ||
+    r.estimated !== references.some((d) => d.estimated)
+  )
+    throw Error('Saved open-field totals or PAR provenance do not match retained weather.');
   const g = receiverGridSpec(s),
     count = g.nx * g.ny;
   if (count > 20000 || !Array.isArray(r.cells) || r.cells.length !== count)
@@ -67,6 +76,11 @@ export async function validateResult(s, r) {
         c[key] > (['shade', 'sunlight'].includes(key) ? 100 : 1e9)
       )
         throw Error('Invalid light value in receiver ' + (i + 1));
+    if (
+      c.wh > r.openWh + 1e-7 * Math.max(1, r.openWh) ||
+      c.dli > r.openDli + 1e-7 * Math.max(1, r.openDli)
+    )
+      throw Error('Saved receiver light exceeds its open-field reference.');
     const fraction = Math.max(0, Math.min(100, (100 * c.wh) / r.openWh));
     if (!close(c.sunlight, fraction) || !close(c.shade, 100 - fraction))
       throw Error('Inconsistent sunlight values in receiver ' + (i + 1));
@@ -90,6 +104,9 @@ export async function validateResult(s, r) {
     for (const [i, d] of r.daily.entries()) {
       if (
         d.date !== dates[i] ||
+        !close(d.openWh, references[i].openWh) ||
+        !close(d.openDli, references[i].openDli) ||
+        d.meanDli > d.openDli + 1e-7 * Math.max(1, d.openDli) ||
         !['openWh', 'openDli', 'meanWh', 'meanDli'].every(
           (k) => Number.isFinite(d[k]) && d[k] >= 0,
         ) ||

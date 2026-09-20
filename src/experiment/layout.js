@@ -19,41 +19,51 @@ export function nearestCell(result, x, y) {
     (c.x - x) ** 2 + (c.y - y) ** 2 < (a.x - x) ** 2 + (a.y - y) ** 2 ? c : a,
   );
 }
+const statsCache = new WeakMap();
 export function plotStats(result, plot) {
   if (!result) return null;
-  const samples = result.cells.map((c, i) => ({
-    ...c,
-    weight: (() => {
-      if (!result.grid) return 1;
-      const g = result.grid,
-        row = Math.floor(i / g.nx);
-      if (plot.gridMode !== 'exact' || !plot.grid) return rowHeight(g, row);
-      const column = i % g.nx,
-        p = plot.grid;
-      const across = Math.max(
-        0,
-        Math.min(rowEdge(g, row + 1), rowEdge(g, p.row + p.rows)) -
-          Math.max(rowEdge(g, row), rowEdge(g, p.row)),
-      );
-      const along = Math.max(
-        0,
-        Math.min(column + 1, p.column + p.columns) - Math.max(column, p.column),
-      );
-      return along * across;
-    })(),
-  }));
-  const cells = samples.filter((c, i) => {
-    if (plot.gridMode === 'exact' && plot.grid && result.grid) return c.weight > 1e-12;
-    if (plot.grid && result.grid) {
-      const column = i % result.grid.nx,
-        row = Math.floor(i / result.grid.nx),
-        g = plot.grid;
-      return (
-        column >= g.column && column < g.column + g.columns && row >= g.row && row < g.row + g.rows
-      );
+  const key = JSON.stringify([plot.gridMode, plot.grid, plot.x, plot.y, plot.width, plot.length]);
+  if (!statsCache.has(result)) statsCache.set(result, new Map());
+  const cache = statsCache.get(result);
+  if (cache.has(key)) return cache.get(key);
+  const cells = [],
+    g = result.grid,
+    p = plot.grid;
+  const append = (i, weight) => {
+    if (weight > 1e-12) cells.push({ ...result.cells[i], weight });
+  };
+  if (g && p) {
+    const exact = plot.gridMode === 'exact';
+    for (
+      let row = Math.max(0, Math.floor(p.row));
+      row < Math.min(g.ny, Math.ceil(p.row + p.rows));
+      row++
+    ) {
+      const across = exact
+        ? Math.max(
+            0,
+            Math.min(rowEdge(g, row + 1), rowEdge(g, p.row + p.rows)) -
+              Math.max(rowEdge(g, row), rowEdge(g, p.row)),
+          )
+        : rowHeight(g, row);
+      for (
+        let column = Math.max(0, Math.floor(p.column));
+        column < Math.min(g.nx, Math.ceil(p.column + p.columns));
+        column++
+      )
+        append(
+          row * g.nx + column,
+          across *
+            (exact
+              ? Math.max(0, Math.min(column + 1, p.column + p.columns) - Math.max(column, p.column))
+              : 1),
+        );
     }
-    return Math.abs(c.x - plot.x) <= plot.width / 2 && Math.abs(c.y - plot.y) <= plot.length / 2;
-  });
+  } else
+    result.cells.forEach((c, i) => {
+      if (Math.abs(c.x - plot.x) <= plot.width / 2 && Math.abs(c.y - plot.y) <= plot.length / 2)
+        append(i, g ? rowHeight(g, Math.floor(i / g.nx)) : 1);
+    });
   if (!cells.length) return null;
   const ordered = [...cells].sort((a, b) => a.dli - b.dli);
   const weight = cells.reduce((n, c) => n + c.weight, 0);
@@ -71,7 +81,7 @@ export function plotStats(result, plot) {
       break;
     }
   }
-  return {
+  const stats = {
     count: cells.length,
     mean,
     median,
@@ -81,6 +91,9 @@ export function plotStats(result, plot) {
     sunlight: meanOf((c) => c.sunlight ?? 100 - c.shade),
     shade: meanOf((c) => c.shade),
   };
+  cache.set(key, stats);
+  if (cache.size > 500) cache.delete(cache.keys().next().value);
+  return stats;
 }
 export function percentileSensors(s, result) {
   if (!result) return [];

@@ -16,7 +16,10 @@ import { fieldLabelItems, layoutFieldLabels, labelColors } from '../ui/field-lab
 import { engineeringAnnotations } from '../ui/annotations.js';
 import { annotationSvg, zoneSvg, zonePatternDefs } from '../ui/annotation-svg.js';
 export function heatColor(value, max = 100) {
-  const t = Math.max(0, Math.min(1, value / max));
+  const t =
+    Number.isFinite(value) && Number.isFinite(max) && max > 0
+      ? Math.max(0, Math.min(1, value / max))
+      : 0;
   const stops = [
     [37, 78, 113],
     [57, 147, 146],
@@ -35,6 +38,42 @@ export function heatColor(value, max = 100) {
       )
       .join('')
   );
+}
+export function createFigureContext() {
+  const groups = new Map();
+  return {
+    get(s, scope) {
+      const normalizedScope = [
+        'array',
+        'environment',
+        'irradiance',
+        'sensors',
+        'crops',
+        'report',
+      ].includes(scope)
+        ? 'array'
+        : scope;
+      const key = JSON.stringify([
+        s.module,
+        s.racking,
+        s.table,
+        s.row,
+        s.rowPair.pitch,
+        s.array,
+        normalizedScope,
+      ]);
+      if (!groups.has(key)) {
+        const group = buildGeometry(s, normalizedScope, undefined, { textures: false });
+        group.userData.hardwarePoints = hardwarePoints(group);
+        groups.set(key, group);
+      }
+      return groups.get(key);
+    },
+    dispose() {
+      groups.forEach(disposeGroup);
+      groups.clear();
+    },
+  };
 }
 export function figureSvg(
   s,
@@ -55,7 +94,12 @@ export function figureSvg(
   const baseLayers = options.layers || (metric !== 'none' ? irradianceLayers : designLayers);
   const layers = options.control ? controlLayers(baseLayers) : baseLayers;
   const opacity = options.panelOpacity ?? (metric !== 'none' || scope === 'irradiance' ? 0.2 : 1);
-  const group = buildGeometry(s, scope),
+  if (receiverGridSpec(s).exceeded)
+    throw Error(
+      'This grid exceeds 20,000 receivers. Reduce dimensions or increase spacing before exporting figures.',
+    );
+  const group =
+      options.context?.get(s, scope) || buildGeometry(s, scope, undefined, { textures: false }),
     meshes = options.control ? [] : group.children.filter((o) => o.isMesh);
   const ground = scope !== 'module' && showGrid ? groundGrid(s, group.userData) : null;
   const arrayScope = ['array', 'environment', 'irradiance', 'sensors', 'crops', 'report'].includes(
@@ -106,7 +150,7 @@ export function figureSvg(
   // Projected data no longer needs Three.js resources, even if later export fails.
   const rowOffsets = group.userData.rowOffsets;
   const groupLength = group.userData.length;
-  disposeGroup(group);
+  if (!options.context) disposeGroup(group);
   function hull(points) {
     const p = [...new Map(points.map((p) => [p.join(','), p])).values()].sort(
       (a, b) => a[0] - b[0] || a[1] - b[1],

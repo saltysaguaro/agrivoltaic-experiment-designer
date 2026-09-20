@@ -5,12 +5,13 @@ const report = {
   createdAt: new Date().toISOString(),
   version: VERSION,
   scope:
-    'CPU sensitivity on small fixed and tracking arrays at two latitudes and two seasons. Each sweep changes only one setting. Differences describe convergence; they are not field accuracy or universal acceptance tolerances.',
+    'CPU sensitivity on small fixed and tracking arrays at three latitudes across both hemispheres and two seasons. Each sweep changes only one setting. Differences describe convergence; they are not field accuracy or universal acceptance tolerances.',
   cases: [],
 };
 for (const site of [
   { name: 'Tucson', latitude: 32.22, longitude: -110.97, utcOffset: -7 },
   { name: 'Wageningen', latitude: 51.97, longitude: 5.67, utcOffset: 1 },
+  { name: 'Sydney', latitude: -33.87, longitude: 151.21, utcOffset: 10 },
 ])
   for (const date of ['2026-06-21', '2026-12-21'])
     for (const type of ['fixed', 'single-axis', 'dual-axis']) {
