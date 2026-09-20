@@ -6,6 +6,11 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     versioning-strategy: increase
+    groups:
+      react-runtime:
+        patterns: [react, react-dom]
+      vite-toolchain:
+        patterns: [vite, esbuild]
   - package-ecosystem: github-actions
     directory: /
     schedule:
