@@ -1,3 +1,4 @@
+import { dliZones, DLI_ZONE_NOTE } from '../domain/dli-zones.js';
 import { rowHeight, gridSpacingLabel } from '../domain/receiver-grid.js';
 import { controlLayers } from '../experiment/control-field.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
@@ -38,6 +39,10 @@ export function heatColor(value, max = 100) {
       )
       .join('')
   );
+}
+export function dliZoneColor(zoning, id) {
+  if (!id || !zoning?.count) return '#b9c4c4';
+  return heatColor(zoning.count === 1 ? 0.5 : (id - 1) / (zoning.count - 1), 1);
 }
 export function createFigureContext() {
   const groups = new Map();
@@ -86,6 +91,7 @@ export function figureSvg(
 ) {
   // A stale/absent result must export a geometry figure, never a labeled light map.
   if (!result) metric = 'none';
+  const zoning = metric === 'zoned-dli' ? dliZones(result, s.analysis.dliZoneCount) : null;
   const noCallouts =
     options.control ||
     ['irradiance', 'report'].includes(scope) ||
@@ -227,10 +233,12 @@ export function figureSvg(
       );
       content += poly(
         corners,
-        heatColor(
-          metric === 'sunlight' ? c.sunlight : c.dli,
-          metric === 'sunlight' ? 100 : result.openDli,
-        ),
+        zoning
+          ? dliZoneColor(zoning, zoning.cellZones[cellIndex])
+          : heatColor(
+              metric === 'sunlight' ? c.sunlight : c.dli,
+              metric === 'sunlight' ? 100 : result.openDli,
+            ),
         'none',
       );
     }
@@ -327,13 +335,19 @@ export function figureSvg(
     });
   const bar = Math.max(0.1, 10 ** Math.floor(Math.log10((xmax - xmin) / 5 || 1)));
   let legend = '';
-  if (metric !== 'none' && result) {
+  if (zoning) {
+    const width = 250 / (zoning.count || 1);
+    zoning.zones.forEach((z, i) => {
+      legend += `<rect x="${650 + i * width}" y="535" width="${width}" height="10" fill="${dliZoneColor(zoning, z.id)}"/><text x="${650 + (i + 0.5) * width}" y="560" text-anchor="middle" font-size="10">Z${z.id}</text>`;
+    });
+  } else if (metric !== 'none' && result) {
     for (let i = 0; i < 100; i++)
       legend += `<rect x="${650 + i * 2.5}" y="535" width="2.6" height="10" fill="${heatColor((i / 99) * 100)}"/>`;
     legend += `<text x="650" y="565" font-size="12">0</text><text x="900" y="565" text-anchor="end" font-size="12">${metric === 'sunlight' ? '100% sunlight' : result.openDli.toFixed(1) + ' mol m⁻² d⁻¹'}</text>`;
   }
-  const baseTitle =
-    metric === 'sunlight'
+  const baseTitle = zoning
+    ? `Zoned DLI · ${dliLabel(result)}`
+    : metric === 'sunlight'
       ? isPeriod(s)
         ? 'Period relative sunlight'
         : 'Daily relative sunlight'
@@ -430,7 +444,22 @@ export function figureSvg(
         ]
       : fullFooter),
   ];
-  const footerStart = zones.length ? 664 : 615;
+  const legendStart = zones.length ? 664 : 615;
+  const dliLegend = zoning
+    ? zoning.zones
+        .map(
+          (z, i) =>
+            `<rect x="40" y="${legendStart + i * 17 - 9}" width="14" height="11" fill="${dliZoneColor(zoning, z.id)}"/><text x="62" y="${legendStart + i * 17}" font-size="11">Z${z.id}: ${z.min.toFixed(3)}–${z.max.toFixed(3)} mol m⁻² d⁻¹ · mean ${z.mean.toFixed(3)} · ${z.areaPercent.toFixed(1)}% of receiver area</text>`,
+        )
+        .join('')
+    : '';
+  if (zoning)
+    footer.unshift(
+      ...wrap(
+        `${zoning.method}; ${zoning.count} of ${zoning.requestedCount} requested zones. ${DLI_ZONE_NOTE}`,
+      ),
+    );
+  const footerStart = legendStart + (zoning ? zoning.count * 17 + 10 : 0);
   const height = footerStart + 10 + footer.length * 13;
   const zoneLegend = zones.length
     ? Object.entries(zoneStyles)
@@ -449,5 +478,5 @@ export function figureSvg(
         `<text x="40" y="${footerStart + i * 13}" font-size="10">${escapeXml(line)}</text>`,
     )
     .join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="${height}" viewBox="0 0 1000 ${height}" role="img" aria-label="${title}"><metadata>${escapeXml(JSON.stringify(provenance))}</metadata>${zonePatternDefs()}<rect width="1000" height="${height}" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + periodLabel(s) : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : arrayScope ? ` · Receiver cells ${gridSpacingLabel(receivers)}` : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}${zoneLegend}${footerSvg}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="${height}" viewBox="0 0 1000 ${height}" role="img" aria-label="${title}"><metadata>${escapeXml(JSON.stringify(provenance))}</metadata>${zonePatternDefs()}<rect width="1000" height="${height}" fill="#fbfcf9"/><g font-family="Arial,sans-serif" fill="#243d3a"><text x="40" y="36" font-size="19" font-weight="bold">${escapeXml(title)}</text><text x="40" y="57" font-size="12">${escapeXml(s.metadata.title)}${result ? ' · ' + periodLabel(s) : ''}</text>${content}<path d="M 60 530 v 7 h ${bar * scale} v -7" fill="none" stroke="#243d3a" stroke-width="2"/><text x="60" y="558" font-size="12">${bar} m${view === 'oblique' ? ' (projection plane)' : ''}</text>${view === 'plan' ? '<path d="M 935 125 v -40 l -5 12 m 5 -12 l 5 12" fill="none" stroke="#243d3a" stroke-width="2"/><text x="935" y="75" text-anchor="middle" font-size="14">N</text>' : ''}<text x="40" y="583" font-size="11">Coordinates: east / north / up · dimensions in metres · ${escapeXml(view)} projection${ground ? ` · Ground z = 0 m${view === 'profile' ? '' : arrayScope ? ` · Receiver cells ${gridSpacingLabel(receivers)}` : ` · Grid ${ground.spacing} m`}` : ''}</text>${legend}${zoneLegend}${dliLegend}${footerSvg}</g></svg>`;
 }

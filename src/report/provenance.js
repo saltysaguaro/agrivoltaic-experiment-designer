@@ -1,3 +1,4 @@
+import { dliZones, dliZoneSummary } from '../domain/dli-zones.js';
 import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
 import { rackingOrientation } from '../domain/racking-orientation.js';
 import { cellSamplingDescription } from '../domain/receiver-grid.js';
@@ -43,6 +44,7 @@ export function provenanceRecord(s, r, { control = false } = {}) {
         : 'Unavailable (synthetic or legacy)',
     weatherAttribution: s.weather.provenance?.attribution || 'User-supplied or synthetic',
     weatherUrl: s.weather.provenance?.url || 'Local',
+    dliZoning: dliZoneSummary(dliZones(r, s.analysis.dliZoneCount)),
     dliBasis: isPeriod(s)
       ? 'Arithmetic mean daily DLI over every included day; irradiation is a period total; sunlight is the ratio of period energy totals.'
       : 'Single-day irradiation and DLI.',

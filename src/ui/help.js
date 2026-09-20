@@ -86,6 +86,8 @@ export const inputHelp = {
     'Number of cells across each PV row-centre gap. The default is nine. More cells resolve variation across the rows at greater calculation cost. This is across the PV rows, not along individual modules.',
   'analysis.resolution':
     'Nominal spacing along PV rows when row alignment is enabled; spacing in both directions in uniform mode. Smaller spacing gives finer maps but takes more time and memory. Samples per grid cell controls averaging within each tile independently. These points are not physical instruments.',
+  'analysis.dliZoneCount':
+    'Choose 1–10 light classes. Area-weighted natural breaks group similar daily DLI (mean daily for a season or year), using a fast 256-bin histogram. Fewer zones may be available for uniform or nearly uniform values. These are exploratory classes, not statistical or crop-response thresholds. The full receiver footprint, including its buffer, is classified. This display setting does not rerun irradiance.',
   'analysis.samplesPerCell':
     'Choose 1–9 sample locations per grid cell. The default 1 samples its centre. Higher counts average equally weighted points at the centres of equal-area subrectangles; 4 uses 2 × 2 and 9 uses 3 × 3. All samples use the receiver height. Ray-tracing work grows roughly with the count. Small shadows may still be missed. Cell boundaries and field layouts stay fixed.',
   'analysis.receiverHeight':

@@ -1,3 +1,4 @@
+import { DEFAULT_DLI_ZONES, MAX_DLI_ZONES } from './dli-zones.js';
 import { receiverSpec } from './receiver-grid.js';
 import { defaultRackingAzimuth } from './racking-orientation.js';
 import { z } from 'zod';
@@ -158,6 +159,7 @@ export const studySchema = z
         }, 'Use a valid calendar date'),
       resolution: num(0.25, 5),
       samplesPerCell: count(1, 9).default(1),
+      dliZoneCount: count(1, MAX_DLI_ZONES).default(DEFAULT_DLI_ZONES),
       gridAlignment: z.enum(['spacing', 'row-centres']).default('spacing'),
       cellsPerRow: count(1, 99).default(9),
       receiverHeight: num(0, 5),
@@ -306,6 +308,8 @@ export function analysisKey(s) {
   // One centre sample preserves keys from projects created before this option.
   const analysis = {
     ...s.analysis,
+    // Zoning is display-only and must preserve saved numerical result keys.
+    dliZoneCount: undefined,
     samplesPerCell: (s.analysis.samplesPerCell ?? 1) === 1 ? undefined : s.analysis.samplesPerCell,
   };
   return JSON.stringify([

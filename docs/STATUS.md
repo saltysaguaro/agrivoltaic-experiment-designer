@@ -1,5 +1,13 @@
 # Implementation status
 
+## Zoned DLI (September 20)
+
+- Added **Zoned DLI** beside continuous sunlight/DLI maps, with **Number of DLI zones** in Irradiance (1–10, default 5). Area-weighted natural breaks on a bounded 256-bucket histogram classifies daily or period-mean daily DLI without rerunning irradiance or invalidating saved results. Uniform maps use one class; equal values stay together. Entire receiver footprint and buffer are included.
+- Discrete blue-to-yellow colors, cell hover/inspection zone IDs, observed ranges, weighted means and area percentages support exploratory sensor/bed placement. The UI explains that adaptive classes are not crop-response thresholds or statistical significance; disconnected cells can share a class and colors are not comparable across independently classified maps.
+- SVG/PNG, receiver CSV, provenance, project packages and methods reports preserve classifications and settings. Added a zoned plan figure to packages/reports and a per-receiver CSV zone column. See [DLI zoning methods and interpretation](DLI-ZONING.md).
+- Verification: **146 tests pass**, production build and changed-file formatting pass; all **480 archived files are unchanged**. Native Radiance comparison rerun: **0 mismatches over 51,100 rays / 10 cases** (first-hit occlusion scope unchanged). A local 20,000-cell / 10-zone benchmark measured 2.61 ms median over 25 uncached runs.
+- Live in-app browser verification used actual WebGPU results: five-zone map, immediate change to three zones with the selected plan view retained, readable narrow-viewport legend, and one-zone uniform control field. Added an automated Playwright scenario, but its runner could not execute here because the test browser was missing and the vendor download failed certificate validation; browser UI verification used the in-app browser instead. No new biological/field validation or production deployment is claimed.
+
 ## Review fixes and efficiency work (version 0.5.0, September 20)
 
 - All eight reviewed defects are repaired. Added safe worker imports, strict weather timestamps, hemisphere-aware imported defaults, patched Vite, finite zero-DLI rendering, early grid budgets, live material refresh and physically bounded saved results/checkpoints.

@@ -699,6 +699,16 @@ export default function Controls({
                 max: 5,
               })}
             </div>
+            {field('analysis', 'dliZoneCount', 'Number of DLI zones', null, null, {
+              min: 1,
+              max: 10,
+              step: 1,
+              integer: true,
+            })}
+            <p className="control-note">
+              Start with 3–5 zones. Changing this count updates Zoned DLI immediately after
+              calculation, without recalculating light. Uniform light produces one zone.
+            </p>
             {field('analysis', 'patches', 'Diffuse sky resolution', null, [
               { value: 145, label: 'Preview · 145 patches' },
               { value: 577, label: 'Standard · 577 patches' },

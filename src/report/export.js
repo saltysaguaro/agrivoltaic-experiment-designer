@@ -1,3 +1,4 @@
+import { dliZones, dliZoneSummary } from '../domain/dli-zones.js';
 import { gridSpacingLabel, cellSamplingDescription } from '../domain/receiver-grid.js';
 import { fieldStudy, controlResult, controlLayers } from '../experiment/control-field.js';
 import { designLayers } from '../ui/display-layers.js';
@@ -209,6 +210,7 @@ export function methodsRows(s, r) {
       'Numerical receivers',
       r ? `${r.cells.length}; actual cell ${gridSpacingLabel(r.grid, 4)}` : 'Not calculated',
     ],
+    ['Zoned DLI', dliZoneSummary(dliZones(r, s.analysis.dliZoneCount))],
     ['Weather mode', s.weather.mode],
     ['Weather', s.weather.name],
     [
@@ -407,6 +409,7 @@ function makeReportHtml(s, r, context) {
       ? [
           ['plan', 'sunlight'],
           ['plan', 'dli'],
+          ['plan', 'zoned-dli'],
         ]
       : []),
   ];
@@ -511,6 +514,7 @@ export function exportCsv(study, result) {
       'analysis_end',
       'dli_basis',
       'field',
+      'dli_zone',
     ],
   ];
   for (const [field, s, r] of [
@@ -520,7 +524,8 @@ export function exportCsv(study, result) {
       : []),
   ]) {
     const start = rows.length;
-    for (const c of r?.cells || [])
+    const zoning = dliZones(r, s.analysis.dliZoneCount);
+    for (const [index, c] of (r?.cells || []).entries())
       rows.push([
         'receiver',
         '',
@@ -532,6 +537,11 @@ export function exportCsv(study, result) {
         c.dli,
         ...Array(16).fill(''),
         c.wh,
+        '',
+        '',
+        '',
+        field,
+        zoning.cellZones[index],
       ]);
     for (const v of s.experimentSensors) {
       const c = nearestCell(r, v.x, v.y);

@@ -1,3 +1,4 @@
+import DliZoneLegend from './ui/DliZoneLegend.jsx';
 import {
   fieldStudy,
   storeField,
@@ -1558,6 +1559,7 @@ function App() {
                   ['none', 'Geometry'],
                   ['sunlight', 'Relative sunlight'],
                   ['dli', dliLabel(validResult)],
+                  ['zoned-dli', 'Zoned DLI'],
                 ].map(([v, l]) => (
                   <button
                     key={v}
@@ -1572,7 +1574,10 @@ function App() {
                   </button>
                 ))}
               </div>
-              {validResult && metric !== 'none' && (
+              {validResult && metric === 'zoned-dli' && (
+                <DliZoneLegend result={activeResult} count={s.analysis.dliZoneCount} />
+              )}
+              {validResult && metric !== 'none' && metric !== 'zoned-dli' && (
                 <div className="heat-legend">
                   <span>0</span>
                   <i />

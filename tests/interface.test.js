@@ -282,6 +282,26 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.match(document.querySelector('.notice').textContent, /Daily light calculated/);
     assert.equal(document.querySelector('.model-disclosure'), null);
     assert.doesNotMatch(document.body.textContent, /GHI closure:|CPU occlusion matched Radiance/);
+    await click(byText('Zoned DLI'));
+    assert.equal(document.querySelectorAll('.dli-zone-items > div').length, 5);
+    const zoneInput = document.querySelector('[data-annotation="analysis.dliZoneCount"] input');
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+        zoneInput,
+        '3',
+      );
+      zoneInput.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    });
+    assert.equal(document.querySelectorAll('.dli-zone-items > div').length, 3);
+    assert.equal((await savedStudy()).analysis.dliZoneCount, 3);
+    assert.equal(byText('Relative sunlight').disabled, false);
+    assert.equal(calculations, 1, 'Zoning is recomputed without rerunning the light solver');
+    assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
+    assert.match(
+      document.querySelector('.svg-fallback svg').getAttribute('aria-label'),
+      /Zoned DLI/,
+    );
+    await click(byText('Relative sunlight'));
     const sampleInput = document.querySelector('[data-annotation="analysis.samplesPerCell"] input');
     assert.equal(sampleInput.value, '1');
     assert.equal(sampleInput.min, '1');
