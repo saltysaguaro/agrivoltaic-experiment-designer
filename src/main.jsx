@@ -291,7 +291,7 @@ function App() {
     setWeatherPinned(false);
     weatherFlight.current?.controller.abort();
     setStudy((current) => ({
-      ...current,
+      ...updateStudyInput(current, 'site', 'latitude', location.latitude),
       site: {
         ...current.site,
         address: location.label,

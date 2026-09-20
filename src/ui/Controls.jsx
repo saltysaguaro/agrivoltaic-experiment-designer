@@ -1,5 +1,6 @@
 import { gridSpacingLabel } from '../domain/receiver-grid.js';
 import { moduleOptics } from '../domain/optics.js';
+import { defaultRackingAzimuth, rackingOrientation } from '../domain/racking-orientation.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import React, { useId, useState, useEffect, useRef, createContext, useContext } from 'react';
 import Info from './Info.jsx';
@@ -210,6 +211,7 @@ export default function Controls({
   removePlot,
 }) {
   const receiver = receiverGridSpec(s);
+  const orientation = rackingOrientation(s);
   const optics = moduleOptics(s.module);
   const d = dimensions(s),
     minimum = rackingMinimums(s);
@@ -345,6 +347,15 @@ export default function Controls({
               { value: 'vertical', label: 'Vertical bifacial' },
               { value: 'pergola', label: 'Raised / pergola' },
             ])}
+            <p className="control-note">{orientation.description} Adjust azimuth in Full array.</p>
+            <button
+              className="text-button"
+              onClick={() =>
+                set('array', 'azimuth', defaultRackingAzimuth(s.racking.type, s.site.latitude))
+              }
+            >
+              Apply default orientation
+            </button>
             {s.racking.type === 'pergola' &&
               field('racking', 'pergolaLayout', 'Pergola layout', null, [
                 { value: 'aligned', label: 'Aligned table rows' },
@@ -470,11 +481,12 @@ export default function Controls({
         {step === 4 && (
           <>
             {field('array', 'rows', 'Number of rows', null, null, { min: 1, max: 24, step: 1 })}
-            {field('array', 'azimuth', 'Module-facing azimuth', '°', null, {
+            {field('array', 'azimuth', orientation.label, '°', null, {
               min: 0,
               max: 359.9,
               step: 1,
-              hint: 'Clockwise from north. 180° faces south; rows run east–west.',
+              hint: orientation.description,
+              help: orientation.description,
             })}
             {field('landUse', 'perimeterBuffer', 'Perimeter no-crop buffer', 'm', null, {
               min: 0,

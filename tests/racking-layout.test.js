@@ -16,6 +16,7 @@ import {
   worldToLocal,
   simulationGeometry,
   receiverGridSpec,
+  axes,
 } from '../src/domain/geometry.js';
 import { CpuBvhIrradianceEngine } from '../src/irradiance/cpu.js';
 import { figureSvg } from '../src/report/figures.js';
@@ -100,11 +101,11 @@ test('vertical scientific geometry leaves the middle module gap open and blocks 
     await cpu.initializeGeometry(geometry);
     const visibility = await cpu.visibility(
       [
-        { x: modules[0].position.x, y: -5, z: s.racking.height },
-        { x: posts[1].position.x, y: -5, z: s.racking.height },
-        { x: modules[0].position.x, y: -5, z: modules[0].position.z },
+        modules[0].position.clone().setZ(s.racking.height).addScaledVector(axes(s).v, -5),
+        posts[1].position.clone().setZ(s.racking.height).addScaledVector(axes(s).v, -5),
+        modules[0].position.clone().addScaledVector(axes(s).v, -5),
       ],
-      [new Vector3(0, 1, 0)],
+      [axes(s).v],
     );
     assert.deepEqual([...visibility], [1, 0, 0]);
   } finally {

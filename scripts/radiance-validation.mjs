@@ -4,6 +4,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { Vector3 } from 'three';
 import { defaultStudy } from '../src/domain/study.js';
+import { defaultRackingAzimuth } from '../src/domain/racking-orientation.js';
 import {
   buildGeometry,
   simulationGeometry,
@@ -38,12 +39,13 @@ try {
     s.row.tables = 1;
     s.array.rows = 4;
     s.racking.type = type;
+    s.array.azimuth = defaultRackingAzimuth(type, s.site.latitude);
     if (name === 'pergola-checkerboard') {
       s.racking.pergolaLayout = 'checkerboard';
       s.module.gap = 1.5;
       s.row.tables = 2;
     }
-    const sun = new Vector3(0.3, name.includes('afternoon') ? 0.75 : -0.75, 0.55).normalize(),
+    const sun = new Vector3(name.includes('afternoon') ? -0.75 : 0.75, -0.3, 0.55).normalize(),
       group = buildGeometry(s, scope, getPose(s, sun)),
       geometry = simulationGeometry(group);
     disposeGroup(group);

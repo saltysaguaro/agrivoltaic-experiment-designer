@@ -1,4 +1,5 @@
 import { receiverSpec } from './receiver-grid.js';
+import { defaultRackingAzimuth } from './racking-orientation.js';
 import { z } from 'zod';
 import { moduleOptics } from './optics.js';
 import { analysisPeriod, periodKeys } from './period.js';
@@ -433,6 +434,14 @@ export function rackingMinimums(s) {
 }
 export function selectRacking(study, type, applyDefaults = true) {
   const s = structuredClone(study);
+  // Carry archetype defaults between rack types, retaining custom site bearings.
+  // Clearance refreshes and imported/saved studies must not rotate an array.
+  if (
+    applyDefaults &&
+    study.racking.type !== type &&
+    study.array.azimuth === defaultRackingAzimuth(study.racking.type, study.site.latitude)
+  )
+    s.array.azimuth = defaultRackingAzimuth(type, study.site.latitude);
   s.racking.type = type;
   if (applyDefaults && type === 'vertical') s.module.bifacial = true;
   const minimum = rackingMinimums(s);
@@ -444,8 +453,16 @@ export function selectRacking(study, type, applyDefaults = true) {
 // Later workflow steps can enlarge the assembly after its rack was selected.
 // Keep dependent clearances compatible; direct spacing edits remain user-controlled.
 export function updateStudyInput(study, section, key, value) {
+  if (section === 'racking' && key === 'type') return selectRacking(study, value);
   let s = structuredClone(study);
   s[section][key] = value;
+  if (
+    section === 'site' &&
+    key === 'latitude' &&
+    s.racking.type === 'fixed' &&
+    study.array.azimuth === defaultRackingAzimuth('fixed', study.site.latitude)
+  )
+    s.array.azimuth = defaultRackingAzimuth('fixed', value);
   if (section === 'analysis' && periodKeys.includes(key) && s.analysis.period !== 'day')
     s.analysis.date = analysisPeriod(s).start;
   if (section === 'rowPair' && key === 'cropSetback')
@@ -454,10 +471,10 @@ export function updateStudyInput(study, section, key, value) {
     s.landUse.underPanelWidth = s.rowPair.pitch - value;
   if (
     ['module', 'table'].includes(section) ||
-    (section === 'racking' && ['type', 'tilt', 'limit'].includes(key)) ||
+    (section === 'racking' && ['tilt', 'limit'].includes(key)) ||
     (section === 'analysis' && key === 'receiverHeight')
   )
-    s = selectRacking(s, s.racking.type, section === 'racking' && key === 'type');
+    s = selectRacking(s, s.racking.type, false);
   return synchronizeCropSpacing(s);
 }
 export function validationMessage(issue) {

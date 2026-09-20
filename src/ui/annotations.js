@@ -1,6 +1,7 @@
 import { cellLocal, gridSpacingLabel } from '../domain/receiver-grid.js';
 import { Vector3 } from 'three';
 import { dimensions, cropSpacing } from '../domain/study.js';
+import { rackingOrientation } from '../domain/racking-orientation.js';
 import { localToWorld, getPose, receiverGridSpec } from '../domain/geometry.js';
 import { landUseSettings } from '../domain/land-use.js';
 import { plotCorners } from '../experiment/grid-layout.js';
@@ -216,6 +217,8 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
         a.detail =
           'No group boundary in this view. This extra spacing appears once the array has more rows than one group.';
     } else if (id === 'array.azimuth') {
+      a.label = rackingOrientation(s).label;
+      a.detail = rackingOrientation(s).description;
       const radius = Math.min(g.length, g.span + g.width) * 0.35;
       a.kind = 'angle';
       a.points = [

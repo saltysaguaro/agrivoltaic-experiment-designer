@@ -166,9 +166,33 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await click(step('Racking'));
     const rack = document.querySelector('select');
     await act(async () => {
-      rack.value = 'dual-axis';
+      rack.value = 'single-axis';
       rack.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
     });
+    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).array.azimuth, 90);
+    assert.match(
+      document.querySelector('.control-content').textContent,
+      /panels track east–west around a north–south axis/,
+    );
+    await click(step('Full array'));
+    const bearing = document.querySelector('[data-annotation="array.azimuth"] input');
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+        bearing,
+        '180',
+      );
+      bearing.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    });
+    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).array.azimuth, 180);
+    await click(step('Racking'));
+    await click(byText('Apply default orientation'));
+    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).array.azimuth, 90);
+    await act(async () => {
+      const selection = document.querySelector('select');
+      selection.value = 'dual-axis';
+      selection.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    });
+    assert.equal(JSON.parse(localStorage.getItem('aed-study-v1')).array.azimuth, 90);
     assert.equal(document.querySelector('[role="alert"]'), null);
     await click(step('PV table & row'));
     const orientation = document.querySelector('select');

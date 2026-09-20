@@ -1,4 +1,5 @@
 import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
+import { rackingOrientation } from '../domain/racking-orientation.js';
 import { cellSamplingDescription } from '../domain/receiver-grid.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import { cropCatalogVersion, cropCatalogSource } from '../domain/crop-catalog.js';
@@ -10,6 +11,9 @@ export function provenanceRecord(s, r, { control = false } = {}) {
     software: `Agrivoltaic Experiment Designer ${r?.version || VERSION}`,
     schemaVersion: s.schemaVersion,
     racking: s.racking.type,
+    orientation: control
+      ? `Matching field layout; row bearing ${rackingOrientation(s).rowAzimuth}° clockwise from north. No modules.`
+      : rackingOrientation(s).description,
     ...(s.racking.type === 'pergola'
       ? {
           pergolaLayout:

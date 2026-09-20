@@ -3,6 +3,7 @@ import { fieldStudy, controlResult, controlLayers } from '../experiment/control-
 import { designLayers } from '../ui/display-layers.js';
 import { receiverGridSpec } from '../domain/geometry.js';
 import { moduleOptics, opticalAssumptions } from '../domain/optics.js';
+import { rackingOrientation } from '../domain/racking-orientation.js';
 import { isPeriod, periodLabel, analysisPeriod, dliLabel } from '../domain/period.js';
 import {
   landUseSettings,
@@ -140,7 +141,8 @@ export function methodsRows(s, r) {
       'Interrow cropping width · C',
       `${Number(spacing.croppingWidth.toFixed(4))} m; C + U = row pitch`,
     ],
-    ['Surface-facing azimuth', `${s.array.azimuth}° clockwise from north`],
+    [rackingOrientation(s).label, `${s.array.azimuth}° clockwise from north`],
+    ['Rack orientation', rackingOrientation(s).description],
     [
       'Site',
       `${s.site.latitude}°, ${s.site.longitude}°; ${s.site.elevation} m; UTC ${s.site.utcOffset}`,
@@ -298,7 +300,8 @@ export function publicationTables(s, r) {
         'Array',
         'Row pitch · P',
         'Groups / additional aisle',
-        'Surface-facing azimuth',
+        rackingOrientation(s).label,
+        'Rack orientation',
       ],
     ],
     [

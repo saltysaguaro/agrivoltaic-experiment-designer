@@ -31,7 +31,7 @@ export const inputHelp = {
   'racking.pergolaLayout':
     'Checkerboard shifts every other complete table row along the row by half the module-plus-gap spacing. Module centres line up with gap centres in neighboring rows. Supports move with their tables, and the array and sampling extents include the offset. Visible from the row-pair step onward.',
   'racking.type':
-    'How the modules are supported and move. Fixed racks stay tilted; single-axis trackers rotate around the row axis; dual-axis trackers also turn horizontally; vertical modules stand upright and default to bifacial construction; pergolas are horizontal. Selecting a system expands the starting clearances when needed; you can fine-tune them in later steps.',
+    'Fixed racks default to facing the equator: south in the northern hemisphere, north in the southern hemisphere. Both trackers default to north–south rows and an east-facing preview; single-axis panels track east–west, while dual-axis panels also turn horizontally to face the sun. Vertical bifacial racks default to east/west faces. Pergolas face upward. Changing systems updates the standard orientation and clearances; custom bearings are retained. Apply default orientation resets the bearing for the current system and hemisphere.',
   'racking.height':
     'Height above ground at the centre of the module assembly or tracker axis. This is not the height of the lowest edge.',
   'racking.tilt':
@@ -63,7 +63,7 @@ export const inputHelp = {
     'No-crop border outside the array design envelope: row length by row-axis span plus untilted assembly width. Default 3 m; set 0 for no border. Independent of the numerical receiver buffer. It is not a certification of tracker swept clearance.',
   'array.rows': 'Total number of parallel PV rows in the array.',
   'array.azimuth':
-    'Direction the front of the modules faces, measured clockwise from north: 0° north, 90° east, 180° south, 270° west. Rows run perpendicular to this direction.',
+    'Reference direction measured clockwise from north; rows run perpendicular to it. Fixed and vertical racks use the front-face direction. Single-axis trackers use the positive-tilt facing direction: 90° gives north–south rows and east–west tracking. Dual-axis trackers follow the sun independently of their preview direction. Pergolas face upward; this setting only rotates their layout.',
   'array.buffer':
     'Extra ground sampled outside the array on every side. Useful for edge effects and open-field reference locations.',
   'array.groupSize': 'Number of rows in each group before an additional access aisle is inserted.',
