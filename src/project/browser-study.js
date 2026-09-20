@@ -1,4 +1,4 @@
-import { defaultStudy, migrateStudy } from '../domain/study.js';
+import { migrateStudy } from '../domain/study.js';
 
 // Field layouts are session work. Only an explicit project export persists them.
 // Use this on both sides of autosave so older browser records cannot restore them.
@@ -10,19 +10,15 @@ export function withoutFieldLayout(study) {
     controlField: { version: 1, initialized: false, experimentSensors: [], crops: [] },
   };
 }
-const gridDefaultsVersion = 1;
+const gridDefaultsVersion = 2;
 
-// Browser preferences predate the row-aligned default. Upgrade them once without
-// changing explicit project-file imports, or later choices of a custom grid.
+// Apply the current automatic sizing to older browser preferences once. Explicit
+// project-file imports keep their original grid and saved numerical results.
 export function restoreBrowserStudy(record) {
   const study = migrateStudy(withoutFieldLayout(record));
-  if (
-    record.browserGridDefaultsVersion !== gridDefaultsVersion &&
-    study.analysis.gridAlignment === 'spacing'
-  ) {
-    const defaults = defaultStudy().analysis;
-    for (const key of ['gridAlignment', 'cellsPerRow', 'resolution'])
-      study.analysis[key] = defaults[key];
+  if (record.browserGridDefaultsVersion !== gridDefaultsVersion) {
+    study.analysis.gridAlignment = 'row-centres';
+    study.analysis.gridSizing = 'row-pitch';
   }
   return study;
 }
