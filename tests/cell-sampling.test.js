@@ -14,6 +14,7 @@ const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-7, `${a} != ${b}`);
 const cache = { get: async () => null, put: async () => {} };
 function fixture() {
   const s = defaultStudy();
+  s.racking.type = 'fixed';
   s.table.high = 1;
   s.table.wide = 2;
   s.row.tables = 1;

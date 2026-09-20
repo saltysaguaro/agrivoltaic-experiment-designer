@@ -2470,3 +2470,32 @@ progress {
   border-radius: 4px;
   font: inherit;
 }
+
+.dli-zone-legend {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: #42584d;
+}
+.dli-zone-legend p {
+  margin: 8px 0;
+}
+.dli-zone-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+}
+.dli-zone-items > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dli-zone-items i {
+  width: 18px;
+  height: 28px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.light-control,
+.metric-tabs {
+  flex-wrap: wrap;
+}

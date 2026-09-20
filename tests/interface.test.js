@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { JSDOM } from 'jsdom';
 import { build } from 'esbuild';
 import { act } from 'react';
-import { defaultStudy } from '../src/domain/study.js';
+import { defaultStudy, migrateStudy } from '../src/domain/study.js';
 import { projectDocument, readProject } from '../src/project/package.js';
 import { sampleWeather } from '../src/irradiance/solar.js';
 import { parseWeather } from '../src/irradiance/weather.js';
@@ -36,7 +36,14 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     if (!String(args[0]).includes('Error creating WebGL context')) originalError(...args);
   };
   const study = defaultStudy();
+  // This saved-project workflow starts from a compact fixed-array fixture.
+  study.racking.type = 'fixed';
+  study.table.high = 2;
+  study.row.tables = 2;
+  study.array.rows = 4;
+  study.array.azimuth = 180;
   study.table.orientation = 'landscape';
+  Object.assign(study, migrateStudy(study));
   study.weather.mode = 'sample';
   study.weather.name = 'Illustrative clear-sky day · synthetic';
   study.analysis.backend = 'cpu';
@@ -169,8 +176,8 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(document.querySelector('.brand svg'), null);
     assert.deepEqual((await savedStudy()).experimentSensors, []);
     assert.deepEqual((await savedStudy()).crops, []);
-    assert.deepEqual((await savedStudy()).analysis, study.analysis);
-    assert.equal((await savedStudy()).browserGridDefaultsVersion, 1);
+    assert.deepEqual((await savedStudy()).analysis, { ...study.analysis, resolution: 3 });
+    assert.equal((await savedStudy()).browserGridDefaultsVersion, 2);
     assert.equal(localStorage.getItem('fieldwork-study-v1'), null);
     assert.match(document.body.textContent, /Layout is session-only/);
     const help = document.querySelector('button[aria-label="About Length"]');
@@ -282,7 +289,32 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.match(document.querySelector('.notice').textContent, /Daily light calculated/);
     assert.equal(document.querySelector('.model-disclosure'), null);
     assert.doesNotMatch(document.body.textContent, /GHI closure:|CPU occlusion matched Radiance/);
+    await click(byText('Zoned DLI'));
+    assert.equal(document.querySelectorAll('.dli-zone-items > div').length, 5);
+    const zoneInput = document.querySelector('[data-annotation="analysis.dliZoneCount"] input');
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+        zoneInput,
+        '3',
+      );
+      zoneInput.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    });
+    assert.equal(document.querySelectorAll('.dli-zone-items > div').length, 3);
+    assert.equal((await savedStudy()).analysis.dliZoneCount, 3);
+    assert.equal(byText('Relative sunlight').disabled, false);
+    assert.equal(calculations, 1, 'Zoning is recomputed without rerunning the light solver');
+    assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
+    assert.match(
+      document.querySelector('.svg-fallback svg').getAttribute('aria-label'),
+      /Zoned DLI/,
+    );
+    await click(byText('Relative sunlight'));
     const sampleInput = document.querySelector('[data-annotation="analysis.samplesPerCell"] input');
+    const advanced = sampleInput.closest('details');
+    assert.equal(advanced.open, false);
+    assert.equal(advanced.querySelector('summary').textContent, 'Advanced settings');
+    await click(advanced.querySelector('summary'));
+    assert.equal(advanced.open, true);
     assert.equal(sampleInput.value, '1');
     assert.equal(sampleInput.min, '1');
     assert.equal(sampleInput.max, '9');
@@ -359,7 +391,8 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       null,
       'No placement toolbar in Irradiance',
     );
-    assert.ok(document.querySelector('[data-annotation="analysis.resolution"] input'));
+    assert.equal(document.querySelector('[data-annotation="analysis.resolution"] input'), null);
+    assert.ok(document.querySelector('[data-annotation="analysis.cellsPerRow"] input'));
     await click(step('Agrivoltaic'));
     assert.ok(document.querySelector('.compact-sidebar'));
     assert.equal(byText('C · Cropping area').getAttribute('aria-pressed'), 'true');
@@ -531,20 +564,15 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(document.querySelector('.field-tools'), null);
     assert.equal(document.querySelector('.compact-sidebar'), null);
     await click(byText('Apply coarse preview settings'));
-    assert.equal((await savedStudy()).analysis.resolution, 3);
+    assert.equal((await savedStudy()).analysis.cellsPerRow, 5);
+    assert.equal((await savedStudy()).analysis.gridSizing, 'row-pitch');
     await click(byText('Apply standard settings'));
-    assert.equal((await savedStudy()).analysis.resolution, 1);
+    assert.equal((await savedStudy()).analysis.gridSizing, 'row-pitch');
     assert.equal((await savedStudy()).analysis.gridAlignment, 'row-centres');
-    assert.equal((await savedStudy()).analysis.cellsPerRow, 9);
+    assert.equal((await savedStudy()).analysis.cellsPerRow, 15);
     assert.match(document.querySelector('.control-content').textContent, /Current grid:/);
     // Restore the original numerical inputs without running another calculation.
     await act(async () => {
-      const spacing = document.querySelector('[data-annotation="analysis.resolution"] input');
-      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
-        spacing,
-        '1',
-      );
-      spacing.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
       const patches = document.querySelector('[data-annotation="analysis.patches"] select');
       patches.value = '145';
       patches.dispatchEvent(new dom.window.Event('change', { bubbles: true }));

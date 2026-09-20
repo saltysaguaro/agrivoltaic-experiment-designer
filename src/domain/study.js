@@ -1,4 +1,5 @@
-import { receiverSpec } from './receiver-grid.js';
+import { DEFAULT_DLI_ZONES, MAX_DLI_ZONES } from './dli-zones.js';
+import { receiverSpec, DEFAULT_CELLS_PER_ROW, automaticGridSizing } from './receiver-grid.js';
 import { defaultRackingAzimuth } from './racking-orientation.js';
 import { z } from 'zod';
 import { moduleOptics } from './optics.js';
@@ -105,6 +106,7 @@ export const studySchema = z
     racking: z.object({
       type: z.enum(['fixed', 'single-axis', 'dual-axis', 'vertical', 'pergola']),
       tilt: num(0, 85),
+      pergolaTilt: num(0, 85).default(0),
       height: num(0.2, 25),
       limit: num(0, 85),
       backtracking: z.boolean(),
@@ -156,10 +158,13 @@ export const studySchema = z
           const t = Date.parse(v + 'T12:00:00Z');
           return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === v;
         }, 'Use a valid calendar date'),
-      resolution: num(0.25, 5),
+      // Retained for reproducible imports of independently sized legacy grids.
+      resolution: num(0.25, 5).default(1),
+      gridSizing: z.enum(['independent', 'row-pitch']).default('independent'),
       samplesPerCell: count(1, 9).default(1),
+      dliZoneCount: count(1, MAX_DLI_ZONES).default(DEFAULT_DLI_ZONES),
       gridAlignment: z.enum(['spacing', 'row-centres']).default('spacing'),
-      cellsPerRow: count(1, 99).default(9),
+      cellsPerRow: count(1, 99).default(DEFAULT_CELLS_PER_ROW),
       receiverHeight: num(0, 5),
       interval: z.union([z.literal(5), z.literal(10), z.literal(15)]),
       patches: z.union([z.literal(145), z.literal(577), z.literal(2305)]),
@@ -259,23 +264,24 @@ export const defaultStudy = () =>
     metadata: { title: 'Agrivoltaic field study', investigator: '', units: 'SI' },
     module: { length: 2.278, width: 1.134, thickness: 0.035, power: 550, gap: 0.02 },
     racking: {
-      type: 'fixed',
+      type: 'single-axis',
       tilt: 25,
       height: 2.8,
       limit: 60,
       backtracking: true,
       postSize: 0.12,
     },
-    table: { high: 2, wide: 6, orientation: 'portrait' },
-    row: { tables: 2, tableGap: 0.3 },
+    table: { high: 1, wide: 6, orientation: 'portrait' },
+    row: { tables: 5, tableGap: 0.3 },
     rowPair: { pitch: 8, cropSetback: 0, croppingWidth: 7 },
-    array: { rows: 4, azimuth: 180, buffer: 3, groupSize: 4, aisle: 3 },
+    array: { rows: 4, azimuth: 90, buffer: 3, groupSize: 4, aisle: 3 },
     site: { latitude: 32.22, longitude: -110.97, utcOffset: -7, elevation: 728 },
     analysis: {
       date: '2026-06-21',
       resolution: 1,
       gridAlignment: 'row-centres',
-      cellsPerRow: 9,
+      gridSizing: 'row-pitch',
+      cellsPerRow: DEFAULT_CELLS_PER_ROW,
       receiverHeight: 0.2,
       interval: 10,
       patches: 577,
@@ -306,13 +312,24 @@ export function analysisKey(s) {
   // One centre sample preserves keys from projects created before this option.
   const analysis = {
     ...s.analysis,
+    gridSizing: automaticGridSizing(s) ? 'row-pitch' : undefined,
+    resolution: automaticGridSizing(s) ? undefined : s.analysis.resolution,
+    // Zoning is display-only and must preserve saved numerical result keys.
+    dliZoneCount: undefined,
     samplesPerCell: (s.analysis.samplesPerCell ?? 1) === 1 ? undefined : s.analysis.samplesPerCell,
   };
   return JSON.stringify([
     VERSION,
     MODEL_REVISION,
     { ...s.module, power: undefined },
-    s.racking,
+    {
+      ...s.racking,
+      // Legacy pergolas were horizontal even when their unused tilt was nonzero.
+      pergolaTilt:
+        s.racking.type === 'pergola' && s.racking.pergolaTilt > 0
+          ? s.racking.pergolaTilt
+          : undefined,
+    },
     s.table,
     s.row,
     { pitch: s.rowPair.pitch },
@@ -337,7 +354,11 @@ export function dimensions(s) {
   const stagger = pergolaStagger(s, along);
   const length = rowLength + (s.array.rows > 1 ? stagger : 0);
   const tilt =
-    s.racking.type === 'vertical' ? 90 : s.racking.type === 'pergola' ? 0 : s.racking.tilt;
+    s.racking.type === 'vertical'
+      ? 90
+      : s.racking.type === 'pergola'
+        ? (s.racking.pergolaTilt ?? 0)
+        : s.racking.tilt;
   const projected =
     width * Math.cos((tilt * Math.PI) / 180) +
     s.module.thickness * Math.abs(Math.sin((tilt * Math.PI) / 180));
@@ -413,7 +434,7 @@ export function rackingMinimums(s) {
         ((type === 'vertical'
           ? 90
           : type === 'pergola'
-            ? 0
+            ? (s.racking.pergolaTilt ?? 0)
             : ['single-axis', 'dual-axis'].includes(type)
               ? Math.max(s.racking.limit, s.racking.tilt)
               : s.racking.tilt) *
@@ -459,6 +480,13 @@ export function updateStudyInput(study, section, key, value) {
   let s = structuredClone(study);
   s[section][key] = value;
   if (
+    section === 'analysis' &&
+    (key === 'cellsPerRow' || (key === 'gridSizing' && value === 'row-pitch'))
+  ) {
+    s.analysis.gridSizing = 'row-pitch';
+    s.analysis.gridAlignment = 'row-centres';
+  }
+  if (
     section === 'site' &&
     key === 'latitude' &&
     s.racking.type === 'fixed' &&
@@ -473,7 +501,7 @@ export function updateStudyInput(study, section, key, value) {
     s.landUse.underPanelWidth = s.rowPair.pitch - value;
   if (
     ['module', 'table'].includes(section) ||
-    (section === 'racking' && ['tilt', 'limit'].includes(key)) ||
+    (section === 'racking' && ['tilt', 'pergolaTilt', 'limit'].includes(key)) ||
     (section === 'analysis' && key === 'receiverHeight')
   )
     s = selectRacking(s, s.racking.type, false);
@@ -541,7 +569,7 @@ export function designIssues(s) {
   const grid = receiverSpec(s, d);
   if (grid.nx * grid.ny > 20000)
     issues.push(
-      'This grid exceeds 20,000 receivers. Increase along-row spacing, reduce cells per row gap, or reduce the array.',
+      'This grid exceeds 20,000 receivers. Reduce cells between PV row centres or reduce the array.',
     );
   return issues;
 }
