@@ -1,5 +1,12 @@
 # Implementation status
 
+## GitHub check repairs (September 20)
+
+- Browser tests probe WebGL2 independently of the application and require either the live canvas or the SVG fallback according to that capability. Context-loss recovery runs only when the browser exposes the required extension; a separate forced-unavailable test checks SVG rendering and editable dimensions in every browser. This addresses Firefox's `AllowWebgl2:false` failures on GitHub's hosted runner without treating renderer errors on capable browsers as passes.
+- Zoned DLI uses an explicit small fixed-array fixture, five receiver cells per row gap and 15-minute integration. It retains four samples per cell, five-to-three zone changes, view/worker preservation and the uniform control-field check. The fixture no longer inherits the new tracker default and its many sky poses, which exceeded the browser assertion timeout.
+- Dependabot groups React with React DOM, and Vite with esbuild, so coupled updates can be proposed together. Existing React and Vite PRs also need their companion dependencies corrected.
+- Local verification: **151 tests pass**, production build and formatting pass, and all **480 archived files are unchanged**. The four-browser Playwright suite reports **19 passed, 5 skipped**: four explicit hardware-WebGPU gates and Chromium context-loss recovery where the local browser has no WebGL2 context. Firefox and both WebKit projects exercise real context loss/restoration; all four exercise forced SVG fallback. Native Radiance first-hit comparison again reports **0 mismatches over 61,320 rays / 12 cases**. The existing production chunk-size advisory remains. GitHub verification is recorded separately after the repaired branches run; this change makes no new physical-model validation claim.
+
 ## Pergola tilt (September 20)
 
 - Added **Pergola tilt angle** (0–85°, default 0°) in Racking for both aligned and checkerboard pergolas. Each table uses the fixed tilt in the interactive drawing, scientific occluders and publication figures; staggered row offsets remain unchanged. Full array azimuth controls the facing direction when tilted. Clearance guidance, automatic height adjustments, projected cropping boundaries, angle callouts and methods/provenance follow the effective tilt.
