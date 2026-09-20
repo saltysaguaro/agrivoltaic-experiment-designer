@@ -37,9 +37,13 @@ export function rackingOrientation(s) {
       };
     case 'pergola':
       return {
-        label: 'Layout reference azimuth',
+        label:
+          (s.racking.pergolaTilt ?? 0) > 0 ? 'Module-facing azimuth' : 'Layout reference azimuth',
         rowAzimuth,
-        description: `${rows} Modules face upward; this reference controls the row layout, not a horizontal module-facing direction.`,
+        description:
+          (s.racking.pergolaTilt ?? 0) > 0
+            ? `${rows} Pergola modules have a fixed ${s.racking.pergolaTilt}° tilt above horizontal and face ${facing}° clockwise from north.`
+            : `${rows} Modules face upward at 0° tilt. This reference sets their facing direction when tilt is increased.`,
       };
     default:
       return {

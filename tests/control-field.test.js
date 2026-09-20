@@ -77,7 +77,7 @@ test('control starts as an independent matching layout, keeps unique IDs and doe
   assert.equal(analysisKey(edited), analysisKey(s));
   const changed = normalizeLayout({
     ...edited,
-    analysis: { ...edited.analysis, resolution: 0.25 },
+    analysis: { ...edited.analysis, cellsPerRow: 30 },
   });
   assert.deepEqual(changed.controlField.crops[0].grid, s.controlField.crops[0].grid);
   assert.notEqual(analysisKey(changed), analysisKey(s));

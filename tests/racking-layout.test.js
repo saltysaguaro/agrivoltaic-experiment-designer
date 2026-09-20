@@ -90,6 +90,7 @@ test('vertical racking has full-height side posts, shared uprights across table 
 test('vertical scientific geometry leaves the middle module gap open and blocks rays at shared uprights', async () => {
   const s = selectRacking(defaultStudy(), 'vertical');
   s.module.bifacial = false;
+  s.table.high = 2;
   s.table.wide = 2;
   s.row.tables = s.array.rows = 1;
   const g = buildGeometry(s),
