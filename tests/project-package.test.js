@@ -74,7 +74,7 @@ test('project ZIP round-trips the whole research plan, retained weather and vali
     r = await calculateDay(s);
   const exported = await buildProjectPackage(s, r),
     files = await readZip(exported.archive);
-  assert.equal(files.size, 14);
+  assert.equal(files.size, 15);
   for (const path of [
     'manifest.json',
     'README.md',
@@ -90,6 +90,7 @@ test('project ZIP round-trips the whole research plan, retained weather and vali
     'figures/oblique.svg',
     'figures/sunlight.svg',
     'figures/dli.svg',
+    'figures/zoned-dli.svg',
   ])
     assert.ok(files.has(path), path);
   assert.equal(decoder.decode(files.get('weather/source.txt')), s.weather.sourceText);

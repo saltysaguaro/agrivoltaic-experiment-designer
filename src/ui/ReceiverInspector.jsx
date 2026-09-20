@@ -7,6 +7,7 @@ import { cellCenter } from '../experiment/grid-layout.js';
 export default function ReceiverInspector({
   study,
   result,
+  zoning,
   cell,
   setCell,
   open,
@@ -57,6 +58,7 @@ export default function ReceiverInspector({
           <p>
             {value.sunlight.toFixed(1)}% relative sunlight; {value.dli.toFixed(2)}{' '}
             {dliLabel(result)} mol m⁻² d⁻¹.
+            {zoning && ` DLI zone ${zoning.cellZones[index]}.`}
           </p>
         ) : (
           <p>Light has not been calculated.</p>
