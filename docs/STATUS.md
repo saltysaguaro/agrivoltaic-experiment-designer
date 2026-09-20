@@ -1,5 +1,11 @@
 # Implementation status
 
+## Pergola tilt (September 20)
+
+- Added **Pergola tilt angle** (0–85°, default 0°) in Racking for both aligned and checkerboard pergolas. Each table uses the fixed tilt in the interactive drawing, scientific occluders and publication figures; staggered row offsets remain unchanged. Full array azimuth controls the facing direction when tilted. Clearance guidance, automatic height adjustments, projected cropping boundaries, angle callouts and methods/provenance follow the effective tilt.
+- Stored `racking.pergolaTilt` defaults to zero, preserving the horizontal geometry and analysis keys of older pergola projects whose generic tilt field was previously ignored. Changing pergola tilt invalidates light results and visibility caches; project packages retain the new angle and matching results.
+- Verification: **151 tests pass**, production build succeeds (main chunk size advisory), changed-file formatting passes, and all **480 archived files are unchanged**. New tests cover rotated aligned/checkerboard geometry, clearances, old/new project result round trips, cache invalidation and numerical agreement with equivalent fixed geometry. Browser checks confirmed the angle control, facing text, clearance update and tilted profile drawing. Native Radiance comparison reports **0 mismatches over 61,320 rays / 12 cases**, including tilted aligned/checkerboard cases; this is first-hit occlusion validation. No production deployment was made.
+
 ## Single-axis starting layout (September 20)
 
 - New studies default to **single-axis tracking**, **1 module across × 6 modules along**, **5 tables per row**, and **4 rows** (120 modules), revised from the initial 12-row default. The tracking reference azimuth is 90°, giving north–south rows with east–west tracking. Existing browser preferences and imported project choices remain intact.

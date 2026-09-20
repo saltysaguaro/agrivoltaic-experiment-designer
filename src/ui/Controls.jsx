@@ -380,6 +380,12 @@ export default function Controls({
               step: 0.01,
               hint: `Suggested minimum: ${minimum.height.toFixed(2)} m.`,
             })}
+            {s.racking.type === 'pergola' &&
+              field('racking', 'pergolaTilt', 'Pergola tilt angle', '°', null, {
+                min: 0,
+                max: 85,
+                step: 1,
+              })}
             {!['vertical', 'pergola'].includes(s.racking.type) &&
               field('racking', 'tilt', 'Fixed / preview tilt', '°', null, {
                 min: 0,

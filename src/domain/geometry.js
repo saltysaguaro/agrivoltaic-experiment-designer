@@ -24,7 +24,12 @@ export function worldToLocal(s, x, y) {
   return { x: x * u.x + y * u.y, y: x * v.x + y * v.y };
 }
 export function getPose(s, sun = null, quantize = false) {
-  let tilt = s.racking.type === 'vertical' ? 90 : s.racking.type === 'pergola' ? 0 : s.racking.tilt,
+  let tilt =
+      s.racking.type === 'vertical'
+        ? 90
+        : s.racking.type === 'pergola'
+          ? (s.racking.pergolaTilt ?? 0)
+          : s.racking.tilt,
     yaw = 0;
   const { u, v } = axes(s);
   if (sun && s.racking.type === 'single-axis') {

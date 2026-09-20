@@ -106,6 +106,7 @@ export const studySchema = z
     racking: z.object({
       type: z.enum(['fixed', 'single-axis', 'dual-axis', 'vertical', 'pergola']),
       tilt: num(0, 85),
+      pergolaTilt: num(0, 85).default(0),
       height: num(0.2, 25),
       limit: num(0, 85),
       backtracking: z.boolean(),
@@ -321,7 +322,14 @@ export function analysisKey(s) {
     VERSION,
     MODEL_REVISION,
     { ...s.module, power: undefined },
-    s.racking,
+    {
+      ...s.racking,
+      // Legacy pergolas were horizontal even when their unused tilt was nonzero.
+      pergolaTilt:
+        s.racking.type === 'pergola' && s.racking.pergolaTilt > 0
+          ? s.racking.pergolaTilt
+          : undefined,
+    },
     s.table,
     s.row,
     { pitch: s.rowPair.pitch },
@@ -346,7 +354,11 @@ export function dimensions(s) {
   const stagger = pergolaStagger(s, along);
   const length = rowLength + (s.array.rows > 1 ? stagger : 0);
   const tilt =
-    s.racking.type === 'vertical' ? 90 : s.racking.type === 'pergola' ? 0 : s.racking.tilt;
+    s.racking.type === 'vertical'
+      ? 90
+      : s.racking.type === 'pergola'
+        ? (s.racking.pergolaTilt ?? 0)
+        : s.racking.tilt;
   const projected =
     width * Math.cos((tilt * Math.PI) / 180) +
     s.module.thickness * Math.abs(Math.sin((tilt * Math.PI) / 180));
@@ -422,7 +434,7 @@ export function rackingMinimums(s) {
         ((type === 'vertical'
           ? 90
           : type === 'pergola'
-            ? 0
+            ? (s.racking.pergolaTilt ?? 0)
             : ['single-axis', 'dual-axis'].includes(type)
               ? Math.max(s.racking.limit, s.racking.tilt)
               : s.racking.tilt) *
@@ -489,7 +501,7 @@ export function updateStudyInput(study, section, key, value) {
     s.landUse.underPanelWidth = s.rowPair.pitch - value;
   if (
     ['module', 'table'].includes(section) ||
-    (section === 'racking' && ['tilt', 'limit'].includes(key)) ||
+    (section === 'racking' && ['tilt', 'pergolaTilt', 'limit'].includes(key)) ||
     (section === 'analysis' && key === 'receiverHeight')
   )
     s = selectRacking(s, s.racking.type, false);
