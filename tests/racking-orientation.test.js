@@ -74,7 +74,7 @@ test('rack switches adopt the appropriate orientation and retain explicit custom
 });
 
 test('fixed defaults face the equator on hemisphere changes and rack switches, preserving custom bearings', () => {
-  let s = defaultStudy();
+  let s = selectRacking(defaultStudy(), 'fixed');
   for (const latitude of [-33, 45, -12, 0]) {
     s = updateStudyInput(s, 'site', 'latitude', latitude);
     const expected = latitude < 0 ? 0 : 180;

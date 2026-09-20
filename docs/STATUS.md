@@ -1,5 +1,11 @@
 # Implementation status
 
+## Single-axis starting layout (September 20)
+
+- New studies default to **single-axis tracking**, **1 module across × 6 modules along**, **5 tables per row**, and **12 rows** (360 modules). The tracking reference azimuth is 90°, giving north–south rows with east–west tracking. Existing browser preferences and imported project choices remain intact.
+- The starting layout passes clearance checks and uses 14,299 receivers, within the 20,000-cell limit. Browser checks confirmed all five requested defaults. Scientific tests that require fixed arrays or particular row counts now define those fixtures explicitly.
+- Verification: **148 tests pass**, production build and changed-file formatting pass; all **480 archived files are unchanged**. Native Radiance comparison reports **0 mismatches over 51,100 rays / 10 cases** (first-hit occlusion scope). No production deployment was made.
+
 ## Automatic receiver sizing with exact row alignment (September 20)
 
 - Removed **Along-row receiver spacing** and the grid-alignment selector. **Cells between PV row centres** now controls detail in both directions: the along-row target is regular row pitch divided by the cell count, adjusted to fit the exact footprint. Every PV row centre remains a cell boundary; wider aisles and outer edges can have rectangular cells. Standard remains 15 cells per gap; coarse preview uses 5 and retains row alignment.

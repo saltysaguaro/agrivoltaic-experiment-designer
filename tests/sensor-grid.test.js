@@ -27,7 +27,7 @@ test('sensor planning divides rotated cropping areas and aisles into the request
     s.array.aisle = 4;
     s.analysis.gridAlignment = gridAlignment;
     const areas = sensorGrid(s, options);
-    assert.equal(areas.length, 3);
+    assert.equal(areas.length, s.array.rows - 1);
     assert.ok(areas[1].y1 - areas[1].y0 > areas[0].y1 - areas[0].y0);
     for (const area of areas) {
       assert.equal(area.cells.length, 30);

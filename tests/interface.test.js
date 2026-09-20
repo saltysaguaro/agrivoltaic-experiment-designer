@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { JSDOM } from 'jsdom';
 import { build } from 'esbuild';
 import { act } from 'react';
-import { defaultStudy } from '../src/domain/study.js';
+import { defaultStudy, migrateStudy } from '../src/domain/study.js';
 import { projectDocument, readProject } from '../src/project/package.js';
 import { sampleWeather } from '../src/irradiance/solar.js';
 import { parseWeather } from '../src/irradiance/weather.js';
@@ -36,7 +36,14 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     if (!String(args[0]).includes('Error creating WebGL context')) originalError(...args);
   };
   const study = defaultStudy();
+  // This saved-project workflow starts from a compact fixed-array fixture.
+  study.racking.type = 'fixed';
+  study.table.high = 2;
+  study.row.tables = 2;
+  study.array.rows = 4;
+  study.array.azimuth = 180;
   study.table.orientation = 'landscape';
+  Object.assign(study, migrateStudy(study));
   study.weather.mode = 'sample';
   study.weather.name = 'Illustrative clear-sky day · synthetic';
   study.analysis.backend = 'cpu';
