@@ -20,6 +20,7 @@ const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 test('bulk beds exactly partition selected cropping rows, including rotated wider aisles, without changing the receiver grid', async () => {
   for (const alignment of ['row-centres', 'spacing']) {
     const s = defaultStudy();
+    s.racking.type = 'fixed';
     s.array.azimuth = 37;
     s.array.groupSize = 2;
     s.array.aisle = 3;

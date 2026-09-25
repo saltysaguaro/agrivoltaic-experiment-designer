@@ -1,14 +1,44 @@
 // Stored azimuth is the positive-tilt facing direction, perpendicular to rows.
 // Keep this convention for saved studies, field layouts and solver geometry.
+export const northSouthRowsRequired = (type) => ['single-axis', 'vertical'].includes(type);
+
+// Normalize at the Study boundary, including browser restores and file imports.
+// Rotate existing coordinates with the array so legacy layouts without grid
+// indices retain their locations relative to the rows.
+export function normalizeRackingOrientation(s) {
+  if (!northSouthRowsRequired(s.racking.type) || s.array.azimuth === 90) return s;
+  const angle = ((90 - s.array.azimuth) * Math.PI) / 180;
+  const rotate = (items) =>
+    items.map((item) => ({
+      ...item,
+      x: item.x * Math.cos(angle) + item.y * Math.sin(angle),
+      y: -item.x * Math.sin(angle) + item.y * Math.cos(angle),
+    }));
+  return {
+    ...s,
+    array: { ...s.array, azimuth: 90 },
+    experimentSensors: rotate(s.experimentSensors),
+    crops: rotate(s.crops),
+    ...(s.controlField
+      ? {
+          controlField: {
+            ...s.controlField,
+            experimentSensors: rotate(s.controlField.experimentSensors),
+            crops: rotate(s.controlField.crops),
+          },
+        }
+      : {}),
+  };
+}
+
 export function defaultRackingAzimuth(type, latitude) {
   if (['single-axis', 'dual-axis', 'vertical'].includes(type)) return 90;
-  return type === 'fixed' && latitude < 0 ? 0 : 180;
+  return latitude < 0 ? 0 : 180;
 }
 
 export function rackingOrientation(s) {
   const facing = s.array.azimuth;
   const rowAzimuth = (facing + 90) % 180;
-  const opposite = (facing + 180) % 360;
   const rowDirection =
     rowAzimuth === 0
       ? 'north–south'
@@ -21,7 +51,7 @@ export function rackingOrientation(s) {
       return {
         label: 'Tracking reference azimuth',
         rowAzimuth,
-        description: `${rows} The rotation axis follows the rows; panels tilt toward ${facing}° / ${opposite}°. At 90°, panels track east–west around a north–south axis.`,
+        description: `${rows} Orientation is locked: panels track east–west around a north–south axis.`,
       };
     case 'dual-axis':
       return {
@@ -33,7 +63,7 @@ export function rackingOrientation(s) {
       return {
         label: 'Front-face azimuth',
         rowAzimuth,
-        description: `${rows} Vertical module faces point toward ${facing}° / ${opposite}°. At 90°, the two faces point east and west.`,
+        description: `${rows} Orientation is locked: the two vertical module faces point east and west.`,
       };
     case 'pergola':
       return {

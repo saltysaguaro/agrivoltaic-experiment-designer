@@ -13,6 +13,7 @@ import {
 import { cropIdentity } from '../src/domain/crop-catalog.js';
 function fixture(gridAlignment = 'row-centres') {
   const s = defaultStudy();
+  s.racking.type = 'fixed';
   s.analysis.gridAlignment = gridAlignment;
   s.array.azimuth = 137;
   s.analysis.resolution = 1.3;
