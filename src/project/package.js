@@ -337,6 +337,10 @@ export async function readProject(input, name = 'project.json', onProgress = () 
   validateIds(study);
   await verifyWeatherRecord(study.weather);
   const warnings = [...designIssues(study)];
+  if (raw.array?.azimuth !== study.array.azimuth)
+    warnings.push(
+      'Rack orientation was corrected to north–south rows. Field layouts rotate with the array; light must be recalculated.',
+    );
   if (
     canonicalJson(raw.experimentSensors) !== canonicalJson(study.experimentSensors) ||
     canonicalJson(raw.crops) !== canonicalJson(study.crops)

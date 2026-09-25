@@ -6,7 +6,11 @@ import {
   nominalReceiverSpacing,
 } from '../domain/receiver-grid.js';
 import { moduleOptics } from '../domain/optics.js';
-import { defaultRackingAzimuth, rackingOrientation } from '../domain/racking-orientation.js';
+import {
+  defaultRackingAzimuth,
+  northSouthRowsRequired,
+  rackingOrientation,
+} from '../domain/racking-orientation.js';
 import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import React, { useId, useState, useEffect, useRef, createContext, useContext } from 'react';
 import Info from './Info.jsx';
@@ -353,15 +357,24 @@ export default function Controls({
               { value: 'vertical', label: 'Vertical bifacial' },
               { value: 'pergola', label: 'Raised / pergola' },
             ])}
-            <p className="control-note">{orientation.description} Adjust azimuth in Full array.</p>
-            <button
-              className="text-button"
-              onClick={() =>
-                set('array', 'azimuth', defaultRackingAzimuth(s.racking.type, s.site.latitude))
-              }
-            >
-              Apply default orientation
-            </button>
+            <p className="control-note">
+              {orientation.description}
+              {!northSouthRowsRequired(s.racking.type) && ' Adjust azimuth in Full array.'}
+            </p>
+            {!northSouthRowsRequired(s.racking.type) && (
+              <button
+                className="text-button"
+                onClick={() =>
+                  set('array', 'azimuth', defaultRackingAzimuth(s.racking.type, s.site.latitude))
+                }
+              >
+                Apply default orientation
+              </button>
+            )}
+            <p className="control-note">
+              Changing the mounting system resets its orientation, tilt and tracking settings to
+              defaults.
+            </p>
             {s.racking.type === 'pergola' &&
               field('racking', 'pergolaLayout', 'Pergola layout', null, [
                 { value: 'aligned', label: 'Aligned table rows' },
@@ -493,13 +506,17 @@ export default function Controls({
         {step === 4 && (
           <>
             {field('array', 'rows', 'Number of rows', null, null, { min: 1, max: 24, step: 1 })}
-            {field('array', 'azimuth', orientation.label, '°', null, {
-              min: 0,
-              max: 359.9,
-              step: 1,
-              hint: orientation.description,
-              help: orientation.description,
-            })}
+            {northSouthRowsRequired(s.racking.type) ? (
+              <div className="info-box">{orientation.description}</div>
+            ) : (
+              field('array', 'azimuth', orientation.label, '°', null, {
+                min: 0,
+                max: 359.9,
+                step: 1,
+                hint: orientation.description,
+                help: orientation.description,
+              })
+            )}
             {field('landUse', 'perimeterBuffer', 'Perimeter no-crop buffer', 'm', null, {
               min: 0,
               max: 20,

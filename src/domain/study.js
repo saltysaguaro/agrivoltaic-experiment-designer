@@ -1,6 +1,10 @@
 import { DEFAULT_DLI_ZONES, MAX_DLI_ZONES } from './dli-zones.js';
 import { receiverSpec, DEFAULT_CELLS_PER_ROW, automaticGridSizing } from './receiver-grid.js';
-import { defaultRackingAzimuth } from './racking-orientation.js';
+import {
+  defaultRackingAzimuth,
+  northSouthRowsRequired,
+  normalizeRackingOrientation,
+} from './racking-orientation.js';
 import { z } from 'zod';
 import { moduleOptics } from './optics.js';
 import { analysisPeriod, periodKeys } from './period.js';
@@ -252,11 +256,13 @@ export const studySchema = z
       .default({}),
   })
   .transform((s) =>
-    synchronizeCropSpacing({
-      ...s,
-      crops: s.crops.map(normalizeCropIdentity),
-      controlField: { ...s.controlField, crops: s.controlField.crops.map(normalizeCropIdentity) },
-    }),
+    synchronizeCropSpacing(
+      normalizeRackingOrientation({
+        ...s,
+        crops: s.crops.map(normalizeCropIdentity),
+        controlField: { ...s.controlField, crops: s.controlField.crops.map(normalizeCropIdentity) },
+      }),
+    ),
   );
 export const defaultStudy = () =>
   studySchema.parse({
@@ -456,16 +462,19 @@ export function rackingMinimums(s) {
   };
 }
 export function selectRacking(study, type, applyDefaults = true) {
-  const s = structuredClone(study);
-  // Carry archetype defaults between rack types, retaining custom site bearings.
-  // Clearance refreshes and imported/saved studies must not rotate an array.
-  if (
-    applyDefaults &&
-    study.racking.type !== type &&
-    study.array.azimuth === defaultRackingAzimuth(study.racking.type, study.site.latitude)
-  )
+  let s = structuredClone(study);
+  // A hardware switch starts with that rack's operating defaults. Refreshing
+  // clearances for the same rack preserves its configured angles and limits.
+  if (applyDefaults && study.racking.type !== type) {
     s.array.azimuth = defaultRackingAzimuth(type, study.site.latitude);
+    s.racking.tilt = ['vertical', 'pergola'].includes(type) ? 0 : 25;
+    s.racking.limit = type === 'dual-axis' ? 85 : 60;
+    s.racking.backtracking = true;
+    s.racking.pergolaTilt = 0;
+    s.racking.pergolaLayout = 'aligned';
+  }
   s.racking.type = type;
+  s = normalizeRackingOrientation(s);
   if (applyDefaults && type === 'vertical') s.module.bifacial = true;
   const minimum = rackingMinimums(s);
   s.racking.height = Math.max(s.racking.height, Math.min(25, minimum.height));
@@ -478,6 +487,8 @@ export function selectRacking(study, type, applyDefaults = true) {
 export function updateStudyInput(study, section, key, value) {
   if (section === 'racking' && key === 'type') return selectRacking(study, value);
   let s = structuredClone(study);
+  if (section === 'array' && key === 'azimuth' && northSouthRowsRequired(s.racking.type))
+    return normalizeRackingOrientation(s);
   s[section][key] = value;
   if (
     section === 'analysis' &&
@@ -489,10 +500,10 @@ export function updateStudyInput(study, section, key, value) {
   if (
     section === 'site' &&
     key === 'latitude' &&
-    s.racking.type === 'fixed' &&
-    study.array.azimuth === defaultRackingAzimuth('fixed', study.site.latitude)
+    ['fixed', 'pergola'].includes(s.racking.type) &&
+    study.array.azimuth === defaultRackingAzimuth(s.racking.type, study.site.latitude)
   )
-    s.array.azimuth = defaultRackingAzimuth('fixed', value);
+    s.array.azimuth = defaultRackingAzimuth(s.racking.type, value);
   if (section === 'analysis' && periodKeys.includes(key) && s.analysis.period !== 'day')
     s.analysis.date = analysisPeriod(s).start;
   if (section === 'rowPair' && key === 'cropSetback')
@@ -505,7 +516,7 @@ export function updateStudyInput(study, section, key, value) {
     (section === 'analysis' && key === 'receiverHeight')
   )
     s = selectRacking(s, s.racking.type, false);
-  return synchronizeCropSpacing(s);
+  return synchronizeCropSpacing(normalizeRackingOrientation(s));
 }
 export function validationMessage(issue) {
   const names = {
@@ -528,6 +539,10 @@ export function validationMessage(issue) {
 export function designIssues(s) {
   const d = dimensions(s),
     issues = [];
+  if (northSouthRowsRequired(s.racking.type) && s.array.azimuth !== 90)
+    issues.push(
+      'Single-axis and vertical bifacial racks require north–south rows (reference azimuth 90°).',
+    );
   if (s.module.bifacial) {
     const o = moduleOptics(s.module);
     if (o.cellWidth <= 0 || o.cellLength <= 0)

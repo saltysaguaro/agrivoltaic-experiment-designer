@@ -34,6 +34,7 @@ const sensor = (id, x = 0, y = 0) => ({
 
 test('placement snaps to rotated receiver centres, preserves depths and survives grid changes / JSON round trips', () => {
   let s = defaultStudy();
+  s.racking.type = 'fixed';
   s.array.azimuth = 37;
   const spec = receiverGridSpec(s),
     point = localToWorld(s, -spec.width / 2 + 2.2 * spec.dx, -spec.height / 2 + 3.1 * spec.dy),
