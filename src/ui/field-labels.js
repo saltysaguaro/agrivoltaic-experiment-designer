@@ -1,6 +1,6 @@
 // Shared screen-space labeling for the interactive map and exported figures.
 // Labels never shrink below 12 px or overlap; dense layouts retain all items in their key.
-export const labelColors = { sensor: '#954325', crop: '#315d35' };
+export const labelColors = { sensor: '#954325', crop: '#315d35', irrigation: '#087ba8' };
 export function intersects(a, b, gap = 5) {
   return (
     a.x < b.x + b.width + gap &&
@@ -11,6 +11,14 @@ export function intersects(a, b, gap = 5) {
 }
 export function fieldLabelItems(projection, selection) {
   return [
+    ...(projection.irrigation || []).map((u) => ({
+      kind: 'irrigation',
+      id: u.id,
+      text: u.id,
+      title: `Irrigation ${u.id} · ${u.method}`,
+      point: u.point,
+      selected: selection?.kind === 'irrigation' && selection.id === u.id,
+    })),
     ...projection.beds.map((b) => ({
       kind: 'crop',
       id: b.id,

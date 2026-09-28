@@ -48,6 +48,19 @@ export default function FieldMapOverlay({
       viewBox={`0 0 ${projection.width} ${projection.height}`}
       aria-label={interactive ? 'Editable field layout' : 'Field layout'}
     >
+      {(projection.coverage || []).map((path, i) => (
+        <polyline
+          key={`coverage-${i}`}
+          points={path.map((p) => p.join(',')).join(' ')}
+          fill="none"
+          stroke="#187fa5"
+          strokeWidth="1.4"
+          strokeDasharray="5 3"
+          opacity=".8"
+          pointerEvents="none"
+          aria-label="Nominal spray coverage"
+        />
+      ))}
       {projection.beds.map((b) => (
         <g key={b.id}>
           <polygon
@@ -78,6 +91,37 @@ export default function FieldMapOverlay({
             ))}
         </g>
       ))}
+      {(projection.irrigation || []).map((u) => (
+        <g
+          key={u.id}
+          role={interactive ? 'button' : undefined}
+          tabIndex={interactive ? 0 : undefined}
+          aria-label={`Irrigation ${u.id}. Drag to move, Enter to edit.`}
+          className={`irrigation-hit ${selected('irrigation', u.id) ? 'is-selected' : ''}`}
+          {...events({ kind: 'irrigation', id: u.id })}
+        >
+          {u.paths.map((path, i) => (
+            <polyline
+              key={i}
+              points={path.map((p) => p.join(',')).join(' ')}
+              fill="none"
+              stroke="transparent"
+              strokeWidth="14"
+            />
+          ))}
+          <circle cx={u.point[0]} cy={u.point[1]} r={12} fill="transparent" />
+          {selected('irrigation', u.id) && (
+            <circle
+              cx={u.point[0]}
+              cy={u.point[1]}
+              r={9}
+              fill="none"
+              stroke="#087ba8"
+              strokeWidth="2"
+            />
+          )}
+        </g>
+      ))}
       {projection.markers.map((m) => (
         <g
           key={m.ids.join('|')}
@@ -85,7 +129,7 @@ export default function FieldMapOverlay({
           tabIndex={interactive ? 0 : undefined}
           aria-label={
             m.ids.length > 1
-              ? `${m.ids.length} sensors in receiver cell. Select an individual sensor from Find item.`
+              ? `${m.ids.length} sensors in design cell. Select an individual sensor from Find item.`
               : `Sensor ${m.ids[0]}. Drag to move, Enter to edit.`
           }
           className={`sensor-hit ${m.ids.some((id) => selected('sensor', id)) ? 'is-selected' : ''}`}

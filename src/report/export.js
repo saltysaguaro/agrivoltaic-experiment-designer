@@ -1,3 +1,9 @@
+import { designGridDescription } from '../experiment/design-grid.js';
+import {
+  normalizeCropPlanting,
+  plantingSummary,
+  plantingDescription,
+} from '../domain/crop-planting.js';
 import { dliZones, dliZoneSummary } from '../domain/dli-zones.js';
 import {
   gridSpacingLabel,
@@ -60,6 +66,11 @@ export function methodsRows(s, r) {
     ['Software', `Agrivoltaic Experiment Designer ${VERSION}; study schema ${s.schemaVersion}`],
     ['Study', s.metadata.title],
     ['Investigator', s.metadata.investigator || 'Not specified'],
+    ['Design grid', designGridDescription(s)],
+    [
+      'Irrigation',
+      `${(s.irrigationUnits || []).length} units; ${(s.irrigationZones || []).length} zones. Display-only layout; spray coverage is nominal. No hydraulic, water-balance or scheduling simulation.`,
+    ],
     ['Coordinates', 'East / north / up (m); origin at array centre'],
     [
       'Module',
@@ -152,7 +163,7 @@ export function methodsRows(s, r) {
     ],
     [
       'Field layout',
-      'Sensors are at receiver-cell centres. Single beds follow whole cells; bulk beds use exact cropping-area divisions and may cross cell boundaries. All beds rotate with the array. Exact-bed light statistics weight cell values by overlap area, assuming uniform light within each cell. Packed marker offsets are display-only; sensor heights/depths remain installation metadata. Grid rows/columns are 1-based in tables; fractional values describe exact bed boundaries.',
+      'Sensors are at design-cell centres. The design grid is independent of numerical irradiance receivers. Single beds follow whole cells; bulk beds use exact cropping-area divisions and may cross cell boundaries. All beds rotate with the array. Bed light statistics weight cell values by overlap area, assuming uniform light within each cell. Packed marker offsets are display-only; sensor heights/depths remain installation metadata. Grid rows/columns are 1-based in tables; fractional values describe exact bed boundaries.',
     ],
     [
       'Control field',
@@ -353,6 +364,29 @@ function pairedTable(rows) {
     )
     .join('')}</tbody></table>`;
 }
+function plantingSources(study) {
+  const plots = [
+    ...study.crops.map((c) => ({ ...c, field: 'Agrivoltaic' })),
+    ...(study.controlField?.initialized
+      ? study.controlField.crops.map((c) => ({ ...c, field: 'Control' }))
+      : []),
+  ];
+  return (
+    '<h2>Crop spacing assumptions and sources</h2>' +
+    table(
+      ['Field / bed', 'Preset and evidence', 'Production assumptions', 'Source'],
+      plots.map((c) => {
+        const p = normalizeCropPlanting(c).planting.preset;
+        return [
+          c.field + ' / ' + c.id,
+          `${p.profile}; ${p.version}; ${p.basis}; preset rows ${p.rowSpacing} m, plants ${p.plantSpacing} m`,
+          p.note,
+          `${p.sourceTitle}; ${p.sourceUrl}`,
+        ];
+      }),
+    )
+  );
+}
 function controlReport(study, result, context) {
   if (!study.controlField?.initialized) return '<h2>Control field</h2><p>Not initialized.</p>';
   const s = fieldStudy(study, true),
@@ -381,6 +415,7 @@ function controlReport(study, result, context) {
       'Botanical identity / cultivar',
       'Treatment / replicate',
       'E / N; width × length (m)',
+      'Crop rows and plant spacing',
       'Column / row; columns × rows',
       `${dliLabel(r)} (mol/m²/day); notes`,
     ],
@@ -389,6 +424,7 @@ function controlReport(study, result, context) {
       `${c.scientificName || c.botanicalName || 'Catalog selection required'}; family ${c.cropFamily}; cultivar ${c.cultivar}; ${c.taxonUrl}; catalog ${c.cropCatalogVersion} / ${c.cropId}`,
       `${c.treatment} / ${c.replicate}`,
       `${c.x.toFixed(3)} / ${c.y.toFixed(3)}; ${c.width.toFixed(3)} × ${c.length.toFixed(3)}`,
+      plantingDescription(c, false),
       c.grid ? `${c.grid.column + 1} / ${c.grid.row + 1}; ${c.grid.columns} × ${c.grid.rows}` : '—',
       `${r ? `Mean / median / min / max ${r.openDli.toFixed(3)}; SD 0; sunlight 100%` : 'Not calculated'}; ${c.notes}`,
     ]),
@@ -428,7 +464,7 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
     [
       'ID / type',
       'E / N / Z (m)',
-      'Receiver column / row',
+      'Design column / row',
       'Treatment / replicate',
       'Model / logger',
       'Notes',
@@ -446,6 +482,7 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
       'ID / crop',
       'Treatment / replicate',
       'Area (m²)',
+      'Crop rows and plant spacing',
       'Starting column / row; columns × rows',
       `Mean / median / SD ${dliLabel(r)} (mol/m²/day)`,
       'Range DLI / sunlight; reservation overlap',
@@ -456,6 +493,7 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
         c.id + ' · ' + c.crop,
         c.treatment + ' / ' + c.replicate,
         (c.width * c.length).toFixed(3),
+        plantingDescription(c, false),
         c.grid
           ? `${c.grid.column + 1} / ${c.grid.row + 1}; ${c.grid.columns} × ${c.grid.rows}`
           : '—',
@@ -484,7 +522,7 @@ svg{width:100%;height:auto}figure{margin:22px 0;break-inside:avoid}figcaption{fo
           ]),
         )}`
       : ''
-  }${controlReport(s, r, context)}<section class="appendix"><h2>Methods, assumptions and provenance</h2><div class="methods-notes">${publication.notes.map(([key, value]) => `<p><strong>${e(key)}</strong>${e(value)}</p>`).join('')}</div></section>${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric, 'array', true, { context, compact: true, callouts: false })}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p></body></html>`;
+  }${controlReport(s, r, context)}${plantingSources(s)}<section class="appendix"><h2>Methods, assumptions and provenance</h2><div class="methods-notes">${publication.notes.map(([key, value]) => `<p><strong>${e(key)}</strong>${e(value)}</p>`).join('')}</div></section>${figs.map(([view, metric], i) => `<figure>${figureSvg(s, r, view, metric, 'array', true, { context, compact: true, callouts: false })}<figcaption>Figure ${i + 1}. ${view} ${metric === 'none' ? 'system geometry' : metric + ' distribution'}. ${metric === 'dli' && r?.estimated ? 'DLI estimated from broadband irradiance.' : ''}</figcaption></figure>`).join('')}<p>Model references: Perez et al. (1993), doi:10.1016/0038-092X(93)90017-I; Spitters et al. (1986), doi:10.1016/0168-1923(86)90060-2. No reflected radiation is included.</p>${irrigationReport(s)}</body></html>`;
 }
 export function exportCsv(study, result) {
   const rows = [
@@ -519,6 +557,20 @@ export function exportCsv(study, result) {
       'dli_basis',
       'field',
       'dli_zone',
+      'crop_rows_per_bed',
+      'crop_row_spacing_m',
+      'plant_spacing_m',
+      'row_spacing_mode',
+      'plant_spacing_mode',
+      'planned_planting_positions',
+      'spacing_profile',
+      'spacing_version',
+      'spacing_basis',
+      'spacing_source',
+      'planting_warning',
+      'spacing_preset_note',
+      'spacing_preset_row_m',
+      'spacing_preset_plant_m',
     ],
   ];
   for (const [field, s, r] of [
@@ -568,11 +620,31 @@ export function exportCsv(study, result) {
         v.notes +
           '; horizontal receiver estimate; ' +
           rowRelative(s, v) +
-          (v.grid ? `; receiver_column=${v.grid.column + 1}; receiver_row=${v.grid.row + 1}` : ''),
+          (v.grid ? `; design_column=${v.grid.column + 1}; design_row=${v.grid.row + 1}` : ''),
       ]);
     }
+    for (const u of s.irrigationUnits || [])
+      rows.push([
+        'irrigation',
+        u.id,
+        u.method,
+        u.x,
+        u.y,
+        u.z,
+        '',
+        '',
+        u.treatment,
+        u.replicate,
+        u.model,
+        '',
+        '',
+        '',
+        '',
+        `zone_id=${u.zoneId}; status=${u.status}; design_column=${u.grid ? u.grid.column + 1 : ''}; design_row=${u.grid ? u.grid.row + 1 : ''}; metadata_SI=${JSON.stringify(u)}`,
+      ]);
     for (const raw of s.crops) {
-      const p = normalizeCropIdentity(raw);
+      const p = normalizeCropPlanting(normalizeCropIdentity(raw));
+      const planting = plantingSummary(p);
       const stats = plotStats(r, p);
       rows.push([
         'plot',
@@ -590,7 +662,7 @@ export function exportCsv(study, result) {
         '',
         '',
         '',
-        `bed_alignment=${p.gridMode || 'cells'}; width_along_m=${p.width}; length_across_m=${p.length}; receiver_column=${p.grid ? p.grid.column + 1 : ''}; receiver_row=${p.grid ? p.grid.row + 1 : ''}; receiver_columns=${p.grid?.columns ?? ''}; receiver_rows=${p.grid?.rows ?? ''}; reserved_overlap_m2=${(field === 'control' ? 0 : plotZoneOverlap(s, p)).toFixed(4)}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}; notes=${p.notes || ''}`,
+        `bed_alignment=${p.gridMode || 'cells'}; width_along_m=${p.width}; length_across_m=${p.length}; design_column=${p.grid ? p.grid.column + 1 : ''}; design_row=${p.grid ? p.grid.row + 1 : ''}; design_columns=${p.grid?.columns ?? ''}; design_rows=${p.grid?.rows ?? ''}; reserved_overlap_m2=${(field === 'control' ? 0 : plotZoneOverlap(s, p)).toFixed(4)}; median=${stats?.median ?? ''}; SD=${stats?.sd ?? ''}; notes=${p.notes || ''}`,
         p.cropId,
         p.botanicalName,
         p.scientificName,
@@ -599,6 +671,21 @@ export function exportCsv(study, result) {
         p.taxonKey || '',
         p.taxonUrl,
         p.cropCatalogVersion,
+        ...Array(6).fill(''),
+        planting.rowCount,
+        planting.rowSpacing,
+        planting.plantSpacing,
+        planting.rowSpacingMode,
+        planting.plantSpacingMode,
+        planting.positions,
+        planting.preset.profile,
+        planting.preset.version,
+        planting.preset.basis,
+        planting.preset.sourceUrl,
+        planting.issue,
+        planting.preset.note,
+        planting.preset.rowSpacing,
+        planting.preset.plantSpacing,
       ]);
     }
     for (const row of rows.slice(start)) row[28] = field;
@@ -642,4 +729,136 @@ export async function pngFigure(svg) {
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+export function irrigationRows(s) {
+  const columns = [
+    'field',
+    'id',
+    'method',
+    'kind',
+    'label',
+    'zoneId',
+    'treatment',
+    'replicate',
+    'status',
+    'model',
+    'x_m',
+    'y_m',
+    'z_m',
+    'design_column',
+    'design_row',
+    'offset_x_m',
+    'offset_y_m',
+    'bed_id',
+    'bed_along_m',
+    'bed_across_m',
+    'follow_bed_size',
+    'length_m',
+    'width_m',
+    'angle_deg',
+    'emitter_spacing_m',
+    'emitter_offset_m',
+    'nominal_radius_m',
+    'nominal_arc_deg',
+    'furrow_depth_m',
+    'grade',
+    'bund_height_m',
+    'inlet_offset_fraction',
+    'applied_depth_m',
+    'rated_flow_m3_s',
+    'measured_flow_m3_s',
+    'pressure_Pa',
+    'notes',
+  ];
+  return [
+    columns,
+    ...[s, ...(s.controlField?.initialized ? [fieldStudy(s, true)] : [])].flatMap((field, i) =>
+      (field.irrigationUnits || []).map((u) => [
+        i ? 'control' : 'agrivoltaic',
+        u.id,
+        u.method,
+        u.kind,
+        u.label,
+        u.zoneId,
+        u.treatment,
+        u.replicate,
+        u.status,
+        u.model,
+        u.x,
+        u.y,
+        u.z,
+        u.grid ? u.grid.column + 1 : '',
+        u.grid ? u.grid.row + 1 : '',
+        u.offsetX,
+        u.offsetY,
+        u.link?.bedId,
+        u.link?.along,
+        u.link?.across,
+        u.link?.followLength,
+        u.length,
+        u.width,
+        u.angle,
+        u.emitterSpacing,
+        u.emitterOffset,
+        u.radius,
+        u.arc,
+        u.depth,
+        u.grade,
+        u.bundHeight,
+        u.inletOffset,
+        u.appliedDepth,
+        u.ratedFlow,
+        u.measuredFlow,
+        u.pressure,
+        u.notes,
+      ]),
+    ),
+  ];
+}
+export function irrigationZoneRows(s) {
+  return [
+    ['field', 'id', 'name', 'kind', 'bed_ids', 'treatment', 'replicate', 'water_source', 'notes'],
+    ...[s, ...(s.controlField?.initialized ? [fieldStudy(s, true)] : [])].flatMap((f, i) =>
+      (f.irrigationZones || []).map((z) => [
+        i ? 'control' : 'agrivoltaic',
+        z.id,
+        z.name,
+        z.kind,
+        z.bedIds.join('; '),
+        z.treatment,
+        z.replicate,
+        z.waterSource,
+        z.notes,
+      ]),
+    ),
+  ];
+}
+function irrigationReport(s) {
+  const table = (rows) =>
+    `<div class="table-scroll"><table><thead><tr>${rows[0].map((v) => `<th>${e(v)}</th>`).join('')}</tr></thead><tbody>${rows
+      .slice(1)
+      .map((row) => `<tr>${row.map((v) => `<td>${e(v ?? '')}</td>`).join('')}</tr>`)
+      .join('')}</tbody></table></div>`;
+  const units = irrigationRows(s),
+    zones = irrigationZoneRows(s);
+  const group = (row, start, end) =>
+    units[0]
+      .slice(start, end)
+      .map((key, j) => [key, row[start + j]])
+      .filter(([, v]) => v !== undefined && v !== null && v !== '')
+      .map(([key, v]) => `${key}: ${v}`)
+      .join('; ');
+  const compactUnits = [
+    ['Unit / treatment', 'Position / links', 'Geometry / ratings', 'Notes'],
+    ...units
+      .slice(1)
+      .map((row) => [
+        group(row, 0, 10),
+        group(row, 10, 21),
+        group(row, 21, units[0].length - 1),
+        row.at(-1),
+      ]),
+  ];
+  return `<h2>Irrigation design</h2><p>Independent design grid: ${e(designGridDescription(s))} Blue hardware and hatched areas are planning overlays. Spray outlines show nominal coverage only. Unknown ratings are blank; dimensions use metres, flows m³/s and pressure Pa. Drip flow is per emitter; other flow is per head or inlet. Irrigation never changes calculated light. Crop-row edits do not regenerate linked laterals; replace them explicitly through Add irrigation units.</p>${zones.length > 1 ? table(zones) : '<p>No irrigation zones.</p>'}${units.length > 1 ? table(compactUnits) : '<p>No irrigation hardware.</p>'}`;
 }

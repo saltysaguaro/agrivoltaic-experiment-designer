@@ -7,7 +7,16 @@ export function withoutFieldLayout(study) {
     ...study,
     experimentSensors: [],
     crops: [],
-    controlField: { version: 1, initialized: false, experimentSensors: [], crops: [] },
+    irrigationUnits: [],
+    irrigationZones: [],
+    controlField: {
+      version: 1,
+      initialized: false,
+      experimentSensors: [],
+      crops: [],
+      irrigationUnits: [],
+      irrigationZones: [],
+    },
   };
 }
 const gridDefaultsVersion = 2;

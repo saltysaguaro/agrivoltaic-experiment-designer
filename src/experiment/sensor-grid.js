@@ -1,5 +1,6 @@
+import { designGridSpec } from '../experiment/design-grid.js';
 import { sensorTypes } from '../domain/study.js';
-import { localToWorld, receiverGridSpec } from '../domain/geometry.js';
+import { localToWorld } from '../domain/geometry.js';
 import { cropRows } from './crop-beds.js';
 import { cellAt, cellCenter, normalizeLayout } from './grid-layout.js';
 import { allFieldIds, uniqueFieldId } from './control-field.js';
@@ -19,7 +20,7 @@ export function sensorGrid(study, { rows, columns }) {
     throw Error(
       'Use fewer rows or columns; the selection preview supports up to 10,000 cells across the array.',
     );
-  const grid = receiverGridSpec(study);
+  const grid = designGridSpec(study);
   return areas.map((area) => ({
     ...area,
     cells: Array.from({ length: rows * columns }, (_, i) => {

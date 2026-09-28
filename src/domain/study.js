@@ -1,3 +1,8 @@
+import {
+  irrigationUnitsSchema,
+  irrigationZonesSchema,
+  irrigationReferenceIssues,
+} from './irrigation.js';
 import { DEFAULT_DLI_ZONES, MAX_DLI_ZONES } from './dli-zones.js';
 import { receiverSpec, DEFAULT_CELLS_PER_ROW, automaticGridSizing } from './receiver-grid.js';
 import {
@@ -8,6 +13,7 @@ import {
 import { z } from 'zod';
 import { moduleOptics } from './optics.js';
 import { analysisPeriod, periodKeys } from './period.js';
+import { normalizeCropPlanting } from './crop-planting.js';
 import { normalizeCropIdentity } from './crop-catalog.js';
 import { validateWeatherRows } from '../irradiance/weather-validation.js';
 export const VERSION = '0.5.0';
@@ -33,7 +39,7 @@ const sensorsSchema = z
     z.object({
       id: text,
       type: z.enum(sensorTypes),
-      grid: z.object({ column: count(0, 20000), row: count(0, 20000) }).optional(),
+      grid: z.object({ column: count(0, 200000), row: count(0, 200000) }).optional(),
       x: num(-10000, 10000),
       y: num(-10000, 10000),
       z: num(-5, 20),
@@ -48,11 +54,22 @@ const sensorsSchema = z
     }),
   )
   .max(500);
+const designGridSchema = z
+  .object({
+    version: z.literal(1).default(1),
+    mode: z.enum(['copy', 'square']),
+    cellsPerRow: count(1, 200),
+    gridSizing: z.enum(['row-pitch', 'independent']).optional(),
+    gridAlignment: z.enum(['row-centres', 'spacing']).optional(),
+    resolution: num(0.01, 100).optional(),
+  })
+  .optional();
 const cropsSchema = z
   .array(
     z
       .object({
         id: text,
+        gridSpace: z.enum(['receiver', 'design']).optional(),
         crop: text,
         cropId: text.default(''),
         botanicalName: text.default(''),
@@ -61,15 +78,36 @@ const cropsSchema = z
         taxonKey: count(0, Number.MAX_SAFE_INTEGER).default(0),
         taxonUrl: text.default(''),
         cropCatalogVersion: text.default(''),
+        planting: z
+          .object({
+            rowCount: count(1, 100).default(1),
+            rowSpacing: num(0.001, 100),
+            plantSpacing: num(0.001, 100),
+            rowSpacingMode: z.enum(['default', 'custom']).default('custom'),
+            plantSpacingMode: z.enum(['default', 'custom']).default('custom'),
+            preset: z
+              .object({
+                rowSpacing: num(0.001, 100),
+                plantSpacing: num(0.001, 100),
+                profile: text,
+                version: text,
+                basis: z.enum(['published', 'adapted', 'placeholder']),
+                sourceTitle: text,
+                sourceUrl: text,
+                note: text,
+              })
+              .optional(),
+          })
+          .optional(),
         cultivar: text.default(''),
         notes: text.default(''),
         gridMode: z.enum(['cells', 'exact']).optional(),
         grid: z
           .object({
-            column: num(0, 20000),
-            row: num(0, 20000),
-            columns: num(Number.EPSILON, 20000),
-            rows: num(Number.EPSILON, 20000),
+            column: num(0, 200000),
+            row: num(0, 200000),
+            columns: num(Number.EPSILON, 200000),
+            rows: num(Number.EPSILON, 200000),
           })
           .optional(),
         treatment: text,
@@ -244,23 +282,40 @@ export const studySchema = z
         .max(366)
         .default([]),
     }),
+    irrigationUnits: irrigationUnitsSchema,
+    irrigationZones: irrigationZonesSchema,
+    designGrid: designGridSchema,
     experimentSensors: sensorsSchema,
     crops: cropsSchema,
     controlField: z
       .object({
         version: z.literal(1).default(1),
         initialized: z.boolean().default(false),
+        irrigationUnits: irrigationUnitsSchema,
+        irrigationZones: irrigationZonesSchema,
+        designGrid: designGridSchema,
         experimentSensors: sensorsSchema.default([]),
         crops: cropsSchema.default([]),
       })
       .default({}),
   })
+  .superRefine((s, ctx) => {
+    for (const [field, value] of [
+      ['agrivoltaic', s],
+      ['control', s.controlField],
+    ])
+      for (const message of irrigationReferenceIssues(value))
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `${field}: ${message}` });
+  })
   .transform((s) =>
     synchronizeCropSpacing(
       normalizeRackingOrientation({
         ...s,
-        crops: s.crops.map(normalizeCropIdentity),
-        controlField: { ...s.controlField, crops: s.controlField.crops.map(normalizeCropIdentity) },
+        crops: s.crops.map((c) => normalizeCropPlanting(normalizeCropIdentity(c))),
+        controlField: {
+          ...s.controlField,
+          crops: s.controlField.crops.map((c) => normalizeCropPlanting(normalizeCropIdentity(c))),
+        },
       }),
     ),
   );

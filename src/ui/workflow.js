@@ -6,7 +6,7 @@ export const steps = [
   ['Full array', 'Set the field boundaries', 'array'],
   ['Site & weather', 'Define the light environment', 'environment'],
   ['Irradiance', 'Understand the light field', 'irradiance'],
-  ['Agrivoltaic', 'Place sensors and crop beds beneath PV', 'array'],
+  ['Agrivoltaic', 'Place crops, sensors and irrigation beneath PV', 'array'],
   ['Control', 'Edit the matching full-sun field', 'array'],
   ['Methods & export', 'From field design to publication', 'report'],
 ];

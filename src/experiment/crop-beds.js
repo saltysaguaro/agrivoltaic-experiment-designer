@@ -1,7 +1,8 @@
+import { designGridSpec } from '../experiment/design-grid.js';
+import { defaultPlanting, plantingIssue } from '../domain/crop-planting.js';
 import { dimensions } from '../domain/study.js';
 import { landUseZones, landUseSettings } from '../domain/land-use.js';
 import { cropById, cropIdentity } from '../domain/crop-catalog.js';
-import { receiverGridSpec } from '../domain/geometry.js';
 import { rowIndex } from '../domain/receiver-grid.js';
 import { allFieldIds, uniqueFieldId } from './control-field.js';
 import { normalizeLayout } from './grid-layout.js';
@@ -26,9 +27,9 @@ export function cropRows(study) {
   }));
 }
 
-export function planCropBeds(study, { count, rowIds, cropId }) {
+export function planCropBeds(study, { count, rowIds, cropId, planting = defaultPlanting(cropId) }) {
   if (!Number.isInteger(count) || count < 1 || count > 200)
-    throw Error('Enter a whole number from 1 to 200 beds per crop row.');
+    throw Error('Enter a whole number from 1 to 200 beds per cropping area.');
   if (!cropById(cropId)) throw Error('Choose a crop from the catalog.');
   const rows = cropRows(study),
     selected = new Set(rowIds);
@@ -36,9 +37,9 @@ export function planCropBeds(study, { count, rowIds, cropId }) {
     throw Error(
       'No cropping areas are available. Use at least two PV rows with space between their no-crop strips.',
     );
-  if (!selected.size) throw Error('Select at least one crop row.');
+  if (!selected.size) throw Error('Select at least one cropping area.');
   if ([...selected].some((id) => !rows.some((r) => r.id === id)))
-    throw Error('The crop-row selection no longer matches this array.');
+    throw Error('The cropping-area selection no longer matches this array.');
   if (study.crops.length + selected.size * count > 200)
     throw Error(
       `This field supports 200 crop beds; ${200 - study.crops.length} more can be added.`,
@@ -48,6 +49,8 @@ export function planCropBeds(study, { count, rowIds, cropId }) {
     .flatMap((r) => {
       const width = (r.y1 - r.y0) / count,
         length = r.x1 - r.x0;
+      const issue = plantingIssue({ cropId, planting, width: length, length: width });
+      if (issue) throw Error(issue);
       if (length > 100 + 1e-9 || width > 100 + 1e-9)
         throw Error('Full-length beds must fit the software limit of 100 m in either direction.');
       if (width < 0.000001)
@@ -68,11 +71,12 @@ export function addCropBeds(
   { control = false, reservedIds = allFieldIds(study) } = {},
 ) {
   const plan = planCropBeds(study, options),
-    g = receiverGridSpec(study),
+    g = designGridSpec(study),
     used = new Set(reservedIds);
   const crops = plan.map((b) => ({
     id: uniqueFieldId(control ? 'C-P' : 'P', used),
     ...cropIdentity(options.cropId),
+    planting: structuredClone(options.planting || defaultPlanting(options.cropId)),
     cultivar: '',
     notes: `Crop row ${b.cropRow} (bulk layout).`,
     treatment: control ? 'Control' : 'Interrow',

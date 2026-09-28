@@ -1,3 +1,4 @@
+import { designGridSpec } from '../experiment/design-grid.js';
 import {
   gridSpacingLabel,
   DEFAULT_CELLS_PER_ROW,
@@ -15,7 +16,8 @@ import { isPeriod, periodLabel, dliLabel } from '../domain/period.js';
 import React, { useId, useState, useEffect, useRef, createContext, useContext } from 'react';
 import Info from './Info.jsx';
 import CropPicker from './CropPicker.jsx';
-import { cropIdentity } from '../domain/crop-catalog.js';
+import { changePlotCrop } from '../domain/crop-planting.js';
+import CropPlantingFields from './CropPlantingFields.jsx';
 import LocationSearch from './LocationSearch.jsx';
 import { receiverGridSpec } from '../domain/geometry.js';
 import { inputHelp, labelHelp } from './help.js';
@@ -220,7 +222,8 @@ export default function Controls({
   removeSensor,
   removePlot,
 }) {
-  const receiver = receiverGridSpec(s);
+  const receiver = receiverGridSpec(s),
+    placementGrid = designGridSpec(s);
   const orientation = rackingOrientation(s);
   const optics = moduleOptics(s.module);
   const d = dimensions(s),
@@ -819,8 +822,8 @@ export default function Controls({
           <>
             <h3>Field sensors</h3>
             <p className="control-note">
-              Place instruments in receiver cells, then edit their installation details. Dots share
-              a cell without changing the recorded centre coordinates.
+              Place instruments in design cells, then edit their installation details. Dots share a
+              cell without changing the recorded centre coordinates.
             </p>
             <button
               className={'secondary wide ' + (placing && fieldTool === 'sensor' ? 'selected' : '')}
@@ -857,13 +860,13 @@ export default function Controls({
                     <Field
                       key={k}
                       annotation={`experimentSensors.${i}.grid.${k}`}
-                      label={`Receiver ${k}`}
+                      label={`Design ${k}`}
                       value={(v.grid?.[k] ?? 0) + 1}
                       min={1}
-                      max={k === 'column' ? receiver.nx : receiver.ny}
+                      max={k === 'column' ? placementGrid.nx : placementGrid.ny}
                       step={1}
                       integer
-                      help="Select a receiver-grid cell, counted from the negative along-row / across-row edge. The instrument snaps to its centre."
+                      help="Select a design-grid cell, counted from the negative along-row / across-row edge. The instrument snaps to its centre."
                       onChange={(value) =>
                         set('experimentSensors', i, { ...v, grid: { ...v.grid, [k]: value - 1 } })
                       }
@@ -926,11 +929,11 @@ export default function Controls({
             >
               <MapPin size={16} />
               {placing && fieldTool === 'crop'
-                ? 'Click a receiver cell for the crop plot'
+                ? 'Click a design cell for the crop plot'
                 : 'Place a crop plot in the view'}
             </button>
             <p className="control-note">
-              Single crop beds occupy whole receiver cells. Bulk beds use exact cropping-area
+              Single crop beds occupy whole design cells. Bulk beds use exact cropping-area
               divisions. All beds rotate with the array.
             </p>
             <button className="secondary wide" onClick={addPlot}>
@@ -953,7 +956,11 @@ export default function Controls({
                   <CropPicker
                     value={v.cropId}
                     legacy={v.crop}
-                    onChange={(id) => set('crops', i, { ...v, ...cropIdentity(id) })}
+                    onChange={(id) => set('crops', i, changePlotCrop(v, id))}
+                  />
+                  <CropPlantingFields
+                    plot={v}
+                    onChange={(planting) => set('crops', i, { ...v, planting })}
                   />
                   {['cultivar', 'treatment', 'replicate', 'notes'].map((k) => (
                     <Field
@@ -988,10 +995,10 @@ export default function Controls({
                             (v.grid?.[k] ?? (k.endsWith('s') ? 1 : 0)) + (k.endsWith('s') ? 0 : 1)
                           }
                           min={1}
-                          max={k.startsWith('column') ? receiver.nx : receiver.ny}
+                          max={k.startsWith('column') ? placementGrid.nx : placementGrid.ny}
                           step={1}
                           integer
-                          help="Crop boundaries follow whole receiver cells. Columns run along the PV rows; receiver rows run across them. Plots stay inside the grid."
+                          help="Crop boundaries follow whole design cells. Columns run along the PV rows; grid rows run across them. Plots stay inside the grid."
                           onChange={(value) =>
                             set('crops', i, {
                               ...v,

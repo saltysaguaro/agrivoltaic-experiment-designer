@@ -1,11 +1,14 @@
+import { designGridSpec } from '../experiment/design-grid.js';
 import { maxRows, rowIndex } from '../domain/receiver-grid.js';
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { Field } from './Controls.jsx';
+import CropPlantingFields from './CropPlantingFields.jsx';
+import { changePlotCrop, plantingIssue } from '../domain/crop-planting.js';
 import CropPicker from './CropPicker.jsx';
 import { sensorTypes } from '../domain/study.js';
-import { cropIdentity, cropById } from '../domain/crop-catalog.js';
-import { receiverGridSpec, worldToLocal } from '../domain/geometry.js';
+import { cropById } from '../domain/crop-catalog.js';
+import { worldToLocal } from '../domain/geometry.js';
 import { normalizeLayout } from '../experiment/grid-layout.js';
 import { plotStats } from '../experiment/layout.js';
 import { plotZoneOverlap } from '../domain/land-use.js';
@@ -21,6 +24,7 @@ export default function FieldEditor({
   const sensor = selection.kind === 'sensor';
   const items = sensor ? study.experimentSensors : study.crops;
   const item = items.find((v) => v.id === selection.id);
+  const [linkedAction, setLinkedAction] = useState('detach');
   const [draft, setDraft] = useState(() => structuredClone(item)),
     [error, setError] = useState('');
   const form = useRef(null);
@@ -32,7 +36,7 @@ export default function FieldEditor({
     };
   }, []);
   if (!item) return null;
-  const g = receiverGridSpec(study),
+  const g = designGridSpec(study),
     update = (key, v) => setDraft((d) => ({ ...d, [key]: v }));
   const exact = !sensor && draft.gridMode === 'exact';
   const local = worldToLocal(study, draft.x, draft.y);
@@ -55,6 +59,14 @@ export default function FieldEditor({
     if (!sensor && !cropById(draft.cropId)) {
       setError('Select a crop from the catalog.');
       return;
+    }
+    if (!sensor) {
+      const normalized = normalizeLayout({ ...study, crops: [draft] }).crops[0];
+      const issue = plantingIssue(normalized);
+      if (issue) {
+        setError(issue);
+        return;
+      }
     }
     onSave({ ...draft, id: draft.id.trim() });
   }
@@ -95,7 +107,7 @@ export default function FieldEditor({
             <CropPicker
               value={draft.cropId}
               legacy={draft.crop}
-              onChange={(id) => setDraft((d) => ({ ...d, ...cropIdentity(id) }))}
+              onChange={(id) => setDraft((d) => changePlotCrop(d, id))}
             />
             <Field
               label="Cultivar / variety"
@@ -178,8 +190,8 @@ export default function FieldEditor({
                     key={key}
                     label={
                       {
-                        column: 'Receiver column',
-                        row: 'Receiver row',
+                        column: 'Design column',
+                        row: 'Design row',
                         columns: 'Columns wide',
                         rows: 'Rows long',
                       }[key]
@@ -189,12 +201,18 @@ export default function FieldEditor({
                     max={Math.max(1, max)}
                     step={1}
                     integer
-                    help="Coordinates snap to whole receiver cells; columns run along the PV rows."
+                    help="Coordinates snap to whole design cells; columns run along the PV rows."
                     onChange={(v) => update('grid', { ...draft.grid, [key]: v - (size ? 0 : 1) })}
                   />
                 );
               })}
         </div>
+        {!sensor && (
+          <CropPlantingFields
+            plot={normalizeLayout({ ...study, crops: [draft] }).crops[0]}
+            onChange={(v) => update('planting', v)}
+          />
+        )}
         <small>
           East {item.x.toFixed(3)} m · North {item.y.toFixed(3)} m
         </small>
@@ -274,8 +292,20 @@ export default function FieldEditor({
           </p>
         )}
       </div>
+      {selection.kind === 'crop' &&
+        study.irrigationUnits?.some((u) => u.link?.bedId === selection.id) && (
+          <Field
+            label="When deleting this bed"
+            value={linkedAction}
+            options={[
+              { value: 'detach', label: 'Keep irrigation and detach links' },
+              { value: 'delete', label: 'Delete linked irrigation too' },
+            ]}
+            onChange={setLinkedAction}
+          />
+        )}
       <footer>
-        <button type="button" className="text-button danger" onClick={onDelete}>
+        <button type="button" className="text-button danger" onClick={() => onDelete(linkedAction)}>
           <Trash2 size={15} /> Delete
         </button>
         <button type="button" className="secondary compact" onClick={onClose}>
