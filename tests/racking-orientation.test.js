@@ -7,6 +7,7 @@ import {
   updateStudyInput,
   migrateStudy,
   analysisKey,
+  designIssues,
 } from '../src/domain/study.js';
 import {
   axes,
@@ -14,8 +15,17 @@ import {
   disposeGroup,
   getPose,
   receiverGrid,
+  worldToLocal,
 } from '../src/domain/geometry.js';
-import { rackingOrientation } from '../src/domain/racking-orientation.js';
+import {
+  rackingOrientation,
+  northSouthRowsRequired,
+  defaultRackingAzimuth,
+} from '../src/domain/racking-orientation.js';
+import { normalizeLayout } from '../src/experiment/grid-layout.js';
+import { restoreBrowserStudy } from '../src/project/browser-study.js';
+import { readProject } from '../src/project/package.js';
+import { calculateDay } from '../src/irradiance/engine.js';
 import { solarPosition } from '../src/irradiance/solar.js';
 import { methodsRows, publicationTables } from '../src/report/export.js';
 import { provenanceRecord } from '../src/report/provenance.js';
@@ -33,10 +43,17 @@ function moduleNormal(s, sun) {
   }
 }
 
-test('rack switches adopt the appropriate orientation and retain explicit custom bearings', () => {
+test('every rack switch resets orientation and operating defaults, including custom bearings', () => {
   for (const from of types)
     for (const to of types) {
+      if (from === to) continue;
       const initial = selectRacking(defaultStudy(), from);
+      initial.array.azimuth = 37;
+      initial.racking.tilt = 80;
+      initial.racking.limit = 0;
+      initial.racking.backtracking = false;
+      initial.racking.pergolaTilt = 70;
+      initial.racking.pergolaLayout = 'checkerboard';
       const s = updateStudyInput(initial, 'racking', 'type', to);
       assert.equal(
         s.array.azimuth,
@@ -46,31 +63,127 @@ test('rack switches adopt the appropriate orientation and retain explicit custom
         rackingOrientation(s).rowAzimuth,
         ['single-axis', 'dual-axis', 'vertical'].includes(to) ? 0 : 90,
       );
-      initial.array.azimuth = 37;
-      assert.equal(updateStudyInput(initial, 'racking', 'type', to).array.azimuth, 37);
+      assert.equal(s.racking.tilt, ['vertical', 'pergola'].includes(to) ? 0 : 25);
+      assert.equal(s.racking.limit, to === 'dual-axis' ? 85 : 60);
+      assert.equal(s.racking.backtracking, true);
+      assert.equal(s.racking.pergolaTilt, 0);
+      assert.equal(s.racking.pergolaLayout, 'aligned');
+      assert.deepEqual(designIssues(s), []);
+      if (to === 'vertical') assert.equal(s.module.bifacial, true);
     }
-  let s = selectRacking(defaultStudy(), 'single-axis');
-  const previousKey = analysisKey(s);
-  s = updateStudyInput(s, 'array', 'azimuth', 180);
-  assert.notEqual(analysisKey(s), previousKey);
+});
+
+test('locked rack orientations resist direct edits; clearance refreshes preserve configured settings', () => {
+  for (const type of ['single-axis', 'vertical']) {
+    const s = selectRacking(defaultStudy(), type);
+    assert.equal(updateStudyInput(s, 'array', 'azimuth', 180).array.azimuth, 90);
+    assert.equal(analysisKey(updateStudyInput(s, 'array', 'azimuth', 37)), analysisKey(s));
+  }
+  let s = selectRacking(defaultStudy(), 'dual-axis');
+  s.array.azimuth = 37;
+  s.racking.tilt = 15;
+  s.racking.limit = 50;
+  s.racking.height = 10;
+  s.rowPair.pitch = 20;
+  s.row.tableGap = 15;
   for (const [section, key, value] of [
     ['table', 'wide', 3],
     ['module', 'width', 1.2],
     ['racking', 'limit', 50],
-    ['racking', 'type', 'single-axis'],
+    ['racking', 'type', 'dual-axis'],
   ]) {
     s = updateStudyInput(s, section, key, value);
     assert.equal(
       s.array.azimuth,
-      180,
+      37,
       'Geometry edits and clearance refreshes preserve orientation',
     );
+    assert.equal(s.racking.tilt, 15);
+    assert.equal(s.racking.limit, 50);
+    assert.equal(s.racking.height, 10);
+    assert.equal(s.rowPair.pitch, 20);
+    assert.equal(s.row.tableGap, 15);
   }
   assert.equal(
     migrateStudy(JSON.parse(JSON.stringify(s))).array.azimuth,
-    180,
-    'Existing project bearings are retained',
+    37,
+    'Unlocked project bearings are retained',
   );
+});
+
+test('legacy locked racks rotate layouts on import and restore, and reject stale light', async () => {
+  for (const type of ['single-axis', 'vertical']) {
+    let old = selectRacking(defaultStudy(), type);
+    old.array.azimuth = 180;
+    old.weather.mode = 'sample';
+    old.experimentSensors = [
+      {
+        id: 'S-1',
+        type: 'PAR',
+        x: 2,
+        y: 3,
+        z: -0.2,
+        treatment: 'AV',
+        replicate: '1',
+        model: '',
+        logger: '',
+        notes: '',
+      },
+    ];
+    old.crops = [
+      {
+        id: 'P-1',
+        crop: 'Lettuce',
+        x: 2,
+        y: 3,
+        width: 1,
+        length: 1,
+        treatment: 'AV',
+        replicate: '1',
+      },
+    ];
+    old = normalizeLayout(old);
+    old.controlField = {
+      version: 1,
+      initialized: true,
+      experimentSensors: old.experimentSensors.map((s) => ({ ...s, id: 'C-S-1' })),
+      crops: old.crops.map((p) => ({ ...p, id: 'C-P-1' })),
+    };
+    // Include coordinate-only legacy records, as well as current cell indices.
+    for (const withGrid of [true, false]) {
+      const raw = structuredClone(old);
+      if (!withGrid)
+        for (const field of [raw, raw.controlField]) {
+          field.experimentSensors.forEach((s) => delete s.grid);
+          field.crops.forEach((p) => delete p.grid);
+        }
+      const restored = normalizeLayout(migrateStudy(raw));
+      assert.equal(restored.array.azimuth, 90);
+      assert.notEqual(analysisKey(restored), analysisKey(old));
+      assert.equal(restoreBrowserStudy(raw).array.azimuth, 90);
+      for (const [before, after] of [
+        [old, restored],
+        [old.controlField, restored.controlField],
+      ]) {
+        for (const key of ['experimentSensors', 'crops']) {
+          assert.deepEqual(after[key][0].grid, before[key][0].grid);
+          const a = worldToLocal(old, before[key][0].x, before[key][0].y);
+          const b = worldToLocal(restored, after[key][0].x, after[key][0].y);
+          near(a.x, b.x);
+          near(a.y, b.y);
+        }
+        assert.equal(after.experimentSensors[0].z, -0.2);
+      }
+      const project = await readProject(
+        new TextEncoder().encode(JSON.stringify({ study: raw, result: { key: analysisKey(raw) } })),
+      );
+      assert.equal(project.result, null);
+      assert.ok(project.warnings.some((w) => /corrected to north–south/.test(w)));
+      assert.ok(project.warnings.some((w) => /Light results will not be restored/.test(w)));
+      assert.equal(project.study.array.azimuth, 90);
+    }
+    await assert.rejects(calculateDay(old), /require north–south rows/);
+  }
 });
 
 test('fixed defaults face the equator on hemisphere changes and rack switches, preserving custom bearings', () => {
@@ -90,6 +203,12 @@ test('fixed defaults face the equator on hemisphere changes and rack switches, p
   for (const type of ['single-axis', 'dual-axis', 'vertical']) {
     const south = updateStudyInput(selectRacking(defaultStudy(), type), 'site', 'latitude', -33);
     assert.equal(south.array.azimuth, 90);
+  }
+  for (const type of ['fixed', 'pergola']) {
+    const south = updateStudyInput(defaultStudy(), 'site', 'latitude', -33);
+    const s = selectRacking(south, type);
+    assert.equal(s.array.azimuth, defaultRackingAzimuth(type, -33));
+    assert.equal(s.array.azimuth, 0);
   }
 });
 
@@ -135,7 +254,7 @@ test('default single-axis rows run north–south and module normals follow the s
   }
 });
 
-test('fixed, vertical, pergola and dual-axis geometry obey compass directions at arbitrary layout bearings', () => {
+test('geometry obeys locked and editable compass directions; dual-axis normals follow the sun', () => {
   const fixed = selectRacking(defaultStudy(), 'fixed');
   assert.ok(moduleNormal(fixed).y < 0, 'Default fixed front faces south');
   near(moduleNormal(fixed).x, 0);
@@ -145,7 +264,8 @@ test('fixed, vertical, pergola and dual-axis geometry obey compass directions at
   for (const azimuth of [0, 37, 90, 180, 270]) {
     for (const type of types) {
       const s = selectRacking(defaultStudy(), type);
-      s.array.azimuth = azimuth;
+      const configured = updateStudyInput(s, 'array', 'azimuth', azimuth);
+      s.array = configured.array;
       s.racking.backtracking = false;
       s.racking.limit = 85;
       for (const sun of [
@@ -153,7 +273,8 @@ test('fixed, vertical, pergola and dual-axis geometry obey compass directions at
         new Vector3(-0.5, 0.4, 0.7).normalize(),
       ]) {
         const normal = moduleNormal(s, sun);
-        const angle = (azimuth * Math.PI) / 180;
+        const angle = (s.array.azimuth * Math.PI) / 180;
+        if (northSouthRowsRequired(type)) assert.equal(s.array.azimuth, 90);
         const expected =
           type === 'dual-axis'
             ? sun

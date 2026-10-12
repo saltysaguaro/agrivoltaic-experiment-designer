@@ -1,3 +1,6 @@
+import { normalizeIrrigation } from './irrigation.js';
+import { receiverGridSpec } from '../domain/geometry.js';
+import { designGridSpec } from '../experiment/design-grid.js';
 import {
   rowIndex,
   rowEdge,
@@ -6,9 +9,9 @@ import {
   cellLocal,
   maxRows,
 } from '../domain/receiver-grid.js';
-import { receiverGridSpec, localToWorld, worldToLocal } from '../domain/geometry.js';
+import { localToWorld, worldToLocal } from '../domain/geometry.js';
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(v)));
-export function cellAt(study, point, grid = receiverGridSpec(study), clampOutside = true) {
+export function cellAt(study, point, grid = designGridSpec(study), clampOutside = true) {
   if (grid.exceeded) return null;
   const p = worldToLocal(study, point.x, point.y);
   const column = Math.floor((p.x + grid.width / 2) / grid.dx);
@@ -16,24 +19,28 @@ export function cellAt(study, point, grid = receiverGridSpec(study), clampOutsid
   if (!clampOutside && (column < 0 || row < 0 || column >= grid.nx || row >= grid.ny)) return null;
   return { column: clamp(column, 0, grid.nx - 1), row: clamp(row, 0, grid.ny - 1) };
 }
-export function cellCenter(study, cell, grid = receiverGridSpec(study)) {
+export function cellCenter(study, cell, grid = designGridSpec(study)) {
   const p = cellLocal(grid, cell.column, cell.row);
   return localToWorld(study, p.x, p.y);
 }
 export function normalizeLayout(study) {
   const normalized = normalizeField(study);
+  normalized.irrigationUnits = normalizeIrrigation(normalized);
   if (study.controlField) {
     const control = normalizeField({ ...study, ...study.controlField });
+    control.irrigationUnits = normalizeIrrigation(control);
     normalized.controlField = {
       ...study.controlField,
+      ...(control.designGrid ? { designGrid: control.designGrid } : {}),
       experimentSensors: control.experimentSensors,
       crops: control.crops,
+      irrigationUnits: control.irrigationUnits,
     };
   }
   return normalized;
 }
 function normalizeField(study) {
-  const g = receiverGridSpec(study);
+  const g = designGridSpec(study);
   if (g.exceeded) return { ...study };
   return {
     ...study,
@@ -62,6 +69,7 @@ function normalizeField(study) {
         );
         return {
           ...plot,
+          ...(study.designGrid ? { gridSpace: 'design' } : {}),
           grid: { column, row, columns, rows },
           x: center.x,
           y: center.y,
@@ -96,6 +104,7 @@ function normalizeField(study) {
       );
       return {
         ...plot,
+        ...(study.designGrid ? { gridSpace: 'design' } : {}),
         grid: { column, row, columns, rows },
         x: center.x,
         y: center.y,
@@ -134,7 +143,7 @@ export function receiverLines(study, grid = receiverGridSpec(study)) {
 // Positions below are glyph offsets, not changes to installation coordinates.
 // Up to nine individual dots; denser cells use one larger, readable count badge.
 export function sensorMarkers(study, { profile = false } = {}) {
-  const g = receiverGridSpec(study),
+  const g = designGridSpec(study),
     groups = new Map();
   for (const sensor of study.experimentSensors) {
     const cell = sensor.grid || cellAt(study, sensor, g),

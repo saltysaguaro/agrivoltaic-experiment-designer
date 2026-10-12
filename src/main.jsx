@@ -1,3 +1,10 @@
+import IrrigationDialog from './ui/IrrigationDialog.jsx';
+import IrrigationEditor from './ui/IrrigationEditor.jsx';
+import IrrigationZoneEditor from './ui/IrrigationZoneEditor.jsx';
+import { addIrrigation } from './experiment/irrigation.js';
+import { copyIrradianceGrid, regridField } from './experiment/design-grid.js';
+import { fieldItemKey, deleteFieldItem } from './experiment/field-editing.js';
+import { worldToLocal } from './domain/geometry.js';
 import { DEFAULT_CELLS_PER_ROW, PREVIEW_CELLS_PER_ROW } from './domain/receiver-grid.js';
 import DliZoneLegend from './ui/DliZoneLegend.jsx';
 import {
@@ -74,6 +81,7 @@ import SensorsDialog from './ui/SensorsDialog.jsx';
 import { addSensors } from './experiment/sensor-grid.js';
 import { addCropBeds } from './experiment/crop-beds.js';
 import FieldEditor from './ui/FieldEditor.jsx';
+import { defaultPlanting } from './domain/crop-planting.js';
 import { cropIdentity, cropById, unresolvedCrops } from './domain/crop-catalog.js';
 import {
   layoutSnapshot,
@@ -150,6 +158,9 @@ function App() {
     [newCropId, setNewCropId] = useState('lettuce'),
     [cropBedsOpen, setCropBedsOpen] = useState(false),
     [sensorsOpen, setSensorsOpen] = useState(false),
+    [irrigationOpen, setIrrigationOpen] = useState(false),
+    [irrigationType, setIrrigationType] = useState('drip'),
+    [zoneEditor, setZoneEditor] = useState(null),
     [newSensorType, setNewSensorType] = useState('PAR'),
     [selection, setSelection] = useState(null),
     [selections, setSelections] = useState([]),
@@ -231,7 +242,12 @@ function App() {
     setEditorOpen(Boolean(target && open));
     setInspection(null);
     if (target) {
-      const layer = target.kind === 'sensor' ? 'sensors' : 'plots';
+      const layer =
+        target.kind === 'sensor'
+          ? 'sensors'
+          : target.kind === 'irrigation'
+            ? 'irrigation'
+            : 'plots';
       setLayerPrefs((current) => ({
         ...current,
         [layerMode]: { ...current[layerMode], [layer]: true },
@@ -239,7 +255,7 @@ function App() {
     }
   }
   function editFieldItem(target, item) {
-    const key = target.kind === 'sensor' ? 'experimentSensors' : 'crops';
+    const key = fieldItemKey(target.kind);
     const current = fieldLatest.current[key].find((v) => v.id === target.id);
     if (!current) return;
     if (JSON.stringify(current) === JSON.stringify(item)) {
@@ -278,16 +294,29 @@ function App() {
     );
     setEditorOpen(false);
   }
-  function removeFieldItem(target) {
-    const key = target.kind === 'sensor' ? 'experimentSensors' : 'crops';
+  function removeFieldItem(target, linkedAction = 'detach') {
     rememberFieldLayout();
-    setFieldStudy((current) => ({
-      ...current,
-      [key]: current[key].filter((v) => v.id !== target.id),
-    }));
+    setFieldStudy((current) => deleteFieldItem(current, target, linkedAction));
     setSelection(null);
     setSelections([]);
     setEditorOpen(false);
+  }
+  function addIrrigationPoint(point) {
+    const p = worldToLocal(fieldLatest.current, point.x, point.y);
+    try {
+      const added = addIrrigation(
+        fieldLatest.current,
+        { method: irrigationType, placement: 'single', x: p.x, y: p.y, snap: true },
+        { control: step === 8, reservedIds: allFieldIds(latest.current) },
+      );
+      rememberFieldLayout();
+      setFieldStudy(added.study);
+      setPlacing(false);
+      setFieldTool(null);
+      selectFieldItem(added.selections[0]);
+    } catch (e) {
+      setNotice(e.message);
+    }
   }
   function chooseFieldTool(tool) {
     if (tool && view === 'profile') setView('plan');
@@ -297,7 +326,7 @@ function App() {
     setSelection(null);
     setSelections([]);
     if (tool) {
-      const layer = tool === 'sensor' ? 'sensors' : 'plots';
+      const layer = tool === 'sensor' ? 'sensors' : tool === 'irrigation' ? 'irrigation' : 'plots';
       setLayerPrefs((current) => ({
         ...current,
         [layerMode]: { ...current[layerMode], [layer]: true },
@@ -355,6 +384,10 @@ function App() {
     issues = designIssues(s),
     scope = steps[step][2];
   const fieldWorkspace = step === 7 || step === 8;
+  useEffect(() => {
+    if (fieldWorkspace && !s.designGrid)
+      setStudy((current) => ({ ...current, designGrid: copyIrradianceGrid(current) }));
+  }, [fieldWorkspace, s.designGrid]);
   const activeResult = useMemo(
     () => (step === 8 ? controlResult(validResult) : validResult),
     [step, validResult],
@@ -370,7 +403,14 @@ function App() {
       step === 8
         ? controlLayers(layerPrefs[layerMode])
         : step === 6
-          ? { ...layerPrefs[layerMode], sensors: false, plots: false }
+          ? {
+              ...layerPrefs[layerMode],
+              sensors: false,
+              plots: false,
+              irrigation: false,
+              irrigationCoverage: false,
+              designGrid: false,
+            }
           : layerPrefs[layerMode],
     panelOpacity = opacityPrefs[opacityMode];
   useEffect(() => {
@@ -381,7 +421,16 @@ function App() {
         ...current,
         analysis: {
           ...irradianceLayers,
-          ...(fieldWorkspace ? { sensors: true, plots: true, cropping: true } : {}),
+          ...(fieldWorkspace
+            ? {
+                sensors: true,
+                plots: true,
+                cropping: true,
+                designGrid: true,
+                irrigation: true,
+                irrigationCoverage: true,
+              }
+            : {}),
         },
       }));
     }
@@ -390,7 +439,15 @@ function App() {
     if (fieldWorkspace)
       setLayerPrefs((current) => ({
         ...current,
-        analysis: { ...current.analysis, sensors: true, plots: true, cropping: true },
+        analysis: {
+          ...current.analysis,
+          sensors: true,
+          plots: true,
+          cropping: true,
+          designGrid: true,
+          irrigation: true,
+          irrigationCoverage: true,
+        },
       }));
   }, [step]);
 
@@ -456,6 +513,12 @@ function App() {
       JSON.stringify([
         s.experimentSensors,
         s.crops,
+        s.designGrid,
+        s.irrigationUnits,
+        s.irrigationZones,
+        s.controlField.designGrid,
+        s.controlField.irrigationUnits,
+        s.controlField.irrigationZones,
         s.controlField.experimentSensors,
         s.controlField.crops,
       ]),
@@ -464,6 +527,10 @@ function App() {
   const hasLayout =
     s.experimentSensors.length ||
     s.crops.length ||
+    s.irrigationUnits.length ||
+    s.irrigationZones.length ||
+    s.controlField.irrigationUnits.length ||
+    s.controlField.irrigationZones.length ||
     s.controlField.experimentSensors.length ||
     s.controlField.crops.length;
   const unsavedLayout = savedLayoutKey === null ? Boolean(hasLayout) : savedLayoutKey !== fieldKey;
@@ -693,6 +760,10 @@ function App() {
     );
   }
   function go(n) {
+    if (n === 7 || n === 8)
+      setStudy((current) =>
+        current.designGrid ? current : { ...current, designGrid: copyIrradianceGrid(current) },
+      );
     if (n === 8) setStudy((current) => initializeControl(current));
     fieldHistory.current = [];
     setUndoCount(0);
@@ -883,6 +954,12 @@ function App() {
       JSON.stringify([
         loaded.experimentSensors,
         loaded.crops,
+        loaded.designGrid,
+        loaded.irrigationUnits,
+        loaded.irrigationZones,
+        loaded.controlField.designGrid,
+        loaded.controlField.irrigationUnits,
+        loaded.controlField.irrigationZones,
         loaded.controlField.experimentSensors,
         loaded.controlField.crops,
       ]),
@@ -916,7 +993,7 @@ function App() {
     }
     const id = uniqueFieldId(step === 8 ? 'C-S' : 'S', allFieldIds(latest.current));
     if (!cellAt(activeStudy, point, undefined, false)) {
-      setNotice('Choose a receiver cell inside the array grid.');
+      setNotice('Choose a cell inside the design grid.');
       return;
     }
     rememberFieldLayout();
@@ -957,7 +1034,7 @@ function App() {
     }
     const id = uniqueFieldId(step === 8 ? 'C-P' : 'P', allFieldIds(latest.current));
     if (!cellAt(activeStudy, point, undefined, false)) {
-      setNotice('Choose a receiver cell inside the array grid.');
+      setNotice('Choose a cell inside the design grid.');
       return;
     }
     rememberFieldLayout();
@@ -968,6 +1045,7 @@ function App() {
         {
           id,
           ...cropIdentity(cropId),
+          planting: defaultPlanting(cropId),
           cultivar: '',
           notes: '',
           treatment: step === 8 ? 'Control' : 'Interrow',
@@ -1017,6 +1095,7 @@ function App() {
         layers,
         panelOpacity,
         callouts: !fieldWorkspace && scope !== 'report',
+        designGrid: fieldWorkspace,
       });
       download(
         format === 'png' ? await pngFigure(svg) : svg,
@@ -1256,7 +1335,7 @@ function App() {
                     'Bring the individual rows together into a finite system.',
                     'Connect your field location to a reproducible weather source.',
                     'Compare ground light for the selected period with an unobstructed horizontal reference.',
-                    'Arrange sensors and crop beds over the agrivoltaic light field.',
+                    'Arrange crops, sensors and irrigation over the agrivoltaic light field.',
                     'Edit the matching field without PV; uniform light comes from the full-sun reference.',
                     'Export clear figures and traceable parameters for your methods section.',
                   ][step]
@@ -1319,6 +1398,22 @@ function App() {
           )}
           {fieldWorkspace && (
             <FieldTools
+              irrigationType={irrigationType}
+              setIrrigationType={setIrrigationType}
+              onEditZone={setZoneEditor}
+              onAddIrrigation={() => {
+                chooseFieldTool(null);
+                setIrrigationOpen(true);
+              }}
+              onDesignGrid={(config) => {
+                const next = regridField(fieldLatest.current, config);
+                rememberFieldLayout();
+                setFieldStudy(next);
+                setEditorOpen(false);
+                setNotice(
+                  'Design grid updated. Light calculation and numerical sampling are unchanged.',
+                );
+              }}
               onAddSensors={() => {
                 chooseFieldTool(null);
                 setSensorsOpen(true);
@@ -1331,6 +1426,7 @@ function App() {
                 const point = fieldInteraction.current?.pointAtClient(event);
                 if (point) {
                   if (tool.kind === 'sensor') addSensor(point);
+                  else if (tool.kind === 'irrigation') addIrrigationPoint(point);
                   else addPlot(point, tool.cropId);
                 }
               }}
@@ -1346,6 +1442,53 @@ function App() {
               onDuplicate={duplicateSelection}
               onSelect={selectFieldItem}
               view={view}
+            />
+          )}
+          {fieldWorkspace && zoneEditor && (
+            <IrrigationZoneEditor
+              key={zoneEditor}
+              study={activeStudy}
+              zoneId={zoneEditor}
+              onClose={() => setZoneEditor(null)}
+              onApply={(next) => {
+                rememberFieldLayout();
+                setFieldStudy(next);
+                setZoneEditor(null);
+              }}
+            />
+          )}
+          {fieldWorkspace && irrigationOpen && (
+            <IrrigationDialog
+              study={activeStudy}
+              onClose={() => setIrrigationOpen(false)}
+              onApply={(options) => {
+                const added = addIrrigation(fieldLatest.current, options, {
+                  control: step === 8,
+                  reservedIds: allFieldIds(latest.current),
+                });
+                const parsed = studySchema.safeParse(added.study);
+                if (!parsed.success)
+                  throw Error(parsed.error.issues.map(validationMessage).join(' '));
+                rememberFieldLayout();
+                setFieldStudy(parsed.data);
+                setSelections(added.selections);
+                setSelection(added.selections[0] || null);
+                setEditorOpen(false);
+                setIrrigationOpen(false);
+                setLayerPrefs((current) => ({
+                  ...current,
+                  [layerMode]: {
+                    ...current[layerMode],
+                    irrigation: true,
+                    irrigationCoverage: true,
+                  },
+                }));
+                setNotice(
+                  options.method === 'rainfed'
+                    ? 'Rainfed treatment recorded.'
+                    : `Added ${added.selections.length} irrigation units. Coverage is nominal; water delivery is not simulated.`,
+                );
+              }}
             />
           )}
           {fieldWorkspace && sensorsOpen && (
@@ -1401,7 +1544,7 @@ function App() {
                 }));
                 setCropBedsOpen(false);
                 setNotice(
-                  `Added ${added.selections.length} crop beds across ${new Set(options.rowIds).size} crop ${new Set(options.rowIds).size === 1 ? 'row' : 'rows'}.`,
+                  `Added ${added.selections.length} crop beds across ${new Set(options.rowIds).size} cropping ${new Set(options.rowIds).size === 1 ? 'area' : 'areas'}.`,
                 );
               }}
             />
@@ -1466,7 +1609,13 @@ function App() {
                 result={activeResult}
                 metric={metric}
                 showGrid={grid}
-                onPlace={fieldTool === 'crop' ? addPlot : addSensor}
+                onPlace={
+                  fieldTool === 'crop'
+                    ? addPlot
+                    : fieldTool === 'irrigation'
+                      ? addIrrigationPoint
+                      : addSensor
+                }
                 interactionRef={fieldInteraction}
                 editing={fieldWorkspace}
                 selection={selection}
@@ -1474,24 +1623,45 @@ function App() {
                 onSelect={selectFieldItem}
                 onEditItem={editFieldItem}
                 onDropTool={(tool, point) =>
-                  tool.kind === 'crop' ? addPlot(point, tool.cropId) : addSensor(point)
+                  tool.kind === 'crop'
+                    ? addPlot(point, tool.cropId)
+                    : tool.kind === 'irrigation'
+                      ? addIrrigationPoint(point)
+                      : addSensor(point)
                 }
                 editor={
                   fieldWorkspace && editorOpen && selection ? (
-                    <FieldEditor
-                      key={`${selection.kind}:${selection.id}`}
-                      study={activeStudy}
-                      selection={selection}
-                      control={step === 8}
-                      result={activeResult}
-                      onSave={(item) => editFieldItem(selection, item)}
-                      onClose={() => setEditorOpen(false)}
-                      onDelete={() => removeFieldItem(selection)}
-                    />
+                    selection.kind === 'irrigation' ? (
+                      <IrrigationEditor
+                        key={selection.id}
+                        study={activeStudy}
+                        selection={selection}
+                        onSave={(item) => editFieldItem(selection, item)}
+                        onClose={() => setEditorOpen(false)}
+                        onDelete={() => removeFieldItem(selection)}
+                      />
+                    ) : (
+                      <FieldEditor
+                        key={`${selection.kind}:${selection.id}`}
+                        study={activeStudy}
+                        selection={selection}
+                        control={step === 8}
+                        result={activeResult}
+                        onSave={(item) => editFieldItem(selection, item)}
+                        onClose={() => setEditorOpen(false)}
+                        onDelete={(policy) => removeFieldItem(selection, policy)}
+                      />
+                    )
                   ) : null
                 }
                 placing={placing}
-                placementKind={fieldTool === 'crop' ? 'crop plot' : 'sensor'}
+                placementKind={
+                  fieldTool === 'crop'
+                    ? 'crop plot'
+                    : fieldTool === 'irrigation'
+                      ? 'irrigation unit'
+                      : 'sensor'
+                }
                 resetKey={resetKey}
               />
               <div className="scene-label">
@@ -1518,8 +1688,10 @@ function App() {
                   {view === 'profile'
                     ? 'Use the receiver inspector below, or choose another view to place an item'
                     : fieldTool === 'crop'
-                      ? 'Click a receiver cell to place a crop bed'
-                      : 'Click a receiver cell to place an instrument'}
+                      ? 'Click a design cell to place a crop bed'
+                      : fieldTool === 'irrigation'
+                        ? 'Click a design cell to place an irrigation unit'
+                        : 'Click a design cell to place an instrument'}
                 </div>
               )}
               <div className="scene-hint">
@@ -1749,7 +1921,7 @@ function App() {
               {recovery
                 ? 'Automatic saving is paused; the original study is retained.'
                 : step < steps.length - 1
-                  ? 'Export a project to save sensors, crop beds and results.'
+                  ? 'Export a project to save field layouts and light results.'
                   : 'Keep the project package with your research records.'}
             </span>
             <div>

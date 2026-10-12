@@ -201,18 +201,11 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       /panels track east–west around a north–south axis/,
     );
     await click(step('Full array'));
-    const bearing = document.querySelector('[data-annotation="array.azimuth"] input');
-    await act(async () => {
-      Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
-        bearing,
-        '180',
-      );
-      bearing.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
-    });
-    assert.equal((await savedStudy()).array.azimuth, 180);
-    await click(step('Racking'));
-    await click(byText('Apply default orientation'));
+    assert.equal(document.querySelector('[data-annotation="array.azimuth"] input'), null);
+    assert.match(document.querySelector('.control-content').textContent, /Orientation is locked/);
     assert.equal((await savedStudy()).array.azimuth, 90);
+    await click(step('Racking'));
+    assert.equal(byText('Apply default orientation'), undefined);
     await act(async () => {
       const selection = document.querySelector('select');
       selection.value = 'dual-axis';
