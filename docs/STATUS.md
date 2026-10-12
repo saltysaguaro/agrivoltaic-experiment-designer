@@ -1,5 +1,10 @@
 # Implementation status
 
+## Dependency audit repair (October 12)
+
+- Updated the locked PostCSS dependency `source-map-js` from 1.2.1 to 1.2.2 to resolve [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q), the high-severity denial-of-service advisory that failed the weekly dependency audit. Direct dependency pins are unchanged.
+- Verification: `npm audit --audit-level=high` reports **zero vulnerabilities**; all **165 tests pass**; production build succeeds with the existing >500 kB chunk advisory. All **480 archived files are unchanged**. Installed Radiance comparison: **61,320 rays / 12 cases, zero visibility mismatches**; the validation record timestamp reflects this rerun. No remote workflow rerun or deployment is claimed.
+
 ## Irrigation designer and independent field grid (September 28)
 
 - Implemented individual and bulk irrigation in Agrivoltaic and Control: surface/subsurface drip, point emitters/bubblers, micro/fixed sprinklers, furrows, basin/border areas, custom geometries and hardware-free rainfed zones. Includes bed links, explicit replacement previews, independent emitter spacing, exact offsets, rated/measured flow and pressure, zone metadata, duplication, deletion policies and undo. First Control initialization remaps copied unit, zone and bed IDs. See [irrigation guide](IRRIGATION.md).
