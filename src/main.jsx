@@ -366,6 +366,7 @@ function App() {
     );
   }
   const mainRef = useRef(null);
+  const [mobileInputsOpen, setMobileInputsOpen] = useState(false);
   const fieldHistory = useRef([]);
   const fieldInteraction = useRef(null);
   const enteredArray = useRef(navigation().step === 4);
@@ -395,7 +396,7 @@ function App() {
   useEffect(() => {
     if (validResult) logCalculationDiagnostics(s, validResult);
   }, [validResult]);
-  const compactSidebar = fieldWorkspace && !sidebarExpanded;
+  const compactSidebar = fieldWorkspace && !sidebarExpanded && !mobileInputsOpen;
   const unidentifiedCrops = [...unresolvedCrops(s), ...unresolvedCrops(fieldStudy(s, true))];
   const layerMode = step >= 6 && step <= 8 ? 'analysis' : 'design';
   const opacityMode = step === 6 || (validResult && step >= 6) ? 'analysis' : 'design';
@@ -1132,11 +1133,19 @@ function App() {
   }
   const mean = activeResult?.meanDli;
   return (
-    <div className="app">
+    <div className={`app ${mobileInputsOpen ? 'inputs-open' : ''}`}>
       <header className="app-header">
         <a className="brand" href="./" aria-label="Agrivoltaic Experiment Designer home">
           <span>Agrivoltaic Experiment Designer</span>
         </a>
+        <button
+          className="secondary inputs-toggle"
+          aria-expanded={mobileInputsOpen}
+          aria-controls="study-controls"
+          onClick={() => setMobileInputsOpen((open) => !open)}
+        >
+          <PanelLeftOpen size={16} /> {mobileInputsOpen ? 'Close inputs' : 'Inputs'}
+        </button>
         <div className="header-actions">
           {recovery && (
             <button
@@ -1153,6 +1162,7 @@ function App() {
           <button
             className="icon-button"
             title="Open project package or study JSON"
+            aria-label="Open project"
             disabled={Boolean(projectStatus)}
             onClick={() => importRef.current.click()}
           >
@@ -1161,10 +1171,12 @@ function App() {
           </button>
           <button
             className="secondary compact"
+            aria-label="Export project"
+            title="Export project"
             disabled={Boolean(projectStatus)}
             onClick={() => saveStudy()}
           >
-            <Download size={16} /> Export project
+            <Download size={16} /> <span>Export project</span>
           </button>
           <input
             ref={importRef}
@@ -1178,6 +1190,18 @@ function App() {
             }}
           />
         </div>
+        <nav className="step-navigation" aria-label="Step navigation">
+          {step > 0 && (
+            <button className="text-button" onClick={() => go(step - 1)}>
+              <ArrowLeft size={16} /> Back
+            </button>
+          )}
+          {step < steps.length - 1 && (
+            <button className="primary" onClick={() => go(step + 1)}>
+              Continue to {steps[step + 1][0].toLowerCase()} <ArrowRight size={17} />
+            </button>
+          )}
+        </nav>
       </header>
       {pendingProject && (
         <ProjectImportDialog
@@ -1200,6 +1224,13 @@ function App() {
       <div
         className={`workspace ${fieldWorkspace ? 'field-workspace' : ''} ${compactSidebar ? 'compact-sidebar' : ''}`}
       >
+        {mobileInputsOpen && (
+          <button
+            className="inputs-backdrop"
+            aria-label="Close inputs"
+            onClick={() => setMobileInputsOpen(false)}
+          />
+        )}
         <aside className="sidebar" id="study-controls">
           {fieldWorkspace && (
             <button
@@ -1315,87 +1346,59 @@ function App() {
             <span>Designed for reproducible field research</span>
           </div>
         </aside>
-        <main ref={mainRef}>
-          <div className="workspace-heading">
-            <div>
-              <div className="eyebrow">
-                DESIGN WORKSPACE <span>/</span> {String(step + 1).padStart(2, '0')}
+        <main ref={mainRef} aria-label={`${steps[step][0]} designer`}>
+          <div className="workspace-messages">
+            {weatherPinned && step >= 5 && (
+              <div className="snapshot-note">
+                Using the imported weather snapshot. Site/period edits or Refresh weather select new
+                weather data.
               </div>
-              <h1>
-                {steps[step][1]}
-                <span className="heading-dot">.</span>
-              </h1>
-              <p>
-                {
-                  [
-                    'A precise starting point for your agrivoltaic system.',
-                    'Set the geometry that shapes the light below.',
-                    'Arrange modules into a repeatable structural unit.',
-                    'Balance solar geometry, crop access, and working space.',
-                    'Bring the individual rows together into a finite system.',
-                    'Connect your field location to a reproducible weather source.',
-                    'Compare ground light for the selected period with an unobstructed horizontal reference.',
-                    'Arrange crops, sensors and irrigation over the agrivoltaic light field.',
-                    'Edit the matching field without PV; uniform light comes from the full-sun reference.',
-                    'Export clear figures and traceable parameters for your methods section.',
-                  ][step]
-                }
+            )}
+            {notice && (
+              <div className="notice" role="status">
+                <span>{notice}</span>
+                <button onClick={() => setNotice('')} aria-label="Dismiss notification">
+                  ×
+                </button>
+              </div>
+            )}
+            {unidentifiedCrops.length > 0 && step >= 7 && (
+              <div className="warning" role="alert">
+                <Sprout size={17} />
+                <span>
+                  {unidentifiedCrops.length} imported crop bed(s) need a catalog selection to
+                  identify their botanical names. Open each bed and choose its crop.
+                </span>
+              </div>
+            )}
+            {issues.length > 0 && (
+              <div className="warning" role="alert">
+                <AlertTriangle size={17} />
+                <span>{issues.join(' ')}</span>
+              </div>
+            )}
+            {result && !validResult && (
+              <div className="warning">
+                <Sun size={17} />
+                <span>
+                  The design or weather changed. Recalculate irradiance before using light metrics.
+                </span>
+                <button onClick={() => go(6)}>Go to analysis</button>
+              </div>
+            )}
+            <a className="mobile-jump" href="#study-controls">
+              Back to inputs ↑
+            </a>
+            {step === 8 && (
+              <p className="info-box">
+                Control field · same receiver footprint as Agrivoltaic · no PV infrastructure.{' '}
+                {activeResult
+                  ? `${dliLabel(activeResult)}: ${activeResult.openDli.toFixed(2)} mol/m²/day uniformly; 100% relative sunlight.`
+                  : 'Calculate irradiance to obtain the full-sun DLI for this site and period.'}{' '}
+                Layouts are copied on first entry and edited independently afterward.
               </p>
-            </div>
-            <div className="units-chip">
-              SI <span>metres · watts</span>
-            </div>
+            )}
           </div>
-          {weatherPinned && step >= 5 && (
-            <div className="snapshot-note">
-              Using the imported weather snapshot. Site/period edits or Refresh weather select new
-              weather data.
-            </div>
-          )}
-          {notice && (
-            <div className="notice" role="status">
-              <span>{notice}</span>
-              <button onClick={() => setNotice('')} aria-label="Dismiss notification">
-                ×
-              </button>
-            </div>
-          )}
-          {unidentifiedCrops.length > 0 && step >= 7 && (
-            <div className="warning" role="alert">
-              <Sprout size={17} />
-              <span>
-                {unidentifiedCrops.length} imported crop bed(s) need a catalog selection to identify
-                their botanical names. Open each bed and choose its crop.
-              </span>
-            </div>
-          )}
-          {issues.length > 0 && (
-            <div className="warning" role="alert">
-              <AlertTriangle size={17} />
-              <span>{issues.join(' ')}</span>
-            </div>
-          )}
-          {result && !validResult && (
-            <div className="warning">
-              <Sun size={17} />
-              <span>
-                The design or weather changed. Recalculate irradiance before using light metrics.
-              </span>
-              <button onClick={() => go(6)}>Go to analysis</button>
-            </div>
-          )}
-          <a className="mobile-jump" href="#study-controls">
-            Back to inputs ↑
-          </a>
-          {step === 8 && (
-            <p className="info-box">
-              Control field · same receiver footprint as Agrivoltaic · no PV infrastructure.{' '}
-              {activeResult
-                ? `${dliLabel(activeResult)}: ${activeResult.openDli.toFixed(2)} mol/m²/day uniformly; 100% relative sunlight.`
-                : 'Calculate irradiance to obtain the full-sun DLI for this site and period.'}{' '}
-              Layouts are copied on first entry and edited independently afterward.
-            </p>
-          )}
           {fieldWorkspace && (
             <FieldTools
               irrigationType={irrigationType}
@@ -1768,175 +1771,166 @@ function App() {
               )}
             </div>
           )}
-          <div className="stats-grid">
-            {(step === 0
-              ? [
-                  [PanelTop, 'Module area', (s.module.length * s.module.width).toFixed(2), 'm²'],
-                  [Sun, 'Rated power', s.module.power, 'W'],
-                  [Layers, 'Module gap', (s.module.gap * 1000).toFixed(0), 'mm'],
-                ]
-              : step === 3
-                ? [
-                    [Layers, 'Row pitch', s.rowPair.pitch.toFixed(2), 'm'],
-                    [Maximize, 'Clear spacing', d.clear.toFixed(2), 'm'],
-                    [Leaf, 'Usable crop strip', d.usable.toFixed(2), 'm'],
-                  ]
-                : step >= 6 && validResult
+          <details className="workspace-details" key={step}>
+            <summary>
+              {step === 9 ? 'Publication exports and study details' : 'Study details'}
+            </summary>
+            <div className="workspace-details-content">
+              <div className="stats-grid">
+                {(step === 0
                   ? [
                       [
-                        Sun,
-                        'Receiver-area mean relative sunlight',
-                        activeResult.meanSunlight.toFixed(1),
-                        '%',
+                        PanelTop,
+                        'Module area',
+                        (s.module.length * s.module.width).toFixed(2),
+                        'm²',
                       ],
-                      [
-                        Leaf,
-                        validResult.period?.days > 1
-                          ? `Receiver-area ${dliLabel(validResult).toLowerCase()}`
-                          : validResult.estimated
-                            ? 'Mean estimated DLI'
-                            : 'Mean DLI',
-                        mean.toFixed(1),
-                        'mol m⁻² d⁻¹',
-                      ],
-                      [
-                        Grid2X2,
-                        'Analysis receivers',
-                        validResult.cells.length.toLocaleString(),
-                        'points',
-                      ],
+                      [Sun, 'Rated power', s.module.power, 'W'],
+                      [Layers, 'Module gap', (s.module.gap * 1000).toFixed(0), 'mm'],
                     ]
-                  : step === 8
+                  : step === 3
                     ? [
-                        [
-                          Maximize,
-                          'Control footprint',
-                          `${d.footprintX.toFixed(2)} × ${d.footprintY.toFixed(2)}`,
-                          'm',
-                        ],
-                        [
-                          MapPin,
-                          'Control sensors',
-                          activeStudy.experimentSensors.length,
-                          'instruments',
-                        ],
-                        [Leaf, 'Control crop beds', activeStudy.crops.length, 'beds'],
+                        [Layers, 'Row pitch', s.rowPair.pitch.toFixed(2), 'm'],
+                        [Maximize, 'Clear spacing', d.clear.toFixed(2), 'm'],
+                        [Leaf, 'Usable crop strip', d.usable.toFixed(2), 'm'],
                       ]
-                    : [
-                        [
-                          Layers,
-                          step < 4 ? 'Modules in row' : 'Modules in array',
-                          step < 4 ? s.table.high * s.table.wide * s.row.tables : d.modules,
-                          'modules',
-                        ],
-                        [
-                          Sun,
-                          'Array DC capacity',
-                          ((d.modules * s.module.power) / 1000).toFixed(1),
-                          'kWp',
-                        ],
-                        [Maximize, 'Row length', d.rowLength.toFixed(2), 'm'],
-                      ]
-            ).map(([Icon, label, value, unit]) => (
-              <div className="stat" key={label}>
-                <span className="stat-icon">
-                  <Icon size={19} />
-                </span>
-                <div>
-                  <span className="stat-label">{label}</span>
-                  <div className="stat-value">
-                    {value}
-                    <small>{unit}</small>
+                    : step >= 6 && validResult
+                      ? [
+                          [
+                            Sun,
+                            'Receiver-area mean relative sunlight',
+                            activeResult.meanSunlight.toFixed(1),
+                            '%',
+                          ],
+                          [
+                            Leaf,
+                            validResult.period?.days > 1
+                              ? `Receiver-area ${dliLabel(validResult).toLowerCase()}`
+                              : validResult.estimated
+                                ? 'Mean estimated DLI'
+                                : 'Mean DLI',
+                            mean.toFixed(1),
+                            'mol m⁻² d⁻¹',
+                          ],
+                          [
+                            Grid2X2,
+                            'Analysis receivers',
+                            validResult.cells.length.toLocaleString(),
+                            'points',
+                          ],
+                        ]
+                      : step === 8
+                        ? [
+                            [
+                              Maximize,
+                              'Control footprint',
+                              `${d.footprintX.toFixed(2)} × ${d.footprintY.toFixed(2)}`,
+                              'm',
+                            ],
+                            [
+                              MapPin,
+                              'Control sensors',
+                              activeStudy.experimentSensors.length,
+                              'instruments',
+                            ],
+                            [Leaf, 'Control crop beds', activeStudy.crops.length, 'beds'],
+                          ]
+                        : [
+                            [
+                              Layers,
+                              step < 4 ? 'Modules in row' : 'Modules in array',
+                              step < 4 ? s.table.high * s.table.wide * s.row.tables : d.modules,
+                              'modules',
+                            ],
+                            [
+                              Sun,
+                              'Array DC capacity',
+                              ((d.modules * s.module.power) / 1000).toFixed(1),
+                              'kWp',
+                            ],
+                            [Maximize, 'Row length', d.rowLength.toFixed(2), 'm'],
+                          ]
+                ).map(([Icon, label, value, unit]) => (
+                  <div className="stat" key={label}>
+                    <span className="stat-icon">
+                      <Icon size={19} />
+                    </span>
+                    <div>
+                      <span className="stat-label">{label}</span>
+                      <div className="stat-value">
+                        {value}
+                        <small>{unit}</small>
+                      </div>
+                    </div>
                   </div>
+                ))}
+              </div>
+              {step === 9 ? (
+                <section className="export-panel">
+                  <div>
+                    <FileText size={21} />
+                    <h2>Publication package</h2>
+                    <p>
+                      Export one portable ZIP with the editable project, saved results, weather,
+                      methods report, CSV tables and SVG figures.
+                    </p>
+                  </div>
+                  <div className="export-buttons">
+                    <button
+                      className="primary"
+                      disabled={Boolean(projectStatus)}
+                      onClick={() => saveStudy()}
+                    >
+                      <Download size={16} /> Export project package
+                    </button>
+                    <button
+                      className="secondary"
+                      disabled={Boolean(projectStatus)}
+                      onClick={() => saveStudy(true)}
+                    >
+                      Project JSON
+                    </button>
+                    <button className="secondary" onClick={report}>
+                      <FileText size={16} /> Printable methods report
+                    </button>
+                    <button className="secondary" onClick={() => exportTable()}>
+                      Data CSV
+                    </button>
+                    <button className="secondary" onClick={() => exportTable(true)}>
+                      Methods CSV
+                    </button>
+                    <button className="secondary" onClick={() => exportFigure('svg')}>
+                      Figure SVG
+                    </button>
+                    <button className="secondary" onClick={() => exportFigure('png')}>
+                      Figure PNG
+                    </button>
+                  </div>
+                </section>
+              ) : (
+                <div className="design-note">
+                  <span className="note-icon">i</span>
+                  <div>
+                    <strong>
+                      {step === 0
+                        ? 'Small details. Reproducible systems.'
+                        : step >= 6
+                          ? 'Light metrics with a clear reference.'
+                          : 'One study. Consistent geometry.'}
+                    </strong>
+                    <p>
+                      {step === 0
+                        ? 'Module dimensions and gaps carry through to every row, shadow calculation, and exported figure.'
+                        : step >= 6
+                          ? 'Relative sunlight is irradiation received over the selected period as a percentage of incoming GHI (100% = open-field sunlight). DLI uses the same visibility, with documented PAR assumptions.'
+                          : 'The same dimensions drive the interactive view, finite simulation geometry, and publication drawings.'}
+                    </p>
+                  </div>
+                  {step === 0 && <span className="tag">01 / MODULE</span>}
                 </div>
-              </div>
-            ))}
-          </div>
-          {step === 9 ? (
-            <section className="export-panel">
-              <div>
-                <FileText size={21} />
-                <h2>Publication package</h2>
-                <p>
-                  Export one portable ZIP with the editable project, saved results, weather, methods
-                  report, CSV tables and SVG figures.
-                </p>
-              </div>
-              <div className="export-buttons">
-                <button
-                  className="primary"
-                  disabled={Boolean(projectStatus)}
-                  onClick={() => saveStudy()}
-                >
-                  <Download size={16} /> Export project package
-                </button>
-                <button
-                  className="secondary"
-                  disabled={Boolean(projectStatus)}
-                  onClick={() => saveStudy(true)}
-                >
-                  Project JSON
-                </button>
-                <button className="secondary" onClick={report}>
-                  <FileText size={16} /> Printable methods report
-                </button>
-                <button className="secondary" onClick={() => exportTable()}>
-                  Data CSV
-                </button>
-                <button className="secondary" onClick={() => exportTable(true)}>
-                  Methods CSV
-                </button>
-                <button className="secondary" onClick={() => exportFigure('svg')}>
-                  Figure SVG
-                </button>
-                <button className="secondary" onClick={() => exportFigure('png')}>
-                  Figure PNG
-                </button>
-              </div>
-            </section>
-          ) : (
-            <div className="design-note">
-              <span className="note-icon">i</span>
-              <div>
-                <strong>
-                  {step === 0
-                    ? 'Small details. Reproducible systems.'
-                    : step >= 6
-                      ? 'Light metrics with a clear reference.'
-                      : 'One study. Consistent geometry.'}
-                </strong>
-                <p>
-                  {step === 0
-                    ? 'Module dimensions and gaps carry through to every row, shadow calculation, and exported figure.'
-                    : step >= 6
-                      ? 'Relative sunlight is irradiation received over the selected period as a percentage of incoming GHI (100% = open-field sunlight). DLI uses the same visibility, with documented PAR assumptions.'
-                      : 'The same dimensions drive the interactive view, finite simulation geometry, and publication drawings.'}
-                </p>
-              </div>
-              {step === 0 && <span className="tag">01 / MODULE</span>}
-            </div>
-          )}
-          <footer className="step-footer">
-            <span>
-              {recovery
-                ? 'Automatic saving is paused; the original study is retained.'
-                : step < steps.length - 1
-                  ? 'Export a project to save field layouts and light results.'
-                  : 'Keep the project package with your research records.'}
-            </span>
-            <div>
-              {step > 0 && (
-                <button className="text-button" onClick={() => go(step - 1)}>
-                  <ArrowLeft size={16} /> Back
-                </button>
-              )}
-              {step < steps.length - 1 && (
-                <button className="primary" onClick={() => go(step + 1)}>
-                  Continue to {steps[step + 1][0].toLowerCase()} <ArrowRight size={17} />
-                </button>
               )}
             </div>
-          </footer>
+          </details>
         </main>
       </div>
       <footer className="app-footer">
