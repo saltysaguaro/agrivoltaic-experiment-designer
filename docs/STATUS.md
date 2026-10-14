@@ -1,5 +1,15 @@
 # Implementation status
 
+## Mobile browser-check navigation (October 14)
+
+- Updated browser regression scenarios to open and close the Inputs drawer when interacting with mobile controls. The first hosted run passed 19 scenarios and skipped 5 capability-gated scenarios; four mobile scenarios timed out because they assumed the controls were always visible. Assertions remain in place, with drawer visibility checked explicitly. Removed superseded field-only sidebar width/position rules so the Agrivoltaic and Control drawers use the same usable mobile width as other steps. Hosted rerun pending.
+
+## Compact designer workspace (October 14)
+
+- Removed the workspace introduction, subtitle and SI badge. Desktop header height is halved from 82 to 41 px, with Back/Continue at the far right. Narrow screens use a compact two-row header and an Inputs drawer.
+- The main drawing area now fills the remaining viewport without overall scrolling. Input controls and bounded supporting panels scroll independently; study statistics and publication exports are available in an expandable Study details panel.
+- Verification: **165 tests pass**; production build and changed-source formatting pass (existing >500 kB chunk advisory). Live browser checks traversed all ten workflow steps at **1280 × 720** and **390 × 844**, with no main-panel overflow or horizontal page overflow, and checked mobile input access. All **480 archived files are unchanged**. Installed Radiance first-hit comparison: **61,320 rays / 12 cases, zero visibility mismatches**. No deployment or automated cross-browser pass is claimed.
+
 ## Dependency audit repair (October 12)
 
 - Updated the locked PostCSS dependency `source-map-js` from 1.2.1 to 1.2.2 to resolve [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q), the high-severity denial-of-service advisory that failed the weekly dependency audit. Direct dependency pins are unchanged.

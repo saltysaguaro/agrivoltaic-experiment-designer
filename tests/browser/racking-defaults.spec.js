@@ -1,3 +1,4 @@
+import { setInputsOpen } from './inputs.js';
 import { test, expect } from '@playwright/test';
 import { defaultStudy } from '../../src/domain/study.js';
 
@@ -12,6 +13,7 @@ test('restored trackers lock north–south and rack switches replace inherited s
     sessionStorage.setItem('aed-navigation', JSON.stringify({ version: 3, step: 4, view: 'plan' }));
   }, study);
   await page.goto('/');
+  await setInputsOpen(page);
   const controls = page.locator('.control-content');
   const go = async (name) => {
     await page
