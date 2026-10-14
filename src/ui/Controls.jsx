@@ -688,6 +688,25 @@ export default function Controls({
         )}
         {step === 6 && (
           <>
+            <button className="primary wide" onClick={busy ? cancel : run}>
+              {busy ? <Square size={16} /> : <Play size={16} />}{' '}
+              {busy
+                ? 'Cancel calculation'
+                : canResume
+                  ? 'Resume period calculation'
+                  : isPeriod(s)
+                    ? 'Calculate period light'
+                    : 'Calculate daily light'}
+            </button>
+            {busy && (
+              <>
+                <progress value={progress?.progress || 0} max="1" />
+                <small role="status">
+                  {progress?.message || 'Preparing geometry…'} · {elapsed || 0} s elapsed
+                </small>
+                <small>Progress counts sky and sun directions; cached poses finish faster.</small>
+              </>
+            )}
             <p className="control-note">
               {periodLabel(s)}
               {isPeriod(s) ? ' · Maps show period-total irradiation and mean daily DLI.' : ''}
@@ -777,25 +796,6 @@ export default function Controls({
                 Spitters daily diffuse partition. Supplied PPFD overrides broadband conversion.
               </small>
             </details>
-            <button className="primary wide" onClick={busy ? cancel : run}>
-              {busy ? <Square size={16} /> : <Play size={16} />}{' '}
-              {busy
-                ? 'Cancel calculation'
-                : canResume
-                  ? 'Resume period calculation'
-                  : isPeriod(s)
-                    ? 'Calculate period light'
-                    : 'Calculate daily light'}
-            </button>
-            {busy && (
-              <>
-                <progress value={progress?.progress || 0} max="1" />
-                <small role="status">
-                  {progress?.message || 'Preparing geometry…'} · {elapsed || 0} s elapsed
-                </small>
-                <small>Progress counts sky and sun directions; cached poses finish faster.</small>
-              </>
-            )}
             <button className="secondary wide" disabled={busy} onClick={preview}>
               Apply coarse preview settings
             </button>
