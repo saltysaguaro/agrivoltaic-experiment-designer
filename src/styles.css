@@ -2170,9 +2170,6 @@ progress {
   .compact-sidebar .sidebar-expand {
     padding: 12px;
   }
-  .field-workspace .sidebar:not(:is(.compact-sidebar .sidebar)) {
-    width: min(320px, 45vw);
-  }
   .field-workspace .mobile-jump {
     display: none;
   }
@@ -2231,15 +2228,6 @@ progress {
     padding: 6px;
     gap: 4px;
     flex-wrap: wrap;
-  }
-  .field-workspace .sidebar:not(:is(.compact-sidebar .sidebar)) {
-    position: fixed;
-    z-index: 35;
-    left: 0;
-    top: 68px;
-    bottom: 0;
-    width: 290px;
-    overflow: auto;
   }
 }
 
