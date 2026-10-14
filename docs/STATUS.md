@@ -2,7 +2,7 @@
 
 ## Mobile browser-check navigation (October 14)
 
-- Updated browser regression scenarios to open and close the Inputs drawer when interacting with mobile controls. The first hosted run passed 19 scenarios and skipped 5 capability-gated scenarios; four mobile scenarios timed out because they assumed the controls were always visible. Assertions remain in place, with drawer visibility checked explicitly. Removed superseded field-only sidebar width/position rules so the Agrivoltaic and Control drawers use the same usable mobile width as other steps. Hosted rerun pending.
+- Updated browser regression scenarios to open and close the Inputs drawer when interacting with mobile controls. The first hosted run passed 19 scenarios and skipped 5 capability-gated scenarios; four mobile scenarios timed out because they assumed the controls were always visible. Assertions remain in place, with drawer visibility checked explicitly. Removed superseded field-only sidebar width/position rules so the Agrivoltaic and Control drawers use the same usable mobile width as other steps. Hosted rerun: **23 browser scenarios passed, 5 capability-gated scenarios skipped**; build, audit, formatting and 165 unit/integration tests passed. [PR #14](https://github.com/saltysaguaro/agrivoltaic-experiment-designer/pull/14) merged into main; local main is synchronized. GitHub Pages deployment runs after the merge.
 
 ## Compact designer workspace (October 14)
 
