@@ -70,7 +70,6 @@ function SceneView({
   onSelect,
   onEditItem,
   onDropTool,
-  editor,
   interactionRef,
 }) {
   const zoning = metric === 'zoned-dli' ? dliZones(result, study.analysis.dliZoneCount) : null;
@@ -957,22 +956,6 @@ function SceneView({
             onEnd={endItemDrag}
             onKey={keyItem}
           />
-        )}
-        {editing && editor && (
-          <div
-            className="map-editor-anchor"
-            style={{
-              '--editor-max-height': `${Math.max(180, Math.min(projection?.height || 420, projection?.viewportBottom || 420) - (projection?.anchor ? Math.max(8, Math.min(projection.anchor[1] - 40, projection.height - 360)) : 12) - 10)}px`,
-              left: projection?.anchor
-                ? Math.max(8, Math.min(projection.anchor[0] + 24, projection.width - 365))
-                : 12,
-              top: projection?.anchor
-                ? Math.max(8, Math.min(projection.anchor[1] - 40, projection.height - 360))
-                : 12,
-            }}
-          >
-            {editor}
-          </div>
         )}
         {hover && (
           <div

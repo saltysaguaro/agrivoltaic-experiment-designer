@@ -387,12 +387,16 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal(document.querySelector('[data-annotation="analysis.resolution"] input'), null);
     assert.ok(document.querySelector('[data-annotation="analysis.cellsPerRow"] input'));
     await click(step('Agrivoltaic'));
-    assert.ok(document.querySelector('.compact-sidebar'));
+    assert.equal(document.querySelector('.compact-sidebar'), null);
+    assert.ok(document.querySelector('.sidebar .field-tools'));
+    assert.equal(document.querySelector('main .field-tools'), null);
+    assert.equal(step('Agrivoltaic').getAttribute('aria-expanded'), 'true');
     assert.equal(byText('C · Cropping area').getAttribute('aria-pressed'), 'true');
-    await click(document.querySelector('button[aria-label="Expand inputs"]'));
     await click(byText('Place a sensor in the view'));
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     await click(byText('Add at array centre'));
+    assert.ok(document.querySelector('.sidebar .field-editor'));
+    assert.equal(document.querySelector('main .field-editor'), null);
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Top-down/);
     await click(byText('Add at array centre'));
     let saved = await savedStudy();
@@ -526,6 +530,9 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await click(sensorDialog().querySelector('[aria-label="Close sensor layout"]'));
     // First control entry clones all field items; edits remain independent and never solve.
     await click(step('Control'));
+    assert.equal(step('Control').getAttribute('aria-expanded'), 'true');
+    assert.ok(document.querySelector('.sidebar .field-tools'));
+    assert.equal(document.querySelector('main .field-tools'), null);
     assert.equal(JSON.parse(sessionStorage.getItem('aed-navigation')).step, 8);
     assert.match(document.querySelector('.scene-label').textContent, /CONTROL/);
     assert.equal(byText('C · Cropping area').getAttribute('aria-pressed'), 'true');

@@ -49,7 +49,6 @@ import {
   AlertTriangle,
   Loader2,
   PanelLeftOpen,
-  PanelLeftClose,
   Sprout,
 } from 'lucide-react';
 import {
@@ -153,7 +152,6 @@ function App() {
     [notice, setNotice] = useState(initial.error || ''),
     [placing, setPlacing] = useState(false),
     [resetKey, setResetKey] = useState(0),
-    [sidebarExpanded, setSidebarExpanded] = useState(false),
     [fieldTool, setFieldTool] = useState(null),
     [newCropId, setNewCropId] = useState('lettuce'),
     [cropBedsOpen, setCropBedsOpen] = useState(false),
@@ -240,6 +238,7 @@ function App() {
       setSelections(target ? [target] : []);
     setSelection(target);
     setEditorOpen(Boolean(target && open));
+    if (target && open) setMobileInputsOpen(true);
     setInspection(null);
     if (target) {
       const layer =
@@ -366,6 +365,7 @@ function App() {
     );
   }
   const mainRef = useRef(null);
+  const activeStepRef = useRef(null);
   const [mobileInputsOpen, setMobileInputsOpen] = useState(false);
   const fieldHistory = useRef([]);
   const fieldInteraction = useRef(null);
@@ -386,6 +386,15 @@ function App() {
     scope = steps[step][2];
   const fieldWorkspace = step === 7 || step === 8;
   useEffect(() => {
+    if (fieldWorkspace) activeStepRef.current?.scrollIntoView?.({ block: 'start' });
+  }, [step, fieldWorkspace]);
+  useEffect(() => {
+    if (!fieldWorkspace || !editorOpen) return;
+    const editor = activeStepRef.current?.querySelector('.field-editor');
+    editor?.querySelector('input,select')?.focus({ preventScroll: true });
+    editor?.scrollIntoView?.({ block: 'start' });
+  }, [fieldWorkspace, editorOpen, selection?.kind, selection?.id]);
+  useEffect(() => {
     if (fieldWorkspace && !s.designGrid)
       setStudy((current) => ({ ...current, designGrid: copyIrradianceGrid(current) }));
   }, [fieldWorkspace, s.designGrid]);
@@ -396,7 +405,6 @@ function App() {
   useEffect(() => {
     if (validResult) logCalculationDiagnostics(s, validResult);
   }, [validResult]);
-  const compactSidebar = fieldWorkspace && !sidebarExpanded && !mobileInputsOpen;
   const unidentifiedCrops = [...unresolvedCrops(s), ...unresolvedCrops(fieldStudy(s, true))];
   const layerMode = step >= 6 && step <= 8 ? 'analysis' : 'design';
   const opacityMode = step === 6 || (validResult && step >= 6) ? 'analysis' : 'design';
@@ -416,7 +424,6 @@ function App() {
     panelOpacity = opacityPrefs[opacityMode];
   useEffect(() => {
     if (validResult) {
-      setSidebarExpanded(false);
       setEditorOpen(false);
       setLayerPrefs((current) => ({
         ...current,
@@ -775,7 +782,6 @@ function App() {
     setFieldTool(null);
     setSelection(null);
     setEditorOpen(false);
-    setSidebarExpanded(false);
     if (n === 4 && !enteredArray.current) {
       setView('oblique');
       enteredArray.current = true;
@@ -1221,9 +1227,7 @@ function App() {
           <button onClick={() => projectTask.current?.cancel()}>Cancel</button>
         </div>
       )}
-      <div
-        className={`workspace ${fieldWorkspace ? 'field-workspace' : ''} ${compactSidebar ? 'compact-sidebar' : ''}`}
-      >
+      <div className={`workspace ${fieldWorkspace ? 'field-workspace' : ''}`}>
         {mobileInputsOpen && (
           <button
             className="inputs-backdrop"
@@ -1232,17 +1236,6 @@ function App() {
           />
         )}
         <aside className="sidebar" id="study-controls">
-          {fieldWorkspace && (
-            <button
-              className="sidebar-expand"
-              onClick={() => setSidebarExpanded((v) => !v)}
-              aria-label={compactSidebar ? 'Expand inputs' : 'Collapse inputs'}
-              title={compactSidebar ? 'Expand inputs' : 'Collapse inputs'}
-            >
-              {compactSidebar ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
-              <span>{compactSidebar ? '' : 'Collapse inputs'}</span>
-            </button>
-          )}
           <a className="mobile-jump" href="#design-drawing">
             Jump to drawing ↓
           </a>
@@ -1258,85 +1251,158 @@ function App() {
           </div>
           <nav aria-label="Design steps">
             {steps.map(([name, subtitle], i) => (
-              <section key={name} className={'step-section ' + (i === step ? 'active' : '')}>
+              <section
+                ref={i === step ? activeStepRef : null}
+                key={name}
+                className={'step-section ' + (i === step ? 'active' : '')}
+              >
                 <button
                   className="step-toggle"
                   aria-label={name}
                   title={name}
-                  aria-expanded={i === step && !compactSidebar}
+                  aria-expanded={i === step}
                   aria-current={i === step ? 'step' : undefined}
                   onClick={() => go(i)}
                 >
-                  {compactSidebar &&
-                    React.createElement(
-                      [
-                        PanelTop,
-                        Box,
-                        Layers,
-                        ArrowLeft,
-                        Grid2X2,
-                        MapPin,
-                        Sun,
-                        Sprout,
-                        Sprout,
-                        FileText,
-                      ][i],
-                      { size: 20, className: 'rail-icon' },
-                    )}
                   <span className={'step-number ' + (i < step ? 'visited' : '')}>
                     {i < step ? <Check size={13} /> : String(i + 1).padStart(2, '0')}
                   </span>
                   <span>{name}</span>
                   {i === step ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
                 </button>
-                {i === step && !compactSidebar && (
-                  <Controls
-                    canResume={resumeKey === currentAnalysisKey}
-                    onInspect={(value) => setInspection({ ...value, step })}
-                    step={step}
-                    s={activeStudy}
-                    set={set}
-                    selectLocation={selectLocation}
-                    result={activeResult}
-                    busy={busy}
-                    progress={progress}
-                    elapsed={elapsed}
-                    preview={() => preview(false)}
-                    standard={() => preview(true)}
-                    run={run}
-                    cancel={cancel}
-                    uploadWeather={uploadWeather}
-                    weatherStatus={weatherStatus}
-                    refreshWeather={() => ensureWeather(latest.current, true).catch(() => {})}
-                    template={() =>
-                      download(
-                        isPeriod(s) ? periodWeatherTemplate(s) : weatherTemplate,
-                        'weather-template.csv',
-                        'text/csv',
-                      )
-                    }
-                    placing={placing}
-                    fieldTool={fieldTool}
-                    setPlacing={(v, kind) => chooseFieldTool(v ? kind : null)}
-                    addSensor={() => addSensor()}
-                    addPercentiles={() => {
-                      rememberFieldLayout();
-                      setFieldStudy({
-                        ...activeStudy,
-                        experimentSensors: [
-                          ...activeStudy.experimentSensors,
-                          ...percentileSensors(activeStudy, activeResult),
-                        ],
-                      });
-                    }}
-                    addPlot={() => addPlot()}
-                    removeSensor={(i) =>
-                      removeFieldItem({ kind: 'sensor', id: activeStudy.experimentSensors[i].id })
-                    }
-                    removePlot={(i) =>
-                      removeFieldItem({ kind: 'crop', id: activeStudy.crops[i].id })
-                    }
-                  />
+                {i === step && (
+                  <>
+                    <div className="field-sidebar-inputs">
+                      {step === 8 && (
+                        <p className="info-box">
+                          Control field · same receiver footprint as Agrivoltaic · no PV
+                          infrastructure.{' '}
+                          {activeResult
+                            ? `${dliLabel(activeResult)}: ${activeResult.openDli.toFixed(2)} mol/m²/day uniformly; 100% relative sunlight.`
+                            : 'Calculate irradiance to obtain the full-sun DLI for this site and period.'}{' '}
+                          Layouts are copied on first entry and edited independently afterward.
+                        </p>
+                      )}
+                      {fieldWorkspace && editorOpen && selection ? (
+                        selection.kind === 'irrigation' ? (
+                          <IrrigationEditor
+                            key={selection.id}
+                            study={activeStudy}
+                            selection={selection}
+                            onSave={(item) => editFieldItem(selection, item)}
+                            onClose={() => setEditorOpen(false)}
+                            onDelete={() => removeFieldItem(selection)}
+                          />
+                        ) : (
+                          <FieldEditor
+                            key={`${selection.kind}:${selection.id}`}
+                            study={activeStudy}
+                            selection={selection}
+                            control={step === 8}
+                            result={activeResult}
+                            onSave={(item) => editFieldItem(selection, item)}
+                            onClose={() => setEditorOpen(false)}
+                            onDelete={(policy) => removeFieldItem(selection, policy)}
+                          />
+                        )
+                      ) : null}
+                      {fieldWorkspace && (
+                        <FieldTools
+                          irrigationType={irrigationType}
+                          setIrrigationType={setIrrigationType}
+                          onEditZone={setZoneEditor}
+                          onAddIrrigation={() => {
+                            chooseFieldTool(null);
+                            setIrrigationOpen(true);
+                          }}
+                          onDesignGrid={(config) => {
+                            const next = regridField(fieldLatest.current, config);
+                            rememberFieldLayout();
+                            setFieldStudy(next);
+                            setEditorOpen(false);
+                            setNotice(
+                              'Design grid updated. Light calculation and numerical sampling are unchanged.',
+                            );
+                          }}
+                          onAddSensors={() => {
+                            chooseFieldTool(null);
+                            setSensorsOpen(true);
+                          }}
+                          onAddCropBeds={() => {
+                            chooseFieldTool(null);
+                            setCropBedsOpen(true);
+                          }}
+                          onDropPalette={(tool, event) => {
+                            const point = fieldInteraction.current?.pointAtClient(event);
+                            if (point) {
+                              if (tool.kind === 'sensor') addSensor(point);
+                              else if (tool.kind === 'irrigation') addIrrigationPoint(point);
+                              else addPlot(point, tool.cropId);
+                            }
+                          }}
+                          tool={fieldTool}
+                          setTool={chooseFieldTool}
+                          cropId={newCropId}
+                          setCropId={setNewCropId}
+                          onUndo={undoFieldEdit}
+                          canUndo={undoCount > 0}
+                          study={activeStudy}
+                          selection={selection}
+                          selections={selections}
+                          onDuplicate={duplicateSelection}
+                          onSelect={selectFieldItem}
+                          view={view}
+                        />
+                      )}
+                    </div>
+                    <Controls
+                      canResume={resumeKey === currentAnalysisKey}
+                      onInspect={(value) => setInspection({ ...value, step })}
+                      step={step}
+                      s={activeStudy}
+                      set={set}
+                      selectLocation={selectLocation}
+                      result={activeResult}
+                      busy={busy}
+                      progress={progress}
+                      elapsed={elapsed}
+                      preview={() => preview(false)}
+                      standard={() => preview(true)}
+                      run={run}
+                      cancel={cancel}
+                      uploadWeather={uploadWeather}
+                      weatherStatus={weatherStatus}
+                      refreshWeather={() => ensureWeather(latest.current, true).catch(() => {})}
+                      template={() =>
+                        download(
+                          isPeriod(s) ? periodWeatherTemplate(s) : weatherTemplate,
+                          'weather-template.csv',
+                          'text/csv',
+                        )
+                      }
+                      placing={placing}
+                      fieldTool={fieldTool}
+                      setPlacing={(v, kind) => chooseFieldTool(v ? kind : null)}
+                      addSensor={() => addSensor()}
+                      addPercentiles={() => {
+                        rememberFieldLayout();
+                        setFieldStudy({
+                          ...activeStudy,
+                          experimentSensors: [
+                            ...activeStudy.experimentSensors,
+                            ...percentileSensors(activeStudy, activeResult),
+                          ],
+                        });
+                      }}
+                      addPlot={() => addPlot()}
+                      removeSensor={(i) =>
+                        removeFieldItem({ kind: 'sensor', id: activeStudy.experimentSensors[i].id })
+                      }
+                      removePlot={(i) =>
+                        removeFieldItem({ kind: 'crop', id: activeStudy.crops[i].id })
+                      }
+                    />
+                  </>
                 )}
               </section>
             ))}
@@ -1389,64 +1455,7 @@ function App() {
             <a className="mobile-jump" href="#study-controls">
               Back to inputs ↑
             </a>
-            {step === 8 && (
-              <p className="info-box">
-                Control field · same receiver footprint as Agrivoltaic · no PV infrastructure.{' '}
-                {activeResult
-                  ? `${dliLabel(activeResult)}: ${activeResult.openDli.toFixed(2)} mol/m²/day uniformly; 100% relative sunlight.`
-                  : 'Calculate irradiance to obtain the full-sun DLI for this site and period.'}{' '}
-                Layouts are copied on first entry and edited independently afterward.
-              </p>
-            )}
           </div>
-          {fieldWorkspace && (
-            <FieldTools
-              irrigationType={irrigationType}
-              setIrrigationType={setIrrigationType}
-              onEditZone={setZoneEditor}
-              onAddIrrigation={() => {
-                chooseFieldTool(null);
-                setIrrigationOpen(true);
-              }}
-              onDesignGrid={(config) => {
-                const next = regridField(fieldLatest.current, config);
-                rememberFieldLayout();
-                setFieldStudy(next);
-                setEditorOpen(false);
-                setNotice(
-                  'Design grid updated. Light calculation and numerical sampling are unchanged.',
-                );
-              }}
-              onAddSensors={() => {
-                chooseFieldTool(null);
-                setSensorsOpen(true);
-              }}
-              onAddCropBeds={() => {
-                chooseFieldTool(null);
-                setCropBedsOpen(true);
-              }}
-              onDropPalette={(tool, event) => {
-                const point = fieldInteraction.current?.pointAtClient(event);
-                if (point) {
-                  if (tool.kind === 'sensor') addSensor(point);
-                  else if (tool.kind === 'irrigation') addIrrigationPoint(point);
-                  else addPlot(point, tool.cropId);
-                }
-              }}
-              tool={fieldTool}
-              setTool={chooseFieldTool}
-              cropId={newCropId}
-              setCropId={setNewCropId}
-              onUndo={undoFieldEdit}
-              canUndo={undoCount > 0}
-              study={activeStudy}
-              selection={selection}
-              selections={selections}
-              onDuplicate={duplicateSelection}
-              onSelect={selectFieldItem}
-              view={view}
-            />
-          )}
           {fieldWorkspace && zoneEditor && (
             <IrrigationZoneEditor
               key={zoneEditor}
@@ -1631,31 +1640,6 @@ function App() {
                     : tool.kind === 'irrigation'
                       ? addIrrigationPoint(point)
                       : addSensor(point)
-                }
-                editor={
-                  fieldWorkspace && editorOpen && selection ? (
-                    selection.kind === 'irrigation' ? (
-                      <IrrigationEditor
-                        key={selection.id}
-                        study={activeStudy}
-                        selection={selection}
-                        onSave={(item) => editFieldItem(selection, item)}
-                        onClose={() => setEditorOpen(false)}
-                        onDelete={() => removeFieldItem(selection)}
-                      />
-                    ) : (
-                      <FieldEditor
-                        key={`${selection.kind}:${selection.id}`}
-                        study={activeStudy}
-                        selection={selection}
-                        control={step === 8}
-                        result={activeResult}
-                        onSave={(item) => editFieldItem(selection, item)}
-                        onClose={() => setEditorOpen(false)}
-                        onDelete={(policy) => removeFieldItem(selection, policy)}
-                      />
-                    )
-                  ) : null
                 }
                 placing={placing}
                 placementKind={

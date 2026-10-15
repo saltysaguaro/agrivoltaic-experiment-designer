@@ -1,5 +1,10 @@
 # Implementation status
 
+## Field inputs in the sidebar (October 14)
+
+- Agrivoltaic and Control keep the full sidebar expanded on desktop. Layout tools, the independent design grid, irrigation controls, Control context, and selected sensor/crop/irrigation editors now live in the inputs panel; item editors no longer cover the drawing. Entering either phase brings its tools into view. The mobile Inputs drawer remains available, and selecting an item opens its editor there. Bulk setup dialogs retain their existing behavior.
+- Verification: **165 tests pass**, including sidebar placement and independent Control editing without a new solve. Production build and changed-source formatting pass (existing chunk-size advisory). Live browser checks at **1280 × 720** verified both phases and at **390 × 844** verified the drawer and selected sensor editor, with no main-panel or sidebar horizontal overflow. All **480 archived files are unchanged**; installed Radiance comparison reports **zero visibility mismatches across 61,320 rays / 12 cases**. No deployment or automated cross-browser pass is claimed.
+
 ## Irradiance calculation access (October 14)
 
 - Moved Calculate/Resume/Cancel and its running progress display to the top of the expanded Irradiance inputs, before the period description and numerical settings. Calculation behavior is unchanged.
