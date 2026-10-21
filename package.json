@@ -26,7 +26,7 @@
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "three": "0.185.0",
-    "three-mesh-bvh": "0.9.1",
+    "three-mesh-bvh": "0.9.15",
     "zod": "3.24.2"
   },
   "devDependencies": {
