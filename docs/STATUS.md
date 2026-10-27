@@ -1,5 +1,18 @@
 # Implementation status
 
+## Dependency audit and Zod 4 migration (October 26)
+
+- Updated the exact Vite pin from 7.3.6 to 7.3.7 and Zod from 3.24.2 to 4.6.7, including the lockfile, to resolve the two high-severity dependency findings in [weekly audit run 40391487239](https://github.com/saltysaguaro/agrivoltaic-experiment-designer/actions/runs/40391487239). The audit threshold remains unchanged.
+- Changed the missing control-field fallback to Zod 4's `.prefault({})`, preserving nested defaults for new and legacy studies. Added regressions for missing/empty control fields, independent defaults, raw JSON import/round trips, and rejection of oversized sensor/crop/irrigation/weather collections before element validation.
+- Local verification: **168 tests pass** (including the pre-existing uncommitted DLI regression); `npm audit --audit-level=high` reports **zero vulnerabilities**; production build and formatting pass. The build retains its chunk-size advisory and reports upstream Zod comment-annotation warnings. All **480 archived files are unchanged**. Installed Radiance first-hit comparison: **61,320 rays / 12 cases, zero visibility mismatches**; the rerun report is kept outside the repository to preserve the existing uncommitted validation record. This does not establish independent daily-energy or WebGPU validation.
+- Browser verification with the pinned Playwright browser binaries: **23 passed, 5 capability-gated skips** across Chromium, Firefox, desktop WebKit and mobile WebKit. No hosted workflow rerun or deployment is claimed.
+
+## Zoned DLI end-band investigation (October 21)
+
+- Inspected the supplied April 1, 2025 Tucson plan and oblique SVGs. The plan has equal 3.00 m receiver buffers at both PV row ends; neither the array nor the numerical footprint is translated. The wider high-DLI band at the south end is consistent with northward solar shadows, which zoning makes more visible. Zoned DLI only classifies and recolors existing values.
+- Added a regression using the same site/date and a small north–south tracker array with illustrative weather on CPU. It checks higher south-end DLI, equal geometric end buffers, unchanged study/result data, and identical panel/receiver polygon positions between continuous and zoned DLI in plan and oblique exports. This is not a reproduction of the supplied WebGPU result's exact weather snapshot. No solver or layout behavior was changed.
+- Verification: **166 tests pass**; production build passes with the existing chunk-size advisory. All **480 archived files are unchanged**. Installed Radiance first-hit comparison: **61,320 rays / 12 cases, zero visibility mismatches**; this does not independently validate the supplied GPU daily-energy result.
+
 ## Field inputs in the sidebar (October 14)
 
 - Agrivoltaic and Control keep the full sidebar expanded on desktop. Layout tools, the independent design grid, irrigation controls, Control context, and selected sensor/crop/irrigation editors now live in the inputs panel; item editors no longer cover the drawing. Entering either phase brings its tools into view. The mobile Inputs drawer remains available, and selecting an item opens its editor there. Bulk setup dialogs retain their existing behavior.
