@@ -297,7 +297,7 @@ export const studySchema = z
         experimentSensors: sensorsSchema.default([]),
         crops: cropsSchema.default([]),
       })
-      .default({}),
+      .prefault({}),
   })
   .superRefine((s, ctx) => {
     for (const [field, value] of [
