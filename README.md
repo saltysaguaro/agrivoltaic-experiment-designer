@@ -1,4 +1,4 @@
-# Agrivoltaic Experiment Designer
+# Agrivoltaics Experiment Designer
 
 A new browser-only application for designing reproducible agrivoltaic field experiments. The original `agrivoltaic_bf` project is preserved in [`archive/agrivoltaic_bf`](archive/agrivoltaic_bf), with checksums and local read-only protection. No archived code is imported into the new application.
 

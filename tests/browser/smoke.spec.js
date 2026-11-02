@@ -11,7 +11,7 @@ test('CPU solve, zero-DLI exports and weather persistence', async ({ page }) => 
 test('application boots and invalid dimensions remain editable', async ({ page }) => {
   await page.goto('/');
   const capabilities = await drawingCapabilities(page);
-  await expect(page.locator('.brand')).toHaveText('Agrivoltaic Experiment Designer');
+  await expect(page.locator('.brand')).toHaveText('Agrivoltaics Experiment Designer');
   const gap = page.locator('[data-annotation="module.gap"] input');
   await setInputsOpen(page);
   await gap.fill('200000');

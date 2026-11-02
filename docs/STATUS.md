@@ -1,5 +1,10 @@
 # Implementation status
 
+## Application title (November 2)
+
+- Renamed the application to **Agrivoltaics Experiment Designer** in the header, browser title, accessible home link, export software labels and repository documentation. Updated existing title assertions.
+- Verification: **168 tests pass**; production build passes with existing chunk-size and upstream comment-annotation warnings. All **480 archived files are unchanged**. Installed Radiance first-hit comparison: **61,320 rays / 12 cases, zero visibility mismatches**, with the rerun report retained outside the repository. This does not independently validate daily energy or WebGPU. No deployment is claimed.
+
 ## Dependency audit and Zod 4 migration (October 26)
 
 - Updated the exact Vite pin from 7.3.6 to 7.3.7 and Zod from 3.24.2 to 4.6.7, including the lockfile, to resolve the two high-severity dependency findings in [weekly audit run 40391487239](https://github.com/saltysaguaro/agrivoltaic-experiment-designer/actions/runs/40391487239). The audit threshold remains unchanged.

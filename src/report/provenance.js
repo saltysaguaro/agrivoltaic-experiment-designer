@@ -15,7 +15,7 @@ export function provenanceRecord(s, r, { control = false } = {}) {
       'Display-only irrigation layout and treatment metadata. Spray coverage is nominal, not a prediction of water delivery or uniformity. No hydraulics, scheduling, runoff, infiltration, water balance or irrigation shading is simulated. Unknown flow and pressure remain null; SI units are retained in JSON and tables.',
     crop_planting: `Spacing catalog ${cropSpacingVersion}; one crop row per bed by default. Crop rows run along PV rows and are centred in each bed. Crop-specific published guidance and adapted planning estimates are distinguished per bed; user overrides and source snapshots are retained. Counts describe planting positions, not germination or yield. Dense dots are sampled; rows remain exact. No crop occlusion or crop response is modeled.`,
     crop_catalog: `${cropCatalogVersion}; ${cropCatalogSource}; species-level identities with taxon URLs per crop bed`,
-    software: `Agrivoltaic Experiment Designer ${r?.version || VERSION}`,
+    software: `Agrivoltaics Experiment Designer ${r?.version || VERSION}`,
     schemaVersion: s.schemaVersion,
     numericalModelRevision: r?.modelRevision || MODEL_REVISION,
     racking: s.racking.type,

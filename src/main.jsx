@@ -1141,8 +1141,8 @@ function App() {
   return (
     <div className={`app ${mobileInputsOpen ? 'inputs-open' : ''}`}>
       <header className="app-header">
-        <a className="brand" href="./" aria-label="Agrivoltaic Experiment Designer home">
-          <span>Agrivoltaic Experiment Designer</span>
+        <a className="brand" href="./" aria-label="Agrivoltaics Experiment Designer home">
+          <span>Agrivoltaics Experiment Designer</span>
         </a>
         <button
           className="secondary inputs-toggle"
