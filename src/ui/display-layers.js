@@ -7,6 +7,9 @@ export const designLayers = Object.freeze({
   receiver: true,
   sensors: true,
   plots: true,
+  designGrid: true,
+  irrigation: true,
+  irrigationCoverage: true,
 });
 export const irradianceLayers = Object.freeze({
   ...designLayers,
@@ -16,4 +19,7 @@ export const irradianceLayers = Object.freeze({
   receiver: true,
   sensors: false,
   plots: false,
+  designGrid: false,
+  irrigation: false,
+  irrigationCoverage: false,
 });

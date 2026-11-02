@@ -1,3 +1,4 @@
+import { setInputsOpen } from './inputs.js';
 import { test, expect } from '@playwright/test';
 import { drawingCapabilities, expectDrawing } from './drawing.js';
 test('CPU solve, zero-DLI exports and weather persistence', async ({ page }) => {
@@ -12,13 +13,17 @@ test('application boots and invalid dimensions remain editable', async ({ page }
   const capabilities = await drawingCapabilities(page);
   await expect(page.locator('.brand')).toHaveText('Agrivoltaic Experiment Designer');
   const gap = page.locator('[data-annotation="module.gap"] input');
+  await setInputsOpen(page);
   await gap.fill('200000');
   await gap.press('Tab');
+  await setInputsOpen(page, false);
   await expect(
     page.getByText('This grid exceeds 20,000 receivers.', { exact: false }).first(),
   ).toBeVisible();
+  await setInputsOpen(page);
   await gap.fill('0.02');
   await gap.press('Tab');
+  await setInputsOpen(page, false);
   await expect(page.locator('.scene-fallback')).toHaveCount(0);
   await expectDrawing(page, capabilities);
 });
@@ -58,8 +63,10 @@ test('drawing remains available when WebGL is unavailable', async ({ page }) => 
   await page.goto('/');
   await expectDrawing(page, { webgl: false });
   const length = page.locator('[data-annotation="module.length"] input');
+  await setInputsOpen(page);
   await length.fill('2.5');
   await length.press('Tab');
   await expect(length).toHaveValue('2.5');
+  await setInputsOpen(page, false);
   await expectDrawing(page, { webgl: false });
 });

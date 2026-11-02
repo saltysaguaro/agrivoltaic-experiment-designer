@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Field } from './Controls.jsx';
 import { receiverGridSpec } from '../domain/geometry.js';
-import { cellCenter } from '../experiment/grid-layout.js';
+import { cellCenter, cellAt } from '../experiment/grid-layout.js';
 export default function ReceiverInspector({
   study,
   result,
@@ -21,9 +21,10 @@ export default function ReceiverInspector({
   const index = current.row * g.nx + current.column,
     point = cellCenter(study, current, g);
   const value = result?.cells[index];
-  const sensors = study.experimentSensors.filter(
-    (s) => s.grid?.column === current.column && s.grid?.row === current.row,
-  );
+  const sensors = study.experimentSensors.filter((s) => {
+    const at = cellAt(study, s, g, false);
+    return at?.column === current.column && at?.row === current.row;
+  });
   const [target, setTarget] = useState(null);
   useEffect(() => {
     setTarget(document.getElementById('receiver-inspector'));
@@ -71,7 +72,7 @@ export default function ReceiverInspector({
       </div>
       {placing && (
         <button className="secondary" onClick={() => onPlace(point)}>
-          Place {kind} in this cell
+          Place {kind} at nearest design cell
         </button>
       )}
     </details>,

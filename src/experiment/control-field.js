@@ -6,6 +6,9 @@ export function fieldStudy(study, control = false) {
         ...study,
         experimentSensors: study.controlField.experimentSensors,
         crops: study.controlField.crops,
+        designGrid: study.controlField.designGrid || study.designGrid,
+        irrigationUnits: study.controlField.irrigationUnits || [],
+        irrigationZones: study.controlField.irrigationZones || [],
       }
     : study;
 }
@@ -18,15 +21,29 @@ export function storeField(study, edited, control = false) {
           initialized: true,
           experimentSensors: edited.experimentSensors,
           crops: edited.crops,
+          designGrid: edited.designGrid,
+          irrigationUnits: edited.irrigationUnits || [],
+          irrigationZones: edited.irrigationZones || [],
         },
       }
-    : { ...study, experimentSensors: edited.experimentSensors, crops: edited.crops };
+    : {
+        ...study,
+        experimentSensors: edited.experimentSensors,
+        crops: edited.crops,
+        designGrid: edited.designGrid,
+        irrigationUnits: edited.irrigationUnits || [],
+        irrigationZones: edited.irrigationZones || [],
+      };
 }
 export function allFieldIds(study) {
   return new Set(
     [
       ...study.experimentSensors,
       ...study.crops,
+      ...(study.irrigationUnits || []),
+      ...(study.irrigationZones || []),
+      ...(study.controlField?.irrigationUnits || []),
+      ...(study.controlField?.irrigationZones || []),
       ...(study.controlField?.experimentSensors || []),
       ...(study.controlField?.crops || []),
     ].map((item) => item.id),
@@ -48,13 +65,28 @@ export function initializeControl(study) {
       id: uniqueFieldId(prefix, used),
       treatment: 'Control',
     }));
+  const crops = copy(study.crops, 'C-P');
+  const bedMap = new Map(study.crops.map((c, i) => [c.id, crops[i].id]));
+  const zones = copy(study.irrigationZones || [], 'C-Z').map((z) => ({
+    ...z,
+    bedIds: z.bedIds.map((id) => bedMap.get(id)),
+  }));
+  const zoneMap = new Map((study.irrigationZones || []).map((z, i) => [z.id, zones[i].id]));
+  const units = copy(study.irrigationUnits || [], 'C-I').map((u) => ({
+    ...u,
+    zoneId: zoneMap.get(u.zoneId) || '',
+    link: u.link ? { ...u.link, bedId: bedMap.get(u.link.bedId) } : null,
+  }));
   return {
     ...study,
     controlField: {
       version: 1,
       initialized: true,
       experimentSensors: copy(study.experimentSensors, 'C-S'),
-      crops: copy(study.crops, 'C-P'),
+      crops,
+      ...(study.designGrid ? { designGrid: structuredClone(study.designGrid) } : {}),
+      irrigationUnits: units,
+      irrigationZones: zones,
     },
   };
 }

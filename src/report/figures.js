@@ -1,3 +1,7 @@
+import { designGridLines } from '../experiment/design-grid.js';
+import { irrigationGeometry } from '../experiment/irrigation.js';
+import { cropPlantingGeometry } from '../experiment/crop-planting.js';
+import { plantingDescription } from '../domain/crop-planting.js';
 import { dliZones, DLI_ZONE_NOTE } from '../domain/dli-zones.js';
 import { rowHeight, gridSpacingLabel } from '../domain/receiver-grid.js';
 import { controlLayers } from '../experiment/control-field.js';
@@ -112,6 +116,9 @@ export function figureSvg(
     scope,
   );
   const receivers = receiverGridSpec(s);
+  const useDesignGrid = Boolean(
+    s.designGrid && (scope === 'report' || metric === 'none' || options.designGrid),
+  );
   const zones =
     arrayScope || scope === 'pair'
       ? landUseZones(s, group.userData).zones.filter(
@@ -248,7 +255,8 @@ export function figureSvg(
   if (
     ground &&
     (!arrayScope ||
-      (layers.receiver && (metric === 'none' || options.layers)) ||
+      ((useDesignGrid ? layers.designGrid : layers.receiver) &&
+        (metric === 'none' || options.layers)) ||
       view === 'profile')
   ) {
     const segment = (a, b) => {
@@ -260,9 +268,11 @@ export function figureSvg(
       view === 'profile'
         ? [[ground.corners[0], ground.corners[3]]]
         : arrayScope
-          ? receiverLines(s, receivers)
+          ? layers.designGrid
+            ? designGridLines(s)
+            : receiverLines(s, receivers)
           : ground.lines;
-    content += `<g data-ground-grid="true" ${arrayScope ? 'data-receiver-grid="true"' : ''}><path d="${lines.map(([a, b]) => segment(a, b)).join(' ')}" fill="none" stroke="#8c9f85" stroke-width="${view === 'profile' ? 1.5 : 0.55}" opacity=".65"/></g>`;
+    content += `<g data-ground-grid="true" ${arrayScope ? (useDesignGrid ? 'data-design-grid="true"' : 'data-receiver-grid="true"') : ''}><path d="${lines.map(([a, b]) => segment(a, b)).join(' ')}" fill="none" stroke="#8c9f85" stroke-width="${view === 'profile' ? 1.5 : 0.55}" opacity=".65"/></g>`;
   }
   content += zoneSvg(zones, (p) => xy(project(p)), {
     profile: view === 'profile',
@@ -270,11 +280,49 @@ export function figureSvg(
   });
   if (arrayScope && layers.receiver && view !== 'profile')
     content += `<polygon data-receiver-boundary="true" points="${receiverBoundary.map((p) => xy(project(p)).join(',')).join(' ')}" fill="none" stroke="#276a80" stroke-dasharray="5 4"/>`;
-  const fieldProjection = { beds: [], markers: [] };
+  const fieldProjection = { beds: [], markers: [], irrigation: [] };
   if (arrayScope) {
+    for (const unit of layers.irrigation || layers.irrigationCoverage
+      ? s.irrigationUnits || []
+      : []) {
+      const shape = irrigationGeometry(s, unit, { profile: view === 'profile' });
+      const path = (points) =>
+        points.map((p, i) => `${i ? 'L' : 'M'} ${xy(project(p)).join(' ')}`).join(' ');
+      content += `<g data-irrigation-unit="${escapeXml(unit.id)}"><title>${escapeXml(`${unit.id} · ${unit.method}; ${unit.z} m height/depth; nominal coverage only`)}</title>`;
+      if (layers.irrigationCoverage)
+        content += shape.coverage
+          .map(
+            (line) =>
+              `<path d="${path(line)}" fill="none" stroke="#187fa5" opacity=".45" stroke-dasharray="4 3"/>`,
+          )
+          .join('');
+      if (layers.irrigation) {
+        content += shape.lines
+          .map(
+            (line) =>
+              `<path d="${path(line)}" fill="none" stroke="#087ba8" stroke-width="1.5" ${shape.dashed ? 'stroke-dasharray="4 3"' : ''}/>`,
+          )
+          .join('');
+        content += shape.markers
+          .map((p) => {
+            const [x, y] = xy(project(p));
+            return `<circle cx="${x}" cy="${y}" r="${unit.kind === 'point' ? 3.5 : 1.3}" fill="#087ba8"/>`;
+          })
+          .join('');
+        fieldProjection.irrigation.push({ ...unit, point: xy(project(shape.centre)) });
+      }
+      content += '</g>';
+    }
     for (const c of layers.plots ? s.crops : []) {
       const p = plotCorners(s, c).map(project);
       content += poly(p, '#94bc69', '#557a35', 0.45);
+      const planting = cropPlantingGeometry(s, c);
+      content += `<g data-crop-rows="${escapeXml(c.id)}"><title>${escapeXml(plantingDescription(c))}</title><path d="${planting.rows.map(([a, b]) => `M ${xy(project(a)).join(' ')} L ${xy(project(b)).join(' ')}`).join(' ')}" fill="none" stroke="#315d35" stroke-width=".8"/>${planting.plants
+        .map((p) => {
+          const [x, y] = xy(project(new THREE.Vector3(p.x, p.y, p.z)));
+          return `<circle cx="${x}" cy="${y}" r="1.1" fill="#315d35"/>`;
+        })
+        .join('')}</g>`;
       fieldProjection.beds.push({ id: c.id, crop: c.crop, points: p.map(xy) });
     }
     for (const [glyphIndex, glyph] of glyphs.entries()) {
@@ -382,8 +430,14 @@ export function figureSvg(
     return lines;
   };
   const sensorFooter = [
+    ...(layers.irrigation
+      ? (s.irrigationUnits || []).map(
+          (u) =>
+            `Irrigation ${u.id}: ${u.method}; E ${u.x.toFixed(3)} / N ${u.y.toFixed(3)} / z ${u.z} m; zone ${u.zoneId || 'unassigned'}; bed ${u.link?.bedId || 'none'}; rated flow ${u.ratedFlow === null ? 'unknown' : u.ratedFlow + ' m³/s'}${u.emitterSpacing ? ' per emitter' : ' per head/inlet'}.`,
+        )
+      : []),
     ...(fieldLabels.hidden.length > 0
-      ? ['Some ID tags omitted to avoid overlap; use the field key and receiver coordinates below.']
+      ? ['Some ID tags omitted to avoid overlap; use the field key and design coordinates below.']
       : []),
     ...glyphs.map(
       (glyph) =>
@@ -392,7 +446,7 @@ export function figureSvg(
     ...(layers.plots
       ? s.crops.map(
           (c) =>
-            `Bed ${c.id}: ${c.crop}; ${c.grid ? `cell ${c.grid.column + 1}/${c.grid.row + 1}; ${c.grid.columns} × ${c.grid.rows} cells` : `E ${c.x} / N ${c.y} m`}`,
+            `Bed ${c.id}: ${c.crop}; ${c.planting?.rowCount ?? 1} crop rows; ${c.grid ? `cell ${c.grid.column + 1}/${c.grid.row + 1}; ${c.grid.columns} × ${c.grid.rows} cells` : `E ${c.x} / N ${c.y} m`}`,
         )
       : []),
   ].flatMap((text) => wrap(text));
@@ -407,6 +461,8 @@ export function figureSvg(
     provenance.dli,
     provenance.model,
     provenance.assumptions,
+    provenance.designGrid,
+    provenance.irrigation,
     provenance.validation,
     ...(options.control
       ? [
@@ -427,7 +483,9 @@ export function figureSvg(
           ),
           ...(sensorFooter.length
             ? [
-                'ID tags: orange = sensors; green = crop beds. Full identities and receiver coordinates are in the report tables.',
+                ...wrap(
+                  'ID tags: orange = sensors; green = crop beds; blue = irrigation (dashed spray outlines are nominal coverage). Green lines mark crop rows; dense plant dots are sampled. Full identities and field coordinates are in the report tables.',
+                ),
               ]
             : []),
           ...(fieldLabels.hidden.length

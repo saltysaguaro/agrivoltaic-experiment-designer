@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dliZones } from '../src/domain/dli-zones.js';
-import { defaultStudy, migrateStudy, analysisKey } from '../src/domain/study.js';
+import { defaultStudy, migrateStudy, analysisKey, dimensions } from '../src/domain/study.js';
 import { figureSvg, dliZoneColor } from '../src/report/figures.js';
 import { exportCsv, methodsRows } from '../src/report/export.js';
 import { receiverGrid } from '../src/domain/geometry.js';
+import { calculateDay } from '../src/irradiance/engine.js';
+import { rowHeight } from '../src/domain/receiver-grid.js';
 
 const fixture = (values, weights = values.map(() => 1)) => ({
   cells: values.map((dli) => ({ dli })),
@@ -134,4 +136,48 @@ test('zoned figures, methods and receiver CSV share the displayed zone assignmen
     z.cellZones,
   );
   assert.doesNotMatch(figureSvg(s, null, 'plan', 'zoned-dli'), /Zoned DLI/);
+});
+
+test('northward spring shadows leave unequal end light without moving the array or zoned map', async () => {
+  const s = defaultStudy();
+  s.site = { latitude: 32.221297, longitude: -110.973306, utcOffset: -7, elevation: 728 };
+  s.analysis.date = '2025-04-01';
+  // Independent illustrative CPU reproduction of the reported site's geometry effect,
+  // not a recreation of the export's unavailable weather snapshot or GPU values.
+  s.weather.mode = 'sample';
+  s.analysis.backend = 'cpu';
+  s.analysis.patches = 145;
+  s.analysis.interval = 30;
+  s.analysis.cellsPerRow = 5;
+  s.row.tables = 1;
+  s.array.rows = 3;
+  const studyBefore = structuredClone(s);
+  const result = await calculateDay(s, () => {}, {
+    cache: { get: async () => null, put: async () => {} },
+  });
+  const halfLength = dimensions(s).rowLength / 2;
+  const endMean = (sign) => {
+    const cells = result.cells
+      .map((c, i) => ({
+        ...c,
+        area: result.grid.dx * rowHeight(result.grid, Math.floor(i / result.grid.nx)),
+      }))
+      .filter((c) => sign * c.y > halfLength);
+    return (
+      cells.reduce((sum, c) => sum + c.dli * c.area, 0) / cells.reduce((sum, c) => sum + c.area, 0)
+    );
+  };
+  assert.ok(endMean(-1) > endMean(1) + 1, 'South end receives more DLI than north end');
+  assert.ok(Math.abs((result.grid.width - 2 * halfLength) / 2 - s.array.buffer) < 1e-9);
+  const resultBefore = structuredClone(result);
+  const polygons = (svg) => [...svg.matchAll(/<polygon\b[^>]*points="([^"]+)"/g)].map((m) => m[1]);
+  for (const view of ['plan', 'oblique']) {
+    assert.deepEqual(
+      polygons(figureSvg(s, result, view, 'zoned-dli')),
+      polygons(figureSvg(s, result, view, 'dli')),
+      'Zoning only recolors the map; panel and receiver positions remain identical',
+    );
+  }
+  assert.deepEqual(result, resultBefore);
+  assert.deepEqual(s, studyBefore);
 });

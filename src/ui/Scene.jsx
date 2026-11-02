@@ -1,3 +1,6 @@
+import { designGridSpec, designGridLines } from '../experiment/design-grid.js';
+import { irrigationGeometry } from '../experiment/irrigation.js';
+import { cropPlantingGeometry } from '../experiment/crop-planting.js';
 import { dliZones } from '../domain/dli-zones.js';
 import { batchHardware } from './hardware-display.js';
 import { rowHeight, maxRows, rowEdge } from '../domain/receiver-grid.js';
@@ -67,7 +70,6 @@ function SceneView({
   onSelect,
   onEditItem,
   onDropTool,
-  editor,
   interactionRef,
 }) {
   const zoning = metric === 'zoned-dli' ? dliZones(result, study.analysis.dliZoneCount) : null;
@@ -115,6 +117,8 @@ function SceneView({
     scopeKey,
   ]);
   const overlayKey = JSON.stringify([
+    study.designGrid,
+    study.irrigationUnits,
     study.landUse,
     study.rowPair.cropSetback,
     study.rowPair.croppingWidth,
@@ -124,7 +128,7 @@ function SceneView({
     study.analysis.cellsPerRow,
     study.analysis.receiverHeight,
     study.experimentSensors.map((s) => [s.id, s.x, s.y, s.z, s.grid]),
-    study.crops.map((p) => [p.id, p.x, p.y, p.width, p.length, p.grid]),
+    study.crops.map((p) => [p.id, p.x, p.y, p.width, p.length, p.grid, p.planting]),
   ]);
 
   const annotationKey = JSON.stringify([
@@ -219,6 +223,29 @@ function SceneView({
                 ...b,
                 points: plotCorners(displayed, b).map(project),
               }))
+            : [],
+          coverage: current.layers.irrigationCoverage
+            ? (displayed.irrigationUnits || []).flatMap((unit) =>
+                irrigationGeometry(displayed, unit, {
+                  profile: current.view === 'profile',
+                }).coverage.map((path) =>
+                  path.map((p) => project(new THREE.Vector3(p.x, p.y, p.z))),
+                ),
+              )
+            : [],
+          irrigation: current.layers.irrigation
+            ? (displayed.irrigationUnits || []).map((unit) => {
+                const shape = irrigationGeometry(displayed, unit, {
+                  profile: current.view === 'profile',
+                });
+                const screen = (p) => project(new THREE.Vector3(p.x, p.y, p.z));
+                return {
+                  ...unit,
+                  point: screen(shape.centre),
+                  paths: shape.lines.map((line) => line.map(screen)),
+                  markers: shape.markers.map(screen),
+                };
+              })
             : [],
           markers: current.layers.sensors
             ? sensorMarkers(displayed, { profile: current.view === 'profile' }).map((m) => {
@@ -349,9 +376,10 @@ function SceneView({
           ...cellCenter(v.study, cell, g),
           z: v.study.analysis.receiverHeight,
         },
-        sensors: v.study.experimentSensors.filter(
-          (s) => s.grid?.column === cell.column && s.grid?.row === cell.row,
-        ),
+        sensors: v.study.experimentSensors.filter((s) => {
+          const at = cellAt(v.study, s, g, false);
+          return at?.column === cell.column && at?.row === cell.row;
+        }),
         left: Math.max(8, Math.min(e.clientX - rect.left + 14, rect.width - 235)),
         top: Math.max(8, Math.min(e.clientY - rect.top + 14, rect.height - 290)),
       });
@@ -362,7 +390,7 @@ function SceneView({
     canvas.addEventListener('keydown', (e) => {
       const v = latest.current;
       if (v.scopeKey !== 'array') return;
-      const g = receiverGridSpec(v.study),
+      const g = v.placing ? designGridSpec(v.study) : receiverGridSpec(v.study),
         cell = { ...v.selectedCell };
       if (e.key === 'Enter' && v.placing) {
         e.preventDefault();
@@ -476,13 +504,19 @@ function SceneView({
       const ground = groundGrid(study, group.userData);
       const grid = new THREE.LineSegments(
         new THREE.BufferGeometry().setFromPoints(
-          (scopeKey === 'array' ? receiverLines(study) : ground.lines).flat(),
+          (scopeKey === 'array'
+            ? editing || scope === 'report'
+              ? designGridLines(study)
+              : receiverLines(study)
+            : ground.lines
+          ).flat(),
         ),
         new THREE.LineBasicMaterial({ color: 0x97ac97, transparent: true, opacity: 0.32 }),
       );
       // Small display offset avoids z-fighting with the light-map overlay.
       grid.position.z = 0.02;
-      if (scopeKey === 'array') grid.userData.layer = 'receiver';
+      if (scopeKey === 'array')
+        grid.userData.layer = editing || scope === 'report' ? 'designGrid' : 'receiver';
       overlay.add(grid);
     }
     if (
@@ -592,6 +626,43 @@ function SceneView({
           overlay.add(label);
         }
       }
+      for (const unit of study.irrigationUnits || []) {
+        const shape = irrigationGeometry(study, unit, { profile: view === 'profile' });
+        const vector = (p) => new THREE.Vector3(p.x, p.y, p.z);
+        for (const [paths, layer] of [
+          [shape.lines, 'irrigation'],
+          [editing || scope === 'report' ? [] : shape.coverage, 'irrigationCoverage'],
+        ]) {
+          for (const path of paths) {
+            const dashed = shape.dashed || layer === 'irrigationCoverage';
+            const line = new THREE.Line(
+              new THREE.BufferGeometry().setFromPoints(path.map(vector)),
+              dashed
+                ? new THREE.LineDashedMaterial({
+                    color: 0x187fa5,
+                    dashSize: 0.15,
+                    gapSize: 0.1,
+                    transparent: true,
+                    opacity: layer === 'irrigationCoverage' ? 0.5 : 1,
+                  })
+                : new THREE.LineBasicMaterial({ color: 0x187fa5 }),
+            );
+            if (dashed) line.computeLineDistances();
+            line.userData.layer = layer;
+            overlay.add(line);
+          }
+        }
+        const markers = new THREE.Points(
+          new THREE.BufferGeometry().setFromPoints(shape.markers.map(vector)),
+          new THREE.PointsMaterial({
+            color: 0x087ba8,
+            size: unit.kind === 'point' ? 8 : 4,
+            sizeAttenuation: false,
+          }),
+        );
+        markers.userData.layer = 'irrigation';
+        overlay.add(markers);
+      }
       for (const p of study.crops) {
         const mesh = new THREE.Mesh(
           new THREE.PlaneGeometry(p.width, p.length),
@@ -613,6 +684,23 @@ function SceneView({
           new THREE.LineBasicMaterial({ color: 0x4f793d }),
         );
         mesh.add(edges);
+        const planting = cropPlantingGeometry(study, p);
+        const rowLines = new THREE.LineSegments(
+          new THREE.BufferGeometry().setFromPoints(
+            planting.rows.flat().map((v) => new THREE.Vector3(v.x, v.y, v.z)),
+          ),
+          new THREE.LineBasicMaterial({ color: 0x315d35, transparent: true, opacity: 0.75 }),
+        );
+        rowLines.userData.layer = 'plots';
+        overlay.add(rowLines);
+        const dots = new THREE.Points(
+          new THREE.BufferGeometry().setFromPoints(
+            planting.plants.map((v) => new THREE.Vector3(v.x, v.y, v.z + 0.005)),
+          ),
+          new THREE.PointsMaterial({ color: 0x315d35, size: 3, sizeAttenuation: false }),
+        );
+        dots.userData.layer = 'plots';
+        overlay.add(dots);
       }
     }
     applyDisplayLayers(group, overlay, layers, panelOpacity);
@@ -798,7 +886,7 @@ function SceneView({
     const [x, y] = dirs[e.key];
     let grid;
     if (e.shiftKey && target.kind === 'crop') {
-      const g = receiverGridSpec(study);
+      const g = designGridSpec(study);
       grid =
         item.gridMode === 'exact'
           ? resizeGrid(
@@ -835,7 +923,7 @@ function SceneView({
     try {
       const tool = JSON.parse(raw),
         point = runtime.current?.pointAt(e);
-      if (point && ['sensor', 'crop'].includes(tool.kind)) onDropTool?.(tool, point);
+      if (point && ['sensor', 'crop', 'irrigation'].includes(tool.kind)) onDropTool?.(tool, point);
     } catch {}
   }
   return (
@@ -868,22 +956,6 @@ function SceneView({
             onEnd={endItemDrag}
             onKey={keyItem}
           />
-        )}
-        {editing && editor && (
-          <div
-            className="map-editor-anchor"
-            style={{
-              '--editor-max-height': `${Math.max(180, Math.min(projection?.height || 420, projection?.viewportBottom || 420) - (projection?.anchor ? Math.max(8, Math.min(projection.anchor[1] - 40, projection.height - 360)) : 12) - 10)}px`,
-              left: projection?.anchor
-                ? Math.max(8, Math.min(projection.anchor[0] + 24, projection.width - 365))
-                : 12,
-              top: projection?.anchor
-                ? Math.max(8, Math.min(projection.anchor[1] - 40, projection.height - 360))
-                : 12,
-            }}
-          >
-            {editor}
-          </div>
         )}
         {hover && (
           <div
@@ -956,6 +1028,7 @@ function SceneView({
                 focus,
                 control,
                 callouts: !editing && scope !== 'report',
+                designGrid: editing,
                 layers,
                 panelOpacity,
               }),

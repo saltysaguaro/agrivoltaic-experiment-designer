@@ -18,6 +18,7 @@ import { projectDocument, readProject, buildProjectPackage } from '../src/projec
 import { cropIdentity } from '../src/domain/crop-catalog.js';
 function example() {
   const s = defaultStudy();
+  s.racking.type = 'fixed';
   s.array.azimuth = 37;
   s.experimentSensors = [1, 2].map((n) => ({
     id: `S-${n}`,

@@ -22,18 +22,39 @@ export function nearestCell(result, x, y) {
 const statsCache = new WeakMap();
 export function plotStats(result, plot) {
   if (!result) return null;
-  const key = JSON.stringify([plot.gridMode, plot.grid, plot.x, plot.y, plot.width, plot.length]);
+  const key = JSON.stringify([
+    plot.gridSpace,
+    plot.gridMode,
+    plot.grid,
+    plot.x,
+    plot.y,
+    plot.width,
+    plot.length,
+  ]);
   if (!statsCache.has(result)) statsCache.set(result, new Map());
   const cache = statsCache.get(result);
   if (cache.has(key)) return cache.get(key);
   const cells = [],
     g = result.grid,
-    p = plot.grid;
+    p =
+      plot.gridSpace === 'design' && g
+        ? (() => {
+            const a = (g.azimuth * Math.PI) / 180;
+            const x = -Math.cos(a) * plot.x + Math.sin(a) * plot.y;
+            const y = -Math.sin(a) * plot.x - Math.cos(a) * plot.y;
+            return {
+              column: (x - plot.width / 2 + g.width / 2) / g.dx,
+              columns: plot.width / g.dx,
+              row: rowIndex(g, y - plot.length / 2),
+              rows: rowIndex(g, y + plot.length / 2) - rowIndex(g, y - plot.length / 2),
+            };
+          })()
+        : plot.grid;
   const append = (i, weight) => {
     if (weight > 1e-12) cells.push({ ...result.cells[i], weight });
   };
   if (g && p) {
-    const exact = plot.gridMode === 'exact';
+    const exact = plot.gridMode === 'exact' || plot.gridSpace === 'design';
     for (
       let row = Math.max(0, Math.floor(p.row));
       row < Math.min(g.ny, Math.ceil(p.row + p.rows));

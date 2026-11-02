@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import CropPlantingFields from './CropPlantingFields.jsx';
+import { defaultPlanting, changePlotCrop } from '../domain/crop-planting.js';
 import CropPicker from './CropPicker.jsx';
 import { cropRows, planCropBeds } from '../experiment/crop-beds.js';
 import { dimensions } from '../domain/study.js';
@@ -8,6 +10,7 @@ export default function CropBedsDialog({ study, cropId, control, onApply, onClos
   const rows = cropRows(study);
   const [count, setCount] = useState('3');
   const [crop, setCrop] = useState(cropId);
+  const [planting, setPlanting] = useState(() => defaultPlanting(cropId));
   const [chosen, setChosen] = useState([]);
   const [error, setError] = useState('');
   useEffect(() => {
@@ -24,7 +27,7 @@ export default function CropBedsDialog({ study, cropId, control, onApply, onClos
   let plan = [],
     problem = '';
   try {
-    plan = planCropBeds(study, { count: Number(count), rowIds: chosen, cropId: crop });
+    plan = planCropBeds(study, { count: Number(count), rowIds: chosen, cropId: crop, planting });
   } catch (e) {
     problem = e.message;
   }
@@ -51,8 +54,12 @@ export default function CropBedsDialog({ study, cropId, control, onApply, onClos
         onSubmit={(e) => {
           e.preventDefault();
           if (problem) return;
+          if (e.currentTarget.querySelector('[aria-invalid="true"]')) {
+            setError('Correct the marked value before adding beds.');
+            return;
+          }
           try {
-            onApply({ count: Number(count), rowIds: chosen, cropId: crop });
+            onApply({ count: Number(count), rowIds: chosen, cropId: crop, planting });
           } catch (e) {
             setError(e.message);
           }
@@ -65,9 +72,9 @@ export default function CropBedsDialog({ study, cropId, control, onApply, onClos
           </p>
           <div className="crop-bed-inputs">
             <label className="field">
-              Crop beds per crop row
+              Crop beds per cropping area
               <input
-                aria-label="Crop beds per crop row"
+                aria-label="Crop beds per cropping area"
                 type="number"
                 min="1"
                 max="200"
@@ -77,10 +84,18 @@ export default function CropBedsDialog({ study, cropId, control, onApply, onClos
                 onChange={(e) => setCount(e.target.value)}
               />
             </label>
-            <CropPicker label="Crop for new beds" value={crop} onChange={setCrop} />
+            <CropPicker
+              label="Crop for new beds"
+              value={crop}
+              onChange={(id) => {
+                setPlanting(changePlotCrop({ cropId: crop, planting }, id).planting);
+                setCrop(id);
+              }}
+            />
           </div>
+          <CropPlantingFields plot={{ cropId: crop, planting }} onChange={setPlanting} />
           <div className="crop-row-actions">
-            <strong>Choose crop rows · {chosen.length} selected</strong>
+            <strong>Choose cropping areas · {chosen.length} selected</strong>
             <button
               type="button"
               className="secondary compact"
@@ -160,8 +175,28 @@ export default function CropBedsDialog({ study, cropId, control, onApply, onClos
                         strokeDasharray="5 3"
                       />
                     ))}
+                    {beds.flatMap((b, bedIndex) =>
+                      Array.from({ length: planting.rowCount }, (_, rowIndex) => (
+                        <line
+                          key={`crop-${bedIndex}-${rowIndex}`}
+                          x1="98"
+                          x2="550"
+                          y1={y(
+                            (b.y0 + b.y1) / 2 +
+                              (rowIndex - (planting.rowCount - 1) / 2) * planting.rowSpacing,
+                          )}
+                          y2={y(
+                            (b.y0 + b.y1) / 2 +
+                              (rowIndex - (planting.rowCount - 1) / 2) * planting.rowSpacing,
+                          )}
+                          stroke="#315d35"
+                          strokeWidth=".65"
+                          opacity=".6"
+                        />
+                      )),
+                    )}
                     <text x="324" y={top + h / 2 + 4} textAnchor="middle">
-                      {selected ? '✓ ' : ''}Crop row {r.id} · {(r.y1 - r.y0).toFixed(2)} m wide
+                      {selected ? '✓ ' : ''}Cropping area {r.id} · {(r.y1 - r.y0).toFixed(2)} m wide
                     </text>
                     <title>
                       {(r.x1 - r.x0).toFixed(2)} m long × {(r.y1 - r.y0).toFixed(2)} m wide
@@ -172,7 +207,7 @@ export default function CropBedsDialog({ study, cropId, control, onApply, onClos
             </svg>
           </div>
           <p role="status">
-            {problem || `${plan.length} new beds · ${Number(count)} per selected crop row`}
+            {problem || `${plan.length} new beds · ${Number(count)} per selected cropping area`}
           </p>
           {!problem && (
             <p>

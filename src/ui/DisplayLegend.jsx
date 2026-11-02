@@ -23,6 +23,9 @@ export default function DisplayLegend({
     ...(array
       ? [
           ['receiver', 'Receiver boundary', 'receiver-swatch'],
+          ['designGrid', 'Design grid', 'receiver-swatch'],
+          ['irrigation', 'Irrigation units', 'irrigation-swatch'],
+          ['irrigationCoverage', 'Nominal spray coverage', 'irrigation-swatch'],
           ['plots', 'Crop plots', 'zone-swatch cropping'],
           ['sensors', 'Field sensors', 'legend-dot'],
         ]
@@ -35,7 +38,10 @@ export default function DisplayLegend({
           .filter(
             ([key]) =>
               (!control || !['modules', 'supports', 'underPanel', 'perimeter'].includes(key)) &&
-              (fieldLayout || !['sensors', 'plots'].includes(key)),
+              (fieldLayout ||
+                !['sensors', 'plots', 'designGrid', 'irrigation', 'irrigationCoverage'].includes(
+                  key,
+                )),
           )
           .map(([key, label, style]) => (
             <button

@@ -1,5 +1,9 @@
+import { irrigationMethods, irrigationMethod } from '../domain/irrigation.js';
+import { irrigationBedWarnings } from '../experiment/irrigation.js';
+import DesignGridControls from './DesignGridControls.jsx';
 import React, { useRef, useState } from 'react';
-import { MousePointer2, MapPin, Sprout, Undo2 } from 'lucide-react';
+import { MousePointer2, MapPin, Sprout, Undo2, Droplets } from 'lucide-react';
+import { plantingIssue } from '../domain/crop-planting.js';
 import CropPicker from './CropPicker.jsx';
 export default function FieldTools({
   tool,
@@ -17,6 +21,11 @@ export default function FieldTools({
   onDropPalette,
   onAddCropBeds,
   onAddSensors,
+  onAddIrrigation,
+  onDesignGrid,
+  irrigationType = 'drip',
+  setIrrigationType,
+  onEditZone,
 }) {
   const gesture = useRef(null),
     suppressClick = useRef(false);
@@ -88,7 +97,11 @@ export default function FieldTools({
     <div className="field-tools" aria-label="Field layout tools">
       {ghost && (
         <div className="palette-ghost" style={{ left: ghost.x + 12, top: ghost.y + 12 }}>
-          {ghost.kind === 'sensor' ? 'New sensor' : 'New crop bed'}
+          {ghost.kind === 'sensor'
+            ? 'New sensor'
+            : ghost.kind === 'irrigation'
+              ? 'New irrigation unit'
+              : 'New crop bed'}
         </div>
       )}
       <div className="tool-buttons">
@@ -105,6 +118,7 @@ export default function FieldTools({
         <button className="bulk-sensor-button" onClick={onAddSensors}>
           <MapPin size={16} /> Add sensors
         </button>
+        <button onClick={onAddIrrigation}>Add irrigation units</button>
         <button disabled={!canUndo} onClick={onUndo} aria-label="Undo field edit">
           <Undo2 size={16} /> Undo
         </button>
@@ -121,7 +135,7 @@ export default function FieldTools({
               onSelect(kind ? { kind, id: ids.join(':') } : null);
             }}
           >
-            <option value="">Select a sensor or bed…</option>
+            <option value="">Select a field item…</option>
             {study.experimentSensors.map((s) => (
               <option key={`sensor:${s.id}`} value={`sensor:${s.id}`}>
                 {s.id} · {s.type}
@@ -132,9 +146,17 @@ export default function FieldTools({
                 {c.id} · {c.crop}
               </option>
             ))}
+            {(study.irrigationUnits || []).map((u) => (
+              <option key={`irrigation:${u.id}`} value={`irrigation:${u.id}`}>
+                {u.id} · {irrigationMethod(u.method)?.[1]}
+              </option>
+            ))}
           </select>
         </label>
         <div className="single-field-tools">
+          <button {...palette('irrigation')} aria-pressed={tool === 'irrigation'}>
+            <Droplets size={16} /> Add single irrigation unit
+          </button>
           <button {...palette('sensor')} aria-pressed={tool === 'sensor'}>
             <MapPin size={16} /> Add sensor
           </button>
@@ -174,6 +196,7 @@ export default function FieldTools({
           {[
             ...study.experimentSensors.map((item) => ({ ...item, kind: 'sensor' })),
             ...study.crops.map((item) => ({ ...item, kind: 'crop' })),
+            ...(study.irrigationUnits || []).map((item) => ({ ...item, kind: 'irrigation' })),
           ].map((item) => (
             <label key={`${item.kind}:${item.id}`}>
               <input
@@ -182,11 +205,64 @@ export default function FieldTools({
                 checked={selections.some((v) => v.kind === item.kind && v.id === item.id)}
                 onChange={() => onSelect({ kind: item.kind, id: item.id }, false, true)}
               />
-              {item.id} · {item.kind === 'sensor' ? item.type : item.crop}
+              {item.id} ·{' '}
+              {item.kind === 'sensor'
+                ? item.type
+                : item.kind === 'irrigation'
+                  ? irrigationMethod(item.method)?.[1]
+                  : item.crop}
             </label>
           ))}
         </div>
       </details>
+      {study.crops.filter((c) => plantingIssue(c)).length > 0 && (
+        <p className="warning" role="alert">
+          Crop rows do not fit in beds{' '}
+          {study.crops
+            .filter((c) => plantingIssue(c))
+            .map((c) => c.id)
+            .join(', ')}
+          . Open these beds to adjust their width, row count or spacing. Their crop rows are hidden
+          until they fit.
+        </p>
+      )}
+      {onDesignGrid && <DesignGridControls study={study} onChange={onDesignGrid} />}
+      {tool === 'irrigation' && (
+        <label>
+          Method for new units{' '}
+          <select
+            aria-label="Method for new irrigation units"
+            value={irrigationType}
+            onChange={(e) => setIrrigationType(e.target.value)}
+          >
+            {irrigationMethods.map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      {(study.irrigationZones || []).length > 0 && (
+        <details>
+          <summary>Irrigation zones / treatments ({study.irrigationZones.length})</summary>
+          {study.irrigationZones.map((z) => (
+            <button
+              type="button"
+              key={z.id}
+              className="secondary compact"
+              onClick={() => onEditZone(z.id)}
+            >
+              {z.id} · {z.name} · {z.kind}
+            </button>
+          ))}
+        </details>
+      )}
+      {irrigationBedWarnings(study).map((w) => (
+        <p className="warning" key={w}>
+          {w}
+        </p>
+      ))}
       {tool === 'crop' && (
         <CropPicker label="Crop for new beds" value={cropId} onChange={setCropId} />
       )}
@@ -194,7 +270,7 @@ export default function FieldTools({
         {view === 'profile'
           ? 'Choose Top-down or Orthographic to drag items; the item list opens their editors in any view.'
           : tool
-            ? `Click a receiver cell to place ${tool === 'sensor' ? 'a sensor' : 'a crop bed'}, or drag its toolbar button onto the drawing.`
+            ? `Click a design cell to place ${tool === 'sensor' ? 'a sensor' : tool === 'irrigation' ? 'an irrigation unit' : 'a crop bed'}, or drag its toolbar button onto the drawing.`
             : 'Click to edit; Shift-click to select a group. Drag to move; drag bed corners to resize. Arrow keys move; Shift + arrows resize. Escape cancels.'}
       </p>
     </div>

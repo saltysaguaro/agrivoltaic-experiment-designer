@@ -1,19 +1,22 @@
+import { designGridSpec } from '../experiment/design-grid.js';
 import { rowIndex, rowEdge, rowSpan, cellLocal } from '../domain/receiver-grid.js';
 import { allFieldIds, uniqueFieldId } from './control-field.js';
-import { receiverGridSpec, worldToLocal } from '../domain/geometry.js';
+import { worldToLocal } from '../domain/geometry.js';
 import { normalizeLayout } from './grid-layout.js';
+export const fieldItemKey = (kind) =>
+  kind === 'sensor' ? 'experimentSensors' : kind === 'irrigation' ? 'irrigationUnits' : 'crops';
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 export function layoutItems(study, kind) {
-  return kind === 'sensor' ? study.experimentSensors : study.crops;
+  return study[fieldItemKey(kind)] || [];
 }
 export function gridPoint(study, point) {
-  const g = receiverGridSpec(study),
+  const g = designGridSpec(study),
     p = worldToLocal(study, point.x, point.y);
   return { column: (p.x + g.width / 2) / g.dx, row: rowIndex(g, p.y) };
 }
 // The opposite corner stays fixed. A bed cannot flip, leave the grid, or exceed 100 m.
 export function resizeGrid(study, original, corner, point, exact = false) {
-  const g = receiverGridSpec(study),
+  const g = designGridSpec(study),
     p = gridPoint(study, point);
   const right = corner.includes('e'),
     top = corner.includes('n');
@@ -80,7 +83,7 @@ function compatibleRowOffset(g, grids, requested) {
   return 0;
 }
 export function moveGrid(study, original, delta) {
-  const g = receiverGridSpec(study);
+  const g = designGridSpec(study);
   return {
     ...original,
     column: clamp(original.column + Math.round(delta.column), 0, g.nx - (original.columns || 1)),
@@ -88,16 +91,63 @@ export function moveGrid(study, original, delta) {
   };
 }
 export function replaceFieldItem(study, selection, item) {
-  const key = selection.kind === 'sensor' ? 'experimentSensors' : 'crops';
-  return normalizeLayout({
+  const key = fieldItemKey(selection.kind),
+    original = layoutItems(study, selection.kind).find((v) => v.id === selection.id);
+  let next = {
     ...study,
-    [key]: study[key].map((v) => (v.id === selection.id ? item : v)),
-  });
+    [key]: layoutItems(study, selection.kind).map((v) => (v.id === selection.id ? item : v)),
+  };
+  if (selection.kind === 'crop' && original.id !== item.id) {
+    next.irrigationUnits = (study.irrigationUnits || []).map((u) =>
+      u.link?.bedId === original.id ? { ...u, link: { ...u.link, bedId: item.id } } : u,
+    );
+    next.irrigationZones = (study.irrigationZones || []).map((z) => ({
+      ...z,
+      bedIds: z.bedIds.map((id) => (id === original.id ? item.id : id)),
+    }));
+  }
+  if (
+    selection.kind === 'irrigation' &&
+    item.link &&
+    original?.grid &&
+    item.grid &&
+    (item.grid.column !== original.grid.column || item.grid.row !== original.grid.row)
+  ) {
+    const g = designGridSpec(study),
+      a = cellLocal(g, original.grid.column, original.grid.row),
+      b = cellLocal(g, item.grid.column, item.grid.row);
+    next[key] = next[key].map((u) =>
+      u.id === item.id
+        ? {
+            ...u,
+            link: { ...u.link, along: u.link.along + b.x - a.x, across: u.link.across + b.y - a.y },
+          }
+        : u,
+    );
+  }
+  return normalizeLayout(next);
+}
+export function deleteFieldItem(study, target, linkedAction = 'detach') {
+  const key = fieldItemKey(target.kind);
+  let next = { ...study, [key]: layoutItems(study, target.kind).filter((v) => v.id !== target.id) };
+  if (target.kind === 'crop') {
+    next.irrigationUnits = (study.irrigationUnits || [])
+      .filter((u) => linkedAction !== 'delete' || u.link?.bedId !== target.id)
+      .map((u) => (u.link?.bedId === target.id ? { ...u, link: null } : u));
+    next.irrigationZones = (study.irrigationZones || []).map((z) => ({
+      ...z,
+      bedIds: z.bedIds.filter((id) => id !== target.id),
+    }));
+  }
+  return normalizeLayout(next);
 }
 export function layoutSnapshot(study) {
   return {
     experimentSensors: structuredClone(study.experimentSensors),
     crops: structuredClone(study.crops),
+    designGrid: study.designGrid ? structuredClone(study.designGrid) : undefined,
+    irrigationUnits: structuredClone(study.irrigationUnits || []),
+    irrigationZones: structuredClone(study.irrigationZones || []),
   };
 }
 
@@ -110,7 +160,7 @@ export function selectedItems(study, selections) {
 // Clamp one shared translation, not each item separately: relative spacing is preserved.
 export function groupDelta(study, selections, delta) {
   const items = selectedItems(study, selections),
-    g = receiverGridSpec(study);
+    g = designGridSpec(study);
   if (!items.length) return { column: 0, row: 0 };
   return {
     column: clamp(
@@ -145,6 +195,17 @@ export function moveFieldGroup(study, selections, delta) {
     ...study,
     experimentSensors: move(study.experimentSensors, 'sensor'),
     crops: move(study.crops, 'crop'),
+    irrigationUnits: move(study.irrigationUnits || [], 'irrigation').map((u) => {
+      if (!u.link || !chosen.has(`irrigation:${u.id}`) || chosen.has(`crop:${u.link.bedId}`))
+        return u;
+      const old = study.irrigationUnits.find((v) => v.id === u.id),
+        a = cellLocal(designGridSpec(study), old.grid.column, old.grid.row),
+        b = cellLocal(designGridSpec(study), u.grid.column, u.grid.row);
+      return {
+        ...u,
+        link: { ...u.link, along: u.link.along + b.x - a.x, across: u.link.across + b.y - a.y },
+      };
+    }),
   });
 }
 export function duplicateFieldGroup(
@@ -156,13 +217,22 @@ export function duplicateFieldGroup(
   const items = selectedItems(study, selections),
     offset = groupDelta(study, selections, delta);
   const used = new Set(reservedIds),
-    next = { ...study, experimentSensors: [...study.experimentSensors], crops: [...study.crops] },
+    next = {
+      ...study,
+      experimentSensors: [...study.experimentSensors],
+      crops: [...study.crops],
+      irrigationUnits: [...(study.irrigationUnits || [])],
+      irrigationZones: structuredClone(study.irrigationZones || []),
+    },
     copies = [];
   for (const { target, item } of items) {
-    const key = target.kind === 'sensor' ? 'experimentSensors' : 'crops';
-    if (next[key].length >= (target.kind === 'sensor' ? 500 : 200))
+    const key = fieldItemKey(target.kind);
+    if (next[key].length >= (target.kind === 'crop' ? 200 : 500))
       throw Error('Duplication would exceed the field limit of 500 sensors or 200 crop beds.');
-    const id = uniqueFieldId(target.kind === 'sensor' ? 'S' : 'P', used);
+    const id = uniqueFieldId(
+      target.kind === 'sensor' ? 'S' : target.kind === 'irrigation' ? 'I' : 'P',
+      used,
+    );
     next[key].push({
       ...structuredClone(item),
       id,
@@ -174,5 +244,40 @@ export function duplicateFieldGroup(
     });
     copies.push({ kind: target.kind, id });
   }
+  const bedMap = new Map(
+    items
+      .filter((v) => v.target.kind === 'crop')
+      .map((v) => [v.item.id, copies[items.indexOf(v)].id]),
+  );
+  const unitMap = new Map(
+    items
+      .filter((v) => v.target.kind === 'irrigation')
+      .map((v) => [v.item.id, copies[items.indexOf(v)].id]),
+  );
+  // Copy linked hardware with selected beds, and remap links rather than attaching copies to originals.
+  for (const u of study.irrigationUnits || [])
+    if (u.link && bedMap.has(u.link.bedId) && !unitMap.has(u.id)) {
+      if (next.irrigationUnits.length >= 500)
+        throw Error('Duplication would exceed 500 irrigation units.');
+      const id = uniqueFieldId('I', used);
+      unitMap.set(u.id, id);
+      next.irrigationUnits.push({
+        ...structuredClone(u),
+        id,
+        link: { ...u.link, bedId: bedMap.get(u.link.bedId) },
+      });
+    }
+  next.irrigationUnits = next.irrigationUnits.map((u) => {
+    const originalId = [...unitMap].find(([, id]) => id === u.id)?.[0];
+    if (!originalId || !u.link) return u;
+    const original = study.irrigationUnits.find((v) => v.id === originalId);
+    if (bedMap.has(original.link.bedId))
+      return { ...u, link: { ...u.link, bedId: bedMap.get(original.link.bedId) } };
+    return { ...u, link: null };
+  });
+  next.irrigationZones = next.irrigationZones.map((z) => ({
+    ...z,
+    bedIds: [...z.bedIds, ...z.bedIds.filter((id) => bedMap.has(id)).map((id) => bedMap.get(id))],
+  }));
   return { study: normalizeLayout(next), selections: copies, offset };
 }
