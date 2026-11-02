@@ -29,6 +29,8 @@ import ProjectImportDialog from './ui/ProjectImportDialog.jsx';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
+  MessageSquare,
+  ExternalLink,
   ArrowRight,
   ArrowLeft,
   Check,
@@ -1141,8 +1143,8 @@ function App() {
   return (
     <div className={`app ${mobileInputsOpen ? 'inputs-open' : ''}`}>
       <header className="app-header">
-        <a className="brand" href="./" aria-label="Agrivoltaic Experiment Designer home">
-          <span>Agrivoltaic Experiment Designer</span>
+        <a className="brand" href="./" aria-label="Agrivoltaics Experiment Designer home">
+          <span>Agrivoltaics Experiment Designer</span>
         </a>
         <button
           className="secondary inputs-toggle"
@@ -1196,6 +1198,17 @@ function App() {
             }}
           />
         </div>
+        <a
+          className="feedback-button"
+          href="https://docs.google.com/forms/d/e/1FAIpQLSdESoRuog24q7yos0UWacDMPlW_8ErXz0RhMY6EYypi6eZ3yA/viewform"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Give feedback (opens Google Form in a new tab)"
+        >
+          <MessageSquare size={18} aria-hidden="true" />
+          <span>Give feedback</span>
+          <ExternalLink size={18} aria-hidden="true" />
+        </a>
         <nav className="step-navigation" aria-label="Step navigation">
           {step > 0 && (
             <button className="text-button" onClick={() => go(step - 1)}>

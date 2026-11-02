@@ -63,7 +63,7 @@ export function methodsRows(s, r) {
     spacing = cropSpacing(s),
     areas = landUseSummary(s);
   return [
-    ['Software', `Agrivoltaic Experiment Designer ${VERSION}; study schema ${s.schemaVersion}`],
+    ['Software', `Agrivoltaics Experiment Designer ${VERSION}; study schema ${s.schemaVersion}`],
     ['Study', s.metadata.title],
     ['Investigator', s.metadata.investigator || 'Not specified'],
     ['Design grid', designGridDescription(s)],

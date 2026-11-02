@@ -1,4 +1,4 @@
-# Agrivoltaic Experiment Designer
+# Agrivoltaics Experiment Designer
 
 ## Mission and source of truth
 Build a browser-only research design application for standardized agrivoltaic/PV experiments and publication methods figures. Deploy as static assets on GitHub Pages. The user's complete modeling brief is preserved in docs/modeling-brief.md.

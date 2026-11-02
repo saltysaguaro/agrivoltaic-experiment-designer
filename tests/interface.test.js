@@ -172,7 +172,7 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await act(async () => {
       application = await import(pathToFileURL(file).href + '?test=' + Date.now());
     });
-    assert.match(document.querySelector('.brand').textContent, /Agrivoltaic Experiment Designer/);
+    assert.match(document.querySelector('.brand').textContent, /Agrivoltaics Experiment Designer/);
     assert.equal(document.querySelector('.brand svg'), null);
     assert.deepEqual((await savedStudy()).experimentSensors, []);
     assert.deepEqual((await savedStudy()).crops, []);
