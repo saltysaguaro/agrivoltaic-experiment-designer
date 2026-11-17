@@ -60,9 +60,9 @@ export const inputHelp = {
   'rowPair.croppingWidth':
     'Width of the cropping area between adjacent non-cultivated strips. Cropping width plus non-cultivated width equals row pitch. Editing either width updates setback and the other width. Group aisles add cropping space.',
   'landUse.underPanelWidth':
-    'Total non-cultivated width centred beneath each row, including table gaps. Its edges touch the cropping area. Editing it updates cropping width and signed setback immediately. Zero permits crops across the full row pitch.',
+    'Total non-cultivated width centred beneath each row, including table gaps. Its edges touch the cropping area. Editing it updates cropping width and signed setback immediately. With multiple spacings, the narrowest active pitch limits this shared strip width. Zero permits crops across the full row pitch.',
   'landUse.perimeterBuffer':
-    'No-crop border outside the array design envelope: row length by row-axis span plus untilted assembly width. Default 3 m; set 0 for no border. Independent of the numerical receiver buffer. It is not a certification of tracker swept clearance.',
+    'No-crop border outside the array design envelope: row length by row-axis span plus the larger of untilted assembly width and under-row no-crop width. This keeps the border outside the outer rows’ no-crop strips. Default 3 m; set 0 for no border. Independent of the numerical receiver buffer. It is not a certification of tracker swept clearance.',
   'array.rows': 'Total number of parallel PV rows in the array.',
   'array.azimuth':
     'Reference direction measured clockwise from north; rows run perpendicular to it. Fixed and vertical racks use the front-face direction. Single-axis trackers use the positive-tilt facing direction: 90° gives north–south rows and east–west tracking. Dual-axis trackers follow the sun independently of their preview direction. Tilted pergolas face this direction; at 0° tilt, this setting only rotates their layout.',

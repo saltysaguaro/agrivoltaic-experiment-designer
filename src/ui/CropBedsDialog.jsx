@@ -1,3 +1,4 @@
+import { rowPositions } from '../domain/row-spacing.js';
 import React, { useEffect, useRef, useState } from 'react';
 import CropPlantingFields from './CropPlantingFields.jsx';
 import { defaultPlanting, changePlotCrop } from '../domain/crop-planting.js';
@@ -119,11 +120,7 @@ export default function CropBedsDialog({ study, cropId, control, onApply, onClos
               aria-label="Choose cropping areas in the array"
               aria-describedby="crop-row-help"
             >
-              {Array.from({ length: study.array.rows }, (_, i) => {
-                const cy =
-                  i * study.rowPair.pitch +
-                  Math.floor(i / study.array.groupSize) * study.array.aisle -
-                  d.span / 2;
+              {rowPositions(study).map((cy, i) => {
                 return (
                   <g key={i}>
                     <rect x="95" y={y(cy) - 5} width="458" height="10" rx="2" fill="#536d7c" />

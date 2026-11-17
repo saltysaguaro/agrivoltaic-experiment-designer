@@ -1,4 +1,11 @@
 import {
+  rowPitches,
+  rowPositions,
+  minimumRowPitch,
+  rowSpacingKey,
+  MAX_ROW_PITCH,
+} from './row-spacing.js';
+import {
   irrigationUnitsSchema,
   irrigationZonesSchema,
   irrigationReferenceIssues,
@@ -163,9 +170,14 @@ export const studySchema = z
     row: z.object({ tables: count(1, 20), tableGap: num(0.05, 30) }),
     rowPair: z.object({
       pitch: num(0.5, 120),
+      multipleSpacings: z.boolean().default(false),
+      customPitches: z.array(num(0.5, MAX_ROW_PITCH)).max(23).default([]),
       // Derived from panel width, which grows with the uncapped module gap.
-      cropSetback: z.number().finite().max(60),
-      croppingWidth: num(0, 120).default(0),
+      cropSetback: z
+        .number()
+        .finite()
+        .max(MAX_ROW_PITCH / 2),
+      croppingWidth: num(0, MAX_ROW_PITCH).default(0),
     }),
     array: z.object({
       rows: count(1, 24),
@@ -176,7 +188,7 @@ export const studySchema = z
     }),
     landUse: z
       .object({
-        underPanelWidth: num(0, 120).default(1),
+        underPanelWidth: num(0, MAX_ROW_PITCH).default(1),
         perimeterBuffer: num(0, 20).default(3),
       })
       .default({ underPanelWidth: 1, perimeterBuffer: 3 }),
@@ -393,7 +405,7 @@ export function analysisKey(s) {
     },
     s.table,
     s.row,
-    { pitch: s.rowPair.pitch },
+    rowSpacingKey(s),
     s.array,
     { latitude: s.site.latitude, longitude: s.site.longitude, utcOffset: s.site.utcOffset },
     s.analysis.gridAlignment === 'row-centres'
@@ -423,9 +435,7 @@ export function dimensions(s) {
   const projected =
     width * Math.cos((tilt * Math.PI) / 180) +
     s.module.thickness * Math.abs(Math.sin((tilt * Math.PI) / 180));
-  const span =
-    (s.array.rows - 1) * s.rowPair.pitch +
-    Math.floor((s.array.rows - 1) / s.array.groupSize) * s.array.aisle;
+  const span = rowPositions(s, s.array.rows, false).at(-1);
   return {
     along,
     cross,
@@ -439,8 +449,8 @@ export function dimensions(s) {
     footprintX: length + 2 * s.array.buffer,
     footprintY: span + width + 2 * s.array.buffer,
     modules: s.table.high * s.table.wide * s.row.tables * s.array.rows,
-    clear: s.rowPair.pitch - projected,
-    usable: Math.max(0, s.rowPair.pitch - (s.landUse?.underPanelWidth ?? 1)),
+    clear: minimumRowPitch(s) - projected,
+    usable: Math.max(0, minimumRowPitch(s) - (s.landUse?.underPanelWidth ?? 1)),
     minHeight:
       s.racking.height -
       (width / 2) *
@@ -462,12 +472,15 @@ export function pergolaStagger(s, along) {
 // Stored dependent values are normalized on every import and application edit.
 export function cropSpacing(s) {
   const projected = dimensions(s).projected;
-  const underPanelWidth = Math.max(0, Math.min(s.rowPair.pitch, s.landUse?.underPanelWidth ?? 1));
+  const underPanelWidth = Math.max(
+    0,
+    Math.min(minimumRowPitch(s), s.landUse?.underPanelWidth ?? 1),
+  );
   return {
     projected,
     underPanelWidth,
     cropSetback: (underPanelWidth - projected) / 2,
-    croppingWidth: s.rowPair.pitch - underPanelWidth,
+    croppingWidth: minimumRowPitch(s) - underPanelWidth,
   };
 }
 export function synchronizeCropSpacing(s) {
@@ -534,6 +547,10 @@ export function selectRacking(study, type, applyDefaults = true) {
   const minimum = rackingMinimums(s);
   s.racking.height = Math.max(s.racking.height, Math.min(25, minimum.height));
   s.rowPair.pitch = Math.max(s.rowPair.pitch, Math.min(120, minimum.pitch));
+  if (s.rowPair.multipleSpacings)
+    s.rowPair.customPitches = s.rowPair.customPitches.map((pitch) =>
+      Math.max(pitch, Math.min(MAX_ROW_PITCH, minimum.pitch)),
+    );
   s.row.tableGap = Math.max(s.row.tableGap, Math.min(30, minimum.tableGap));
   return synchronizeCropSpacing(s);
 }
@@ -545,6 +562,21 @@ export function updateStudyInput(study, section, key, value) {
   if (section === 'array' && key === 'azimuth' && northSouthRowsRequired(s.racking.type))
     return normalizeRackingOrientation(s);
   s[section][key] = value;
+  if (section === 'rowPair' && key === 'multipleSpacings' && value) {
+    // Seed newly exposed gaps from the existing layout; retain saved custom gaps.
+    const current = rowPitches(study);
+    s.rowPair.customPitches = Array.from(
+      { length: Math.max(current.length, s.rowPair.customPitches?.length || 0) },
+      (_, i) => s.rowPair.customPitches?.[i] ?? current[i],
+    );
+  }
+  if (section === 'array' && key === 'rows' && s.rowPair.multipleSpacings) {
+    const active = rowPitches(s);
+    s.rowPair.customPitches = Array.from(
+      { length: Math.max(active.length, s.rowPair.customPitches?.length || 0) },
+      (_, i) => s.rowPair.customPitches?.[i] ?? active[i],
+    );
+  }
   if (
     section === 'analysis' &&
     (key === 'cellsPerRow' || (key === 'gridSizing' && value === 'row-pitch'))
@@ -564,7 +596,7 @@ export function updateStudyInput(study, section, key, value) {
   if (section === 'rowPair' && key === 'cropSetback')
     s.landUse.underPanelWidth = dimensions(s).projected + 2 * value;
   if (section === 'rowPair' && key === 'croppingWidth')
-    s.landUse.underPanelWidth = s.rowPair.pitch - value;
+    s.landUse.underPanelWidth = minimumRowPitch(s) - value;
   if (
     ['module', 'table'].includes(section) ||
     (section === 'racking' && ['tilt', 'pergolaTilt', 'limit'].includes(key)) ||
@@ -612,7 +644,7 @@ export function designIssues(s) {
   }
   if (s.racking.type === 'dual-axis') {
     const envelope = Math.hypot(d.width, d.tableLength);
-    if (s.rowPair.pitch < envelope + 0.05)
+    if (minimumRowPitch(s) < envelope + 0.05)
       issues.push(
         'Possible rotation interference between rows. The conservative clearance check needs a pitch of ' +
           rackingMinimums(s).pitch.toFixed(2) +
@@ -630,7 +662,7 @@ export function designIssues(s) {
       'The lowest module edge intersects the ground. Increase axis height or reduce assembly width / tilt.',
     );
   if (
-    s.rowPair.pitch <
+    minimumRowPitch(s) <
     (['single-axis', 'dual-axis'].includes(s.racking.type) ? d.width : d.projected) + 0.05
   )
     issues.push('Adjacent row envelopes overlap. Increase row pitch.');

@@ -364,6 +364,54 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     await act(async () => reservation.blur());
     assert.equal((await savedStudy()).landUse.underPanelWidth, 2);
     assert.match(document.querySelector('.annotation-cards').textContent, /2 m/);
+    const spacingToggle = () => document.querySelector('.multiple-spacing-toggle input');
+    assert.equal(spacingToggle().checked, false);
+    assert.equal(document.querySelector('.row-spacing-editor'), null);
+    await click(spacingToggle());
+    assert.equal(document.querySelectorAll('.row-spacing-gap').length, 3);
+    const inputValue = async (input, value) =>
+      act(async () => {
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
+          input,
+          value,
+        );
+        input.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+      });
+    const patternInput = document.querySelector('.row-spacing-editor input[placeholder]');
+    await inputValue(patternInput, '6, 10');
+    await click(byText('Apply pattern to all gaps'));
+    assert.deepEqual((await savedStudy()).rowPair.customPitches, [6, 10, 6]);
+    await inputValue(patternInput, '6, invalid');
+    await click(byText('Apply pattern to all gaps'));
+    assert.match(
+      document.querySelector('.row-spacing-editor [role="alert"]').textContent,
+      /Enter 1–23 pitches/,
+    );
+    assert.deepEqual((await savedStudy()).rowPair.customPitches, [6, 10, 6]);
+    const customGap = document.querySelector('[data-annotation="rowPair.customPitches.1"] input');
+    await inputValue(customGap, '12');
+    await act(async () => customGap.focus());
+    assert.match(document.querySelector('.annotation-cards').textContent, /12 m/);
+    assert.deepEqual((await savedStudy()).rowPair.customPitches, [6, 12, 6]);
+    await click(step('Irradiance'));
+    assert.equal(
+      byText('Relative sunlight').disabled,
+      true,
+      'Custom pitches invalidate saved light results',
+    );
+    assert.equal(calculations, 1, 'Spacing edits never start a solve automatically');
+    await click(step('Row spacing'));
+    assert.deepEqual(
+      [...document.querySelectorAll('.row-spacing-gap input')].map((e) => Number(e.value)),
+      [6, 12, 6],
+    );
+    await click(spacingToggle());
+    assert.equal(document.querySelector('.row-spacing-editor'), null);
+    assert.deepEqual(
+      (await savedStudy()).rowPair.customPitches,
+      [6, 12, 6],
+      'Turning off retains custom values',
+    );
     await click(step('Irradiance'));
     assert.equal(calculations, 1, 'Changing reserved ground does not repeat the solve');
     assert.equal(

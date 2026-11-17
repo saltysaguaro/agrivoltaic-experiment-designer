@@ -24,6 +24,8 @@ const cases = [
   ['finite-row', 'fixed', 'row'],
   ['two-rows', 'fixed', 'pair'],
   ['array-centre-edge-corner', 'fixed', 'array'],
+  ['custom-row-spacings', 'fixed', 'array'],
+  ['custom-row-spacings-tracker', 'single-axis', 'array'],
   ['vertical-bifacial', 'vertical', 'array'],
   ['single-axis-morning', 'single-axis', 'array'],
   ['single-axis-afternoon', 'single-axis', 'array'],
@@ -41,6 +43,10 @@ try {
     s.row.tables = 1;
     s.array.rows = 4;
     s.racking.type = type;
+    if (name.startsWith('custom-row-spacings')) {
+      s.rowPair.multipleSpacings = true;
+      s.rowPair.customPitches = [3, 8, 5];
+    }
     s.array.azimuth = defaultRackingAzimuth(type, s.site.latitude);
     if (name.includes('tilted')) s.racking.pergolaTilt = 23.7;
     if (name.startsWith('pergola-checkerboard')) {

@@ -1,3 +1,4 @@
+import { rowPitches } from '../domain/row-spacing.js';
 import { cellLocal, gridSpacingLabel } from '../domain/receiver-grid.js';
 import { Vector3 } from 'three';
 import { dimensions, cropSpacing } from '../domain/study.js';
@@ -176,6 +177,16 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
       else
         a.detail =
           'There is only one table in this row. This gap applies when another table is added.';
+    } else if (id.startsWith('rowPair.customPitches.')) {
+      const index = Number(id.split('.').at(-1));
+      if (g.rowOffsets[index + 1] !== undefined) {
+        dimension(p(rowStart, g.rowOffsets[index]), p(rowStart, g.rowOffsets[index + 1]));
+        a.symbol = `P${index + 1}–${index + 2}`;
+        a.value = `${Number(rowPitches(s)[index].toFixed(4))} m`;
+      }
+    } else if (id === 'rowPair.pitch' && s.rowPair.multipleSpacings) {
+      a.detail =
+        'Default pitch sizes grid cells and initializes new gaps. Active row pitches are edited individually.';
     } else if (id === 'rowPair.pitch' && cy1 !== undefined) {
       dimension(p(rowStart, cy), p(rowStart, cy + s.rowPair.pitch));
       if (cy1 - cy > s.rowPair.pitch + 1e-6)
@@ -198,7 +209,12 @@ export function engineeringAnnotations(s, scope, group, focus = null) {
           ? 'The marked gap includes the extra group aisle; C is the regular cropping width.'
           : a.detail,
       );
-      if (cy1 - cy > s.rowPair.pitch + 1e-6) {
+      if (s.rowPair.multipleSpacings) {
+        a.symbol = 'C1–2';
+        a.value = `${Number((cy1 - cy - settings.underPanelWidth).toFixed(4))} m`;
+        a.detail =
+          'Cropping width in the first actual gap. Each gap has its own pitch minus the shared under-row width.';
+      } else if (cy1 - cy > s.rowPair.pitch + 1e-6) {
         a.symbol = 'C + A';
         a.value = `${Number((cy1 - cy - settings.underPanelWidth).toFixed(4))} m`;
         a.detail = `Regular cropping width C = ${Number(spacing.croppingWidth.toFixed(4))} m; extra group aisle A = ${s.array.aisle} m. The witness spans their combined width.`;

@@ -1,3 +1,4 @@
+import { rowSpacingKey } from '../domain/row-spacing.js';
 import {
   DEFAULT_CELLS_PER_ROW,
   nominalReceiverSpacing,
@@ -271,7 +272,7 @@ export async function calculateDay(
       s.racking,
       s.table,
       s.row,
-      s.rowPair,
+      rowSpacingKey(s),
       s.array,
       nominalReceiverSpacing(s),
       s.analysis.receiverHeight,

@@ -1,3 +1,4 @@
+import { rowPositions, minimumRowPitch } from './row-spacing.js';
 import { receiverSpec, cellLocal } from './receiver-grid.js';
 import { moduleOptics } from './optics.js';
 import { packModuleBvh } from '../irradiance/module-bvh.js';
@@ -35,7 +36,7 @@ export function getPose(s, sun = null, quantize = false) {
   if (sun && s.racking.type === 'single-axis') {
     tilt = (Math.atan2(-sun.dot(v), sun.z) * 180) / Math.PI;
     if (s.racking.backtracking) {
-      const ratio = s.rowPair.pitch / dimensions(s).width;
+      const ratio = minimumRowPitch(s) / dimensions(s).width;
       const cos = ratio * Math.cos(rad(tilt));
       if (cos < 1) tilt -= (Math.sign(tilt) * Math.acos(Math.max(0, cos)) * 180) / Math.PI;
     }
@@ -140,10 +141,7 @@ export function buildGeometry(s, scope = 'array', pose = getPose(s), { textures 
     mesh.userData.kind = kind;
     group.add(mesh);
   }
-  const rowOffsets = Array.from(
-    { length: rowCount },
-    (_, i) => i * s.rowPair.pitch + Math.floor(i / s.array.groupSize) * s.array.aisle,
-  );
+  const rowOffsets = rowPositions(s, rowCount, false);
   const span = rowOffsets.at(-1) || 0;
   for (let r = 0; r < rowCount; r++) {
     const cy = rowOffsets[r] - span / 2;

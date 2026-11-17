@@ -2861,3 +2861,49 @@ progress {
     width: 100%;
   }
 }
+
+.multiple-spacing-toggle {
+  margin: 14px 0;
+}
+.multiple-spacing-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.multiple-spacing-toggle input {
+  width: auto;
+}
+.row-spacing-editor {
+  border: 1px solid var(--line, #d7dfd9);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  min-width: 0;
+}
+.row-spacing-editor .field > input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.row-spacing-editor .field > button {
+  margin-top: 8px;
+}
+.row-spacing-preview {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 12px 0;
+}
+.row-spacing-gaps {
+  display: grid;
+  gap: 12px;
+}
+.row-spacing-gap {
+  border-top: 1px solid var(--line, #d7dfd9);
+  padding-top: 10px;
+}
+.row-spacing-gap .field {
+  margin-bottom: 4px;
+}
+.row-spacing-gap > small {
+  display: block;
+}

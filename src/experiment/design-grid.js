@@ -37,7 +37,7 @@ export function designGridSpec(study) {
 export function designGridDescription(study) {
   const g = designGridSpec(study);
   return study.designGrid?.mode === 'square'
-    ? `${study.designGrid.cellsPerRow} cells per regular PV centre-to-centre pitch; ${g.dx.toFixed(4)} m square cells. Outer bounds extend by less than one cell. Extra group aisles retain square cells and may not coincide with grid edges.`
+    ? `${study.designGrid.cellsPerRow} cells per regular PV centre-to-centre pitch; ${g.dx.toFixed(4)} m square cells. Outer bounds extend by less than one cell. Custom gaps and extra group aisles retain square cells and may not coincide with grid edges.`
     : 'Independent copy of irradiance-grid settings; edit the cell count below to use square cells.';
 }
 export function designGridLines(study) {

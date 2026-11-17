@@ -1,3 +1,4 @@
+import { rowSpacingDescription, backtrackingDescription } from '../domain/row-spacing.js';
 import { designGridDescription } from '../experiment/design-grid.js';
 import {
   normalizeCropPlanting,
@@ -110,7 +111,9 @@ export function methodsRows(s, r) {
     ],
     [
       'Backtracking',
-      s.racking.type === 'single-axis' ? String(s.racking.backtracking) : 'Not applicable',
+      s.racking.type === 'single-axis'
+        ? `${s.racking.backtracking}${backtrackingDescription(s) ? '; ' + backtrackingDescription(s) : ''}`
+        : 'Not applicable',
     ],
     ['Table', `${s.table.high} across × ${s.table.wide} along; ${s.table.orientation}`],
     ['Tables per row / gap', `${s.row.tables} / ${s.row.tableGap} m`],
@@ -118,14 +121,22 @@ export function methodsRows(s, r) {
       'Array',
       `${s.array.rows} rows; ${d.modules} modules; ${((d.modules * s.module.power) / 1000).toFixed(2)} kWp`,
     ],
-    ['Row pitch · P', `${s.rowPair.pitch} m`],
+    [
+      'Row pitch · P',
+      s.rowPair.multipleSpacings
+        ? `${s.rowPair.pitch} m default (grid sizing and new gaps); ${rowSpacingDescription(s)}`
+        : `${s.rowPair.pitch} m`,
+    ],
     ['Numerical receiver buffer · R', `${s.array.buffer} m`],
     [
       'Under-row no-crop width · U',
       `${Number(land.underPanelWidth.toFixed(4))} m (centred continuous strip)`,
     ],
     ['Perimeter no-crop buffer · B', `${land.perimeterBuffer} m (outside design envelope)`],
-    ['Design envelope', `${d.length.toFixed(3)} × ${(d.span + d.width).toFixed(3)} m`],
+    [
+      'Design envelope',
+      `${d.length.toFixed(3)} × ${(d.span + Math.max(d.width, land.underPanelWidth)).toFixed(3)} m`,
+    ],
     ['Reserved land union area', `${areas.reservedArea.toFixed(2)} m²; overlaps counted once`],
     ['Envelope plus perimeter area', `${areas.outerArea.toFixed(2)} m²`],
     [
@@ -139,14 +150,17 @@ export function methodsRows(s, r) {
       'Crop catalog',
       `${cropCatalogVersion}; ${cropCatalogSource}; crop groups use species-level botanical identities; cultivars are recorded separately. ${cropCatalogCitation}`,
     ],
-    ['Groups / additional aisle', `${s.array.groupSize} rows per group / ${s.array.aisle} m`],
+    [
+      'Groups / additional aisle',
+      `${s.array.groupSize} rows per group / ${s.array.aisle} m${s.rowPair.multipleSpacings ? ' (inactive; custom pitches include access space)' : ''}`,
+    ],
     [
       'PV-edge crop setback · S',
       `${Number(spacing.cropSetback.toFixed(4))} m (signed; negative beneath PV)`,
     ],
     [
       'Interrow cropping width · C',
-      `${Number(spacing.croppingWidth.toFixed(4))} m; C + U = row pitch`,
+      `${Number(spacing.croppingWidth.toFixed(4))} m${s.rowPair.multipleSpacings ? ' at the narrowest gap; each gap has C = its pitch − U' : '; C + U = row pitch'}`,
     ],
     [rackingOrientation(s).label, `${s.array.azimuth}° clockwise from north`],
     ['Rack orientation', rackingOrientation(s).description],

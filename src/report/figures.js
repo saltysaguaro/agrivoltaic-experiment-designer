@@ -1,3 +1,4 @@
+import { rowSpacingKey } from '../domain/row-spacing.js';
 import { designGridLines } from '../experiment/design-grid.js';
 import { irrigationGeometry } from '../experiment/irrigation.js';
 import { cropPlantingGeometry } from '../experiment/crop-planting.js';
@@ -67,7 +68,7 @@ export function createFigureContext() {
         s.racking,
         s.table,
         s.row,
-        s.rowPair.pitch,
+        rowSpacingKey(s),
         s.array,
         normalizedScope,
       ]);
@@ -496,7 +497,7 @@ export function figureSvg(
           ...(metric !== 'none' ? wrap(provenance.dli) : []),
           ...(zones.length
             ? wrap(
-                'U and C meet at the cropping edge; U + C = pitch. S is signed from the PV edge (negative beneath panels). B surrounds the design envelope.',
+                'U and C meet at the cropping edge; U + C = each actual row pitch. S is signed from the PV edge (negative beneath panels). B surrounds the design envelope.',
               )
             : []),
         ]

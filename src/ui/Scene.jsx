@@ -1,3 +1,4 @@
+import { rowSpacingKey } from '../domain/row-spacing.js';
 import { designGridSpec, designGridLines } from '../experiment/design-grid.js';
 import { irrigationGeometry } from '../experiment/irrigation.js';
 import { cropPlantingGeometry } from '../experiment/crop-planting.js';
@@ -112,7 +113,7 @@ function SceneView({
     study.racking,
     study.table,
     study.row,
-    study.rowPair.pitch,
+    rowSpacingKey(study),
     study.array,
     scopeKey,
   ]);

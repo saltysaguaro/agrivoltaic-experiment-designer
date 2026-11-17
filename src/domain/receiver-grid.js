@@ -1,3 +1,4 @@
+import { rowPositions } from './row-spacing.js';
 export const MAX_RECEIVERS = 20000;
 export const DEFAULT_CELLS_PER_ROW = 15;
 export const PREVIEW_CELLS_PER_ROW = 5;
@@ -11,7 +12,7 @@ export const nominalReceiverSpacing = (s) =>
 export function receiverGridDescription(s) {
   if (s.analysis.gridAlignment !== 'row-centres')
     return `${s.analysis.resolution} m nominal uniform spacing (legacy grid)`;
-  return `${s.analysis.cellsPerRow} cells between adjacent PV row centre lines, including wider aisles; ${automaticGridSizing(s) ? `${nominalReceiverSpacing(s).toFixed(4)} m target along-row size derived from regular pitch / cell count` : `${s.analysis.resolution} m nominal along-row spacing (legacy independent sizing)`}; along-row widths and outer-buffer cells fitted to the exact footprint; wider aisles may have rectangular cells; area-weighted summaries`;
+  return `${s.analysis.cellsPerRow} cells between adjacent PV row centre lines, including custom gaps and wider aisles; ${automaticGridSizing(s) ? `${nominalReceiverSpacing(s).toFixed(4)} m target along-row size derived from regular pitch / cell count` : `${s.analysis.resolution} m nominal along-row spacing (legacy independent sizing)`}; along-row widths and outer-buffer cells fitted to the exact footprint; wider aisles may have rectangular cells; area-weighted summaries`;
 }
 // Pure grid math shared by solver geometry, field editing, hit testing and exports.
 // x is along PV rows; y is across row centre lines. Bounds retain the exact footprint.
@@ -59,10 +60,7 @@ export function receiverSpec(study, dimensions) {
       ...(!(nx * ny <= MAX_RECEIVERS) ? { exceeded: true } : {}),
     };
   }
-  const centres = Array.from(
-    { length: s.array.rows },
-    (_, i) => i * s.rowPair.pitch + Math.floor(i / s.array.groupSize) * s.array.aisle - d.span / 2,
-  );
+  const centres = rowPositions(s);
   const count = s.analysis.cellsPerRow ?? DEFAULT_CELLS_PER_ROW,
     spacing = s.rowPair.pitch / count;
   const anchors = [-height / 2, ...centres, height / 2];

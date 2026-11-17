@@ -1,3 +1,5 @@
+import RowSpacingEditor from './RowSpacingEditor.jsx';
+import { minimumRowPitch } from '../domain/row-spacing.js';
 import { designGridSpec } from '../experiment/design-grid.js';
 import {
   gridSpacingLabel,
@@ -467,14 +469,44 @@ export default function Controls({
         )}
         {step === 3 && (
           <>
-            {field('rowPair', 'pitch', 'Row centre-to-centre pitch', 'm', null, {
-              min: 0.5,
-              max: 120,
-              step: 0.01,
-              hint: `Suggested minimum for this rack: ${minimum.pitch.toFixed(2)} m.`,
-            })}
+            {field(
+              'rowPair',
+              'pitch',
+              s.rowPair.multipleSpacings ? 'Default row pitch' : 'Row centre-to-centre pitch',
+              'm',
+              null,
+              {
+                min: 0.5,
+                max: 120,
+                step: 0.01,
+                hint: s.rowPair.multipleSpacings
+                  ? 'Used for new gaps and grid cell sizing. Existing custom pitches stay unchanged.'
+                  : `Suggested minimum for this rack: ${minimum.pitch.toFixed(2)} m.`,
+              },
+            )}
+            <div className="field-label multiple-spacing-toggle">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={s.rowPair.multipleSpacings ?? false}
+                  onChange={(e) => set('rowPair', 'multipleSpacings', e.target.checked)}
+                />{' '}
+                Multiple row spacings
+              </label>
+              <Info label="Multiple row spacings">
+                Enable repeating patterns and individual centre-to-centre pitches. Turning this off
+                restores the default pitch and group aisles while retaining your custom gap values.
+              </Info>
+            </div>
+            {s.rowPair.multipleSpacings && <RowSpacingEditor s={s} set={set} Field={Field} />}
             <div className="derived">
-              <span>Clear spacing at regular pitch</span>
+              <span>
+                {s.rowPair.multipleSpacings
+                  ? s.array.rows > 1
+                    ? 'Clear spacing at narrowest gap'
+                    : 'Clear spacing at default pitch'
+                  : 'Clear spacing at regular pitch'}
+              </span>
               <strong>{d.clear.toFixed(2)} m</strong>
             </div>
             {field(
@@ -485,24 +517,40 @@ export default function Controls({
               null,
               {
                 min: 0,
-                max: s.rowPair.pitch,
+                max: minimumRowPitch(s),
                 hint: 'U · Total centred strip width; 0 allows crops beneath the row.',
               },
             )}
             {field('rowPair', 'cropSetback', 'Crop setback from each edge', 'm', null, {
               min: -d.projected / 2,
-              max: (s.rowPair.pitch - d.projected) / 2,
+              max: (minimumRowPitch(s) - d.projected) / 2,
               hint: 'S · Negative values allow crops beneath the panel edges.',
             })}
-            {field('rowPair', 'croppingWidth', 'Cropping area width', 'm', null, {
-              min: 0,
-              max: s.rowPair.pitch,
-              hint: 'C · Linked to non-cultivated width and setback.',
-            })}
+            {field(
+              'rowPair',
+              'croppingWidth',
+              s.rowPair.multipleSpacings
+                ? s.array.rows > 1
+                  ? 'Cropping width at narrowest gap'
+                  : 'Cropping width at default pitch'
+                : 'Cropping area width',
+              'm',
+              null,
+              {
+                min: 0,
+                max: minimumRowPitch(s),
+                hint: 'C · Linked to non-cultivated width and setback.',
+              },
+            )}
             <div className="info-box">
-              Non-cultivated width + cropping width = {s.rowPair.pitch} m row pitch. The two areas
-              share an edge. Group aisles add cropping space. Setback is measured from the panel
-              edge at the displayed tilt.
+              Non-cultivated width + cropping width = {minimumRowPitch(s)} m{' '}
+              {s.rowPair.multipleSpacings
+                ? s.array.rows > 1
+                  ? 'at the narrowest gap. Wider gaps have more cropping space.'
+                  : 'default pitch. One row has no interrow cropping area.'
+                : 'row pitch. Group aisles add cropping space.'}{' '}
+              The areas share an edge. Setback is measured from the panel edge at the displayed
+              tilt.
             </div>
           </>
         )}
@@ -526,14 +574,21 @@ export default function Controls({
               hint: 'B · Outside the design envelope; independent of sampling.',
             })}
             {field('array', 'buffer', 'Perimeter receiver buffer', 'm', null, { min: 0, max: 20 })}
-            <div className="field-pair">
-              {field('array', 'groupSize', 'Rows per group', null, null, {
-                min: 1,
-                max: 24,
-                step: 1,
-              })}
-              {field('array', 'aisle', 'Extra group aisle', 'm', null, { min: 0, max: 20 })}
-            </div>
+            {s.rowPair.multipleSpacings ? (
+              <div className="info-box">
+                Custom row pitches are active. Edit them in Row spacing. Each gap already includes
+                access space; group aisles are not added.
+              </div>
+            ) : (
+              <div className="field-pair">
+                {field('array', 'groupSize', 'Rows per group', null, null, {
+                  min: 1,
+                  max: 24,
+                  step: 1,
+                })}
+                {field('array', 'aisle', 'Extra group aisle', 'm', null, { min: 0, max: 20 })}
+              </div>
+            )}
           </>
         )}
         {step === 5 && (
@@ -719,7 +774,7 @@ export default function Controls({
             })}
             {automaticGridSizing(s) ? (
               <p className="control-note">
-                Cell size follows row pitch ÷ cell count: {s.rowPair.pitch} m ÷{' '}
+                Cell size follows default row pitch ÷ cell count: {s.rowPair.pitch} m ÷{' '}
                 {s.analysis.cellsPerRow} = {nominalReceiverSpacing(s).toFixed(3)} m target size.
                 Along-row widths adjust slightly to fit the footprint. Cell boundaries meet every PV
                 row centre; wider aisles and outer edges can have rectangular cells.

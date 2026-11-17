@@ -105,6 +105,53 @@ test('reserved rectangles rotate with the array, retain metric widths and includ
   assert.equal(landUseSummary(s).reservedArea, 0);
 });
 
+test('perimeter stays outside under-row strips, retaining its width and independent receiver bounds', () => {
+  for (const type of ['fixed', 'vertical', 'pergola', 'single-axis', 'dual-axis']) {
+    for (const rows of [1, 4]) {
+      const s = selectRacking(defaultStudy(), type);
+      s.array.rows = rows;
+      s.array.groupSize = 2;
+      s.array.azimuth = 137;
+      s.landUse.perimeterBuffer = 3.6;
+      const d = dimensions(s);
+      s.rowPair.pitch = Math.max(s.rowPair.pitch, d.width + 2);
+      const grid = receiverGridSpec(s),
+        key = analysisKey(s);
+      for (const width of [0, d.width / 2, d.width, d.width + 2]) {
+        s.landUse.underPanelWidth = width;
+        for (const scope of ['row', 'pair', 'array']) {
+          const group = buildGeometry(s, scope),
+            { zones, envelope, outer } = landUseZones(s, group.userData),
+            perimeter = zones.filter((z) => z.kind === 'perimeter'),
+            interior = zones.filter((z) => z.kind !== 'perimeter');
+          near(envelope.y1 - envelope.y0, group.userData.span + Math.max(d.width, width));
+          for (const a of perimeter)
+            for (const b of interior)
+              near(
+                Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) *
+                  Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0)),
+                0,
+              );
+          for (const edge of ['x0', 'x1', 'y0', 'y1'])
+            near(Math.abs(outer[edge] - envelope[edge]), 3.6);
+          near(
+            rectangleUnionArea(perimeter),
+            (outer.x1 - outer.x0) * (outer.y1 - outer.y0) -
+              (envelope.x1 - envelope.x0) * (envelope.y1 - envelope.y0),
+          );
+          if (scope === 'array') {
+            assert.deepEqual(landUseZones(s), landUseZones(s, group.userData));
+            near(landUseSummary(s).outerArea, (outer.x1 - outer.x0) * (outer.y1 - outer.y0));
+          }
+          disposeGroup(group);
+        }
+        assert.deepEqual(receiverGridSpec(s), grid);
+        assert.equal(analysisKey(s), key);
+      }
+    }
+  }
+});
+
 test('plot reservations use union area and central profile sections do not project side buffers through the field', () => {
   near(
     rectangleUnionArea([

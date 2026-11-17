@@ -1,3 +1,4 @@
+import { rowPitches } from './domain/row-spacing.js';
 import IrrigationDialog from './ui/IrrigationDialog.jsx';
 import IrrigationEditor from './ui/IrrigationEditor.jsx';
 import IrrigationZoneEditor from './ui/IrrigationZoneEditor.jsx';
@@ -385,7 +386,7 @@ function App() {
   const d = dimensions(s),
     validResult = result?.key === currentAnalysisKey ? result : null,
     issues = designIssues(s),
-    scope = steps[step][2];
+    scope = step === 3 && s.rowPair.multipleSpacings ? 'array' : steps[step][2];
   const fieldWorkspace = step === 7 || step === 8;
   useEffect(() => {
     if (fieldWorkspace) activeStepRef.current?.scrollIntoView?.({ block: 'start' });
@@ -1787,7 +1788,14 @@ function App() {
                     ]
                   : step === 3
                     ? [
-                        [Layers, 'Row pitch', s.rowPair.pitch.toFixed(2), 'm'],
+                        [
+                          Layers,
+                          s.rowPair.multipleSpacings ? 'Pitch range' : 'Row pitch',
+                          s.rowPair.multipleSpacings && s.array.rows > 1
+                            ? `${Math.min(...rowPitches(s)).toFixed(2)}–${Math.max(...rowPitches(s)).toFixed(2)}`
+                            : s.rowPair.pitch.toFixed(2),
+                          'm',
+                        ],
                         [Maximize, 'Clear spacing', d.clear.toFixed(2), 'm'],
                         [Leaf, 'Usable crop strip', d.usable.toFixed(2), 'm'],
                       ]

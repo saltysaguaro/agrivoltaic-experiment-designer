@@ -1,3 +1,4 @@
+import { rowPositions } from './row-spacing.js';
 import { dimensions, cropSpacing } from './study.js';
 import { localToWorld, worldToLocal } from './geometry.js';
 
@@ -24,7 +25,7 @@ export const landUseSettings = (s) => ({
   underPanelWidth: cropSpacing(s).underPanelWidth,
 });
 export const landUseDefinition =
-  'U: continuous non-cultivated width centred on each row axis. C: cropping width between non-cultivated strips; C = pitch − U, plus any extra group aisle. S: signed distance from the projected PV frame edge to the cropping edge; S = (U − projected panel width) / 2. Negative S allows crops beneath panels. B: no-crop perimeter outside the design envelope (row length × axis span plus untilted assembly width). Ground layers do not shade or mask numerical receivers; tracker dimensions use the displayed pose.';
+  'U: continuous non-cultivated width centred on each row axis. C: cropping width between non-cultivated strips; C = each actual centre-to-centre pitch − U, including access space. S: signed distance from the projected PV frame edge to the cropping edge; S = (U − projected panel width) / 2. Negative S allows crops beneath panels. B: no-crop perimeter outside the design envelope (row length × [axis span plus the larger of untilted assembly width and U]). Ground layers do not shade or mask numerical receivers; tracker dimensions use the displayed pose.';
 
 export function landUseZones(s, geometry = null) {
   const d = dimensions(s),
@@ -33,14 +34,12 @@ export function landUseZones(s, geometry = null) {
     length: d.length,
     width: d.width,
     span: d.span,
-    rowOffsets: Array.from(
-      { length: s.array.rows },
-      (_, i) =>
-        i * s.rowPair.pitch + Math.floor(i / s.array.groupSize) * s.array.aisle - d.span / 2,
-    ),
+    rowOffsets: rowPositions(s),
   };
+  // The perimeter must also clear wide under-row reservations at the outer rows.
+  // Keep the untilted assembly envelope as the minimum; do not resize receivers.
   const x = g.length / 2,
-    y = (g.span + g.width) / 2;
+    y = (g.span + Math.max(g.width, settings.underPanelWidth)) / 2;
   const rect = (kind, x0, y0, x1, y1) => ({
     kind,
     x0,

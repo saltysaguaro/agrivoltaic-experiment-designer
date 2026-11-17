@@ -1,6 +1,6 @@
 import { designGridSpec } from '../experiment/design-grid.js';
 import { defaultPlanting, plantingIssue } from '../domain/crop-planting.js';
-import { dimensions } from '../domain/study.js';
+import { rowPositions } from '../domain/row-spacing.js';
 import { landUseZones, landUseSettings } from '../domain/land-use.js';
 import { cropById, cropIdentity } from '../domain/crop-catalog.js';
 import { rowIndex } from '../domain/receiver-grid.js';
@@ -9,15 +9,8 @@ import { normalizeLayout } from './grid-layout.js';
 
 // Retain the physical PV-pair number even when another pair has no cultivable space.
 export function cropRows(study) {
-  const d = dimensions(study);
   const zones = landUseZones(study).zones.filter((z) => z.kind === 'cropping');
-  const starts = Array.from(
-    { length: study.array.rows - 1 },
-    (_, i) =>
-      i * study.rowPair.pitch +
-      Math.floor(i / study.array.groupSize) * study.array.aisle -
-      d.span / 2,
-  );
+  const starts = rowPositions(study).slice(0, -1);
   return zones.map((zone) => ({
     ...zone,
     id:

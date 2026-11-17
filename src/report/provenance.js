@@ -1,3 +1,4 @@
+import { rowSpacingDescription, backtrackingDescription } from '../domain/row-spacing.js';
 import { designGridDescription } from '../experiment/design-grid.js';
 import { cropSpacingVersion } from '../domain/crop-planting.js';
 import { dliZones, dliZoneSummary } from '../domain/dli-zones.js';
@@ -19,6 +20,8 @@ export function provenanceRecord(s, r, { control = false } = {}) {
     schemaVersion: s.schemaVersion,
     numericalModelRevision: r?.modelRevision || MODEL_REVISION,
     racking: s.racking.type,
+    rowSpacing: rowSpacingDescription(s),
+    ...(backtrackingDescription(s) ? { backtracking: backtrackingDescription(s) } : {}),
     orientation: control
       ? `Matching field layout; row bearing ${rackingOrientation(s).rowAzimuth}° clockwise from north. No modules.`
       : rackingOrientation(s).description,
@@ -30,7 +33,7 @@ export function provenanceRecord(s, r, { control = false } = {}) {
               : 'Aligned table rows',
         }
       : {}),
-    landUse: `U ${landUseSettings(s).underPanelWidth} m; S ${Number(cropSpacing(s).cropSetback.toFixed(4))} m (signed); C ${Number(cropSpacing(s).croppingWidth.toFixed(4))} m; U + C = pitch; B ${landUseSettings(s).perimeterBuffer} m; receiver buffer R ${s.array.buffer} m. Planning overlays only; do not occlude or change light results.`,
+    landUse: `U ${landUseSettings(s).underPanelWidth} m; S ${Number(cropSpacing(s).cropSetback.toFixed(4))} m (signed); C ${Number(cropSpacing(s).croppingWidth.toFixed(4))} m${s.rowPair.multipleSpacings ? ' at narrowest gap; each gap has C = its pitch − U' : '; U + C = pitch'}; B ${landUseSettings(s).perimeterBuffer} m; receiver buffer R ${s.array.buffer} m. Planning overlays only; do not occlude or change light results.`,
     landUseDefinition,
     study: s.metadata.title,
     date: periodLabel(s),
