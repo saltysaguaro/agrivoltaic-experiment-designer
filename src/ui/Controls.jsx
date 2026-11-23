@@ -86,8 +86,10 @@ export function Field({
     <div
       className="field"
       data-annotation={annotation}
-      onFocusCapture={() =>
-        annotation && inspect?.({ id: annotation, label, unit, help: help || labelHelp[label] })
+      onFocusCapture={(event) =>
+        event.target.id === id &&
+        annotation &&
+        inspect?.({ id: annotation, label, unit, help: help || labelHelp[label] })
       }
     >
       <div className="field-label">
@@ -246,7 +248,7 @@ export default function Controls({
   );
   return (
     <InspectionContext.Provider value={onInspect}>
-      <div className="control-content">
+      <div className="control-content" onBlurCapture={() => onInspect?.(null)}>
         {step === 0 && (
           <>
             <p className="control-note">
@@ -594,7 +596,8 @@ export default function Controls({
         {step === 5 && (
           <>
             <div
-              onFocusCapture={() =>
+              onFocusCapture={(event) =>
+                event.target.matches('input') &&
                 onInspect?.({
                   id: 'site.address',
                   label: 'Place search',

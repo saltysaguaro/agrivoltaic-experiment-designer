@@ -78,6 +78,7 @@ function SceneView({
     runtime = useRef(null),
     latest = useRef(null),
     annotationLayer = useRef(null);
+  const showCallout = Boolean(focus) && !editing && scope !== 'report' && scope !== 'irradiance';
   const [annotations, setAnnotations] = useState([]);
   const [projection, setProjection] = useState(null);
   const [failed, setFailed] = useState(false),
@@ -454,8 +455,7 @@ function SceneView({
       rt.structureKey = structureKey;
     }
     const group = rt.group;
-    rt.annotations =
-      editing || scope === 'report' ? [] : engineeringAnnotations(study, scope, group, focus);
+    rt.annotations = showCallout ? engineeringAnnotations(study, scope, group, focus) : [];
     const land = landUseZones(study, group.userData);
     rt.zones =
       scopeKey === 'array' || scopeKey === 'pair'
@@ -775,13 +775,13 @@ function SceneView({
   // Updating a callout or non-spatial field does not rebuild thousands of map cells.
   useEffect(() => {
     const rt = runtime.current;
-    const group = rt?.group || buildGeometry(study, scopeKey);
-    const next = engineeringAnnotations(study, scope, group, focus);
-    setAnnotations(editing || scope === 'report' ? [] : next);
+    const group = rt?.group || (showCallout && buildGeometry(study, scopeKey));
+    const next = showCallout ? engineeringAnnotations(study, scope, group, focus) : [];
+    setAnnotations(next);
     if (rt) {
-      rt.annotations = editing || scope === 'report' ? [] : next;
+      rt.annotations = next;
       rt.draw();
-    } else disposeGroup(group);
+    } else if (group) disposeGroup(group);
   }, [annotationKey, structureKey, overlayKey, scope, focus, editing, selection]);
   function startItemDrag(e, target, corner) {
     if (e.button !== 0 || placing) return;
@@ -1028,7 +1028,7 @@ function SceneView({
               __html: figureSvg(study, result, view, metric, scope, showGrid, {
                 focus,
                 control,
-                callouts: !editing && scope !== 'report',
+                callouts: showCallout,
                 designGrid: editing,
                 layers,
                 panelOpacity,
@@ -1052,8 +1052,8 @@ function SceneView({
               ))}
             </div>
             <small>
-              Focus an input to highlight it. Valid edits and arrow keys update immediately; a short
-              leader marks dimensions viewed edge-on. Pan and zoom are preserved.
+              Valid edits and arrow keys update immediately; a short leader marks dimensions viewed
+              edge-on. Pan and zoom are preserved.
             </small>
           </aside>,
           document.getElementById('drawing-annotations'),

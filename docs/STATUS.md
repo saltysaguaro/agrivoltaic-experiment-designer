@@ -1,5 +1,9 @@
 # Implementation status
 
+## Interactive measurement callouts (November 23)
+
+Engineering callouts follow the focused input and disappear on blur in both the interactive drawing and its SVG fallback. Publication figures retain their existing dimensions.
+
 ## Multiple row spacings (November 16)
 
 - Main-branch delivery: synchronized with the latest `origin/main` dependency/workflow updates and repeated verification using its pinned dependencies. All **175 tests**, production build, repository formatting and archive checks pass; dependency installation reports **zero vulnerabilities**. The build reports upstream Lucide `use client` directive warnings. The expanded Radiance comparison again reports **zero mismatches over 71,540 rays / 14 cases**. Delivery is directly to `main`, through the existing GitHub Pages workflow.

@@ -1371,7 +1371,7 @@ function App() {
                     </div>
                     <Controls
                       canResume={resumeKey === currentAnalysisKey}
-                      onInspect={(value) => setInspection({ ...value, step })}
+                      onInspect={(value) => setInspection(value ? { ...value, step } : null)}
                       step={step}
                       s={activeStudy}
                       set={set}

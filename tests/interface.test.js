@@ -180,8 +180,20 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.equal((await savedStudy()).browserGridDefaultsVersion, 2);
     assert.equal(localStorage.getItem('fieldwork-study-v1'), null);
     assert.match(document.body.textContent, /Layout is session-only/);
+    const drawnCallouts = () =>
+      [...document.querySelectorAll('.svg-fallback [data-callout]')].map((el) =>
+        el.getAttribute('data-callout'),
+      );
+    assert.deepEqual(drawnCallouts(), []);
+    for (const id of ['module.length', 'module.width']) {
+      await act(async () => document.querySelector(`[data-annotation="${id}"] input`).focus());
+      assert.deepEqual(drawnCallouts(), [id]);
+      assert.equal(document.querySelectorAll('.annotation-cards > div').length, 1);
+    }
     const help = document.querySelector('button[aria-label="About Length"]');
     await act(async () => help.focus());
+    assert.deepEqual(drawnCallouts(), []);
+    assert.equal(document.querySelector('.drawing-annotations'), null);
     assert.match(document.querySelector('[role="tooltip"]').textContent, /long outside edge/);
     await click(help);
     assert.ok(
@@ -226,8 +238,11 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
     assert.match(document.querySelector('.view-tabs .selected').textContent, /Orthographic/);
     await click(step('Site & weather'));
     const latitude = document.querySelector('[data-annotation="site.latitude"] input');
+    assert.equal(document.querySelector('.drawing-annotations'), null);
     await act(async () => latitude.focus());
     assert.match(document.querySelector('.annotation-cards').textContent, /Latitude/);
+    await act(async () => latitude.blur());
+    assert.equal(document.querySelector('.drawing-annotations'), null);
     const search = document.querySelector('input[role="combobox"]');
     await act(async () => {
       Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(
@@ -361,9 +376,10 @@ test('first calculation succeeds without leaving Irradiance; controls preserve s
       );
       reservation.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
     });
+    assert.match(document.querySelector('.annotation-cards').textContent, /2 m/);
     await act(async () => reservation.blur());
     assert.equal((await savedStudy()).landUse.underPanelWidth, 2);
-    assert.match(document.querySelector('.annotation-cards').textContent, /2 m/);
+    assert.equal(document.querySelector('.annotation-cards'), null);
     const spacingToggle = () => document.querySelector('.multiple-spacing-toggle input');
     assert.equal(spacingToggle().checked, false);
     assert.equal(document.querySelector('.row-spacing-editor'), null);
